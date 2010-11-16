@@ -1,0 +1,11 @@
+<a href="[% self_url %]/admin">re-generate lex_et index</a>
+
+view recent queries
+
+view change log
+
+view bug reports
+
+
+</body>
+</html>

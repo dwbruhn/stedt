@@ -1,0 +1,37 @@
+[% self_url = c.query.url('-absolute',1) -%]
+[% self_base = self_url.replace('[^/]+$' , '') -%]
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8">
+	<title>STEDT Login</title>
+	<link rel="stylesheet" href="[% self_base %]styles/rootcanal.css">
+</head>
+<body>
+<form method="post" action="[% self_url %]/account/login">
+username: <input type="text" size="10" name="user">
+password: <input type="password" size="10" name="pwd">
+<input type="submit" value="log in">
+<p><a href="[% self_url %]/account">create account</a></p>
+</form>
+
+[%- IF !blank -%]
+<p>Sorry, your username and/or password were/was incorrect.
+You can try again (above), or type in (below) your username OR
+the email address associated with your account to have a new
+password emailed to you.</p>
+
+[%- IF err.all_empty -%]
+<p>[%- err.all_empty -%]</p>
+[%- END -%]
+
+<form method="post" name="password_reset_form" action="[% self_url %]/account/password_reset">
+username: <input type="text" size="10" name="username" maxlength="15">[% err.username %]<br>
+OR email: <input type="text" size="30" name="email">[% err.email %]<br>
+<input name="btn" type="submit" value="Email me a new password">
+</form>
+[%- END -%]
+
+</body>
+</html>

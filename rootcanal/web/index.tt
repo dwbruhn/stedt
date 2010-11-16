@@ -1,0 +1,40 @@
+[% PROCESS header.tt title="STEDT Database (Beta)"%]
+
+<div id="splash">
+<center>
+<br>
+<a href="http://stedt.berkeley.edu/" title="STEDT Home Page">
+<img src="img/stedt_rgb.jpg" alt="STEDT Logo" border=0></a>
+<br><br><br>
+<form id="simple_search" method="post">
+<input type="text" name="s" id ="simple_searchinput" size="64" maxlength="128">
+<input type="submit" name="search" value="Search" >
+</form>
+</center>
+</div>
+
+<div id="etyma" style="display:none;">
+<div align="center">[% # search div %]
+<form id="etyma_search" method="post">
+Search etyma: <input name="s" type="text" size="50" id="etyma_searchinput" ><input name="btn" type="submit" value="Search">
+</form>
+</div>
+<div id="etyma_results"></div>
+<div id="addform"></div>
+<div id="debug"></div>
+</div>
+
+<div id="dragger" style="display:none;"></div>
+
+<div id="lexicon" style="display:none;">
+<div align="center">
+<form id="lexicon_search" method="post">
+Search lexicon: <input name="s" type="text" size="50" id="lexicon_searchinput" ><input name="btn" type="submit" value="Search">
+</form>
+</div>
+<div id="lexicon_results"></div>
+<div id="info" style="display:none;"></div>
+</div>
+
+</body>
+</html>
