@@ -9,7 +9,7 @@ onComplete: function (transport){ $(divname + '_search').enable(); }
 });
 $(divname + '_search').disable(); // prevent accidental multiple submit. reversed by onComplete, above.
 return false;
-}}
+}};
 
 $('etyma_search').onsubmit = create_searchfn('etyma');
 $('lexicon_search').onsubmit = create_searchfn('lexicon');
@@ -32,7 +32,7 @@ snap : function (x, y, d) {
 });
 
 $('simple_searchinput').focus();
-}
+};
 
 function show_advanced_search(tbl) {
 	var result_table = $(tbl + '_resulttable');
@@ -49,6 +49,6 @@ function show_advanced_search(tbl) {
 		r.appendChild(c);
 	});
 	result_table.parentNode.insertBefore(t, result_table);
-}
+};
 
 document.observe("dom:loaded", stedtedit);

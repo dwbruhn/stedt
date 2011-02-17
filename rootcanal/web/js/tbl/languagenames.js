@@ -56,5 +56,5 @@ setup.languagenames = {
 		transform : function (v, key, rec, i) {
 			return rec[i-2] + ' - ' + rec[i-1];
 		}
-	},
+	}
 };

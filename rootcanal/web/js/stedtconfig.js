@@ -10,7 +10,7 @@ function findPos(obj) { // based on http://www.quirksmode.org/js/findpos.html
 		} while (obj = obj.offsetParent);
 		return [curleft,curtop];
 	}
-}
+};
 
 // code to make things draggable and droppable for the subroots
 makesubroot = function(dragged, destination, e) {
@@ -54,7 +54,7 @@ function show_notes(rn) {
 	new Ajax.Updater('notes' + rn, baseRef + 'notes/' + rn, {
 		onFailure: function (transport){ alert('Error: ' + transport.responseText); }
 	});
-}
+};
 
 
 var current_cog = 0;
@@ -64,7 +64,7 @@ function show_cognates(tag) {
 	}
 	$$('.r' + tag).each(function (item) {item.addClassName('cognate')});
 	current_cog = tag;
-}
+};
 
 var make_one_table = function (tablename, tabledata) {
 	// make a table
@@ -152,7 +152,7 @@ var make_one_table = function (tablename, tabledata) {
 		var fn = setup[tablename]._postprocess;
 		fn();
 	}
-}
+};
 var ajax_make_table = function (transport,json){ // function suitable for the onSuccess callback
 	var response = transport.responseText || "ERROR: no response text";
 	response = response.evalJSON();
@@ -175,7 +175,7 @@ function show_supporting_forms(tag) {
 		onSuccess: function (transport,json) { ajax_make_table(transport,json); show_cognates(tag); },
 		onFailure: function (transport){ alert('Error: ' + transport.responseText); }
 	});
-}
+};
 
 function SylStation() {
 	var tonechars = "⁰¹²³⁴⁵⁶⁷⁸0-9ˊˋ";
@@ -229,7 +229,7 @@ function SylStation() {
 		}
 		return [syl_ary, delim_ary];
 	};
-}
+};
 var SYLSTATION = new SylStation(); // for efficiency, we make this object once
 
 var stedtadmin = stedtuserprivs >= 16;
@@ -291,7 +291,7 @@ function show_root(tag) {
 		onSuccess: function (transport,json) { ajax_make_table(transport,json); show_cognates(tag); },
 		onFailure: function (transport){ alert('Error: ' + transport.responseText); }
 	});
-}
+};
 function show_tag(tag,loc) {
 // 	new Ajax.Request(baseRef + 'search/etyma', {
 // 		parameters: { 'etyma.tag' : tag },
@@ -306,7 +306,7 @@ function show_tag(tag,loc) {
 		x.setStyle({left:loc[0] + 'px', top:loc[1] + 'px'});
 		x.show();
 // 	}
-}
+};
 
 // maybe better to return a fn, not a string, for transforms
 // and make a helper function to make links... if editable, onclick=dontedit()?
@@ -449,7 +449,7 @@ var setup = { // in the form setup.[tablename].[fieldname]
 		'etyma.public' : {
 			label: 'public',
 			size: 15
-		},
+		}
 	},
 	lexicon : {
 		_key: 'lexicon.rn',
