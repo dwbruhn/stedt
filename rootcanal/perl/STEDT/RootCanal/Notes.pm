@@ -94,10 +94,21 @@ sub etymon : Runmode {
 	my (@etyma, @footnotes);
 	my $footnote_index = 1;
 	my $etyma_for_tag = $self->dbh->selectall_arrayref(
-	qq#SELECT e.tag, e.printseq, e.protoform, e.protogloss, e.plg, e.hptbid, e.tag=e.supertag AS is_main
-		FROM `etyma` AS `e` JOIN `etyma` AS `super` ON e.supertag = super.tag
-		WHERE e.supertag=?
-		ORDER BY is_main DESC, e.plgord#, undef, $tag);
+qq#SELECT e.tag, e.printseq, e.protoform, e.protogloss, e.plg, e.hptbid, e.tag=e.supertag AS is_main
+	FROM `etyma` AS `e` JOIN `etyma` AS `super` ON e.supertag = super.tag
+	WHERE e.supertag=?
+	ORDER BY is_main DESC, e.plgord#, undef, $tag);
+	if (!@$etyma_for_tag) {
+		# if it failed the first time, this is probably a mesoroot.
+		# get the mesoroot's supertag and try one more time
+		($tag) = $self->dbh->selectrow_array("SELECT supertag FROM etyma WHERE tag=?", undef, $tag);
+		$etyma_for_tag = $self->dbh->selectall_arrayref(
+qq#SELECT e.tag, e.printseq, e.protoform, e.protogloss, e.plg, e.hptbid, e.tag=e.supertag AS is_main
+	FROM `etyma` AS `e` JOIN `etyma` AS `super` ON e.supertag = super.tag
+	WHERE e.supertag=?
+	ORDER BY is_main DESC, e.plgord#, undef, $tag);
+	}
+	if (!@$etyma_for_tag) { die "no etymon with tag #$tag" }
 
 	foreach (@$etyma_for_tag) {
 		my %e; # hash of infos to be added to @etyma
@@ -162,7 +173,7 @@ EndOfSQL
 				if ($rec->[-1]) { # if there are any notes...
 					# only select notes which are generic (empty id) OR those that have specifically been marked as belonging to this etymon/reflex combination
 					my @results = @{$self->dbh->selectall_arrayref("SELECT notetype, xmlnote FROM notes "
-							. "WHERE notes.rn=? AND (`id`=$tag OR `id`='') $internal_note_search ORDER BY ord",
+							. "WHERE notes.rn=? AND (`id`=$e{tag} OR `id`='') $internal_note_search ORDER BY ord",
 							undef, $rec->[0])};
 					$rec->[-1] = '';
 					# NB: these are footnotes, and they don't have footnotes inside them!
