@@ -1,8 +1,7 @@
-/*
-*
-* Copyright (c) 2007 Andrew Tetlaw & Millstream Web Software
+/* Copyright (c) 2007 Andrew Tetlaw & Millstream Web Software
 * http://www.millstream.com.au/view/code/tablekit/
 * Version: 1.3b 2008-03-23
+* modified by Dominic Yu
 * 
 * Permission is hereby granted, free of charge, to any person
 * obtaining a copy of this software and associated documentation
@@ -23,18 +22,22 @@
 * ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
-* * 
 */
 
 // Use the TableKit class constructure if you'd prefer to init your tables as JS objects
-var TableKit = Class.create();
+// 1. If you use this style, the syntax is
+//  	var table = new TableKit(table, {options});
 
-TableKit.prototype = {
+// 2. Alternatively, set classes on your tables to auto-initialize tables. See last line.
+// 3. You can also initialize manually, with this syntax:
+//  	TableKit.Sortable.init(table, {options});
+
+// this creates a class (i.e. a function you can call "new" on)
+// whose prototype includes the following functions.
+var TableKit = Class.create({
 	initialize : function(elm, options) {
 		var table = $(elm);
-		if(table.tagName !== "TABLE") {
-			return;
-		}
+		if (table.tagName !== "TABLE") return; // make sure it *is* a table element
 		TableKit.register(table,Object.extend(TableKit.options,options || {}));
 		this.id = table.id;
 		var op = TableKit.option('sortable resizable editable', this.id);
@@ -57,7 +60,16 @@ TableKit.prototype = {
 	editCell : function(row, column) {
 		TableKit.Editable.editCell(this.id, row, column);
 	}
-};
+});
+
+// this adds attributes directly to the TableKit class!
+// the global TableKit class-cum-object stores an array of table infos
+// in the "tables" attribute.
+// the structure of this info object is initialized in "register"
+// and contains a copy of all the default options.
+// the "register" call in the initializer above seems flawed because it calls
+// Object.extend() directly on the global Tablekit.options object, rather than
+// making a copy first.
 
 Object.extend(TableKit, {
 	getBodyRows : function(table) {
@@ -86,7 +98,7 @@ Object.extend(TableKit, {
 		if(!cell) { return ""; }
 		var data = TableKit.getCellData(cell);
 		if(refresh || data.refresh || !data.textContent) {
-			data.textContent = cell.textContent ? cell.textContent : cell.innerText;
+			data.textContent = cell.textContent || cell.innerText;
 			data.refresh = false;
 		}
 		return data.textContent || ''; // *** DY added empty to avoid "undefined" in firefox
@@ -135,7 +147,7 @@ Object.extend(TableKit, {
 	},
 	option : function(s, id, o1, o2) {
 		o1 = o1 || TableKit.options;
-		o2 = o2 || (id ? (TableKit.tables[id] ? TableKit.tables[id] : {}) : {});
+		o2 = o2 || (id ? (TableKit.tables[id] || {}) : {});
 		var key = id + s;
 		if(!TableKit._opcache[key]){
 			TableKit._opcache[key] = $A($w(s)).inject([],function(a,v){
@@ -274,6 +286,87 @@ Object.extend(TableKit, {
 	}
 });
 
+TableKit.Raw = {
+	// init takes a table (or id for a table) that is already populated with data.
+	// the column (or th's') id's should already be set.
+	// assume the existence of a global "setup" var.
+	// *** this should be changed to some option within the TableKit namespace
+	// <tablename> is the name of the key for the info in the setup hash.
+	init : function (t, tablename, edituri) {
+		var fields = [];
+		TableKit.options.defaultSort = 1;
+		var t = $(t);
+		t.width = '100%';
+		t.style.tableLayout = 'fixed';
+		var thead = t.tHead;
+		var row = thead.rows[0];
+		var rawDataCols = {}; // lookup table for column id -> index
+		
+		if (!setup[tablename]) setup[tablename] = {};
+		
+		var k = -1; // to find index of key field
+		$A(row.cells).each(function (cell, i) {
+			var fld = cell.id;
+			if (!setup[tablename][fld]) {
+				setup[tablename][fld] = { noedit:true };
+			}
+			if (setup[tablename][fld].label)
+				cell.innerHTML = setup[tablename][fld].label;
+			if (setup[tablename][fld].hide)
+				cell.style.display = 'none';
+			if (setup[tablename][fld].noedit)
+				cell.addClassName('noedit');
+			if (setup[tablename][fld].size)
+				cell.width = setup[tablename][fld].size;
+			rawDataCols[fld] = i;
+			if (k < 0 && setup[tablename]['_key'] === fld) {
+				k = i;
+			}
+			fields.push(fld);
+		});
+		
+		var rawData = {};
+		$A(t.tBodies[0].rows).each(function (row) {
+			var id = row.cells[k].innerHTML;
+			row.id = id;
+			rawData[id] = $A(row.cells).map(function (c,i) {
+				if (setup[tablename][fields[i]].hide) c.style.display = 'none';
+				return c.innerHTML;
+			});
+		});
+		
+		$A(t.tBodies[0].rows).each(function (row) {
+			$A(row.cells).each(function (cell,i) {
+				var xform = setup[tablename][fields[i]].transform;
+				var v = cell.innerHTML;
+				// if (v) { // don't check for empty values here because sometimes you *do* want to transform them
+				cell.innerHTML = xform	? xform(v.escapeHTML(), rawData[row.id][k], rawData[row.id], i)
+										: v.escapeHTML();
+				//}
+			});
+		});
+		
+		TableKit.Resizable.init(t); // you have to init before setting the following
+		TableKit.tables[t.id].raw = {};
+		TableKit.tables[t.id].raw.data = rawData;
+		TableKit.tables[t.id].raw.cols = rawDataCols;
+		TableKit.tables[t.id].editAjaxExtraParams = '&tbl=' + tablename;
+		TableKit.tables[t.id].editAjaxTransform = function (tbl, fld, key, val, rec, n) {
+			var xform = setup[tbl][fld].transform;
+			return xform ? xform(val, key, rec, n) : val;
+		};
+		if (edituri) {
+			TableKit.Editable.init(t);
+			TableKit.tables[t.id].editAjaxURI = edituri;
+		}
+		if (setup[tablename]._postprocess) {
+			var fn = setup[tablename]._postprocess;
+			fn();
+		}
+	}
+};
+
+
 TableKit.Rows = {
 	stripe : function(table) {
 		var rows = TableKit.getBodyRows(table);
@@ -379,9 +472,13 @@ TableKit.Sortable = {
 		} else {
 			var datatype = TableKit.Sortable.getDataType(cell,index,table);
 			var tkst = TableKit.Sortable.types;
-			rows.sort(function(a,b) {
-				return order * tkst[datatype].compare(TableKit.getCellText(a.cells[index]),TableKit.getCellText(b.cells[index]));
-			});
+			if (TableKit.tables[table.id].customSortFn) {
+				TableKit.tables[table.id].customSortFn(rows, index, tkst[datatype]); // we might want to add an order argument to this too, right now order is ignored.
+			} else {
+				rows.sort(function(a,b) {
+					return order * tkst[datatype].compare(TableKit.getCellText(a.cells[index]),TableKit.getCellText(b.cells[index]));
+				});
+			}
 		}
 		var tb = table.tBodies[0];
 		var tkr = TableKit.Rows;
@@ -814,12 +911,13 @@ TableKit.Editable.CellEditor.prototype = {
 		var op = this.options;
 		var table = cell.up('table');
 		// *** added DY
-		var formwidth = cell.getWidth();
+		var formwidth = cell.offsetWidth; // getWidth();
 		var formheight = cell.getHeight();
 		var rowid = cell.up('tr').id;
 		var colid = $(TableKit.getHeaderCells(table, cell)[TableKit.getCellIndex(cell)]).id;
-		var tableinfo = TableKit.tables[table.id];
-		var rawValue = tableinfo.rawData[rowid][tableinfo.rawDataCols[colid]];
+		var raw = TableKit.tables[table.id].raw;
+		var rawValue = raw ? raw.data[rowid][raw.cols[colid]] : null;
+		var oldValue = raw ? rawValue : TableKit.getCellText(cell);
 		// *** DY
 		
 		var form = $(document.createElement("form"));
@@ -845,7 +943,7 @@ TableKit.Editable.CellEditor.prototype = {
 							this.cancel(cell);
 						} else if (event.keyCode == Event.KEY_RETURN) {
 							field.onblur = '';
-							if (field.value == rawValue) {
+							if (field.value == oldValue) {
 								this.cancel(cell);
 // 								this.ajax = null;
 // 								var data = TableKit.getCellData(cell);
@@ -869,7 +967,7 @@ TableKit.Editable.CellEditor.prototype = {
 								data.active = true;
 							}
 						} else if (event.keyCode == Event.KEY_TAB ) {
-							if (field.value != rawValue) {
+							if (field.value != oldValue) {
 								field.onblur = '';
 								this._submit(event);
 							}
@@ -888,13 +986,24 @@ TableKit.Editable.CellEditor.prototype = {
 				break;
 				
 				case 'select':
-				var txt = TableKit.getCellText(cell);
+				op.showSubmit = false;
+				op.showCancel = false;
 				$A(op.selectOptions).each(function(v){
-					field.options[field.options.length] = new Option(v[0], v[1]);
-					if(txt === v[1]) {
+					field.options[field.options.length] = new Option(v[0], v[1]); // add the value-key pairs to the end of the select.
+					if(oldValue === v[1]) {
 						field.options[field.options.length-1].selected = 'selected';
 					}
 				});
+				field.observe('keydown', function(event) {
+					if (event.keyCode == Event.KEY_ESC) {
+						field.onblur = '';
+						this.cancel(cell);
+					}
+				}.bindAsEventListener(this));
+				field.observe('change', function(event) {
+					this._submit(event);
+				}.bindAsEventListener(this));
+				field.onblur = this._cancel.bindAsEventListener(this);
 				break;
 			}
 			form.appendChild(field);
@@ -920,12 +1029,15 @@ TableKit.Editable.CellEditor.prototype = {
 			form.setStyle({'width': formwidth + 'px',
 						  'height': formheight + 'px'});
 			field.setStyle({'height': cell.getHeight() + 'px'});
+			// temporarily undo hanging indent, otherwise the form element is offset bizarrely to the right, but the text input isn't!
+			cell.style.paddingLeft = '0px';
+			cell.style.textIndent = '0px';
 			// cell.innerHTML = '';
 			// cell.appendChild(form);
 			// stick it in before instead
 			cell.insert({ top : form });
 			field.focus();
-			field.value = rawValue; //TableKit.getCellText(cell);
+			field.value = oldValue; //TableKit.getCellText(cell);
 			// *** DY
 	},
 	_submit : function(e) { // *** DY comment: this helper fn takes an event arg, and passes on two args to the main submit fn
@@ -944,26 +1056,27 @@ TableKit.Editable.CellEditor.prototype = {
 		var xform;
 		var s_extra = TableKit.option('editAjaxExtraParams', table.id);
 		var s = s_extra + '&row=' + (TableKit.getRowIndex(row)+1) + '&cell=' + (TableKit.getCellIndex(cell)+1) + '&id=' + row.id + '&field=' + head.id + '&' + Form.serialize(form);
-		this.ajax = new Ajax.Updater({success:cell}, op.ajaxURI || TableKit.option('editAjaxURI', table.id)[0], Object.extend(op.ajaxOptions || TableKit.option('editAjaxOptions', table.id)[0], {
+		var request = this.ajax = new Ajax.Updater({success:cell}, op.ajaxURI || TableKit.option('editAjaxURI', table.id)[0], Object.extend(op.ajaxOptions || TableKit.option('editAjaxOptions', table.id)[0], {
 			// *** DY above changed "cell" to {sucess:cell} so it only updates on sucess
 			postBody : s,
-			onSuccess : function() { // *** DY added onSuccess because we only do the xform if it was successful
-				xform = TableKit.options.editAjaxTransform; // dunno why the other TableKit.option(...) call doesn't work...
-			},
 			onComplete : function() {
 				var data = TableKit.getCellData(cell);
 				data.active = false;
 				data.refresh = true; // mark cell cache for refreshing, in case cell contents has changed and sorting is applied
-				// *** DY added STEDT-specific stuff
-				if (xform && cell.innerHTML != '') {
-					// update the raw data store (remember xform has a value only when the ajax call is successful)
-					var tableinfo = TableKit.tables[table.id];
-					tableinfo.rawData[row.id][tableinfo.rawDataCols[head.id]] = cell.innerHTML;
-
-					// run the transform
-					var re = /tbl=(.+)/;
-					var tbl = re.exec(s_extra)[1];
-					cell.innerHTML = xform(tbl, head.id, row.id, cell.innerHTML, tableinfo.rawData[row.id]);
+				// *** DY
+				if (request.success()) {
+					var raw = TableKit.tables[table.id].raw;
+					if (raw) raw.data[row.id][raw.cols[head.id]] = cell.innerHTML;
+					xform = TableKit.tables[table.id].editAjaxTransform; // dunno why the TableKit.option(...) call doesn't work...
+					if (xform) { // && cell.innerHTML != '') { run the transform even on empty values
+						// run the transform
+						var re = /tbl=(.+)/;
+						var tbl = re.exec(s_extra)[1];
+						cell.innerHTML = xform(tbl, head.id, row.id, cell.innerHTML, raw ? raw.data[row.id] : [], raw ? raw.cols[head.id] : 0);
+					}
+					// restore possible hanging ident
+					cell.style.paddingLeft = null;
+					cell.style.textIndent = null;
 				}
 				// *** DY
 			},
@@ -973,7 +1086,6 @@ TableKit.Editable.CellEditor.prototype = {
 				var data = TableKit.getCellData(cell);
 				cell.innerHTML = data.htmlContent;
 				data.htmlContent = '';
-				data.active = false;
 				// *** DY
 			}
 		}));
@@ -989,6 +1101,10 @@ TableKit.Editable.CellEditor.prototype = {
 		cell.innerHTML = data.htmlContent;
 		data.htmlContent = '';
 		data.active = false;
+		// *** DY restore possible hanging ident
+		cell.style.paddingLeft = null;
+		cell.style.textIndent = null;
+		// *** DY
 	},
 	ajax : null
 };

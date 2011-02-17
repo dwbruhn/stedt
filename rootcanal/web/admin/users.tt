@@ -1,0 +1,32 @@
+[% self_url = c.query.url('-absolute',1) -%]
+[% self_base = self_url.replace('[^/]+$' , '') -%]
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8">
+	<title>STEDT Database - Users</title>
+	<link rel="stylesheet" href="[% self_base %]styles/rootcanal.css">
+</head>
+<body>
+<p>[% users.size %] users:</p>
+
+<table>
+<tr>
+	<th>uid</th>
+	<th>username</th>
+	<th>password</th>
+	<th>email</th>
+	<th>privs</th>
+</tr>
+[% FOREACH row IN users -%]
+<tr>
+[% FOREACH col IN row -%]
+<td>[% col %]</td>
+[% END -%]
+</tr>
+[% END -%]
+</table>
+
+</body>
+</html>

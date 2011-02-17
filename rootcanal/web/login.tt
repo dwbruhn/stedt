@@ -9,11 +9,15 @@
 	<link rel="stylesheet" href="[% self_base %]styles/rootcanal.css">
 </head>
 <body>
+[% IF msg -%]
+<p>[% msg %]</p>
+[% END -%]
 <form method="post" action="[% self_url %]/account/login">
 username: <input type="text" size="10" name="user">
 password: <input type="password" size="10" name="pwd">
+<input type="hidden" name="url" value="[% c.query.param('url') %]">
 <input type="submit" value="log in">
-<p><a href="[% self_url %]/account">create account</a></p>
+<p><a href="[% self_url %]/account/gsarpa">create account</a></p>
 </form>
 
 [%- IF !blank -%]
@@ -23,7 +27,7 @@ the email address associated with your account to have a new
 password emailed to you.</p>
 
 [%- IF err.all_empty -%]
-<p>[%- err.all_empty -%]</p>
+<p>[% err.all_empty %]</p>
 [%- END -%]
 
 <form method="post" name="password_reset_form" action="[% self_url %]/account/password_reset">

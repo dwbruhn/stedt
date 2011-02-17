@@ -1,11 +1,33 @@
-<a href="[% self_url %]/admin">re-generate lex_et index</a>
+[% self_url = c.query.url('-absolute',1) -%]
+[% self_base = self_url.replace('[^/]+$' , '') -%]
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8">
+	<title>STEDT Database - Admin Page</title>
+	<link rel="stylesheet" href="[% self_base %]styles/rootcanal.css">
+</head>
+<body>
 
-view recent queries
+Edit tables:
+<ul>
+[% FOREACH tbl IN ['etyma', 'lexicon', 'languagenames', 'srcbib'] -%]
+	<li><a href="[% self_url %]/edit/[% tbl %]">[% tbl %]</a></li>
+[% END -%]
+</ul>
 
-view change log
+<p><a href="[% self_url %]/admin/queries">view recent queries</a></p>
+<p><a href="[% self_url %]/admin/changes">view change log</a></p>
 
-view bug reports
+Accounts:
+<ul>
+<li><a href="[% self_url %]/account/gsarpa">create a new account</a></li>
+<li><a href="[% self_url %]/admin/users">list of users</a></li>
+</ul>
 
-
+Tools:
+<p><a href="[% self_url %]/admin/lex_et_gen">re-generate lex_et index</a></p>
+<p><a href="[% self_url %]/admin/listpublic">list of public etyma tag #s</a></p>
 </body>
 </html>

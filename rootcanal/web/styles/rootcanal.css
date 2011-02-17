@@ -32,6 +32,7 @@ div#info
 }
 
 tr { vertical-align: top; }
+td { text-indent: -1em; padding-left: 1em; }
 td, .editable-cell-form textarea
 /* table cells and their editable versions should look the same */
 /* (looks like we're only using textareas, not text inputs) */
@@ -70,12 +71,14 @@ see http://www.pupinc.com/boxflowhack/ */
 .footnote { font-size: smaller; }
 
 th {
-     text-align: left;
-     color: white;
-     background-color: navy;
-     font-family: "Gill Sans", Futura, Helvetica, Arial, sans;
-     /*font-size: smaller;*/
-     font-weight: normal; }
+	text-align: left;
+	color: white;
+	background-color: navy;
+	font-family: "Gill Sans", Futura, Helvetica, Arial, sans;
+	/*font-size: smaller;*/
+	font-weight: normal;
+	overflow: hidden;
+}
 
 th A:link     		{ color: white; }
 th A:visited   		{ color: white; }
@@ -164,3 +167,9 @@ div.move-handle {
 	margin-left: -1px;
 	margin-top: -1px;
 } 
+
+
+.hoverdrop { background-color : yellow; }
+
+.lggroup { background-color : #E6E6E6; }
+.lggroup td { font-weight: bold; }

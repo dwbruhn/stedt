@@ -34,4 +34,21 @@ snap : function (x, y, d) {
 $('simple_searchinput').focus();
 }
 
+function show_advanced_search(tbl) {
+	var result_table = $(tbl + '_resulttable');
+	var t = new Element('table');
+	t.width = '100%';
+	t.style.tableLayout = 'fixed';
+	var r = t.insertRow(-1);
+	$A(result_table.tHead.rows[0].cells).each(function (th) {
+		var c = new Element('td');
+		c.width = th.getWidth();
+		var box = new Element('input', {id:th.id});
+		box.setStyle({width:'100%'});
+		c.appendChild(box);
+		r.appendChild(c);
+	});
+	result_table.parentNode.insertBefore(t, result_table);
+}
+
 document.observe("dom:loaded", stedtedit);

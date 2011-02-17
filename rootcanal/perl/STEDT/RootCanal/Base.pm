@@ -69,7 +69,7 @@ sub cgiapp_prerun {
 	$self->session->expire("1y");
 	# additional cookie to test for a secure connection on the next HTTP request
 	$self->header_add(-cookie=>
-		[$self->query->cookie(-name=>'stsec',-value=>1,-secure=>1)]);
+		[$self->query->cookie(-name=>'stsec',-value=>1,-secure=>1,-expires=>'+1y')]);
 }
 
 # using C::A::P::AutoRunmode, we set this to be called in the event of an error
@@ -77,6 +77,16 @@ sub unable_to_comply : ErrorRunmode {
 	my ($self, $err) = @_;
 	$self->header_props(-status => 500); # server error
 	return $err; # just the text, ma'am (it might show up in a javascript alert)
+}
+
+# helper method to load the relevant module
+sub load_table_module {
+	my ($self, $tbl) = @_;
+	$tbl =~ /\W/ and die "table name contained illegal characters!"; # prevent sneaky injection attacks
+	$tbl =~ s/^(.)/\u$1/; # uppercase the first char
+	my $tbl_class = "STEDT::Table::$tbl";
+	eval "require $tbl_class" or die $@;
+	return $tbl_class->new($self->dbh);
 }
 
 1;

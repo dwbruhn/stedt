@@ -4,12 +4,17 @@
 <center>
 <br>
 <a href="http://stedt.berkeley.edu/" title="STEDT Home Page">
-<img src="img/stedt_rgb.jpg" alt="STEDT Logo" border=0></a>
+<img src="[% self_base %]img/stedt_rgb.jpg" alt="STEDT Logo" border="0" width="400" height="128"></a>
 <br><br><br>
 <form id="simple_search" method="post">
 <input type="text" name="s" id ="simple_searchinput" size="64" maxlength="128">
 <input type="submit" name="search" value="Search" >
+<a href="[% self_base %]help.html" target="_blank">Help</a>
 </form>
+<div style="height:10ex"></div>
+<hr>
+<a href="http://stedt.berkeley.edu/">STEDT Home Page</a> | 
+<a href="[% self_base %]contact.html" target="_blank">Contact Us</a>
 </center>
 </div>
 
@@ -17,6 +22,7 @@
 <div align="center">[% # search div %]
 <form id="etyma_search" method="post">
 Search etyma: <input name="s" type="text" size="50" id="etyma_searchinput" ><input name="btn" type="submit" value="Search">
+[%- IF c.param('userprivs') >= 16 %]<a href="#" onclick="show_advanced_search('etyma'); return false;">Advanced Search</a>[% END %]
 </form>
 </div>
 <div id="etyma_results"></div>
@@ -36,5 +42,6 @@ Search lexicon: <input name="s" type="text" size="50" id="lexicon_searchinput" >
 <div id="info" style="display:none;"></div>
 </div>
 
+<script src="[% self_base %]js/stedtedit.js"></script>
 </body>
 </html>

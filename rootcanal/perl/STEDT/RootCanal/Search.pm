@@ -3,45 +3,38 @@ use strict;
 use feature 'switch';
 use base 'STEDT::RootCanal::Base';
 use JSON;
-use Encode;
-use utf8;
 
-# helper function to load the relevant module
-sub load_table_module {
-	my ($tbl, $dbh) = @_;
-	$tbl =~ /\W/ and die "table name contained illegal characters!"; # prevent sneaky injection attacks
-	$tbl =~ s/^(.)/\u$1/; # uppercase the first char
-	my $tbl_class = "STEDT::Table::$tbl";
-	eval "require $tbl_class" or die $@;
-	return $tbl_class->new($dbh);
+
+sub extractions : Runmode {
+	my $self = shift;
+	# find all etyma with extraction < 2
+	# there should be an extraction table with name of the extraction
+	# and possibly the name of the pdf file
+	# there should be a pdf directory with pdf's
+	
+	# pass to extractions.tt:
+	# list of extractions
+	
+	# generate a list, with a pdf link too.
+	# each extraction will be
+	# - a set of (semantically based) chapters
+	# - one chapter
+	# - a set of misc. forms, phonologically based.
+	
+	# the phonologically based sets are going to be harder to organize
+	# because we don't want to duplicate sequence numbers
+	
+	# eventually this page should become moot (?) because 
+	# you'll be able to get to it from a "table of contents" page.
+	# or rather, this is intended as a chronological listing of published forms,
+	# rather than a semantically based one.
+	return $self->tt_process("extractions.tt");
 }
+
 
 sub splash : StartRunmode {
 	my $self = shift;
 	return $self->tt_process("index.tt");
-}
-
-sub update : Runmode {
-	my $self = shift;
-	my $q = $self->query;
-
-	my ($tblname, $field, $id, $value) = ($q->param('tbl'), $q->param('field'), $q->param('id'), $q->param('value'));
-	my $t;
-	
-	if ($self->param('user')
-	   && ($self->param('userprivs') > 1) ### need to figure out who can edit what
-	   && ($t = load_table_module($tblname, $self->dbh))
-	   && $t->in_editable($field)) {
-		my $oldval = $self->dbh->selectrow_array("SELECT $field FROM $tblname WHERE $t->{key}=?", undef, $id);
-		$self->dbh->do("INSERT changelog VALUES (?,?,?,?,?,?,NOW())", undef,
-			$self->session->param('uid'), $tblname, $field =~ /([^.]+)$/, $id, $oldval, $value);
-		$t->save_value($field, $value, $id);
-		return $q->escapeHTML($value);
-	} else {
-		$self->header_props(-status => 403); # Forbidden
-		return "User not logged in" unless $self->param('user');
-		return "Field $field not editable";
-	}
 }
 
 sub source : Runmode {
@@ -83,90 +76,13 @@ sub group : Runmode {
 		grpid=>$grpid,
 		grpno=>$grpno,
 		grpname=>$grpname,
-		grps => $self->dbh->selectall_arrayref("SELECT grpid, grpno, grp FROM languagegroups")
+		grps => $self->dbh->selectall_arrayref("SELECT grpid, grpno, grp FROM languagegroups ORDER BY ord, grpno")
 	});
-}
-
-
-sub _tag2info {
-	my ($t, $s, $dbh) = @_;
-	my @a = $dbh->selectrow_array("SELECT etyma.protoform,etyma.protogloss FROM etyma WHERE tag=?", undef, $t);
-	return "[ERROR! Dead etyma ref #$t!]" unless $a[0];
-	my ($form, $gloss) = map {decode_utf8($_)} @a;
-	$form =~ s/-/‑/g; # non-breaking hyphens
-	$form =~ s/^/*/;
-	$form =~ s/⪤ /⪤ */g;		# add a star for proto-allofams
-	$form =~ s|(\*\S+)|<b>$1</b>|g; # bold the protoform but not the allofam sign or gloss
-	if ($s) {			# alternative gloss, add it in
-		$s = "$form $s";
-	} else {
-		$s = "$form $gloss"; # put protogloss if no alt given
-	}
-	return $s;
-}
-
-sub _nonbreak_hyphens {
-	my $s = $_[0];
-	$s =~ s/-/‑/g;
-	return $s;
-}
-
-my @italicize_abbrevs =
-qw|GSR GSTC STC HPTB TSR AHD VSTB TBT HCT LTBA BSOAS CSDPN TIL OED|;
-
-sub xml2html {
-	my @footnotes;
-	my $i = 1;
-	my $dbh = $_[1];
-	local $_ = $_[0];
-	s|<par>|<p>|g;
-	s|</par>|</p>|g;
-	s|<emph>|<i>|g;
-	s|</emph>|</i>|g;
-	s|<gloss>(.*?)</gloss>|$1|g;	# no formatting?
-	s|<reconstruction>\*(.*?)</reconstruction>|"<b>*" . _nonbreak_hyphens($1) . "</b>"|ge;
-	s|<xref ref="(\d+)">#\1(.*?)</xref>|_tag2info($1,$2,$dbh)|ge;
-	s|<footnote>(.*?)</footnote>|push @footnotes, $1; "<sup>" . $i++ . "</sup>"|ge;
-	s|<hanform>(.*?)</hanform>|$1|g;
-	s|<latinform>(.*?)</latinform>|"<b>" . _nonbreak_hyphens($1) . "</b>"|ge;
-	s|<plainlatinform>(.*?)</plainlatinform>|$1|g;
-
-	s/(\S)&apos;/$1’/g; # smart quotes
-	s/&apos;/‘/g;
-	s/&quot;(?=[\w'])/“/g;
-	s/&quot;/”/g;  # or $_[0] =~ s/(?<!\s)"/&#8221;/g; $_[0] =~ s/(\A|\s)"/$1&#8220;/g;
-	
-	# italicize certain abbreviations
-	for my $abbrev (@italicize_abbrevs) {
-		s|\b($abbrev)\b|<i>$1</i>|g;
-	}
-	### specify STEDTU here?
-
-	s/&lt;-+&gt;/⟷/g; # convert arrows
-	s/< /< /g; # no-break space after "comes from" sign
-	
-	$i = 1;
-	for my $f (@footnotes) { $_ .= '<p class="footnote">' . $i++ . ". $f</p>" }
-	return $_;
-}
-
-
-sub notes_for_tag : Runmode {
-	my $self = shift;
-	my $tag = $self->param('tag');
-	
-	my $notes = $self->dbh->selectall_arrayref("SELECT xmlnote FROM notes WHERE tag=?", undef, $tag);
-	my @notes;
-	for (@$notes) {
-		 my $xml = decode_utf8($_->[0]);
-		 push @notes, xml2html($xml, $self->dbh);
-	}
-	return join '', @notes;
 }
 
 sub searchresults_from_querystring {
 	my ($self, $s, $tbl) = @_;
-	my $t = load_table_module($tbl, $self->dbh);
+	my $t = $self->load_table_module($tbl);
 	my $query = new CGI;
 
 	# figure out the table and the search terms
@@ -228,7 +144,7 @@ sub blah : Runmode { # this sub wants a nicer name
 			die "bad table name!";
 		}
 	} else { # just pass the query on
-		my $t = load_table_module($tbl, $self->dbh);
+		my $t = $self->load_table_module($tbl);
 		$result = $t->search($self->query, $self->param('userprivs'));
 	}
 

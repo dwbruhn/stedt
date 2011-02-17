@@ -1,0 +1,133 @@
+[% PROCESS header.tt title="STEDT Database - Edit " _ t.table -%]
+<form>
+<table width="100%" style="table-layout:fixed;">
+<tr>
+[% FOREACH col IN t.searchable -%]
+<th width="50">[% col.replace('^.*\.','') %]</th>
+[% END -%]
+</tr>
+<tr>
+[% FOREACH col IN t.searchable -%]
+<td>[%- sub = t.search_form_items(col) %]
+[%- IF t.search_form_items(col) %]
+[%- sub(c.query) %]
+[%- ELSE %]
+<input type="text" name="[% col %]" style="width:100%">
+[%- END %]</td>
+[% END -%]
+</tr>
+</table>
+<input name="search" type="submit" value="Search">
+</form>
+
+[% IF result.data.size -%]
+<form target="tableedit_print" method="post">
+[% result.data.size %] found. (WHERE [% result.debug %])
+[%- FOREACH col IN t.searchable -%]
+[%- IF c.query.param(col) %]<input name="[% col %]" type="hidden" value="[% c.query.param(col) %]">[% END -%]
+[%- END -%]
+[%# <input name="print" type="submit" value="Print"> %]
+</form>
+
+[% IF manual -%]
+<form method="post">
+[% FOREACH col IN t.searchable.merge(['sortkey']) -%]
+[%- IF c.query.param(col) %]<input name="[% col %]" type="hidden" value="[% c.query.param(col) %]">[% END -%]
+[%- END -%]
+<input name="pagenum" type="hidden" value="[% pagenum %]">
+[% UNLESS pagenum == 0 %]<input name="prev" type="submit" value="Previous Page">[% END %]
+Displaying items [% a %]-[% b %] of [% result.data.size %].
+[% UNLESS b == result.data.size %]<input name="next" type="submit" value="Next Page">[% END %]
+</form>
+[% END -%]
+
+<form>
+<table id="[% t.table %]_resulttable" class="[% IF !manual %]sortable [% END %]resizable editable" width="100%" style="table-layout:fixed;">
+<thead><tr>
+[%- FOREACH col IN result.fields %]
+<th id=[% col %]>
+[%- IF manual %]
+<a href="[% sortlinks.$col %]">[% col.replace('^.*\.','') %]</a>
+[%- ELSE %]
+[%- col.replace('^.*\.','') %]
+[%- END %]
+</th>
+[%- END %]
+</tr></thead>
+<tbody>
+[%- FOREACH row IN result.data.slice(a - 1, b - 1) -%]
+<tr>
+[%- FOREACH s IN row -%]
+<td>[% s %]</td>
+[%- END -%]
+</tr>
+[% END %]
+</tbody>
+</table>
+</form>
+[%- ELSE -%]
+No records found. (WHERE [% result.debug %])
+[% END -%]
+
+<a href="#" onclick="$('add_form_span').toggle(); scrollEnd(); return false;">Add a record...</a>
+<span id="add_form_span" style="display:none">
+<form id="add_form" onsubmit="add_record(); return false;">
+<table border=0>
+[%- FOREACH fld IN t.addable %]
+<tr><th>[% fld.replace('^.*\.','') %]</th><td>
+[%- sub = t.add_form_items(fld) %]
+[%- IF t.add_form_items(fld) %]
+[%- sub(c.query) %]
+[%- ELSE %]
+<input name="[% fld %]" type="text" class="add_reset">
+[%- END %]
+</td></tr>
+[%- END %]
+</table>
+<input name="btn" type="submit" value="Add Record">
+</form>
+</span>
+
+
+<script src="[% self_base %]js/tbl/[% t.table %].js"></script>
+<script>
+var tablename = '[% t.table %]';
+TableKit.Raw.init(tablename + '_resulttable', tablename, '[% self_url %]/update');
+var scrollEnd = function() {
+	if (document.body.scrollHeight) { window.scrollTo(0, document.body.scrollHeight); 
+	} else if (screen.height) { window.scrollTo(0, screen.height); } // IE5 
+}
+var dontedit = function(e) {
+	if (!e) var e = window.event;
+	e.cancelBubble = true; if (e.stopPropagation) e.stopPropagation();
+	return true;
+};
+var add_record = function () { new Ajax.Request('[% self_url %]/add/[% t.table %]', {
+	parameters: $('add_form').serialize(true),
+    onSuccess: function (transport,json){
+		var response = transport.responseText || "ERROR: no response text";
+		var rec = response.evalJSON();
+		var t = $('[% t.table %]_resulttable');
+		var row = t.insertRow(-1);
+		row.id = json.id;
+		var tinfo = TableKit.tables[t.id];
+		var rawData = tinfo.raw.data;
+		var head_cells = TableKit.getHeaderCells(t);
+		rec.each(function (v,i) {
+			var xform = setup['[% t.table %]'][head_cells[i].id].transform;
+			var cell = row.insertCell(-1);
+			if (v) {
+				cell.innerHTML = xform	? xform(v.escapeHTML(), row.id, rec, i)
+										: v.escapeHTML();
+			}
+		});
+		rawData[row.id] = rec;
+		TableKit.reload();
+		scrollEnd();
+		$$('.add_reset').each(function(i) {i.value = ''});
+    },
+    onFailure: function(transport){ alert('Error: ' + transport.responseText) }
+})};
+</script>
+</body>
+</html>

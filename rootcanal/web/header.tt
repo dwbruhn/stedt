@@ -8,34 +8,37 @@
 	<meta http-equiv="content-type" content="text/html; charset=utf-8">
 	<title>[% title %]</title>
 	<link rel="stylesheet" href="[% self_base %]styles/rootcanal.css">
+[% IF cognates.size -%]
+	<style type="text/css">
+[%- FOREACH n IN cognates %].r[% n %] { background-color:yellow; } [% END %]</style>
+[% END -%]
 	<script src="[% self_base %]scriptaculous/lib/prototype.js"></script>
 	<script src="[% self_base %]scriptaculous/src/scriptaculous.js"></script>
 	<script src="[% self_base %]tablekit.js"></script>
-	<script src="[% self_base %]js/stedtconfig.js"></script>
-	<script src="[% self_base %]js/stedtedit.js"></script>
 </head>
 <body>
 <div id="header" style="display:none;">
 [%- user = c.param('user') -%]
 <span class="right">
 [% IF user -%]
-Logged in: [% user %]
-| <a href="[% self_url %]/account">account settings</a>
-| <a href="[% self_url %]/logout">log out</a>
 <script>
 var stedtuserprivs = [% c.param('userprivs') %];
-if (stedtuserprivs > 15) {
-	setup.lexicon['lexicon.analysis'].hide = false;//[% # this should probably go in stedtconfig, but we don't calculate stedtuserprivs until we get here, so... %]
-}
+$('header').show();
 </script>
+Logged in: [% user %]
+| <a href="[% self_url %]/admin">administration page</a>
+| <a href="[% self_url %]/account">account settings</a>
+| <a href="[% self_url %]/logout">log out</a>
+|
 [% ELSE -%]
 <script>
 var stedtuserprivs = 0;
 </script>
 [% END -%]
-<a href="help.html" target="_blank">Help</a>
+<a href="[% self_base %]help.html" target="_blank">Help</a>
+<script src="[% self_base %]js/stedtconfig.js"></script>
 </span>
-<a href='http://stedt.berkeley.edu/' title='STEDT Home Page' target="_blank"><img src='img/STB32x32.gif' alt='STEDT Logo' width='32' height='32' class="left" border=0></a>
+<a href='http://stedt.berkeley.edu/' title='STEDT Home Page' target="_blank"><img src='[% self_base %]img/STB32x32.gif' alt='STEDT Logo' width='32' height='32' class="left" border=0></a>
 <b>[% title %]</b>
 <hr>
 </div>

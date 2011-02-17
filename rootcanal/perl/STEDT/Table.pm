@@ -90,12 +90,6 @@ sub fields {
 		%{$self->{field_visible_privs}} = map {$_,1} @a;	# all visible by default
 		@{$self->{full_fields}}{@a} = @full_fields;
 		die "key not in fields list!" unless $self->{is_field}{$self->{key}};
-		my $i = 0;
-		for (@_) {
-			last if $_ eq $self->{key};
-			$i++;
-		}
-		$self->{index_of_key} = $i;
 	} else {
 		return @{$self->{fields}}; # return a list
 	}
@@ -160,30 +154,32 @@ sub AUTOLOAD {
 
 sub search {
 	my $self = shift;
-	my $cgi = shift; ### pass in the query as a cgi obj
-	my $privs = shift;
+	my ($cgi, $privs, $debug) = @_; ### pass in the query as a cgi obj
 	my $dbh = $self->{dbh};
     
 	# sort by a separate key if specified
-# 	if (my $sortkey = $cgi->param('sortkey')) {
-# 		$self->{order_by} = $sortkey;
-# 	}
+	if (my $sortkey = $cgi->param('sortkey')) {
+		$self->{order_by} = $sortkey;
+	}
 
     # construct our query
-    my ($query, $where) = $self->get_query($cgi, $privs) or return;
-
-	# print $query if $self->{debug};
+    my ($query, $where) = $self->get_query($cgi, $privs);
 	
 	# fetch the data so we can count the rows
 	my $sth = $dbh->prepare($query);
 	$sth->execute();
 	my $ary = $sth->fetchall_arrayref();
 
-	return {table => $self->{table}, fields => [$self->fields_for_priv($privs)], data => $ary}; #, debug => $query };
+	my $result = {table => $self->{table}, fields => [$self->fields_for_priv($privs)], data => $ary};
+	$result->{debug} = $where if $privs >= 16;
+	return $result;
 }
 
 
 # Returns an SQL query based on the parameters passed to the script.
+# actually returns two values: the first is the entire SQL query;
+# the second is a string consisting of the WHERE and HAVING clauses,
+# which is nicer to display to the user than the entire query string.
 sub get_query {
 	my $self = shift;
 	my $cgi = shift;

@@ -6,7 +6,7 @@ sub new {
 my $t = shift->SUPER::new(my $dbh = shift, 'lexicon', 'lexicon.rn'); # dbh, table, key
 
 $t->query_from(q|lexicon LEFT JOIN notes USING (rn) LEFT JOIN languagenames USING (lgid) LEFT JOIN languagegroups USING (grpid)|);
-$t->order_by('languagegroups.ord, languagenames.lgsort, lexicon.gloss');
+$t->order_by('languagegroups.ord, languagenames.lgsort, lexicon.reflex, languagenames.srcabbr, lexicon.srcid');
 $t->fields(
 	'lexicon.rn',
 	'lexicon.analysis',
@@ -132,6 +132,7 @@ $t->addable(
 $t->add_form_items(
 	'lexicon.lgid' => sub {
 		my $cgi = shift;
+		my $self_url = $cgi->url(-absolute=>1);
 		# make a list of srcabbr's which have one or more languages
 		my $a = $dbh->selectall_arrayref("SELECT srcabbr, COUNT(lgid) as numlgs FROM srcbib LEFT JOIN languagenames USING (srcabbr) GROUP BY srcabbr HAVING numlgs > 0 ORDER BY srcabbr");
 		return $cgi->popup_menu(-name => 'srcabbr-ignore',
@@ -139,8 +140,8 @@ $t->add_form_items(
 			-labels=>{'0'=>'(Select...)'},
 			-default=>'', -override=>1,
 			-id=>'add_srcabbr',
-			-onChange => <<EOF),
-new Ajax.Request('json_lg.pl?srcabbr=' + \$('add_srcabbr').value, {
+			-onChange => <<EOF) .
+new Ajax.Request('$self_url/json_lg/' + \$('add_srcabbr').value, {
 	method: 'get',
     onSuccess: function(transport,json){
 		var lg_menu = \$('add_language');

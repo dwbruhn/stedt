@@ -21,6 +21,15 @@ sub account : StartRunmode {
 	});
 }
 
+sub gsarpa : Runmode {
+	my $self = shift;
+	if (!$self->query->cookie('stsec')) {
+		return "You must be using a secure connection to do this. Try changing your URL to https...";
+	}
+	my $errs = shift;
+	return $self->tt_process("admin/create_account.tt", { err => $errs });
+}
+
 
 # create/update account if attempting to do so
 sub acct_dfv_profile {
@@ -71,13 +80,15 @@ sub acct_dfv_profile {
 
 sub create : Runmode {
 	my $self = shift;
-	
-	my $dfv_results = $self->check_rm('account', $self->acct_dfv_profile(),
+	my $q = $self->query;
+	if (!$q->cookie('stsec')) {
+		return "You must be using a secure connection to do this. Try changing your URL to https...";
+	}
+	my $dfv_results = $self->check_rm('gsarpa', $self->acct_dfv_profile(),
 		{target=>'acct_form', ignore_fields => ['newpwd','newpwd2']})
 	|| return $self->check_rm_error_page;
 		
 	# success!
-	my $q = $self->query;
 	my $u = $q->param('newuser');
 	my $dbh = $self->dbh;
 	my $sth = $dbh->prepare("INSERT users ("
@@ -88,8 +99,10 @@ sub create : Runmode {
 		my $err = "Can't create new account: $@";
 		die $err; # give unexpected error page!
 	}
-	my ($uid) = $dbh->selectrow_array("SELECT LAST_INSERT_ID()");
-	return $self->_login($uid, $u);
+	return $self->tt_process("login.tt", {
+		blank => 1,
+		msg => "Account for $u created successfully!"
+	});
 }
 
 sub update : Runmode {
@@ -131,18 +144,19 @@ sub login : Runmode {
 	my $q = $self->query;
 	my $u = $q->param('user');
 	# check if they're trying to log in over a non-secure connection
-	if (!$q->cookie('stsec') && $u) {
-		return "You must be using a secure connection to log in. Try changing your URL to https...";
+	# require all logins to be over https!
+	if (!$q->cookie('stsec')) {
+		return $self->tt_process("admin/https_warning.tt");
 	}
 	unless ($u) {
 		return $self->tt_process("login.tt", { blank => 1 });
 	}
-	my ($uid, $pwd, $pwd2) =
-		$self->dbh->selectrow_array("SELECT uid, password, SHA1(?) FROM users WHERE username=?", undef, $q->param('pwd'), $u);
+	my ($uid, $pwd, $pwd2, $privs) =
+		$self->dbh->selectrow_array("SELECT uid, password, SHA1(?), privs FROM users WHERE username=?", undef, $q->param('pwd'), $u);
 	if (defined($uid) && $pwd eq $pwd2) {
 		# success!
 
-		return $self->_login($uid, $u);
+		return $self->_login($uid, $u, $privs);
 	}
 	return $self->login_fail({});
 }
@@ -159,11 +173,13 @@ sub login_fail : Runmode {
 # helper function to set params and stuff,
 # then redirect to the main page
 sub _login {
-	my ($self, $uid, $username) = @_;
+	my ($self, $uid, $username, $privs) = @_;
 	$self->session->param('uid', $uid);	# for authentication
 	$self->session->expire('uid', "1d");
 	$self->param(user => $username);	# for template display
-	return $self->redirect($self->query->url(-absolute=>1));
+	$self->param(userprivs => $privs);
+	# redirect to the page they were trying to go to, or the main page otherwise
+	return $self->redirect($self->query->param('url') || $self->query->url(-absolute=>1));
 }
 
 sub password_reset : Runmode {

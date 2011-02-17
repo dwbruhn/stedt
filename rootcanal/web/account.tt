@@ -1,4 +1,4 @@
-[% PROCESS header.tt title="STEDT Database: Account" %]
+[% PROCESS header.tt title="STEDT Database: Account Info" %]
 [%- user = c.param('user') -%]
 [% IF reset -%]
 A new password has been generated and sent to the email address in your account record.
@@ -17,18 +17,7 @@ For security, enter your current password: <input type="password" size="10" name
 <input name="btn" type="submit" value="Update">
 </form>
 [% ELSE -%]
-[% IF err.exists -%]
-<p>Could not create account (see error(s) below). You can try again...</p>
-[% END -%]
-
-<form method="post" name="acct_form" action="[% self_url %]/account/create">
-username: <input type="text" size="10" name="newuser" maxlength="15">[% err.newuser %]<br>
-password: <input type="password" size="10" name="newpwd">[% err.newpwd %]<br>
-confirm password: <input type="password" size="10" name="newpwd2">[% err.newpwd2 %]<br>
-email (in case you forget your password): <input type="text" size="30" name="email">[% err.email %]<br>
-secret code: <input type="password" size="10" name="secret_code">[% err.secret_code %]<br>
-<input name="btn" type="submit" value="Create">
-</form>
+You are not logged in. Try <a href="[% self_url %]/account/gsarpa">creating a new account</a>.
 [% END -%]
 
 </body>

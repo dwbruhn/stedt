@@ -1,0 +1,12 @@
+[% PROCESS header.tt title="STEDT Database - Edit record " _ id _ " from " _ t.table -%]
+<form action="[% self_url %]/edit/[% t.table %]/[% id %]" method="post">
+<table>
+[% FOREACH val IN result -%]
+[%- n = loop.index -%]
+<tr><th>[% cols.$n %]</th><td><input type="text" size="40" name="[% cols.$n %]" value="[% val %]"></td></tr>
+[% END -%]
+</table>
+<input name="rootcanal_btn" type="submit" value="Save">
+</form>
+</body>
+</html>

@@ -5,22 +5,24 @@ use strict;
 sub new {
 my $t = shift->SUPER::new(my $dbh = shift, 'etyma', 'etyma.tag'); # dbh, table, key
 
-$t->query_from(q|etyma LEFT JOIN notes USING (tag) LEFT JOIN lx_et_hash USING (tag)|); # ON (notes.spec = 'E' AND notes.id = etyma.tag) 
-$t->order_by('etyma.chapter, etyma.sequence, etyma.protogloss'); #printseq+0, etyma.printseq -- this was needed before we made sequence redundant with printseq
+$t->query_from(q|etyma LEFT JOIN notes USING (tag) LEFT JOIN lx_et_hash USING (tag) JOIN `etyma` AS `super` ON etyma.supertag = super.tag|);
+$t->order_by('super.chapter, super.sequence, etyma.plgord');
 $t->fields('etyma.tag',
+	'etyma.supertag',
 	'etyma.printseq' ,
 	'COUNT(DISTINCT lx_et_hash.rn) AS num_recs',
 	'etyma.chapter', 'etyma.protoform', 'etyma.protogloss',
-	'etyma.plg', 'etyma.notes', 'etyma.hptbid',
+	'etyma.plg', 'etyma.plgord',
+	'etyma.notes', 'etyma.hptbid',
 	'COUNT(DISTINCT notes.noteid) AS num_notes',
 	'etyma.sequence' ,
-	'etyma.exemplary',
 	'etyma.xrefs',
 	'etyma.allofams' ,
 	'etyma.possallo' ,
 	'etyma.public',
 );
 $t->field_visible_privs(
+	'etyma.supertag' => 16,
 	'etyma.chapter' => 16,
 	'etyma.plg' => 16,
 	'etyma.notes' => 16,
@@ -42,11 +44,13 @@ $t->searchable('etyma.tag',
 	'etyma.public',
 );
 $t->editable(
+	'etyma.supertag', 'etyma.printseq', 'etyma.sequence',
 	'etyma.chapter', 'etyma.protoform', 'etyma.protogloss',
 	'etyma.plg', 'etyma.notes', 'etyma.hptbid',
 	'etyma.xrefs',
 	'etyma.possallo' ,
 	'etyma.allofams' ,
+	'etyma.public'
 );
 
 # Stuff for searching
@@ -67,6 +71,7 @@ $t->search_form_items(
 );
 
 $t->wheres(
+	'etyma.tag' => sub {my ($k,$v) = @_; '(' . STEDT::Table::where_int($k,$v) . ' OR ' . STEDT::Table::where_int('etyma.supertag',$v) . ')'},
 	'etyma.plg'	=> sub {my ($k,$v) = @_; $v = '' if $v eq '0'; "$k LIKE '$v'"},
 	'etyma.chapter' => sub { my ($k,$v) = @_; "$k LIKE '$v'" },
 	'etyma.protogloss'	=> 'word',
@@ -105,6 +110,21 @@ $t->save_hooks(
 			$sth->execute($tag, $id, $index) if ($id =~ /^\d+$/);
 			$index++;
 		}
+	},
+	'etyma.plg' => sub {
+		my ($id, $value) = @_;
+		# simultaneously update plgord fld
+		my @plgs = ('PST', 'PTB', 'KMR', 'PTani', 'AMD', 'PKC',
+			'KCN', 'PKN', 'PNC', 'PCC', 'PPC', 'PSPC', 'PNN', 'NNA', 'NAG', 'PBG',
+			'HIM', 'PHM', 'WHI', 'BOD', 'TGTM', 'KIR', 'PKir', 'BSD', 'PQ',
+			'Jg/Lu', 'LUI', 'PLB', 'LB', 'BRM', 'PBM', 'PL', 'KAR', 'PKar', 'OC',
+			'IA', 'NPL');
+		my $i;
+		$i++ until ($value eq shift @plgs) || !@plgs;
+		# this has the side effect of making plgs that aren't on this list sort last.
+		
+		my $sth = $dbh->prepare(qq{UPDATE etyma SET etyma.plgord=? WHERE etyma.tag=?});
+		$sth->execute($i, $id);
 	}
 );
 $t->footer_extra(sub {
@@ -158,7 +178,6 @@ $t->add_form_items(
 			}
 		}
 		$i++;
-		
 		return $cgi->popup_menu(-name => 'etyma.tag', -values=>['',$i,@a],  -default=>'', -override=>1);
 	},
 	'etyma.plg' => sub {
