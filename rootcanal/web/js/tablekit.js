@@ -332,10 +332,10 @@ TableKit.Raw = {
 			rawData[id] = [];
 			$A(row.cells).each(function (cell,i) {
 				if (setup[tablename][fields[i]].hide) cell.style.display = 'none';
-				var v = rawData[id][i] =  cell.innerHTML.unescapeHTML();
+				var v = rawData[id][i] = cell.innerHTML.unescapeHTML();
 				var xform = setup[tablename][fields[i]].transform;
 				if (xform)
-					xform(v, rawData[row.id][k], rawData[row.id], i).escapeHTML();
+					cell.innerHTML = xform(v, rawData[row.id][k], rawData[row.id], i);//.escapeHTML();
 			});
 		});
 		
