@@ -329,20 +329,13 @@ TableKit.Raw = {
 		$A(t.tBodies[0].rows).each(function (row) {
 			var id = row.cells[k].innerHTML;
 			row.id = id;
-			rawData[id] = $A(row.cells).map(function (c,i) {
-				if (setup[tablename][fields[i]].hide) c.style.display = 'none';
-				return c.innerHTML;
-			});
-		});
-		
-		$A(t.tBodies[0].rows).each(function (row) {
+			rawData[id] = [];
 			$A(row.cells).each(function (cell,i) {
+				if (setup[tablename][fields[i]].hide) cell.style.display = 'none';
+				var v = rawData[id][i] =  cell.innerHTML.unescapeHTML();
 				var xform = setup[tablename][fields[i]].transform;
-				var v = cell.innerHTML;
-				// if (v) { // don't check for empty values here because sometimes you *do* want to transform them
-				cell.innerHTML = xform	? xform(v.escapeHTML(), rawData[row.id][k], rawData[row.id], i)
-										: v.escapeHTML();
-				//}
+				if (xform)
+					xform(v, rawData[row.id][k], rawData[row.id], i).escapeHTML();
 			});
 		});
 		

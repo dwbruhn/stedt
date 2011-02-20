@@ -58,7 +58,7 @@ Displaying items [% a %]-[% b %] of [% result.data.size %].
 [%- FOREACH row IN result.data.slice(a - 1, b - 1) -%]
 <tr>
 [%- FOREACH s IN row -%]
-<td>[% s %]</td>
+<td>[% s | html %]</td>
 [%- END -%]
 </tr>
 [% END %]

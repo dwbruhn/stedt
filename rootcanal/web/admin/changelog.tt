@@ -24,7 +24,7 @@
 [% FOREACH row IN changes -%]
 <tr>
 [% FOREACH col IN row -%]
-<td>[% col %]</td>
+<td>[% col | html %]</td>
 [% END -%]
 </tr>
 [% END -%]
