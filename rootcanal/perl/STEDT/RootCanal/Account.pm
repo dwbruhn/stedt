@@ -142,12 +142,15 @@ sub login : Runmode {
 	my $self = shift;
 	
 	my $q = $self->query;
-	my $u = $q->param('user');
 	# check if they're trying to log in over a non-secure connection
 	# require all logins to be over https!
 	if (!$q->cookie('stsec')) {
 		return $self->tt_process("admin/https_warning.tt");
 	}
+	if ($self->param('user')) {
+		return $self->redirect($q->url(-absolute=>1));
+	}
+	my $u = $q->param('user');
 	unless ($u) {
 		return $self->tt_process("login.tt", { blank => 1 });
 	}
