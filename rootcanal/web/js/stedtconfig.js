@@ -41,8 +41,8 @@ makesubroot = function(dragged, destination, e) {
 		}
 	});
 };
-var make_draggable_id = function(obj) {
-	new Draggable(obj, { revert:true, constraint:'vertical', scroll:'etyma' });
+var make_draggable_id = function (obj, scrollElement) { // scrollElement is the containing element which should be scrolled, if any
+	new Draggable(obj, { revert:true, constraint:'vertical', scroll:scrollElement });
 	Droppables.add(obj,
 	  { hoverclass : 'hoverdrop',
 		accept : 'tagid',
@@ -314,8 +314,9 @@ var setup = { // in the form setup.[tablename].[fieldname]
 	etyma : {
 		_key: 'etyma.tag',   // maybe send it from the server?
 		_postprocess: function () {
+			var scrollElem = $('etyma') || window; // if we're not in the combo view, there's no etyma div; if we pass a nonexistent element to Draggable, prototype will crash (in firefox and possibly other browsers)
 			$$('.tagid').each(function(obj, index) {
-				make_draggable_id(obj);
+				make_draggable_id(obj, scrollElem);
 			});
 			// put in a special sort function for all columns of the table
 			var t = TableKit.tables['etyma_resulttable'];
