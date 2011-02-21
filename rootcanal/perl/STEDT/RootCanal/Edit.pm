@@ -127,7 +127,7 @@ sub update : Runmode {
 		$self->dbh->do("INSERT changelog VALUES (?,?,?,?,?,?,NOW())", undef,
 			$self->session->param('uid'), $tblname, $field =~ /([^.]+)$/, $id, $oldval, $value);
 		$t->save_value($field, $value, $id);
-		return $q->escapeHTML($value);
+		return $value;
 	} else {
 		$self->header_props(-status => 403); # Forbidden
 		return "User not logged in" unless $self->param('user');

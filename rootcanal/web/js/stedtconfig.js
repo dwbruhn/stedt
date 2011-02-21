@@ -523,8 +523,8 @@ var setup = { // in the form setup.[tablename].[fieldname]
 			label: 'group',
 			noedit: true,
 			size: 120,
-			transform : function (v, key, rec) {
-				return v + ' - ' + rec[9];
+			transform : function (v, key, rec, n) {
+				return v + ' - ' + rec[n+1];
 			}
 		},
 		'languagegroups.grp' : {

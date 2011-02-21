@@ -11,7 +11,7 @@
 <td>[%- sub = t.search_form_items(col) %]
 [%- IF t.search_form_items(col) %]
 [%- sub(c.query) %]
-[%- ELSE %]
+[%- ELSE -%]
 <input type="text" name="[% col %]" style="width:100%">
 [%- END %]</td>
 [% END -%]
@@ -29,7 +29,7 @@
 [%# <input name="print" type="submit" value="Print"> %]
 </form>
 
-[% IF manual -%]
+[%- IF manual -%]
 <form method="post">
 [% FOREACH col IN t.searchable.merge(['sortkey']) -%]
 [%- IF c.query.param(col) %]<input name="[% col %]" type="hidden" value="[% c.query.param(col) %]">[% END -%]
@@ -39,35 +39,35 @@
 Displaying items [% a %]-[% b %] of [% result.data.size %].
 [% UNLESS b == result.data.size %]<input name="next" type="submit" value="Next Page">[% END %]
 </form>
-[% END -%]
+[%- END -%]
 
 <form>
 <table id="[% t.table %]_resulttable" class="[% IF !manual %]sortable [% END %]resizable editable" width="100%" style="table-layout:fixed;">
 <thead><tr>
 [%- FOREACH col IN result.fields %]
-<th id=[% col %]>
+<th id="[% col %]">
 [%- IF manual %]
 <a href="[% sortlinks.$col %]">[% col.replace('^.*\.','') %]</a>
 [%- ELSE %]
 [%- col.replace('^.*\.','') %]
-[%- END %]
+[%- END -%]
 </th>
 [%- END %]
 </tr></thead>
 <tbody>
-[%- FOREACH row IN result.data.slice(a - 1, b - 1) -%]
+[% FOREACH row IN result.data.slice(a - 1, b - 1) -%]
 <tr>
 [%- FOREACH s IN row -%]
 <td>[% s | html %]</td>
 [%- END -%]
 </tr>
-[% END %]
+[% END -%]
 </tbody>
 </table>
 </form>
 [%- ELSE -%]
 No records found. (WHERE [% result.debug %])
-[% END -%]
+[% END %]
 
 <a href="#" onclick="$('add_form_span').toggle(); scrollEnd(); return false;">Add a record...</a>
 <span id="add_form_span" style="display:none">

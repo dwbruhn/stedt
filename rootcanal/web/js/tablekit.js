@@ -326,16 +326,20 @@ TableKit.Raw = {
 		});
 		
 		var rawData = {};
+		// you must compile rawData first, since the transform functions
+		// might refer to cells after themselves!
 		$A(t.tBodies[0].rows).each(function (row) {
-			var id = row.cells[k].innerHTML;
-			row.id = id;
-			rawData[id] = [];
-			$A(row.cells).each(function (cell,i) {
-				if (setup[tablename][fields[i]].hide) cell.style.display = 'none';
-				var v = rawData[id][i] = cell.innerHTML.unescapeHTML();
+			row.id = row.cells[k].innerHTML;
+			rawData[row.id] = $A(row.cells).map(function (c,i) {
+				if (setup[tablename][fields[i]].hide) c.style.display = 'none';
+				return c.innerHTML.unescapeHTML();
+			});
+		});
+		$A(t.tBodies[0].rows).each(function (row) {
+			var data = rawData[row.id];
+			$A(row.cells).each(function (c,i) {
 				var xform = setup[tablename][fields[i]].transform;
-				if (xform)
-					cell.innerHTML = xform(v, rawData[row.id][k], rawData[row.id], i);//.escapeHTML();
+				if (xform) c.innerHTML = xform(data[i].escapeHTML(), data[k], data, i);
 			});
 		});
 		
@@ -1049,37 +1053,34 @@ TableKit.Editable.CellEditor.prototype = {
 		var xform;
 		var s_extra = TableKit.option('editAjaxExtraParams', table.id);
 		var s = s_extra + '&row=' + (TableKit.getRowIndex(row)+1) + '&cell=' + (TableKit.getCellIndex(cell)+1) + '&id=' + row.id + '&field=' + head.id + '&' + Form.serialize(form);
-		var request = this.ajax = new Ajax.Updater({success:cell}, op.ajaxURI || TableKit.option('editAjaxURI', table.id)[0], Object.extend(op.ajaxOptions || TableKit.option('editAjaxOptions', table.id)[0], {
-			// *** DY above changed "cell" to {sucess:cell} so it only updates on sucess
+		// *** DY why is the request saved to this.ajax? it doesn't seem to be used for anything
+		this.ajax = new Ajax.Request(op.ajaxURI || TableKit.option('editAjaxURI', table.id)[0], Object.extend(op.ajaxOptions || TableKit.option('editAjaxOptions', table.id)[0], {
+			// *** DY changed Ajax.Update to Request to better handle rawData: escapeHTML on client side, not server side
 			postBody : s,
-			onComplete : function() {
+			onSuccess : function(t) {
 				var data = TableKit.getCellData(cell);
 				data.active = false;
 				data.refresh = true; // mark cell cache for refreshing, in case cell contents has changed and sorting is applied
-				// *** DY
-				if (request.success()) {
-					var raw = TableKit.tables[table.id].raw;
-					if (raw) raw.data[row.id][raw.cols[head.id]] = cell.innerHTML;
-					xform = TableKit.tables[table.id].editAjaxTransform; // dunno why the TableKit.option(...) call doesn't work...
-					if (xform) { // && cell.innerHTML != '') { run the transform even on empty values
-						// run the transform
-						var re = /tbl=(.+)/;
-						var tbl = re.exec(s_extra)[1];
-						cell.innerHTML = xform(tbl, head.id, row.id, cell.innerHTML, raw ? raw.data[row.id] : [], raw ? raw.cols[head.id] : 0);
-					}
-					// restore possible hanging ident
-					cell.style.paddingLeft = null;
-					cell.style.textIndent = null;
+				var text = t.responseText;
+				var raw = TableKit.tables[table.id].raw;
+				if (raw) raw.data[row.id][raw.cols[head.id]] = text;
+				xform = TableKit.tables[table.id].editAjaxTransform; // dunno why the TableKit.option(...) call doesn't work...
+				if (xform) {
+					var re = /tbl=(.+)/;
+					var tbl = re.exec(s_extra)[1];
+					cell.innerHTML = xform(tbl, head.id, row.id, text.escapeHTML(), raw ? raw.data[row.id] : null, raw ? raw.cols[head.id] : 0);
 				}
-				// *** DY
+				// restore possible hanging ident
+				cell.style.paddingLeft = null;
+				cell.style.textIndent = null;
 			},
-			onFailure : function(transport) {
-				alert('Error: ' + transport.responseText);
+			onFailure : function(t) {
+				alert('Error: ' + t.responseText);
 				// *** DY revert the field
 				var data = TableKit.getCellData(cell);
+				data.active = false;
 				cell.innerHTML = data.htmlContent;
 				data.htmlContent = '';
-				// *** DY
 			}
 		}));
 	},
