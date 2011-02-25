@@ -75,7 +75,7 @@ sub save : RunMode {
 	$dbh->do("LOCK TABLE notes WRITE");
 	if ($lastmod eq $mod_time) {
 		my $sql = "UPDATE notes SET notetype=?, xmlnote=? WHERE noteid=?";
-		my @args = $q->param('notetype'), markup2xml($q->param('xmlnote'));
+		my @args = ($q->param('notetype'), markup2xml($q->param('xmlnote')));
 		if ($q->param('id')) {
 			$sql =~ s/ WHERE/, id=? WHERE/;
 			push @args, $q->param('id');
