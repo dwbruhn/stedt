@@ -12,7 +12,7 @@ sub dispatch_args {
 			'source/:srcabbr' => { app=>'Search', rm => 'source' },
 			'group/:id/:lgid?'=> { app=>'Search', rm => 'group' },
 			'etymon/:tag'     => { app=>'Notes', rm => 'etymon' },
-			'notes/:rn'       => { app=>'Notes', rm => 'notes_for_rn' },
+			'notes/l/:rn'     => { app=>'Notes', rm => 'notes_for_rn' },
 			'edit/:tbl'		  => { app=>'Edit', rm => 'table' },
 			'edit/:tbl/:id'	  => { app=>'Edit', rm => 'single_record' },
 			'add/:tbl'		  => { app=>'Edit', rm => 'add' },

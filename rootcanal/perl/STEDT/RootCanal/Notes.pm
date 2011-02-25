@@ -4,9 +4,192 @@ use base 'STEDT::RootCanal::Base';
 use Encode;
 use utf8;
 
+sub add : RunMode {
+	my $self = shift;
+	if ($self->param('userprivs') < 16) {
+		$self->header_props(-status => 403);
+		return "User not logged in";
+	}
+	my $dbh = $self->dbh;
+	my $q = $self->query;
+	my ($spec, $id, $ord, $type, $xml) = ($q->param('spec'), $q->param('id'),
+		$q->param('ord'), $q->param('notetype'), markup2xml($q->param('xmlnote')));
+	my $key = $spec eq 'L' ? 'rn' : $spec eq 'E' ? 'tag' : 'id';
+	my $sth = $dbh->prepare("INSERT notes (spec, $key, ord, notetype, xmlnote) VALUES (?,?,?,?,?)");
+	$sth->execute($spec, $id, $ord, $type, $xml);
+
+	my $kind = $spec eq 'L' ? 'lex' : $spec eq 'C' ? 'chap' : # special handling for comparanda
+		$type eq 'F' ? 'comparanda' : 'etyma';
+	my $noteid = $dbh->selectrow_array("SELECT LAST_INSERT_ID()");
+	my $lastmod = $dbh->selectrow_array("SELECT datetime FROM notes WHERE noteid=?", undef, $noteid);
+	$self->header_add('-x-json'=>qq|{"id":"$noteid"}|);
+	my @a; my $i = $q->param('fn_counter')+1;
+	return join "\r", ${$self->tt_process("notes_$kind.tt", {
+		n=>{noteid=>$noteid, type=>$type, lastmod=>$lastmod, 'ord'=>$ord,
+			text=>xml2html($xml, $self, \@a, \$i, $spec eq 'E' ? $id : undef),
+			markup=>xml2markup($xml), num_lines=>guess_num_lines($xml)},
+		fncounter=>$q->param('fn_counter')
+	})}, map {$_->{text}} @a;
+}
+
+sub delete : RunMode {
+	my $self = shift;
+	if ($self->param('userprivs') < 16) {
+		$self->header_props(-status => 403);
+		return "User not logged in";
+	}
+	my $dbh = $self->dbh;
+	my $q = $self->query;
+	my $noteid = $q->param('noteid');
+	my $lastmod = $q->param('mod');
+	my $mod_time = $dbh->selectrow_array("SELECT datetime FROM notes WHERE noteid=?", undef, $noteid);
+	
+	$dbh->do("LOCK TABLE notes WRITE");
+	if ($lastmod eq $mod_time) {
+		my $sql = "DELETE FROM notes WHERE noteid=?";
+		my $sth = $dbh->prepare($sql);
+		$sth->execute($noteid);
+	} else {
+		$self->dbh->do("UNLOCK TABLES");
+		$self->header_props(-status => 409);
+ 		return "Someone else has modified this note (since $lastmod)! The note was not deleted.";
+ 	}
+	$self->dbh->do("UNLOCK TABLES");
+	return '';
+}
+
+sub save : RunMode {
+	my $self = shift;
+	if ($self->param('userprivs') < 16) {
+		$self->header_props(-status => 403);
+		return "User not logged in";
+	}
+	my $dbh = $self->dbh;
+	my $q = $self->query;
+	my $noteid = $q->param('noteid');
+	my $lastmod = $q->param('mod');
+	my $mod_time = $dbh->selectrow_array("SELECT datetime FROM notes WHERE noteid=?", undef, $noteid);
+	my $xml;
+	
+	# check mod time to ensure no one changed it before us
+	$dbh->do("LOCK TABLE notes WRITE");
+	if ($lastmod eq $mod_time) {
+		my $sql = "UPDATE notes SET notetype=?, xmlnote=? WHERE noteid=?";
+		my @args = $q->param('notetype'), markup2xml($q->param('xmlnote'));
+		if ($q->param('id')) {
+			$sql =~ s/ WHERE/, id=? WHERE/;
+			push @args, $q->param('id');
+		}
+		my $sth = $dbh->prepare($sql);
+		$sth->execute(@args, $noteid);
+		($xml, $lastmod) = $dbh->selectrow_array("SELECT xmlnote, datetime FROM notes WHERE noteid=?", undef, $noteid);
+	} else {
+		$self->dbh->do("UNLOCK TABLES");
+		$self->header_props(-status => 409);
+ 		return "Someone else has modified this note! Your changes were not saved.";
+ 	}
+	$self->dbh->do("UNLOCK TABLES");
+	$self->header_add('-x-json'=>qq|{"lastmod":"$lastmod"}|);
+	my @a; my $i = 1;
+	return join("\r", xml2html(decode_utf8($xml), $self, \@a, \$i), map {$_->{text}} @a);
+}
+
+sub reorder : RunMode {
+	my $self = shift;
+	if ($self->param('userprivs') < 16) {
+		$self->header_props(-status => 403);
+		return "User not logged in";
+	}
+	my @ids = map {/(\d+)$/} split /\&/, $self->query->param('ids');
+	# change the order, but don't update the modification time for something so minor.
+	my $sth = $self->dbh->prepare("UPDATE notes SET ord=?, datetime=datetime WHERE noteid=?");
+	my $i = 0;
+	$sth->execute(++$i, $_) foreach @ids;
+	return '';
+}
+
+sub xml2markup {
+	local $_ = $_[0];
+	s|^<par>||;
+	s|</par>$||;
+	s|</par><par>|\n\n|g;
+	s|<br />|\n|g;
+	s|<sub>(.*?)</sub>|[[_$1]]|g;
+	s|<emph>(.*?)</emph>|[[~$1]]|g;
+	s|<strong>(.*?)</strong>|[[\@$1]]|g;
+	s|<gloss>(.*?)</gloss>|[[:$1]]|g;
+	s|<reconstruction>\*(.*?)</reconstruction>|[[*$1]]|g;
+	s|<xref ref="(\d+)">#\1(.*?)</xref>|[[#$1$2]]|g;
+	s|<footnote>(.*?)</footnote>|{{%$1}}|g;
+	s|<hanform>(.*?)</hanform>|[[$1]]|g;
+	s|<latinform>(.*?)</latinform>|[[+$1]]|g;
+	s|<plainlatinform>(.*?)</plainlatinform>|[[$1]]|g;
+	s/&amp;/&/g;
+	s/&lt;/</g;
+	s/&gt;/>/g;
+	s/&apos;/'/g;
+	s/&quot;/"/g;
+	return $_;
+}
+
+sub guess_num_lines {
+	use integer;
+	my $n = length($_[0])/70;
+	return $n < 3 ? 3 : $n;
+}
+
+my $LEFT_BRACKET = encode_utf8('⟦');
+my $RIGHT_BRACKET = encode_utf8('⟧');
+sub markup2xml {
+	my $s = shift;
+	$s =~ s/&/&amp;/g;
+	$s =~ s/</&lt;/g;
+	$s =~ s/>/&gt;/g;
+	$s =~ s/'/&apos;/g;
+	$s =~ s/"/&quot;/g;
+	$s =~ s/(?<!\[)\[([^\[\]]*)\]/$LEFT_BRACKET$1$RIGHT_BRACKET/g;
+		# take out matching single square brackets
+		# note that this only matches a single level
+		# of embedded pairs of single square brackets inside
+		# other square brackets. To match more levels from
+		# the inside out, repeat several times.
+	$s =~ s/\[\[([^\[\]]*?)\]\]/_markup2xml($1)/ge foreach (1..2);
+		# no recursion (embedded square brackets);
+		# if needed eventually, run multiple times
+		#	while ($s =~ s/\[\[([^\[\]]*?)\]\]/_markup2xml($1)/ge) {}
+	$s =~ s/$LEFT_BRACKET/[/go; # restore single square brackets
+	$s =~ s/$RIGHT_BRACKET/]/go;
+	$s =~ s|{{%(.*?)}}|<footnote>$1</footnote>|g;
+	$s =~ s|^[\r\n]+||g;
+	$s =~ s|[\r\n]+$||g;
+	$s =~ s#(\r\n){2,}|\r{2,}|\n{2,}#</par><par>#g;
+	$s =~ s#\r\n|\r|\n#<br />#g;
+	return "<par>$s</par>";
+}
+
+sub _markup2xml {
+	my $s = shift;
+	my ($code, $s2) = $s =~ /^(.)(.*)/;
+	if ($code =~ /[_~:*+@]/) {
+		my %sym2x = qw(_ sub ~ emph : gloss * reconstruction @ strong + latinform);
+		$s2 = $s if $code eq '*';
+		return "<$sym2x{$code}>$s2</$sym2x{$code}>";
+	}
+	if ($code eq '#') {
+		my ($num, $s3) = $s2 =~ /^(\d+)(.*)/;
+		return qq|<xref ref="$num">#$num$s3</xref>|;
+	}
+	my $u = ord decode_utf8($s); ### oops, it hasn't been decoded from utf8 yet
+	if (($u >= 0x3400 && $u <= 0x4dbf) || ($u >= 0x4e00 && $u <= 0x9fff)
+		|| ($u >= 0x20000 && $u <= 0x2a6df)) {
+		return "<hanform>$s</hanform>";
+	}
+	return "<plainlatinform>$s</plainlatinform>";
+}
+
 sub _tag2info {
-	my ($t, $s, $dbh) = @_;
-	my @a = $dbh->selectrow_array("SELECT etyma.protoform,etyma.protogloss FROM etyma WHERE tag=?", undef, $t);
+	my ($t, $s, $c) = @_;
+	my @a = $c->dbh->selectrow_array("SELECT etyma.protoform,etyma.protogloss FROM etyma WHERE tag=?", undef, $t);
 	return "[ERROR! Dead etyma ref #$t!]" unless $a[0];
 	my ($form, $gloss) = map {decode_utf8($_)} @a;
 	$form =~ s/-/‑/g; # non-breaking hyphens
@@ -14,11 +197,12 @@ sub _tag2info {
 	$form =~ s/⪤ /⪤ */g;		# add a star for proto-allofams
 	$form =~ s|(\*\S+)|<b>$1</b>|g; # bold the protoform but not the allofam sign or gloss
 	if ($s) {			# alternative gloss, add it in
-		$s = "$form $s";
+		$s = "$form</a> $s";
 	} else {
-		$s = "$form $gloss"; # put protogloss if no alt given
+		$s = "$form</a> $gloss"; # put protogloss if no alt given
 	}
-	return $s;
+	my $u = $c->query->url(-absolute=>1);
+	return qq|<a href="$u/etymon/$t">#$t $s|;
 }
 
 sub _nonbreak_hyphens {
@@ -33,15 +217,14 @@ qw|GSR GSTC STC HPTB TBRS TSR AHD VSTB TBT HCT LTBA BSOAS CSDPN TIL OED|;
 # returns the note, and an array of footnotes in html
 sub xml2html {
 	local $_ = shift;
-	my ($dbh, $footnotes, $i) = @_; # array ref and an index
+	my ($c, $footnotes, $i, $super_id) = @_; # array ref and ref to footnote number counter
 	s|<par>|<p>|g;
 	s|</par>|</p>|g;
 	s|<emph>|<i>|g;
 	s|</emph>|</i>|g;
 	s|<gloss>(.*?)</gloss>|$1|g;	# no formatting?
 	s|<reconstruction>\*(.*?)</reconstruction>|"<b>*" . _nonbreak_hyphens($1) . "</b>"|ge;
-	s|<xref ref="(\d+)">#\1(.*?)</xref>|_tag2info($1,$2,$dbh)|ge;
-	s|<footnote>(.*?)</footnote>|push @$footnotes, $1; qq(<a href="#foot$$i" id="toof$$i"><sup>) . $$i++ . "</sup></a>"|ge;
+	s|<xref ref="(\d+)">#\1(.*?)</xref>|_tag2info($1,$2,$c)|ge;
 	s|<hanform>(.*?)</hanform>|$1|g;
 	s|<latinform>(.*?)</latinform>|"<b>" . _nonbreak_hyphens($1) . "</b>"|ge;
 	s|<plainlatinform>(.*?)</plainlatinform>|$1|g;
@@ -60,6 +243,7 @@ sub xml2html {
 	s/&lt;-+&gt;/⟷/g; # convert arrows
 	s/< /< /g; # no-break space after "comes from" sign
 	
+	s|<footnote>(.*?)</footnote>|push @$footnotes,{text=>$1,super=>$super_id}; qq(<a href="#foot$$i" id="toof$$i"><sup>) . $$i++ . "</sup></a>"|ge;
 	s/^<p>//; # get rid of surround <p> tags.
 	s|</p>$||;
 	return $_;
@@ -78,7 +262,7 @@ sub notes_for_rn : StartRunmode {
 	my (@dummy, $dummy);
 	for (@$notes) {
 		 my $xml = decode_utf8($_->[0]);
-		 push @notes, xml2html($xml, $self->dbh, \@dummy, \$dummy);
+		 push @notes, xml2html($xml, $self, \@dummy, \$dummy);
 	}
 	return join '<p>', @notes;
 }
@@ -93,20 +277,16 @@ sub etymon : Runmode {
 	$internal_note_search = "AND notetype != 'I' AND notetype != 'O'" unless $INTERNAL_NOTES;
 	my (@etyma, @footnotes);
 	my $footnote_index = 1;
-	my $etyma_for_tag = $self->dbh->selectall_arrayref(
-qq#SELECT e.tag, e.printseq, e.protoform, e.protogloss, e.plg, e.hptbid, e.tag=e.supertag AS is_main
-	FROM `etyma` AS `e` JOIN `etyma` AS `super` ON e.supertag = super.tag
-	WHERE e.supertag=?
-	ORDER BY is_main DESC, e.plgord#, undef, $tag);
+	my $sql = qq#SELECT e.tag, e.printseq, e.protoform, e.protogloss, e.plg, e.hptbid, e.tag=e.supertag AS is_main
+FROM `etyma` AS `e` JOIN `etyma` AS `super` ON e.supertag = super.tag
+WHERE e.supertag=?
+ORDER BY is_main DESC, e.plgord#;
+	my $etyma_for_tag = $self->dbh->selectall_arrayref($sql, undef, $tag);
 	if (!@$etyma_for_tag) {
 		# if it failed the first time, this is probably a mesoroot.
 		# get the mesoroot's supertag and try one more time
 		($tag) = $self->dbh->selectrow_array("SELECT supertag FROM etyma WHERE tag=?", undef, $tag);
-		$etyma_for_tag = $self->dbh->selectall_arrayref(
-qq#SELECT e.tag, e.printseq, e.protoform, e.protogloss, e.plg, e.hptbid, e.tag=e.supertag AS is_main
-	FROM `etyma` AS `e` JOIN `etyma` AS `super` ON e.supertag = super.tag
-	WHERE e.supertag=?
-	ORDER BY is_main DESC, e.plgord#, undef, $tag);
+		$etyma_for_tag = $self->dbh->selectall_arrayref($sql, undef, $tag);
 	}
 	if (!@$etyma_for_tag) { die "no etymon with tag #$tag" }
 
@@ -119,22 +299,25 @@ qq#SELECT e.tag, e.printseq, e.protoform, e.protogloss, e.plg, e.hptbid, e.tag=e
 			= map {decode_utf8($_)} @$_;
 		$e{plg} = $e{plg} eq 'PTB' ? '' : "$e{plg}";
 	
-		$e{protoform} =~ s/⪤} +/⪤} */g;
+		$e{protoform} =~ s/⪤ +/⪤ */g;
 		$e{protoform} =~ s/OR +/OR */g;
-		$e{protoform} =~ s/\\textasciitilde\\ +/~ */g;
+		$e{protoform} =~ s/~ +/~ */g;
 		$e{protoform} =~ s/ = +/ = */g;
 		$e{protoform} = '*' . $e{protoform};
 		
 		# etymon notes
 		$e{notes} = [];
 		my $seen_hptb; # don't generate an HPTB reference if there's a custom HPTB note already
-		foreach (@{$self->dbh->selectall_arrayref("SELECT notetype, xmlnote FROM notes "
+		foreach (@{$self->dbh->selectall_arrayref("SELECT noteid, notetype, datetime, xmlnote, ord FROM notes "
 				. "WHERE tag=$e{tag} AND notetype != 'F' ORDER BY ord")}) {
-			my $notetype = $_->[0];
-			next if $notetype eq 'I' && !$INTERNAL_NOTES; # skip internal notes if we're publishing
+			my $notetype = $_->[1];
+			my $xml = decode_utf8($_->[3]);
+			next if $notetype eq 'I' && !$INTERNAL_NOTES;
 			$seen_hptb = 1 if $notetype eq 'H';
-			push @{$e{notes}}, {type=>$notetype,
-				text=>xml2html(decode_utf8($_->[1]), $self->dbh, \@footnotes, \$footnote_index)};
+			push @{$e{notes}}, { noteid=>$_->[0], type=>$notetype, lastmod=>$_->[2], 'ord'=>$_->[4],
+				text=>xml2html($xml, $self, \@footnotes, \$footnote_index, $_->[0]),
+				markup=>xml2markup($xml), num_lines=>guess_num_lines($xml)
+			};
 		}
 		if ($e{hptbid} && !$seen_hptb) {
 			my $text = "See <i>HPTB</i> ";
@@ -154,7 +337,7 @@ qq#SELECT e.tag, e.printseq, e.protoform, e.protogloss, e.plg, e.hptbid, e.tag=e
 	
 	
 		# do entries
-		my $sql = <<EndOfSQL;
+		my $recs = $self->dbh->selectall_arrayref(<<EndOfSQL);
 SELECT DISTINCT lexicon.rn, lexicon.analysis, languagenames.lgid, lexicon.reflex, lexicon.gloss, lexicon.gfn,
 	languagenames.language, languagegroups.grpid, languagegroups.grpno, languagegroups.grp,
 	languagenames.srcabbr, lexicon.srcid, languagegroups.ord, notes.rn
@@ -166,26 +349,29 @@ AND languagenames.grpid=languagegroups.grpid
 )
 ORDER BY languagegroups.ord, languagenames.lgsort, reflex, languagenames.srcabbr, lexicon.srcid
 EndOfSQL
-		my $recs = $self->dbh->selectall_arrayref($sql);
 		if (@$recs) { # skip if no records
 			for my $rec (@$recs) {
 				$_ = decode_utf8($_) foreach @$rec;
 				if ($rec->[-1]) { # if there are any notes...
 					# only select notes which are generic (empty id) OR those that have specifically been marked as belonging to this etymon/reflex combination
-					my @results = @{$self->dbh->selectall_arrayref("SELECT notetype, xmlnote FROM notes "
+					my @results = @{$self->dbh->selectall_arrayref("SELECT noteid, notetype, datetime, xmlnote, id FROM notes "
 							. "WHERE notes.rn=? AND (`id`=$e{tag} OR `id`='') $internal_note_search ORDER BY ord",
 							undef, $rec->[0])};
 					$rec->[-1] = '';
 					# NB: these are footnotes, and they don't have footnotes inside them!
 					foreach (@results) {
-						my ($notetype, $note) = @$_;
-						$note = xml2html(decode_utf8($note), $self->dbh, \@footnotes, \$footnote_index);
+						my ($noteid, $notetype, $lastmod, $note, $id) = @$_;
+						my $xml = decode_utf8($note);
+						$note = xml2html($xml, $self, \@footnotes, \$footnote_index);
 						if ($notetype eq 'I') {
 							$note =~ s/^/[Internal] <i>/;
 							$note =~ s|$|</i>|;
 						}
 						$note =~ s/^/[Source note] / if $notetype eq 'O';
-						push @footnotes, $note;
+						push @footnotes, {noteid=>$noteid, type=>$notetype, lastmod=>$lastmod,
+							text=>$note, id=>$id, # id is for lex notes specific to particular etyma. editing this field is not yet supported, but this is here as a placeholder for now.
+							markup=>xml2markup($xml), num_lines=>guess_num_lines($xml)
+						};
 						$rec->[-1] .= ' ' . $footnote_index++;
 					}
 				}
@@ -195,15 +381,19 @@ EndOfSQL
 	
 		# Chinese comparanda
 		$e{comparanda} = [];
-		my @comparanda = @{$self->dbh->selectcol_arrayref("SELECT xmlnote FROM notes WHERE tag=$e{tag} AND notetype = 'F'")};
-		for my $note (@comparanda) {
+		my $comparanda = $self->dbh->selectall_arrayref("SELECT noteid, datetime, xmlnote, ord FROM notes WHERE tag=$e{tag} AND notetype = 'F' ORDER BY ord");
+		for my $row (@$comparanda) {
+			my $note = $row->[2];
 			$note = decode_utf8($note);
 #			$note =~ s/(Karlgren|Li|Baxter): /\\hfill $1: /g;
 			$note =~ s/ Citations:/\n\nCitations:/g;
 			$note =~ s/ Correspondences:/\n\nCorrespondences:/g;
 #			$note =~ s/(\[ZJH\])/\\hfill $1/g;
 #			$note =~ s/(\[JAM\])/\\hfill $1/g;
-			push @{$e{comparanda}}, xml2html(decode_utf8($note), $self->dbh, \@footnotes, \$footnote_index);
+			push @{$e{comparanda}}, { noteid=>$row->[0], lastmod=>$row->[1], 'ord'=>$_->[3],
+				text=>xml2html($note, $self, \@footnotes, \$footnote_index, $row->[0]),
+				markup=>xml2markup($note), num_lines=>guess_num_lines($note)
+			};
 		}
 	}
 

@@ -51,7 +51,7 @@ var make_draggable_id = function (obj, scrollElement) { // scrollElement is the 
 };
 
 function show_notes(rn) {
-	new Ajax.Updater('notes' + rn, baseRef + 'notes/' + rn, {
+	new Ajax.Updater('notes' + rn, baseRef + 'notes/l/' + rn, {
 		onFailure: function (transport){ alert('Error: ' + transport.responseText); }
 	});
 };
@@ -560,19 +560,6 @@ var setup = { // in the form setup.[tablename].[fieldname]
 					+ 'onclick="show_notes(' + key + '); return false;">'
 					+ v + '&nbsp;note' + (v == 1 ? '' : 's')
 					+ '</a>' + '</span>';
-			}
-		},
-		'notes.rn' : {
-			// used in the etymon view
-			label: 'notes',
-			noedit: true,
-			size: 80,
-			transform : function (v) {
-				if (v === '') return '';
-				var a = $A(v.match(/\d+/g)).map(function (s) {
-					return '<a href="#foot' + s + '" id="toof' + s + '">' + s + '</a>';
-				});
-				return a.join(' ');
 			}
 		},
 		'languagegroups.ord' : {

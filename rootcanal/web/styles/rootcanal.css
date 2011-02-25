@@ -4,8 +4,9 @@
 	div#lexicon { position: static; }
 	div#dragger { display: none; }
 	div#info { display:none; }
-	form#etyma_search { display:none; }
-	form#lexicon_search { display:none; }
+	form, .edit { display:none; }
+/*	form#etyma_search { display:none; }
+	form#lexicon_search { display:none; } */
 }
 
 @media screen { 
@@ -173,3 +174,16 @@ div.move-handle {
 
 .lggroup { background-color : #E6E6E6; }
 .lggroup td { font-weight: bold; }
+
+#addnoteform
+{
+	position: fixed;
+	top: 20%;
+	left: 10%;
+	width: 80%;
+	height: 60%;
+	background-color: white;
+	border: 5pt solid black;
+	padding: 5pt;
+	z-index:1;
+}

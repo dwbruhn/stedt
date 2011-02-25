@@ -195,7 +195,10 @@ sub single_record : Runmode {
 
 sub makesubroot : Runmode {
 	my $self = shift;
-	return $self->tt_process("admin/https_warning.tt") unless $self->param('userprivs') >= 16;
+	if ($self->param('userprivs') < 16) {
+		$self->header_props(-status => 403);
+		return "User not logged in";
+	}
 	my $tag = $self->param('src');
 	my $dst = $self->param('dst');
 	my $supertag = $self->param('srcsuper');
