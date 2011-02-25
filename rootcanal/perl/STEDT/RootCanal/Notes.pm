@@ -386,8 +386,8 @@ EndOfSQL
 			my $note = $row->[2];
 			$note = decode_utf8($note);
 #			$note =~ s/(Karlgren|Li|Baxter): /\\hfill $1: /g;
-			$note =~ s/ Citations:/\n\nCitations:/g;
-			$note =~ s/ Correspondences:/\n\nCorrespondences:/g;
+			$note =~ s/ Citations:/<br>Citations:/g;
+			$note =~ s/ Correspondences:/<br>Correspondences:/g;
 #			$note =~ s/(\[ZJH\])/\\hfill $1/g;
 #			$note =~ s/(\[JAM\])/\\hfill $1/g;
 			push @{$e{comparanda}}, { noteid=>$row->[0], lastmod=>$row->[1], 'ord'=>$_->[3],

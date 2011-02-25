@@ -176,7 +176,7 @@ function showaddform (spec, id) { // C, E, L; F for comparanda (special handling
 					f.up('body').insert(note);
 					++footnote_counter;
 					var cell = $(id).childElements().last();
-					var celltext = cell.innerHTML
+					var celltext = cell.innerHTML;
 					cell.innerHTML = celltext + ' <a href="#foot' + footnote_counter + '" id="toof' + footnote_counter + '">' + footnote_counter + '</a>';
 				}
 				// attach javascript
