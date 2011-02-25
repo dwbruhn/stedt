@@ -72,6 +72,7 @@
 [% END -%]
 [% END -%]
 
+[% IF user -%]
 <form id="addnoteform" method="post" action="[% self_url %]/notes/add" style="display:none">
 <div class="right">
 <p>notetype: <select name="notetype"></select></p>
@@ -100,6 +101,7 @@
 {{%footnote}}
 </pre>
 </form>
+[% END -%]
 
 <script>
 var footnote_counter = [% footnotes.size %];
