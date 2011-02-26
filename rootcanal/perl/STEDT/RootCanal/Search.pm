@@ -83,7 +83,7 @@ sub group : Runmode {
 sub searchresults_from_querystring {
 	my ($self, $s, $tbl) = @_;
 	my $t = $self->load_table_module($tbl);
-	my $query = new CGI;
+	my $query = $self->query->new; # for some reason faster than saying "new CGI"? disk was thrashing.
 
 	# figure out the table and the search terms
 	if ($tbl eq 'etyma') {

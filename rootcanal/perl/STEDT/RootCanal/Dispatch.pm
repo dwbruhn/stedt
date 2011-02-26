@@ -18,6 +18,8 @@ sub dispatch_args {
 			'add/:tbl'		  => { app=>'Edit', rm => 'add' },
 			'json_lg/:srcabbr'=> { app=>'Edit', rm => 'json_lg' },
 			'makesubroot/:src/:dst/:srcsuper'=> { app=>'Edit', rm => 'makesubroot' },
+			'chapters'		  => { app=>'Notes', rm => 'chapter_browser' },
+			'chap/:vol/:chap' => { app=>'Notes', rm => 'chapter' },
 			':app/:rm'        => { },
 			':app'        	  => { },
 		],

@@ -60,6 +60,7 @@
 [% END # if comparanda -%]
 [% END # foreach etyma %]
 
+<br>
 [% fncounter = 0 -%]
 [% FOREACH n IN footnotes -%]
 [% IF n.super || !user %]
@@ -109,5 +110,6 @@ var footnote_counter = [% footnotes.size %];
 num_tables=[% lexicon_id %];
 </script>
 <script src="[% self_base %]js/etymon.js"></script>
+<script src="[% self_base %]js/notes.js"></script>
 </body>
 </html>

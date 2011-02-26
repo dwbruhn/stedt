@@ -1,0 +1,89 @@
+﻿[% PROCESS header.tt title="STEDT Chapter " _ chap -%]
+<h1>[% chap %] [% chaptitle %]</h1>
+[% IF user -%]
+<div id="allnotes" class="container">
+<p class="edit">
+<label><input type="checkbox" value="off" class="reordcheckbox"[% IF notes.size < 2 %] disabled[% END %]>Drag to reorder</label>
+<a href="#" onclick="showaddform('C','[% chap %]'); return false;">Add a note...</a>
+</p>
+[% FOREACH n IN notes -%]
+[% PROCESS notes_chapter.tt -%]
+[% END -%]
+</div>
+[% ELSE -%]
+[% FOREACH n IN notes -%]
+[% IF n.type == 'G' -%]
+<div><img src="[% self_base %]gif/[% n.noteid %].gif"></div>
+[% ELSE -%]
+<p>[% n.text %]</p>
+[% END # notetype -%]
+[% END # foreach -%]
+[% END # if user -%]
+
+[% IF result.data.size -%]
+<h2>Etyma in this chapter</h2>
+<table id="etyma_resulttable" class="resizable" width="100%" style="table-layout:fixed;">
+<thead><tr>
+[%- FOREACH col IN result.fields %]
+<th id="[% col %]">
+[%- col.replace('^.*\.','') %]
+</th>
+[%- END %]
+</tr></thead>
+<tbody>
+[% FOREACH row IN result.data -%]
+<tr>
+[%- FOREACH s IN row -%]
+<td>[% s | html %]</td>
+[%- END -%]
+</tr>
+[% END -%]
+</tbody>
+</table>
+[% END -%]
+
+<br>
+[% FOREACH n IN footnotes -%]
+<div class="footnote[% IF n.super %] fnote-[% n.super %][% END %]" id="foot[% loop.count %]">
+<a href="#toof[% loop.count %]">^ [% loop.count %].</a> [% n.text %]</div>
+[% END -%]
+
+[% IF user -%]
+<form id="addnoteform" method="post" action="[% self_url %]/notes/add" style="display:none">
+<div class="right">
+<p>notetype: <select name="notetype"></select></p>
+<textarea name="xmlnote"  rows="15" cols="50"></textarea>
+<br>
+<input type="submit" name="btn" value="Add Note">
+<input type="button" value="Cancel" onclick="$('addnoteform').hide()">
+</div>
+<input type="hidden" name="spec" value="C">
+<input type="hidden" name="id">
+<input type="hidden" name="ord">
+<input type="hidden" name="fn_counter">
+<h1>New Note</h1>
+<p>The following markup codes will be converted to XML tags:</p>
+<pre>&lt;return&gt;&lt;return&gt; - paragraph break
+&lt;return&gt; - line break
+[[_subscript]]
+[[~emphasis]] (italic)
+[[@strong]] (bold)
+[[:gloss]] (deprecated)
+[[*reconstruction]]
+[[#76 ALT GLOSS]] (tag reference)
+[[漢字]]
+[[stɛt ⪤ fɑnt]] (plain)
+[[+stɛt ⪤ fɑnt]] (bold)
+{{%footnote}}
+</pre>
+</form>
+[% END -%]
+
+<script src="[% self_base %]js/tbl/etyma.js"></script>
+<script>
+var footnote_counter = [% footnotes.size %];
+TableKit.Raw.init('etyma_resulttable', 'etyma'[% IF user %], '[% self_url %]/update'[% END %]);
+</script>
+<script src="[% self_base %]js/notes.js"></script>
+</body>
+</html>

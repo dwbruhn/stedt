@@ -1,0 +1,36 @@
+<div class="reord" id="reorddiv_[% n.noteid %]">
+<form id="form[% n.noteid %]" class="noteform right">
+<input type="hidden" name="noteid" value="[% n.noteid %]">
+<input type="hidden" name="mod" value="[% n.lastmod %]">
+<input type="hidden" name="ord" value="[% n.ord %]">
+notetype:<select name="notetype">
+<option [% IF n.type=='T' %]selected="selected" [% END %]value="T">Text</option>
+<option [% IF n.type=='I' %]selected="selected" [% END %]value="I">Internal</option>
+<option [% IF n.type=='N' %]selected="selected" [% END %]value="N">New</option>
+<option [% IF n.type=='G' %]selected="selected" [% END %]value="G">Graphic</option>
+<option [% IF n.type=='F' %]selected="selected" [% END %]value="F">Final</option>
+<option [% IF n.type=='O' %]selected="selected" [% END %]value="O">O??</option>
+</select>
+last modified: <span id="lastmod[% n.noteid %]">[% n.lastmod %]</span>
+<br>
+[% IF n.type == 'G' -%]
+<p>[Link to graphics file [% n.noteid %].gif.<br>
+Delete the file if you delete this note.]</p>
+[% ELSE -%]
+<textarea name="xmlnote" rows="[% n.num_lines %]" cols="54">
+[%- n.markup -%]
+</textarea>
+<br>
+<input type="submit" value="Save Note">
+[% END -%]
+<input type="button" name="delete_btn" value="Delete Note">
+</form>
+<div id="preview[% n.noteid %]" class="notepreview">
+[% IF n.type == 'G' -%]
+<div><img src="[% self_base %]gif/[% n.noteid %].gif"></div>
+[% ELSE -%]
+[% IF n.type == 'I' %][Internal Note:] <i>[% END -%]
+[% n.text -%]
+[% IF n.type == 'I' %]</i>[% END -%]
+[% END -%]
+</div><hr class="edit" style="clear:right"></div>

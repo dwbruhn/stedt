@@ -73,7 +73,7 @@ $t->search_form_items(
 $t->wheres(
 	'etyma.tag' => sub {my ($k,$v) = @_; '(' . STEDT::Table::where_int($k,$v) . ' OR ' . STEDT::Table::where_int('etyma.supertag',$v) . ')'},
 	'etyma.plg'	=> sub {my ($k,$v) = @_; $v = '' if $v eq '0'; "$k LIKE '$v'"},
-	'etyma.chapter' => sub { my ($k,$v) = @_; "$k LIKE '$v'" },
+	'etyma.chapter' => sub { my ($k,$v) = @_; $v eq '0' ? "$k=''" : "$k LIKE '$v'" },
 	'etyma.protogloss'	=> 'word',
 	'etyma.printseq'=> sub { my ($k,$v) = @_; "$k RLIKE '^${v}[abc]*\$'" },
 	'etyma.hptbid' => sub {

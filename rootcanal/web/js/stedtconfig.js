@@ -373,7 +373,7 @@ var setup = { // in the form setup.[tablename].[fieldname]
 		},
 		'etyma.chapter' : {
 			label: 'ch.',
-			size: 40
+			size: 70
 		},
 		'etyma.protoform' : {
 			label: 'protoform',

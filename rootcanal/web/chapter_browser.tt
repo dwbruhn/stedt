@@ -1,0 +1,37 @@
+﻿[% PROCESS header.tt title="STEDT Chapter Browser" -%]
+
+<h1>Chapters</h1>
+
+<table id="ch" width=100%>
+<tr><th>Ch.</th><th>Title</th><th>[% IF user %]public[% ELSE %]num. etyma[% END %]</th>
+[%- IF user %]<th>etyma</th>[% END %]<th>notes</th><th>flowchart?</th><td width="80%">[% # dummy to expand the table width %]</td></tr>
+[% FOREACH r IN ch -%]
+<tr><td>[% r.0 %]</td><td>[% r.1 %]</td><td>[% r.4 ? (r.2 / r.4) || '' : r.2 || '' # because of the way the query is constructed, you have to divide by the number of notes to get the actual number of public etyma %]</td>
+[%- IF user %]<td>[% IF r.3 %]<a href="[% self_url %]/edit/etyma?etyma.chapter=[% r.0 | uri %]">[% r.3 %][% END %]</td>[% END -%]
+<td><a href="[% self_url %]/chap/1/[% r.0 | uri %]">[% IF r.4 %][% r.4 %] note[% r.4 == 1 ? '' : 's' %][% ELSE %]-[% END %]</a></td><td>[% IF r.5 %]✓[% END %]</td></tr>
+[% END -%]
+</table>
+
+<h2>Undefined chapters:</h2>
+<table id="e">
+<tr><th>Ch.</th><th>[% IF user %]public[% ELSE %]num. etyma[% END %]</th>
+[%- IF user %]<th>etyma</th>[% END %]<td width="80%"></td></tr>
+[% FOREACH r IN e -%]
+<tr><td>[% r.0 %]</td><td>[% r.1 %]</td>
+[%- IF user %]<td><a href="[% self_url %]/edit/etyma?etyma.chapter=[% r.0 | uri %]">[% r.2 %] etym[% r.2 == 1 ? 'on' : 'a' %]</a></td>[% END %]</tr>
+[% END -%]
+</table>
+
+[% IF user -%]
+<h2>Orphaned notes:</h2>
+[% FOREACH r IN n -%]
+<p>[% r.0 %]: <a href="[% self_url %]/chap/1/[% r.0 | uri %]">[% r.1 %] note(s)</a>;
+[% r.2 %] etyma</p>
+[% END -%]
+[% END -%]
+
+<script>
+</script>
+[% #<script src="[% self_base % ]js/etymon.js"></script> -%]
+</body>
+</html>

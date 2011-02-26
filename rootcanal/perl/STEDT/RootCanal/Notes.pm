@@ -4,6 +4,75 @@ use base 'STEDT::RootCanal::Base';
 use Encode;
 use utf8;
 
+sub chapter_browser : RunMode {
+	my $self = shift;
+	my $public = '';
+	my $public_ch = '';
+	if ($self->param('userprivs') < 16) {
+		$public = "AND etyma.public=1";
+		$public_ch = 'HAVING num_public OR public_notes';
+	}
+	# from the chapters table
+	my $chapters = $self->dbh->selectall_arrayref(<<SQL);
+SELECT chapters.chapter, chapters.chaptertitle, SUM(etyma.public) AS num_public,
+	COUNT(DISTINCT etyma.tag), COUNT(DISTINCT notes.noteid), MAX(notes.notetype = 'G'), MAX(notes.notetype != 'I') as public_notes
+FROM chapters LEFT JOIN etyma USING (chapter) LEFT JOIN notes ON (notes.id=chapters.chapter)
+GROUP BY 1 $public_ch ORDER BY 1
+SQL
+	# chapters that appear in etyma but not in chapters table
+	my $e_ghost_chaps = $self->dbh->selectall_arrayref(<<SQL);
+SELECT etyma.chapter, SUM(etyma.public), COUNT(*)
+FROM etyma NATURAL LEFT JOIN chapters
+WHERE chapter != ''  $public AND chapters.chaptertitle IS NULL GROUP BY 1 ORDER BY 1
+SQL
+	# chapters that appear in notes but not in chapters table
+	my $n_ghost_chaps = $self->dbh->selectall_arrayref(<<SQL);
+SELECT notes.id, COUNT(notes.noteid), COUNT(etyma.tag)
+FROM notes LEFT JOIN chapters ON (notes.id=chapters.chapter) LEFT JOIN etyma USING (chapter)
+WHERE notes.spec='C' AND chapters.chaptertitle IS NULL GROUP BY 1 ORDER BY 1
+SQL
+	return $self->tt_process('chapter_browser.tt', {
+		ch=>$chapters, e=>$e_ghost_chaps, n=>$n_ghost_chaps
+	});
+}
+
+sub chapter : RunMode {
+	my $self = shift;
+	my $tag = $self->param('tag');
+	my $chap = $self->param('chap');
+	my $title = $self->dbh->selectrow_array("SELECT chaptertitle FROM chapters WHERE chapter=?", undef, $chap);
+	$title ||= '[chapter does not exist in chapters table!]';
+	
+	my $INTERNAL_NOTES = $self->param('userprivs') >= 16;
+	my $internal_note_search = '';
+	$internal_note_search = "AND notetype != 'I'" unless $INTERNAL_NOTES;
+	my (@notes, @footnotes);
+	my $footnote_index = 1;
+	foreach (@{$self->dbh->selectall_arrayref("SELECT noteid, notetype, datetime, xmlnote, ord FROM notes "
+			. "WHERE spec='C' AND id=? $internal_note_search ORDER BY ord", undef, $chap)}) {
+		my $xml = decode_utf8($_->[3]);
+		push @notes, { noteid=>$_->[0], type=>$_->[1], lastmod=>$_->[2], 'ord'=>$_->[4],
+			text=>xml2html($xml, $self, \@footnotes, \$footnote_index, $_->[0]),
+			markup=>xml2markup($xml), num_lines=>guess_num_lines($xml)
+		};
+	}
+	
+	my $t = $self->load_table_module('etyma');
+	my $q = $self->query->new;
+	$q->param('etyma.chapter'=>$chap);
+	my $result = $t->search($q, $self->param('userprivs'));
+	for my $row (@{$result->{data}}) {
+		map {$_ = decode_utf8($_)} @$row; # apparently because we decode_utf8 on some stuff above, we have to do it here too. Compare with Edit/table and edit.tt, where it looks like it's going in binary mode?
+	}
+	
+	return $self->tt_process("chapter.tt", {
+		chap => $chap, chaptitle=>$title,
+		notes  => \@notes,
+		footnotes => \@footnotes,
+		result => $result
+	});
+}
+
 sub add : RunMode {
 	my $self = shift;
 	if ($self->param('userprivs') < 16) {
@@ -18,7 +87,7 @@ sub add : RunMode {
 	my $sth = $dbh->prepare("INSERT notes (spec, $key, ord, notetype, xmlnote) VALUES (?,?,?,?,?)");
 	$sth->execute($spec, $id, $ord, $type, $xml);
 
-	my $kind = $spec eq 'L' ? 'lex' : $spec eq 'C' ? 'chap' : # special handling for comparanda
+	my $kind = $spec eq 'L' ? 'lex' : $spec eq 'C' ? 'chapter' : # special handling for comparanda
 		$type eq 'F' ? 'comparanda' : 'etyma';
 	my $noteid = $dbh->selectrow_array("SELECT LAST_INSERT_ID()");
 	my $lastmod = $dbh->selectrow_array("SELECT datetime FROM notes WHERE noteid=?", undef, $noteid);
@@ -244,8 +313,8 @@ sub xml2html {
 	s/< /< /g; # no-break space after "comes from" sign
 	
 	s|<footnote>(.*?)</footnote>|push @$footnotes,{text=>$1,super=>$super_id}; qq(<a href="#foot$$i" id="toof$$i"><sup>) . $$i++ . "</sup></a>"|ge;
-	s/^<p>//; # get rid of surround <p> tags.
-	s|</p>$||;
+	s/^<p>//; # get rid of the first pair of (not the surrounding) <p> tags.
+	s|</p>||;
 	return $_;
 }
 
@@ -402,8 +471,7 @@ EndOfSQL
 		fields => ['lexicon.rn', 'lexicon.analysis', 'languagenames.lgid', 'lexicon.reflex', 'lexicon.gloss', 'lexicon.gfn',
 			'languagenames.language', 'languagegroups.grpid', 'languagegroups.grpno', 'languagegroups.grp',
 			'languagenames.srcabbr', 'lexicon.srcid', 'languagegroups.ord', 'notes.rn'],
-		footnotes => \@footnotes,
-		internal_notes => $INTERNAL_NOTES,
+		footnotes => \@footnotes
 	});
 	# @etyma : [
 	# 	{
