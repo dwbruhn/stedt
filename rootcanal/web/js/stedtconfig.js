@@ -54,6 +54,7 @@ function show_notes(rn) {
 	new Ajax.Updater('notes' + rn, baseRef + 'notes/l/' + rn, {
 		onFailure: function (transport){ alert('Error: ' + transport.responseText); }
 	});
+	return false;
 };
 
 
@@ -175,6 +176,7 @@ function show_supporting_forms(tag) {
 		onSuccess: function (transport,json) { ajax_make_table(transport,json); show_cognates(tag); },
 		onFailure: function (transport){ alert('Error: ' + transport.responseText); }
 	});
+	return false;
 };
 
 function SylStation() {
@@ -309,7 +311,6 @@ function show_tag(tag,loc) {
 };
 
 // maybe better to return a fn, not a string, for transforms
-// and make a helper function to make links... if editable, onclick=dontedit()?
 var setup = { // in the form setup.[tablename].[fieldname]
 	etyma : {
 		_key: 'etyma.tag',   // maybe send it from the server?
@@ -367,7 +368,7 @@ var setup = { // in the form setup.[tablename].[fieldname]
 			size: 50,
 			transform: function (v,key) {
 				 return v != 0
-				 	? '<a href="#" onclick="show_supporting_forms(' + key + '); return false;">' + v + '&nbsp;r\'s</a>'
+				 	? '<a href="#" onclick="show_supporting_forms(' + key + ')">' + v + '&nbsp;r\'s</a>'
 				 	: v + '&nbsp;r\'s';
 			}
 		},
@@ -403,7 +404,7 @@ var setup = { // in the form setup.[tablename].[fieldname]
 				if (v === '') return '';
 				v = v.replace(/, */g,', ');
 				return '<a href="hptb.pl?submit=Search&hptbid=' + v
-					+ '" target="hptbwindow" onclick="dontedit()">' + v + '</a>';
+					+ '" target="hptbwindow">' + v + '</a>';
 			}
 		},
 		'num_notes' : {
@@ -491,7 +492,7 @@ var setup = { // in the form setup.[tablename].[fieldname]
 // 							+ '" onclick="'
 // //							+ 'alert(event.element().cumulativeScrollOffset());'
 // 							+ 'show_root(' + tags[i]  // + ', findPos(event.element())
-// 							+ '); event.stop(); return false;"'
+// 							+ '); return false;"'
 // 							+ '" class="r' + tags[i] + '">'
 // 							+ s + '</a>' + delim
 						: '<span class="r' + tags[i] + '">' + s + '</span>' + delim;
@@ -556,10 +557,10 @@ var setup = { // in the form setup.[tablename].[fieldname]
 			size: 200,
 			transform: function (v,key) {
 				if (v == 0) return '';
-				return '<span id="notes' + key +  '">' + '<a href="#" '
-					+ 'onclick="show_notes(' + key + '); return false;">'
+				return '<span id="notes' + key +  '"><a href="#" '
+					+ 'onclick="show_notes(' + key + ')">'
 					+ v + '&nbsp;note' + (v == 1 ? '' : 's')
-					+ '</a>' + '</span>';
+					+ '</a></span>';
 			}
 		},
 		'languagegroups.ord' : {

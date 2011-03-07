@@ -22,7 +22,7 @@
 <div align="center">[% # search div %]
 <form id="etyma_search" method="post">
 Search etyma: <input name="s" type="text" size="50" id="etyma_searchinput" ><input name="btn" type="submit" value="Search">
-[%- IF c.param('userprivs') >= 16 %]<a href="#" onclick="show_advanced_search('etyma'); return false;">Advanced Search</a>[% END %]
+[%- IF c.param('userprivs') >= 16 %]<a href="#" onclick="show_advanced_search('etyma')">Advanced Search</a>[% END %]
 </form>
 </div>
 <div id="etyma_results"></div>

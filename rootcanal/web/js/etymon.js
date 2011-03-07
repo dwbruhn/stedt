@@ -12,7 +12,7 @@ setup['lexicon']['notes.rn'] = {
 	}
 };
 for (var i = 1; i < num_tables; i++) {
-	TableKit.Raw.init('lexicon' + i, 'lexicon', stedtuserprivs >= 16 ? '[% self_url %]/update' : null);
+	TableKit.Raw.init('lexicon' + i, 'lexicon', stedtuserprivs >= 16 ? (baseRef+'update') : null);
 	TableKit.Rows.stripe('lexicon' + i);
 }
 
@@ -45,8 +45,8 @@ for (var i = 1; i < num_tables; i++) {
 
 $$('.lexadd').each(function (a) {
 	var id = $(a).up('tr').id;
-	a.onclick = function (e) {
+	a.onclick = function () {
 		showaddform('L',id);
-		e.stop();
+		return false;
 	};
 });

@@ -49,6 +49,7 @@ function show_advanced_search(tbl) {
 		r.appendChild(c);
 	});
 	result_table.parentNode.insertBefore(t, result_table);
+	return false;
 };
 
 document.observe("dom:loaded", stedtedit);

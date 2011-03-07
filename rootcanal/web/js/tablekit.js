@@ -830,6 +830,7 @@ TableKit.Editable = {
 	},
 	_editCell : function(e) {
 		e = TableKit.e(e);
+		if (Event.findElement(e,'a')) return; // don't edit if clicking on a link
 		var cell = Event.findElement(e,'td');
 		if(cell) {
 			TableKit.Editable.editCell(null, cell, null, e);
@@ -949,8 +950,8 @@ TableKit.Editable.CellEditor.prototype = {
 							} else {
 								this._submit(event);
 							}
-							if (cell.up('tr').next()) { // only if there's another row...
-								event.stop();
+							if (cell.up('tr').next() && cell.up('tr').next().id) { // only if there's another row..., and the row looks like it's operable...
+								Event.stop(event); // otherwise the return gets typed into the form
 								var table = cell.up('table');
 								var colnum = TableKit.getCellIndex(cell);
 								var head = $(TableKit.getHeaderCells(table, cell)[colnum]);

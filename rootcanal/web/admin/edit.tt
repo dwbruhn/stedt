@@ -97,11 +97,6 @@ var scrollEnd = function() {
 	if (document.body.scrollHeight) { window.scrollTo(0, document.body.scrollHeight); 
 	} else if (screen.height) { window.scrollTo(0, screen.height); } // IE5 
 }
-var dontedit = function(e) {
-	if (!e) var e = window.event;
-	e.cancelBubble = true; if (e.stopPropagation) e.stopPropagation();
-	return true;
-};
 var add_record = function () { new Ajax.Request('[% self_url %]/add/[% t.table %]', {
 	parameters: $('add_form').serialize(true),
     onSuccess: function (transport,json){

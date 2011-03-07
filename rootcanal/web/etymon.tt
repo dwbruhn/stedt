@@ -9,7 +9,7 @@
 <div id="allnotes[% e.tag %]" class="container">
 <p class="edit">
 <label><input type="checkbox" value="off" class="reordcheckbox"[% IF e.notes.size < 2 %] disabled[% END %]>Drag to reorder</label>
-<a href="#" onclick="showaddform('E',[% e.tag %]); return false;">Add a note...</a>
+<a href="#" onclick="showaddform('E',[% e.tag %])">Add a note...</a>
 </p>
 [% FOREACH n IN e.notes -%]
 [% PROCESS notes_etyma.tt -%]
@@ -47,7 +47,7 @@
 <div id="allcomparanda[% e.tag %]" class="container">
 <p class="edit">
 <label><input type="checkbox" value="off" class="reordcheckbox"[% IF e.comparanda.size < 2 %] disabled[% END %]>Drag to reorder</label>
-<a href="#" onclick="showaddform('F',[% e.tag %]); return false;">Add a note...</a>
+<a href="#" onclick="showaddform('F',[% e.tag %])">Add a note...</a>
 </p>
 [% FOREACH n IN e.comparanda -%]
 [% PROCESS notes_comparanda.tt -%]

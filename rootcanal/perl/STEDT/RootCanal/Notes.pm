@@ -60,6 +60,7 @@ sub chapter : RunMode {
 	my $t = $self->load_table_module('etyma');
 	my $q = $self->query->new;
 	$q->param('etyma.chapter'=>$chap);
+	$q->param('etyma.public'=>1) if $self->param('userprivs') < 16;
 	my $result = $t->search($q, $self->param('userprivs'));
 	for my $row (@{$result->{data}}) {
 		map {$_ = decode_utf8($_)} @$row; # apparently because we decode_utf8 on some stuff above, we have to do it here too. Compare with Edit/table and edit.tt, where it looks like it's going in binary mode?

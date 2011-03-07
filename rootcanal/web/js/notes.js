@@ -30,7 +30,7 @@ function init_note_form(f) {
 				alert(t.responseText);
 			}
 		});
-		e.stop();
+		Event.stop(e);
 	};
 	f.delete_btn.onclick = function () {
 		if (!confirm('Are you sure you want to delete the selected records?'))
@@ -65,8 +65,10 @@ $$('.reordcheckbox').each(function (c) {
 					onFailure: function(t){ alert('Error: ' + t.responseText) }
 				});
 			}});
+			$$('#' + container.id + ' form').invoke('hide');
 		} else {
 			Sortable.destroy(container.id);
+			$$('#' + container.id + ' form').invoke('show');
 		}
 	};
 });
@@ -83,16 +85,21 @@ function showaddform (spec, id) { // C, E, L; F for comparanda (special handling
 	// set id (and spec F -> E)
 	if (spec === 'E') {
 		container = $('allnotes' + id);
-		f.ord.value = +$$('#allnotes' + id + ' .reord').last().down('form').ord.value+1;
 	} else if (spec === 'F') {
 		container = $('allcomparanda' + id);
-		f.ord.value = +$$('#allcomparanda' + id + ' .reord').last().down('form').ord.value+1;
 		spec = 'E';
 	} else if (spec === 'C') {
 		container = $('allnotes');
-		f.ord.value = +$$('#allnotes .reord').last().down('form').ord.value+1;
-	} else {
+	} else { // lexicon note
 		f.ord.value = 1;
+	}
+	if (container) {
+		var existing_notes = $$('#' + container.id + ' .reord');
+		if (existing_notes.size()) {
+			f.ord.value = +existing_notes.last().down('form').ord.value+1;
+		} else { // there are no existing notes; the first note's ord should be 1
+			f.ord.value = 1;
+		}
 	}
 	// set spec, id
 	f.spec.value = spec;
@@ -147,6 +154,7 @@ function showaddform (spec, id) { // C, E, L; F for comparanda (special handling
 				alert(t.responseText);
 			}
 		});
-		e.stop();
+		Event.stop(e);
 	};
+	return false;
 };
