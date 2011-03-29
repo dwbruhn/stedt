@@ -1,4 +1,5 @@
 import sys
+import time
 import csv
 import codecs
 
@@ -14,6 +15,8 @@ def mmss2sec(str):
     return "%6.4f" % (float(int(m) * 60) + float(s) / 60.000)
 
 def getCatalog(catalogfile):
+    print '<h1>Lahu Texts</h1>'
+    print '<p><i>as of',time.strftime('%m-%d-%Y %H:%M:%S'),'</i></p>'
     print '<script type="text/javascript" src="http://mediaplayer.yahoo.com/js"></script>';
     print "<table>"
     try:
@@ -30,7 +33,8 @@ def getCatalog(catalogfile):
             
             link[7] = href
            
-            print "<td>".join(link)
+            #print "<td>".join(link)
+            print "<td>".join(link[2:10])
             print "</tr>"
     except:
         print 'could not process catalog file',catalogfile
