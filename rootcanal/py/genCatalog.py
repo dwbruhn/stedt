@@ -24,17 +24,18 @@ def getCatalog(catalogfile):
         for row,link in enumerate(clog):
             print "<tr><td>"
             fmtstr = '<a target="_sound" href="http://stedt.berkeley.edu/~stedt-cgi/mediacut.pl?file=%s.mp3&start=%s&end=%s&suffix=.mp3">%s</a>'
-            href = fmtstr % (link[2],mmss2sec(link[3]),mmss2sec(link[4]),link[7])
+            href = fmtstr % (link[3],mmss2sec(link[4]),mmss2sec(link[5]),link[8])
             
             #fmtstr = '<td><b>%s</b><td><embed type="application/x-shockwave-flash" flashvars="audioUrl=http://localhost/cgi-bin/mediacut.pl?file=%s.mp3&start=%s&end=%s" src="http://www.google.com/reader/ui/3523697345-audio-player.swf" width="200" height="27" quality="best"></embed>'
             
             #fmtstr = '<td><b>%s</b><td><embed target="_new" name="plugin" type="audio/mpeg" src="http://localhost/cgi-bin/mediacut.pl?file=%s.mp3&start=%s&end=%s"/>'
             #href = fmtstr % (link[7],link[2],mmss2sec(link[3]),mmss2sec(link[4]))
-            
-            link[7] = href
+           
+            if row != 0:
+                link[8] = href
            
             #print "<td>".join(link)
-            print "<td>".join(link[2:10])
+            print "<td>".join(link[0:1]+link[3:11])
             print "</tr>"
     except:
         print 'could not process catalog file',catalogfile
