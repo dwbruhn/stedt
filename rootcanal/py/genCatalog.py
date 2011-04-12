@@ -12,7 +12,7 @@ def mmss2sec(str):
     except:
         return str
     
-    return "%6.4f" % (float(int(m) * 60) + float(s) / 60.000)
+    return "%6.4f" % ( float(int(m) * 60) + float(s) )
 
 def getCatalog(catalogfile):
     print '<h1>Lahu Texts</h1>'
@@ -35,7 +35,7 @@ def getCatalog(catalogfile):
                 link[8] = href
            
             #print "<td>".join(link)
-            print "<td>".join(link[0:1]+link[3:11])
+            print "<td>".join(link[0:1]+link[3:13])
             print "</tr>"
     except:
         print 'could not process catalog file',catalogfile
