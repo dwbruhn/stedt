@@ -17,7 +17,8 @@ def mmss2sec(str):
 def getCatalog(catalogfile):
     print '<h1>Lahu Texts</h1>'
     print '<p><i>as of',time.strftime('%m-%d-%Y %H:%M:%S'),'</i></p>'
-    print '<script type="text/javascript" src="http://mediaplayer.yahoo.com/js"></script>';
+    print '<script type="text/javascript" src="http://webplayer.yahooapis.com/player.js"></script>'
+    #print '<script type="text/javascript" src="http://mediaplayer.yahoo.com/js"></script>'
     print "<table>"
     try:
         clog = csv.reader(codecs.open(catalogfile,'rb','utf-8'))
