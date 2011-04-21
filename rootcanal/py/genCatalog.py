@@ -17,15 +17,23 @@ def mmss2sec(str):
 def getCatalog(catalogfile):
     print '<h1>Lahu Texts</h1>'
     print '<p><i>as of',time.strftime('%m-%d-%Y %H:%M:%S'),'</i></p>'
+
+    #print '<link rel="stylesheet" href="http://l.yimg.com/pb/media/p/ptw/www/reset-226.css" type="text/css" media="all" />'
+    #print '<link rel="stylesheet" href="http://l.yimg.com/pb/media/p/ptw/www/ptw-767.css" type="text/css" media="all" />'
+
     print '<script type="text/javascript" src="http://webplayer.yahooapis.com/player.js"></script>'
+
     #print '<script type="text/javascript" src="http://mediaplayer.yahoo.com/js"></script>'
     print "<table>"
     try:
         clog = csv.reader(codecs.open(catalogfile,'rb','utf-8'))
         for row,link in enumerate(clog):
             print "<tr><td>"
-            fmtstr = '<a target="_sound" href="http://stedt.berkeley.edu/~stedt-cgi/mediacut.pl?file=%s.mp3&start=%s&end=%s&suffix=.mp3">%s</a>'
-            href = fmtstr % (link[3],mmss2sec(link[4]),mmss2sec(link[5]),link[8])
+            fmtstr = '<a target="_blank" href="http://stedt.berkeley.edu/~stedt/mp3v2/%s.mp3">%s</a>'
+            href = fmtstr % (link[0],link[8])
+            #fmtstr = '<a target="_blank" href="http://stedt.berkeley.edu/~stedt-cgi/mediacut.pl?file=%s.mp3&start=%s&end=%s&suffix=.mp3">%s</a>'
+            #href = fmtstr % (link[3],mmss2sec(link[4]),mmss2sec(link[5]),link[8])
+            #print 'wget "http://stedt.berkeley.edu/~stedt-cgi/mediacut.pl?file=%s.mp3&start=%s&end=%s&suffix=.mp3" > %s.mp3' % (link[3],mmss2sec(link[4]),mmss2sec(link[5]),link[0])
             
             #fmtstr = '<td><b>%s</b><td><embed type="application/x-shockwave-flash" flashvars="audioUrl=http://localhost/cgi-bin/mediacut.pl?file=%s.mp3&start=%s&end=%s" src="http://www.google.com/reader/ui/3523697345-audio-player.swf" width="200" height="27" quality="best"></embed>'
             
