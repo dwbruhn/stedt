@@ -2,7 +2,16 @@ import sys
 import time
 import csv
 import codecs
+import re
 
+def makenewfilename(filename):
+    
+    newfile = filename.replace('.html','')
+    newfile = newfile.replace(' ','').lower()
+    newfile = re.sub("[\W]", "", newfile)
+    newfile = newfile[:20] + '.xml'
+    return newfile
+    
 def mmss2sec(str):
     #(h, m, s) = str.split(':')
     #result = int(h) * 3600 + int(m) * 60 + int(s)
@@ -31,6 +40,7 @@ def getCatalog(catalogfile):
             print "<tr><td>"
             fmtstr = '<a target="_blank" href="http://stedt.berkeley.edu/~stedt/mp3v2/%s.mp3">%s</a>'
             href = fmtstr % (link[0],link[8])
+            transcription = makenewfilename(link[8])
             #fmtstr = '<a target="_blank" href="http://stedt.berkeley.edu/~stedt-cgi/mediacut.pl?file=%s.mp3&start=%s&end=%s&suffix=.mp3">%s</a>'
             #href = fmtstr % (link[3],mmss2sec(link[4]),mmss2sec(link[5]),link[8])
             #print 'wget "http://stedt.berkeley.edu/~stedt-cgi/mediacut.pl?file=%s.mp3&start=%s&end=%s&suffix=.mp3" > %s.mp3' % (link[3],mmss2sec(link[4]),mmss2sec(link[5]),link[0])
@@ -42,7 +52,11 @@ def getCatalog(catalogfile):
            
             if row != 0:
                 link[8] = href
-           
+                link[10] = '<a href="LahuTexts/%s" target="_text">text</a>' % transcription
+            else:
+                link[10] = 'View'
+ 
+            link[11] = '' 
             #print "<td>".join(link)
             print "<td>".join(link[0:1]+link[3:13])
             print "</tr>"
