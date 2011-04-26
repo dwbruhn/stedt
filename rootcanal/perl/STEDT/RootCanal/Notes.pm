@@ -184,6 +184,7 @@ sub xml2markup {
 	s|</par>$||;
 	s|</par><par>|\n\n|g;
 	s|<br />|\n|g;
+	s|<sup>(.*?)</sup>|[[^$1]]|g;
 	s|<sub>(.*?)</sub>|[[_$1]]|g;
 	s|<emph>(.*?)</emph>|[[~$1]]|g;
 	s|<strong>(.*?)</strong>|[[\@$1]]|g;
@@ -240,8 +241,8 @@ sub markup2xml {
 sub _markup2xml {
 	my $s = shift;
 	my ($code, $s2) = $s =~ /^(.)(.*)/;
-	if ($code =~ /[_~:*+@]/) {
-		my %sym2x = qw(_ sub ~ emph : gloss * reconstruction @ strong + latinform);
+	if ($code =~ /[_^~:*+@]/) {
+		my %sym2x = qw(_ sub ^ sup ~ emph : gloss * reconstruction @ strong + latinform);
 		$s2 = $s if $code eq '*';
 		return "<$sym2x{$code}>$s2</$sym2x{$code}>";
 	}

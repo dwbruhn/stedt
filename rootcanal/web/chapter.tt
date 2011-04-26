@@ -66,6 +66,7 @@
 <pre>&lt;return&gt;&lt;return&gt; - paragraph break
 &lt;return&gt; - line break
 [[_subscript]]
+[[^superscript]]
 [[~emphasis]] (italic)
 [[@strong]] (bold)
 [[:gloss]] (deprecated)
