@@ -284,6 +284,16 @@ sub _nonbreak_hyphens {
 my @italicize_abbrevs =
 qw|GSR GSTC STC HPTB TBRS TSR AHD VSTB TBT HCT LTBA BSOAS CSDPN TIL OED|;
 
+# this sub is used so that apostrophes in forms are not educated into "smart quotes"
+# We need to substitute an obscure unicode char, then switch it back to "&apos;" later.
+# Here we use the "full width" variants used in CJK fonts.
+sub _qtd {
+	my $s = $_[0];
+	$s =~ s/&apos;/＇/g;
+	$s =~ s/&quot;/＂/g;
+	return $s;
+}
+
 # returns the note, and an array of footnotes in html
 sub xml2html {
 	local $_ = shift;
@@ -296,13 +306,16 @@ sub xml2html {
 	s|<reconstruction>\*(.*?)</reconstruction>|"<b>*" . _nonbreak_hyphens($1) . "</b>"|ge;
 	s|<xref ref="(\d+)">#\1(.*?)</xref>|_tag2info($1,$2,$c)|ge;
 	s|<hanform>(.*?)</hanform>|$1|g;
-	s|<latinform>(.*?)</latinform>|"<b>" . _nonbreak_hyphens($1) . "</b>"|ge;
-	s|<plainlatinform>(.*?)</plainlatinform>|$1|g;
+	s|<latinform>(.*?)</latinform>|"<b>" . _nonbreak_hyphens(_qtd($1)) . "</b>"|ge;
+	s|<plainlatinform>(.*?)</plainlatinform>|_qtd($1)|g;
 
 	s/(\S)&apos;/$1’/g; # smart quotes
 	s/&apos;/‘/g;
 	s/&quot;(?=[\w'])/“/g;
 	s/&quot;/”/g;  # or $_[0] =~ s/(?<!\s)"/&#8221;/g; $_[0] =~ s/(\A|\s)"/$1&#8220;/g;
+	
+	s/＇/&apos;/g; # switch back the "dumb" quotes
+	s/＂/&quot;/g;
 	
 	# italicize certain abbreviations
 	for my $abbrev (@italicize_abbrevs) {
