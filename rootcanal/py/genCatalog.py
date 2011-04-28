@@ -1,4 +1,5 @@
 import sys
+import os
 import time
 import csv
 import codecs
@@ -43,16 +44,18 @@ def getCatalog(catalogfile):
             transcription = makenewfilename(link[8])
             #fmtstr = '<a target="_blank" href="http://stedt.berkeley.edu/~stedt-cgi/mediacut.pl?file=%s.mp3&start=%s&end=%s&suffix=.mp3">%s</a>'
             #href = fmtstr % (link[3],mmss2sec(link[4]),mmss2sec(link[5]),link[8])
-            #print 'wget "http://stedt.berkeley.edu/~stedt-cgi/mediacut.pl?file=%s.mp3&start=%s&end=%s&suffix=.mp3" > %s.mp3' % (link[3],mmss2sec(link[4]),mmss2sec(link[5]),link[0])
+            #print 'wget "http://stedt.berkeley.edu/~stedt-cgi/mediacut.pl?file=%s.mp3&start=%s&end=%s&suffix=.mp3" -O  %s.mp3' % (link[3],mmss2sec(link[4]),mmss2sec(link[5]),link[0])
             
             #fmtstr = '<td><b>%s</b><td><embed type="application/x-shockwave-flash" flashvars="audioUrl=http://localhost/cgi-bin/mediacut.pl?file=%s.mp3&start=%s&end=%s" src="http://www.google.com/reader/ui/3523697345-audio-player.swf" width="200" height="27" quality="best"></embed>'
             
             #fmtstr = '<td><b>%s</b><td><embed target="_new" name="plugin" type="audio/mpeg" src="http://localhost/cgi-bin/mediacut.pl?file=%s.mp3&start=%s&end=%s"/>'
             #href = fmtstr % (link[7],link[2],mmss2sec(link[3]),mmss2sec(link[4]))
-           
             if row != 0:
                 link[8] = href
-                link[10] = '<a href="LahuTexts/%s" target="_text">text</a>' % transcription
+                if os.path.isfile("/home/stedt/public_html/LahuTexts/"+transcription):
+                    link[10] = '<a href="LahuTexts/%s" target="_text">text</a>' % transcription
+                else:
+                    link[10] = ''
             else:
                 link[10] = 'View'
  
