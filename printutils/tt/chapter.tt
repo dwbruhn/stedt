@@ -1,0 +1,102 @@
+%!TEX TS-program = xelatex
+%!TEX encoding = UTF-8 Unicode
+\documentclass[12pt]{report}
+\makeatletter
+\renewcommand{\@makechapterhead}[1]{%
+  %\vspace*{50\p@}%
+  {\parindent \z@ \raggedright \normalfont
+    \ifnum \c@secnumdepth >\m@ne
+      \if@mainmatter
+        \huge\bfseries \thechapter. \space
+      \fi
+    \fi
+    \Huge \bfseries #1\par\nobreak
+    \vskip 40\p@
+  }}
+\makeatother
+\usepackage{fontspec}
+\usepackage{xunicode} % for real tildes with \textasciitilde
+\setmainfont{Charis SIL}
+\newfontfamily\stedtfont{STEDTU Roman}
+\newfontfamily\tradchinesefont{LiSong Pro}
+\newfontfamily\simpchinesefont{STSong}
+\newcommand{\TC}[1]{{\tradchinesefont #1}}
+\newcommand{\SC}[1]{{\simpchinesefont #1}}
+\newcommand{\STEDTU}[1]{{\stedtfont #1}}
+\newcommand{\fascicletablebegin}{\begin{longtable}[l]{@{\hspace*{1.1em}}>{\hangindent=0.1in}p{1.7in}>{\hangindent=0.2in}p{1.2in}>{\hangindent=0.2in}p{1.3in}>{\hangindent=0.1in}p{1.5in}l}}
+\renewcommand \thechapter{\Roman{chapter}} % use cap roman numerals for chapter numbers
+\newcommand\comparandum{\@startsection{subsection}{2}{0pt}{-1pt}{1pt}{\large\bfseries}}
+
+\usepackage{fullpage}
+\usepackage{parskip}
+\usepackage{longtable}
+\setcounter{LTchunksize}{300} % use more memory for fewer compiles
+\usepackage{graphicx}
+\usepackage{array} % use array and ragged2e for raggedright inside tables
+\usepackage[document,raggedrightboxes]{ragged2e}
+\setlength{\RaggedRightRightskip}{0pt plus 3em} % must be defined after fonts are loaded
+
+\title{STEDT Root Canal Extraction:\\[% title %]}
+\author{}
+\date{[% date %]}
+\usepackage[bookmarks]{hyperref}
+\hypersetup{% 
+	pdftitle = {STEDT: [% title %]}, 
+	pdfauthor = {\textcopyright\ STEDT}, 
+} 
+
+\begin{document}
+\maketitle
+\tableofcontents
+\newpage
+\addcontentsline{toc}{section}{Introduction}
+% if fascicle... \chapter{}
+
+[% # semantic flowchart %]
+[% FOREACH id IN flowchartids -%]
+\resizebox{\textwidth}{!}{\includegraphics{pdf/[% id %].pdf}}
+
+[% END -%]
+\vspace{1em}
+
+[% # general discussion == chapter notes %]
+[% FOREACH note IN chapter_notes -%]
+[% note %]
+[% END -%]
+
+
+[% # insert actual content %]
+[% FOREACH etyma -%]
+\vspace{1em}
+{\large \parindent=-1em 
+[%- IF is_main %]([% printseq %])[% END -%]
+ \hspace{\stretch{1}} [% plg %] [% protoform %]\hspace{\stretch{1}}\textbf{[% protogloss %]}
+\textit{\tiny[\#[% tag %]]}}
+\nopagebreak
+[% IF is_main -%]
+\addcontentsline{toc}{section}{([% printseq %]) [% plg %] [% protoform_text %] [% protogloss %]}
+% \markright{([% printseq %]) [\#[% tag %]] [% plg %] [% protoform %] [% protogloss %]}
+[% ELSE -%]
+\addcontentsline{toc}{subsection}{[% plg %] [% protoform_text %] [% protogloss %]}
+[% END -%]
+
+[% FOREACH notes -%]
+[% IF type == 'I' %][Internal Note:]\textit{[% END -%]
+[% IF type == 'O' && internal_notes %][Orig/Source][% END -%]
+[% text -%]
+[% IF type == 'I' %]}[% END -%]
+
+
+[% END -%]
+[% IF records %][% records %][% END -%]
+[% IF comparanda.size -%]
+[% label = 'Chinese comparand' _ (comparanda.size == 1 ? 'um' : 'a') -%]
+\addcontentsline{toc}{subsection}{\textit{[% label %]}}
+{\large \textbf{[% label %]}}
+[% END %]
+[% FOREACH note IN comparanda -%]
+[% note %]
+
+[% END -%]
+[% END -%]
+\end{document}

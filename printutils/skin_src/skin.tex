@@ -1,0 +1,59 @@
+%!TEX TS-program = xelatex
+%!TEX encoding = UTF-8 Unicode
+\documentclass[12pt]{report}
+\makeatletter
+\renewcommand{\@makechapterhead}[1]{%
+  %\vspace*{50\p@}%
+  {\parindent \z@ \raggedright \normalfont
+    \ifnum \c@secnumdepth >\m@ne
+      \if@mainmatter
+        \huge\bfseries \thechapter. \space
+      \fi
+    \fi
+    \Huge \bfseries #1\par\nobreak
+    \vskip 40\p@
+  }}
+\makeatother
+\usepackage{fontspec}
+\usepackage{xunicode} % for real tildes with \textasciitilde
+\setmainfont{Charis SIL}
+\newfontfamily\stedtfont{STEDTU Roman}
+\newfontfamily\tradchinesefont{LiSong Pro}
+\newcommand{\TC}[1]{{\tradchinesefont #1}}
+\newcommand{\STEDTU}[1]{{\stedtfont #1}}
+\newcommand{\fascicletablebegin}{\begin{longtable}[l]{>{\hangindent=0.1in}p{1.7in}>{\hangindent=0.2in}p{1.2in}>{\hangindent=0.2in}p{1.3in}>{\hangindent=0.1in}p{1.5in}l}}
+\renewcommand \thechapter{\Roman{chapter}} % use cap roman numerals for chapter numbers
+
+\usepackage{fullpage}
+\usepackage{parskip}
+\usepackage{longtable}
+\setcounter{LTchunksize}{300} % use more memory for fewer compiles
+\usepackage{array} % use array and ragged2e for raggedright inside tables
+\usepackage[document,raggedrightboxes]{ragged2e}
+\setlength{\RaggedRightRightskip}{0pt plus 3em} % must be defined after fonts are loaded
+
+%\usepackage{natbib}
+%\usepackage[sectionbib]{natbib}
+%\bibpunct[:]{(}{)}{;}{a}{}{,}
+%\renewcommand{\bibsection}{\section{References}}
+
+%\includeonly{9}
+
+\title{STEDT Root Canal Extraction \#1: SKIN}
+\author{}
+\date{\number\year.\number\month.\number\day} % \number\year.\number\month.\number\day
+\usepackage[dvipdfmx,bookmarks]{hyperref} % doesn't work with Apple Preview (bug with PDFKit!)
+
+\begin{document}
+%\bibliographystyle{linquiry2}
+
+%\include{frontmatter}
+\maketitle
+
+\tableofcontents
+
+\include{6.5}
+
+%\backmatter
+
+\end{document}
