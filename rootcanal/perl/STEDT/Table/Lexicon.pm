@@ -2,6 +2,34 @@ package STEDT::Table::Lexicon;
 use base STEDT::Table;
 use strict;
 
+# SELECT 
+# 	***DISTINCT*** lexicon.rn,
+# 	GROUP_CONCAT(hash2.tag_str ORDER BY hash2.ind),
+# 	lexicon.reflex, lexicon.gloss,
+#
+# FROM lexicon ***LEFT JOIN lx_et_hash USING (rn)*** LEFT JOIN
+# lx_et_hash AS analysis_table USING (rn)
+# 
+# WHERE ***lx_et_hash.tag= [TAG] ***
+# 
+# GROUP BY lexicon.rn ***,lx_et_hash.ind***
+# 
+# 
+# This is the magic command that allows us to select the correct lexicon
+# records based on the content of lx_et_hash and generate the analysis
+# field on the fly.
+# 
+# The parts in ***'s are necessary if you want to search by tag. The
+# extra WHERE clause is obviously to search by tag, but that means you
+# need another JOIN in the FROM. Then, to prevent multiple rows for
+# records that have been tagged multiple times with the same etymon
+# (e.g. a reduplicated form u-u for EGG), we add the additional GROUP BY
+# to expand the record set to have a result row for each value of ind,
+# thus causing GROUP_CONCAT to concatenate the sequence of tag_str's
+# once for each time the tag is found. Finally, the DISTINCT modifier
+# collapses those extra result rows into each other.
+
+
 sub new {
 my $t = shift->SUPER::new(my $dbh = shift, 'lexicon', 'lexicon.rn'); # dbh, table, key
 
@@ -9,7 +37,6 @@ $t->query_from(q|lexicon LEFT JOIN lx_et_hash AS analysis_table USING (rn) LEFT 
 $t->order_by('languagegroups.ord, languagenames.lgsort, lexicon.reflex, languagenames.srcabbr, lexicon.srcid');
 $t->fields(
 	'lexicon.rn',
-#	'lexicon.analysis',
 	'GROUP_CONCAT(analysis_table.tag_str ORDER BY analysis_table.ind) AS analysis',
 	'languagenames.lgid',
 	'lexicon.reflex',
@@ -23,7 +50,7 @@ $t->fields(
 #	'lexicon.semcat',
 	'COUNT(notes.noteid) AS num_notes'
 );
-$t->searchable('lexicon.rn', 'lexicon.analysis','lexicon.reflex',
+$t->searchable('lexicon.rn', 'analysis','lexicon.reflex',
 	'lexicon.gloss', 'languagenames.language', 'languagegroups.grp',
 	'languagegroups.grpid',
 	'languagenames.srcabbr', 'lexicon.srcid',
@@ -31,7 +58,7 @@ $t->searchable('lexicon.rn', 'lexicon.analysis','lexicon.reflex',
 	'lexicon.lgid', 
 );
 $t->editable(
-	'lexicon.analysis',
+	'analysis',
 	'lexicon.reflex',
 	'lexicon.gloss',
 	'lexicon.srcid',
@@ -46,10 +73,11 @@ $t->wheres(
 		if ($v eq '0') {
 			return "$k=''";
 		} else {
-			# also DISTINCT
-			# also GROUP BY
-			$t->{query_from} .= ' LEFT JOIN lx_et_hash USING (rn)'
-				unless $t->{query_from} =~ / lx_et_hash USING \(rn\)$/;
+			unless ($t->{query_from} =~ / lx_et_hash USING \(rn\)$/) {
+				$t->{query_from} .= ' LEFT JOIN lx_et_hash USING (rn)';
+				$t->also_group_by('lx_et_hash.ind');
+				$t->select_distinct(1);
+			}
 			return "lx_et_hash.tag=$v";
 		}
 	},
@@ -88,7 +116,7 @@ $t->print_form_items(
 );
 
 $t->save_hooks(
-	'lexicon.analysis' => sub {
+	'analysis' => sub {
 		my ($rn, $s, $uid) = @_;
 		# simultaneously update lx_et_hash
 		$dbh->do('DELETE FROM lx_et_hash WHERE rn=? AND uid=?', undef, $rn, $uid);
@@ -109,7 +137,7 @@ $t->footer_extra(sub {
 var x = document.getElementById('update_form').elements;
 var r = new RegExp('\\\\b' + document.getElementById('oldtag').value + '\\\\b', 'g');
 for (i=0; i< x.length; i++) {
-	if (x[i].name.match(/^lexicon.analysis/)) {
+	if (x[i].name.match(/^analysis/)) {
 		x[i].value = x[i].value.replace(r,document.getElementById('newtag').value)
 	}
 }
@@ -125,7 +153,7 @@ EOF
 $t->addable(
 	'lexicon.lgid',
 	'lexicon.srcid',
-	'lexicon.analysis',
+	'analysis',
 	'lexicon.reflex',
 	'lexicon.gloss',
 	'lexicon.gfn',

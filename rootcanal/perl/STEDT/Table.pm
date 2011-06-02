@@ -16,6 +16,8 @@ our %ivars = map {$_,1} qw(
 	key
 	query_from
 	order_by
+	also_group_by
+	select_distinct
 	search_limit
 	debug
 	allow_delete
@@ -191,8 +193,11 @@ sub get_query {
 	return "SELECT $flds FROM $from GROUP BY $self->{key} LIMIT 1", '[first item]' unless $where;
 	
 	my $order = $self->{order_by} || $self->{key};
-	return "SELECT $flds FROM $from WHERE $where "
+	return "SELECT "
+		. ($self->{select_distinct} ? 'DISTINCT ' : '')
+		. "$flds FROM $from WHERE $where "
 		. "GROUP BY $self->{key} "
+		. ($self->{also_group_by} ? ", $self->{also_group_by} " : '')
 		. ($having ? "HAVING $having " : '')
 		. "ORDER BY $order LIMIT 20000", # a sane limit to prevent overburdening the database
 		$where . ($having ? " HAVING $having" : '');
@@ -236,10 +241,16 @@ sub query_where {
 
 			my @restrictions;
 			for my $value (split /, */, $value) {
+				# get the WHERE phrase for this key, if specified
+				# otherwise, default to an int if it's a calculated field, a string (RLIKE) otherwise.
 				my $sub = $self->wheres($key) || ($self->in_calculated_fields($key) ? \&where_int : \&where_rlike);
 				push @restrictions, $sub->($key,$value);
 			}
-			if ($self->in_calculated_fields($key)) {
+			# calculated fields should be searched for using a HAVING clause,
+			# but make an exception for pseudo-fields - right now this means the former
+			# lexicon.analysis field which is now calculated using a GROUP_CONCAT and is editable,
+			# so we check if the key is editable
+			if ($self->in_calculated_fields($key) && !$self->in_editable($key)) {
 				push(@havings, "(" . join(" OR ", @restrictions) .")");
 			} else {
 				push(@wheres, "(" . join(" OR ", @restrictions) .")");
