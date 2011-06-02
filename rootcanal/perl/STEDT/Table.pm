@@ -260,7 +260,7 @@ sub query_where {
 
 sub save_value {
 	my $self = shift;
-	my ($field, $value, $id) = @_;
+	my ($field, $value, $id, $uid) = @_;
 	
 	die "bad field name passed in!" unless $self->in_editable($field); # this will help prevent sql injection attacks
 	my $update = qq{UPDATE $self->{table} SET $field=? WHERE $self->{key}=?};
@@ -268,7 +268,7 @@ sub save_value {
 	$update_sth->execute($value, $id);
 
 	my $sub = $self->save_hooks($field);
-	$sub->($id, $value) if $sub;
+	$sub->($id, $value, $uid) if $sub;
 }
 
 sub delete_data {

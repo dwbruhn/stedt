@@ -126,7 +126,7 @@ sub update : Runmode {
 		my $oldval = $self->dbh->selectrow_array("SELECT $field FROM $tblname WHERE $t->{key}=?", undef, $id);
 		$self->dbh->do("INSERT changelog VALUES (?,?,?,?,?,?,NOW())", undef,
 			$self->session->param('uid'), $tblname, $field =~ /([^.]+)$/, $id, $oldval, $value);
-		$t->save_value($field, $value, $id);
+		$t->save_value($field, $value, $id, $self->session->param('uid'));
 		return $value;
 	} else {
 		$self->header_props(-status => 403); # Forbidden

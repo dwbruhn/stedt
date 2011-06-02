@@ -5,11 +5,12 @@ use strict;
 sub new {
 my $t = shift->SUPER::new(my $dbh = shift, 'lexicon', 'lexicon.rn'); # dbh, table, key
 
-$t->query_from(q|lexicon LEFT JOIN notes USING (rn) LEFT JOIN languagenames USING (lgid) LEFT JOIN languagegroups USING (grpid)|);
+$t->query_from(q|lexicon LEFT JOIN lx_et_hash AS analysis_table USING (rn) LEFT JOIN notes USING (rn) LEFT JOIN languagenames USING (lgid) LEFT JOIN languagegroups USING (grpid)|);
 $t->order_by('languagegroups.ord, languagenames.lgsort, lexicon.reflex, languagenames.srcabbr, lexicon.srcid');
 $t->fields(
 	'lexicon.rn',
-	'lexicon.analysis',
+#	'lexicon.analysis',
+	'GROUP_CONCAT(analysis_table.tag_str ORDER BY analysis_table.ind) AS analysis',
 	'languagenames.lgid',
 	'lexicon.reflex',
 	'lexicon.gloss',
@@ -40,11 +41,13 @@ $t->editable(
 $t->wheres(
 	'languagegroups.grpid' => 'int',
 	'lexicon.lgid' => 'int',
-	'lexicon.analysis' => sub {
+	'analysis' => sub {
 		my ($k,$v) = @_;
 		if ($v eq '0') {
 			return "$k=''";
 		} else {
+			# also DISTINCT
+			# also GROUP BY
 			$t->{query_from} .= ' LEFT JOIN lx_et_hash USING (rn)'
 				unless $t->{query_from} =~ / lx_et_hash USING \(rn\)$/;
 			return "lx_et_hash.tag=$v";
@@ -86,14 +89,14 @@ $t->print_form_items(
 
 $t->save_hooks(
 	'lexicon.analysis' => sub {
-		my ($rn, $s) = @_;
+		my ($rn, $s, $uid) = @_;
 		# simultaneously update lx_et_hash
-		$dbh->do('DELETE FROM lx_et_hash WHERE rn=?', undef, $rn);
-		my $sth = $dbh->prepare(qq{INSERT INTO lx_et_hash (rn, tag, ind) VALUES (?, ?, ?)});
+		$dbh->do('DELETE FROM lx_et_hash WHERE rn=? AND uid=?', undef, $rn, $uid);
+		my $sth = $dbh->prepare(qq{INSERT INTO lx_et_hash (rn, tag, ind, uid) VALUES (?, ?, ?, ?)});
 		my $index = 0;
 		for my $tag (split(/, */, $s)) { # Split the contents of the field on contents
 			# Insert new records into lx_et_hash based on the updated analysis field
-			$sth->execute($rn, $tag, $index) if ($tag =~ /^\d+$/);
+			$sth->execute($rn, $tag, $index, $uid) if ($tag =~ /^\d+$/);
 			$index++;
 		}
 	}
