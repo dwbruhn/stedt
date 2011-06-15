@@ -172,7 +172,7 @@ var ajax_make_table = function (transport,json){ // function suitable for the on
 };
 function show_supporting_forms(tag) {
 	new Ajax.Request(baseRef + 'search/lexicon', {
-		parameters: { 'lexicon.analysis' : tag },
+		parameters: { 'analysis' : tag },
 		onSuccess: function (transport,json) { ajax_make_table(transport,json); show_cognates(tag); },
 		onFailure: function (transport){ alert('Error: ' + transport.responseText); }
 	});
@@ -458,16 +458,24 @@ var setup = { // in the form setup.[tablename].[fieldname]
 		'lexicon.rn' : {
 			label: 'rn',
 			noedit: true,
-			hide: true,
+			hide: stedtuserprivs < 16,
 			size: 70
 		},
-		'lexicon.analysis' : {
+		'analysis' : {
 			label: 'analysis',
 			hide: stedtuserprivs < 16,
 			size: 80,
 			transform: function (v) {
 				return v.replace(/, */g,', ');
 			}
+		},
+		'user_an' : {
+			label: 'my analysis',
+			hide: stedtuserprivs < 16,
+			size: 80,
+			transform: function (v) {
+				return v.replace(/, */g,', ');
+			},
 		},
 		'languagenames.lgid' : {
 			label:'lgid',

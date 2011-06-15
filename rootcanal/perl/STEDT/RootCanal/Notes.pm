@@ -422,15 +422,21 @@ ORDER BY is_main DESC, e.plgord#;
 	
 		# do entries
 		my $recs = $self->dbh->selectall_arrayref(<<EndOfSQL);
-SELECT DISTINCT lexicon.rn, lexicon.analysis, languagenames.lgid, lexicon.reflex, lexicon.gloss, lexicon.gfn,
+SELECT lexicon.rn,
+	(SELECT GROUP_CONCAT(tag_str ORDER BY ind) FROM lx_et_hash WHERE rn=lexicon.rn AND uid=8) AS analysis,
+	languagenames.lgid, lexicon.reflex, lexicon.gloss, lexicon.gfn,
 	languagenames.language, languagegroups.grpid, languagegroups.grpno, languagegroups.grp,
-	languagenames.srcabbr, lexicon.srcid, languagegroups.ord, notes.rn
-FROM lexicon LEFT JOIN notes ON notes.rn=lexicon.rn, languagenames, languagegroups, lx_et_hash
+	languagenames.srcabbr, lexicon.srcid, languagegroups.ord,
+	(SELECT COUNT(*) FROM notes WHERE notes.rn = lexicon.rn) AS num_notes
+FROM lexicon
+	LEFT JOIN lx_et_hash ON (lexicon.rn=lx_et_hash.rn AND lx_et_hash.uid=8),
+	languagenames,
+	languagegroups
 WHERE (lx_et_hash.tag = $e{tag}
-AND lx_et_hash.rn=lexicon.rn
-AND languagenames.lgid=lexicon.lgid
-AND languagenames.grpid=languagegroups.grpid
+	AND languagenames.lgid=lexicon.lgid
+	AND languagenames.grpid=languagegroups.grpid
 )
+GROUP BY lexicon.rn
 ORDER BY languagegroups.ord, languagenames.lgsort, reflex, languagenames.srcabbr, lexicon.srcid
 EndOfSQL
 		if (@$recs) { # skip if no records
@@ -483,7 +489,7 @@ EndOfSQL
 
 	return $self->tt_process("etymon.tt", {
 		etyma    => \@etyma,
-		fields => ['lexicon.rn', 'lexicon.analysis', 'languagenames.lgid', 'lexicon.reflex', 'lexicon.gloss', 'lexicon.gfn',
+		fields => ['lexicon.rn', 'analysis', 'languagenames.lgid', 'lexicon.reflex', 'lexicon.gloss', 'lexicon.gfn',
 			'languagenames.language', 'languagegroups.grpid', 'languagegroups.grpno', 'languagegroups.grp',
 			'languagenames.srcabbr', 'lexicon.srcid', 'languagegroups.ord', 'notes.rn'],
 		footnotes => \@footnotes

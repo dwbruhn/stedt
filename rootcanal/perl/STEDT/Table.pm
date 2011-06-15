@@ -16,8 +16,6 @@ our %ivars = map {$_,1} qw(
 	key
 	query_from
 	order_by
-	also_group_by
-	select_distinct
 	search_limit
 	debug
 	allow_delete
@@ -33,8 +31,6 @@ our %hash_vars = map {$_,1} qw(
 	sizes
 	search_form_items
 	
-	update_form_items
-	print_form_items
 	add_form_items
 	save_hooks
 );
@@ -81,10 +77,7 @@ sub fields {
 		foreach (@a) {					# for all other purposes, use the "AS" aliases, if there is one
 			if (/ AS /) {
 				$_ =~ s/^.+ AS //;
-				$self->calculated_fields($_);
-					# because of an idiosyncrasy in our AUTOLOAD method,
-					# this actually replaces the old list, but we never access
-					# the entire list, just the hash, which gets a new entry when we call this, so it's OK
+				$self->calculated_fields($_); # add this to the set
 			}
 		}
 		$self->{fields} = [@a];
@@ -109,6 +102,13 @@ sub fields_for_priv {
 	return @result;
 }
 
+# the following lets you access object data using method calls.
+# the names of these data items just need to be set in the corresponding hash.
+# ivars: set and get.
+# hash_vars: add key/value pairs to the hash, or return the value for a key.
+# set_vars: add a member (or a list of members) to the set, or return the
+# 	(ordered!) list.
+# To check for membership in a set_vars list, call in_[[name of a set_vars list]].
 sub AUTOLOAD {
 	return if our $AUTOLOAD =~ /::DESTROY$/;
 	my $self = shift;
@@ -138,7 +138,7 @@ sub AUTOLOAD {
 	} elsif ($set_vars{$name}) {
 		if (@_) {
 			$self->{$name}{$_} = 1 foreach @_;
-			$self->{tbledit_arrays}{$name} = [@_];
+			push @{$self->{tbledit_arrays}{$name}}, @_;
 		} else {
 			return unless defined $self->{$name};
 			return @{$self->{tbledit_arrays}{$name}} if wantarray;
@@ -193,13 +193,10 @@ sub get_query {
 	return "SELECT $flds FROM $from GROUP BY $self->{key} LIMIT 1", '[first item]' unless $where;
 	
 	my $order = $self->{order_by} || $self->{key};
-	return "SELECT "
-		. ($self->{select_distinct} ? 'DISTINCT ' : '')
-		. "$flds FROM $from WHERE $where "
+	return "SELECT $flds FROM $from WHERE $where "
 		. "GROUP BY $self->{key} "
-		. ($self->{also_group_by} ? ", $self->{also_group_by} " : '')
-		. ($having ? "HAVING $having " : '')
-		. "ORDER BY $order LIMIT 20000", # a sane limit to prevent overburdening the database
+		. ($having ? " HAVING $having " : '')
+		. " ORDER BY $order LIMIT 20000", # a sane limit to prevent sending too much back to the user
 		$where . ($having ? " HAVING $having" : '');
 }
 
@@ -269,17 +266,27 @@ sub query_where {
 	return;
 }
 
+# sub to retrieve the current value of a single column.
+# useful if you want to check a value before changing it.
+sub get_value {
+	my ($self, $field, $id) = @_;
+	my $col = $self->{full_fields}{$field}; # this might be different from $field if it's a pseudo-field (like analysis)
+	return $self->{dbh}->selectrow_array("SELECT $col FROM $self->{table} WHERE $self->{key}=?", undef, $id);
+}
+
 sub save_value {
 	my $self = shift;
-	my ($field, $value, $id, $uid) = @_;
+	my ($field, $value, $id) = @_;
 	
 	die "bad field name passed in!" unless $self->in_editable($field); # this will help prevent sql injection attacks
-	my $update = qq{UPDATE $self->{table} SET $field=? WHERE $self->{key}=?};
-	my $update_sth = $self->{dbh}->prepare($update);
-	$update_sth->execute($value, $id);
+	unless ($self->in_calculated_fields($field)) { # don't do this for pseudo-fields
+		my $update = qq{UPDATE $self->{table} SET $field=? WHERE $self->{key}=?};
+		my $update_sth = $self->{dbh}->prepare($update);
+		$update_sth->execute($value, $id);
+	}
 
 	my $sub = $self->save_hooks($field);
-	$sub->($id, $value, $uid) if $sub;
+	$sub->($id, $value) if $sub;
 }
 
 sub delete_data {

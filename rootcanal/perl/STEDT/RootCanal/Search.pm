@@ -82,7 +82,7 @@ sub group : Runmode {
 
 sub searchresults_from_querystring {
 	my ($self, $s, $tbl) = @_;
-	my $t = $self->load_table_module($tbl);
+	my $t = $self->load_table_module($tbl, 0);
 	my $query = $self->query->new; # for some reason faster than saying "new CGI"? disk was thrashing.
 
 	# figure out the table and the search terms
@@ -105,14 +105,14 @@ sub searchresults_from_querystring {
 	} elsif ($tbl eq 'lexicon') {
 		for my $token (split / /, $s) { given ($token) {
 			when (/^\d+$/) {
-				$query->param('lexicon.analysis' => $token);
+				$query->param('analysis' => $token);
 			}
 			default {
 				$query->param('lexicon.gloss' => $token);
 			}
 		}}
 		if ($s eq '') {
-			$query->param('lexicon.analysis'=>1764);
+			$query->param('analysis'=>1764);
 		}
 	}
 
@@ -144,7 +144,7 @@ sub blah : Runmode { # this sub wants a nicer name
 			die "bad table name!";
 		}
 	} else { # just pass the query on
-		my $t = $self->load_table_module($tbl);
+		my $t = $self->load_table_module($tbl, 0);
 		$result = $t->search($self->query, $self->param('userprivs'));
 	}
 

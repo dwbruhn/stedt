@@ -85,12 +85,7 @@ $t->wheres(
 		}
 	},
 );
-$t->print_form_items(
-	'num_notes' => sub {
-		my ($cgi,$n,$key) = @_;
-		return $n == 0 ? '' : "$n note" . ($n == 1 ? '' : 's');
-	}
-);
+
 $t->save_hooks(
 	'etyma.printseq' => sub {
 		my ($id, $value) = @_;

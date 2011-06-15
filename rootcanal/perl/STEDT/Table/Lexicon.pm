@@ -2,42 +2,94 @@ package STEDT::Table::Lexicon;
 use base STEDT::Table;
 use strict;
 
-# SELECT 
-# 	***DISTINCT*** lexicon.rn,
-# 	GROUP_CONCAT(hash2.tag_str ORDER BY hash2.ind),
-# 	lexicon.reflex, lexicon.gloss,
-#
-# FROM lexicon ***LEFT JOIN lx_et_hash USING (rn)*** LEFT JOIN
-# lx_et_hash AS analysis_table USING (rn)
-# 
-# WHERE ***lx_et_hash.tag= [TAG] ***
-# 
-# GROUP BY lexicon.rn ***,lx_et_hash.ind***
-# 
-# 
-# This is the magic command that allows us to select the correct lexicon
-# records based on the content of lx_et_hash and generate the analysis
-# field on the fly.
-# 
-# The parts in ***'s are necessary if you want to search by tag. The
-# extra WHERE clause is obviously to search by tag, but that means you
-# need another JOIN in the FROM. Then, to prevent multiple rows for
-# records that have been tagged multiple times with the same etymon
-# (e.g. a reduplicated form u-u for EGG), we add the additional GROUP BY
-# to expand the record set to have a result row for each value of ind,
-# thus causing GROUP_CONCAT to concatenate the sequence of tag_str's
-# once for each time the tag is found. Finally, the DISTINCT modifier
-# collapses those extra result rows into each other.
+=pod
+This is the magic command that we first tried to use to select lexicon records
+based on the content of lx_et_hash and generate analysis fields on the fly.
+The join condition(s) restrict the found analyses to, e.g., the STEDT user,
+which we have arbitrarily chosen to be uid 8.
 
+SELECT ***DISTINCT*** lexicon.rn,
+	GROUP_CONCAT(analysis_table.tag_str ORDER BY analysis_table.ind),
+	lexicon.reflex, lexicon.gloss
+FROM lexicon
+	***LEFT JOIN lx_et_hash ON (lexicon.rn = lx_et_hash.rn AND lx_et_hash.uid=8)***
+	LEFT JOIN lx_et_hash AS analysis_table ON (lexicon.rn = analysis_table.rn AND analysis_table.uid=8)
+	LEFT JOIN lx_et_hash AS an2 ON (analysis_table.rn = an2.rn AND analysis_table.ind = an2.ind AND an2.uid=1)
+WHERE ***lx_et_hash.tag=[[TAG]]***
+GROUP BY lexicon.rn ***,lx_et_hash.ind***
+
+The parts in ***'s are necessary if you want to search by tag. The
+extra WHERE clause is obviously to search by tag, but that means you
+need another JOIN in the FROM. Then, to prevent multiple rows for
+records that have been tagged multiple times with the same etymon
+(e.g. a reduplicated form u-u for EGG), we add the additional GROUP BY
+to expand the record set to have a result row for each value of ind,
+thus causing GROUP_CONCAT to concatenate the sequence of tag_str's
+once for each time the tag is found. Finally, the DISTINCT modifier
+collapses those extra result rows into each other.
+
+Unfortunately, to get a second user's tagging, there does not seem to be
+an easy way to do a second join at the same time while disentangling it
+from the first; in fact, it may not be possible (remember that there might
+be user tagging but no stedt tagging, so you can't piggyback the second join
+onto the first). Luckily, subqueries come to the rescue:
+
+(SELECT GROUP_CONCAT(tag_str ORDER BY ind) FROM lx_et_hash WHERE rn=lexicon.rn AND uid=8) AS analysis
+
+This avoids the need to do DISTINCT or an extra GROUP BY, allows you to retrieve
+an unlimited (for all practical purposes) number of user columns, and actually
+appears to be more efficient since it saves the extra GROUP BY processing time.
+
+
+On the other hand, searching by tag is still more efficient using a JOIN
+vs. a subquery. Look at this query with a subquery (note the WHERE clause):
+
+SELECT lexicon.rn,
+	(SELECT GROUP_CONCAT(tag_str ORDER BY ind) FROM lx_et_hash WHERE rn=lexicon.rn AND uid=8) AS analysis,
+	lexicon.reflex, lexicon.gloss
+FROM lexicon
+WHERE lexicon.rn IN (SELECT rn FROM lx_et_hash WHERE uid=8 AND tag=[[TAG]])
+GROUP BY lexicon.rn
+
+This is equivalent, but it seems to be over 180 times slower!
+
+
+A second kind search is one where we want to pull out multiple taggers' analyses
+at the same time.
+
+SELECT
+	lexicon.rn, an_tbl.uid,
+	GROUP_CONCAT(an_tbl.tag_str ORDER BY an_tbl.ind) as analysis,
+	lexicon.reflex, lexicon.gloss
+FROM lexicon
+	LEFT JOIN lx_et_hash AS an_tbl ON (lexicon.rn = an_tbl.rn)
+WHERE gloss LIKE 'body%'
+GROUP BY lexicon.rn, an_tbl.uid
+
+This will return a separate row for each combination of rn/uid, that is
+a separate row containing each analysis belonging to a record.
+=cut
 
 sub new {
+
+# in addition to the usual $dbh argument which all STEDT::Table modules expect,
+# STEDT::Table::Lexicon looks for an additional, optional $uid. If specified,
+# there will be an additional column returned giving the analyses belonging
+# to that uid.
+
+my ($self, $dbh, $uid) = @_;
+$uid = 0 if $uid == 8;
+	# set this so that below, if $uid has non-zero value,
+	# we generate a second analysis column
+
 my $t = shift->SUPER::new(my $dbh = shift, 'lexicon', 'lexicon.rn'); # dbh, table, key
 
-$t->query_from(q|lexicon LEFT JOIN lx_et_hash AS analysis_table USING (rn) LEFT JOIN notes USING (rn) LEFT JOIN languagenames USING (lgid) LEFT JOIN languagegroups USING (grpid)|);
+$t->query_from(q|lexicon LEFT JOIN languagenames USING (lgid) LEFT JOIN languagegroups USING (grpid)|);
 $t->order_by('languagegroups.ord, languagenames.lgsort, lexicon.reflex, languagenames.srcabbr, lexicon.srcid');
 $t->fields(
 	'lexicon.rn',
-	'GROUP_CONCAT(analysis_table.tag_str ORDER BY analysis_table.ind) AS analysis',
+	'(SELECT GROUP_CONCAT(tag_str ORDER BY ind) FROM lx_et_hash WHERE rn=lexicon.rn AND uid=8) AS analysis',
+	($uid ? "(SELECT GROUP_CONCAT(tag_str ORDER BY ind) FROM lx_et_hash WHERE rn=lexicon.rn AND uid=$uid) AS user_an" : () ),
 	'languagenames.lgid',
 	'lexicon.reflex',
 	'lexicon.gloss',
@@ -48,9 +100,9 @@ $t->fields(
 	'languagegroups.grp',
 	'languagenames.srcabbr', 'lexicon.srcid',
 #	'lexicon.semcat',
-	'COUNT(notes.noteid) AS num_notes'
+	'(SELECT COUNT(*) FROM notes WHERE rn=lexicon.rn) AS num_notes'
 );
-$t->searchable('lexicon.rn', 'analysis','lexicon.reflex',
+$t->searchable('lexicon.rn', 'analysis', 'user_an', 'lexicon.reflex',
 	'lexicon.gloss', 'languagenames.language', 'languagegroups.grp',
 	'languagegroups.grpid',
 	'languagenames.srcabbr', 'lexicon.srcid',
@@ -58,7 +110,7 @@ $t->searchable('lexicon.rn', 'analysis','lexicon.reflex',
 	'lexicon.lgid', 
 );
 $t->editable(
-	'analysis',
+	'analysis', 'user_an',
 	'lexicon.reflex',
 	'lexicon.gloss',
 	'lexicon.srcid',
@@ -70,15 +122,24 @@ $t->wheres(
 	'lexicon.lgid' => 'int',
 	'analysis' => sub {
 		my ($k,$v) = @_;
-		if ($v eq '0') {
-			return "$k=''";
+		if ($v eq '0') { # use special value of 0 to search for empty analysis
+			return "0 = (SELECT COUNT(*) FROM lx_et_hash WHERE rn=lexicon.rn AND uid=8)";
 		} else {
-			unless ($t->{query_from} =~ / lx_et_hash USING \(rn\)$/) {
-				$t->{query_from} .= ' LEFT JOIN lx_et_hash USING (rn)';
-				$t->also_group_by('lx_et_hash.ind');
-				$t->select_distinct(1);
+			unless ($t->{query_from} =~ / lx_et_hash ON \(lexicon.rn/) {
+				$t->{query_from} .= ' LEFT JOIN lx_et_hash ON (lexicon.rn = lx_et_hash.rn AND lx_et_hash.uid=8)';
 			}
 			return "lx_et_hash.tag=$v";
+		}
+	},
+	'user_an' => sub {
+		my ($k,$v) = @_;
+		if ($v eq '0') {
+			return "0 = (SELECT COUNT(*) FROM lx_et_hash WHERE rn=lexicon.rn AND uid=$uid)";
+		} else {
+			unless ($t->{query_from} =~ / lx_et_hash AS l_e_h2 ON \(lexicon.rn/) {
+				$t->{query_from} .= " LEFT JOIN lx_et_hash AS l_e_h2 ON (lexicon.rn = l_e_h2.rn AND l_e_h2.uid=$uid)";
+			}
+			return "l_e_h2.tag=$v";
 		}
 	},
 	'lexicon.gloss' => 'word',#sub { my ($k,$v) = @_; "$k RLIKE '[[:<:]]$v'" },
@@ -94,37 +155,31 @@ $t->wheres(
 	},
 );
 
-# Special handling of results
-$t->update_form_items(
-	'languagenames.srcabbr' => sub {
-		my ($cgi,$s,$key) = @_;
-		return $cgi->a({-href=>"srcbib.pl?submit=Search&srcbib.srcabbr=$s", -target=>'srcbib'},
-						$s);
-	},
-	'COUNT(notes.noteid)' => sub {
-		my ($cgi,$n,$key) = @_;
-		return $cgi->a({-href=>"notes.pl?L=$key", -target=>'noteswindow'},
-			$n == 0 ? "add..." : "$n note" . ($n == 1 ? '' : 's'));
-	}
-);
-
-$t->print_form_items(
-	'COUNT(notes.noteid)' => sub {
-		my ($cgi,$n,$key) = @_;
-		return $n == 0 ? '' : "$n note" . ($n == 1 ? '' : 's');
-	}
-);
 
 $t->save_hooks(
 	'analysis' => sub {
-		my ($rn, $s, $uid) = @_;
+		my ($rn, $s) = @_;
 		# simultaneously update lx_et_hash
-		$dbh->do('DELETE FROM lx_et_hash WHERE rn=? AND uid=?', undef, $rn, $uid);
-		my $sth = $dbh->prepare(qq{INSERT INTO lx_et_hash (rn, tag, ind, uid) VALUES (?, ?, ?, ?)});
+		$dbh->do('DELETE FROM lx_et_hash WHERE rn=? AND uid=?', undef, $rn, 8);
+		my $sth = $dbh->prepare(qq{INSERT INTO lx_et_hash (rn, tag, ind, tag_str, uid) VALUES (?, ?, ?, ?, ?)});
 		my $index = 0;
-		for my $tag (split(/, */, $s)) { # Split the contents of the field on contents
+		for my $tag (split(/, */, $s)) { # Split the contents of the field on commas
 			# Insert new records into lx_et_hash based on the updated analysis field
-			$sth->execute($rn, $tag, $index, $uid) if ($tag =~ /^\d+$/);
+			my $tag_str = $tag;
+			$tag = 0 unless ($tag =~ /^\d+$/);
+			$sth->execute($rn, $tag, $index, $tag_str, 8);
+			$index++;
+		}
+	},
+	'user_an' => sub {
+		my ($rn, $s) = @_;
+		$dbh->do('DELETE FROM lx_et_hash WHERE rn=? AND uid=?', undef, $rn, $uid);
+		my $sth = $dbh->prepare(qq{INSERT INTO lx_et_hash (rn, tag, ind, tag_str, uid) VALUES (?, ?, ?, ?, ?)});
+		my $index = 0;
+		for my $tag (split(/, */, $s)) {
+			my $tag_str = $tag;
+			$tag = 0 unless ($tag =~ /^\d+$/);
+			$sth->execute($rn, $tag, $index, $tag_str, $uid);
 			$index++;
 		}
 	}

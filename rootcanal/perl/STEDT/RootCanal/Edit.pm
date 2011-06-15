@@ -13,7 +13,7 @@ sub table : StartRunmode {
 	my $t = $self->load_table_module($tbl);
 	my $q = $self->query;
 	
-	my $result = $t->search($q, $self->param('userprivs'), 1);
+	my $result = $t->search($q, $self->param('userprivs'));
 	# it doesn't seem to be too inefficient to pull out all the results
 	# and then count them and/or send partial results to the browser (for paging)
 	# The alternative is to do a COUNT * first, which mysql should be optimized for,
@@ -123,10 +123,10 @@ sub update : Runmode {
 	   && ($self->param('userprivs') > 1) ### need to figure out who can edit what
 	   && ($t = $self->load_table_module($tblname))
 	   && $t->in_editable($field)) {
-		my $oldval = $self->dbh->selectrow_array("SELECT $field FROM $tblname WHERE $t->{key}=?", undef, $id);
+		my $oldval = $t->get_value($field, $id);
+		$t->save_value($field, $value, $id);
 		$self->dbh->do("INSERT changelog VALUES (?,?,?,?,?,?,NOW())", undef,
-			$self->session->param('uid'), $tblname, $field =~ /([^.]+)$/, $id, $oldval, $value);
-		$t->save_value($field, $value, $id, $self->session->param('uid'));
+			$self->session->param('uid'), $tblname, $field =~ /([^.]+)$/, $id, $oldval || '', $value); # $oldval might be undefined (and interpreted as NULL by mysql)
 		return $value;
 	} else {
 		$self->header_props(-status => 403); # Forbidden

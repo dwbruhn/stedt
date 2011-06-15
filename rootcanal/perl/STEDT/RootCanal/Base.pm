@@ -80,13 +80,16 @@ sub unable_to_comply : ErrorRunmode {
 }
 
 # helper method to load the relevant module
+# optionally pass in a specific uid; 0 or 8 both mean STEDT user only (see Table.pm)
 sub load_table_module {
-	my ($self, $tbl) = @_;
+	my ($self, $tbl, $uid) = @_;
 	$tbl =~ /\W/ and die "table name contained illegal characters!"; # prevent sneaky injection attacks
 	$tbl =~ s/^(.)/\u$1/; # uppercase the first char
 	my $tbl_class = "STEDT::Table::$tbl";
 	eval "require $tbl_class" or die $@;
-	return $tbl_class->new($self->dbh);
+	
+	$uid = $self->session->param('uid') unless defined($uid);
+	return $tbl_class->new($self->dbh, $uid);
 }
 
 1;
