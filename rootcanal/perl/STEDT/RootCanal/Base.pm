@@ -38,7 +38,8 @@ sub cgiapp_init {
 
 	# a rough test to see if we're running over SSL
 	# if we are, send a different session id over the secure connection
-	my $secure = $self->query->cookie('stsec') ? 1 : 0;
+	# for testing purposes, we can ignore presence of secure connection
+	my $secure = $self->cfg('ignore_ssl') ? 1: ($self->query->cookie('stsec') ? 1 : 0);
 
 	# set up the session, telling it to use the above database connection
 	# to store the session info.
@@ -48,7 +49,7 @@ sub cgiapp_init {
 								{ Handle  => $self->dbh },
 								$secure ? { name => 'CGISECID' } : undef],
 		COOKIE_PARAMS => {	-name=> ($secure ? 'CGISECID' : CGI::Session->name),
-							-secure => $secure,
+							-secure => $self->cfg('ignore_ssl') ? 0 : $secure,
 							-httponly => 1 }
 	);
 }
@@ -69,7 +70,7 @@ sub cgiapp_prerun {
 	$self->session->expire("1y");
 	# additional cookie to test for a secure connection on the next HTTP request
 	$self->header_add(-cookie=>
-		[$self->query->cookie(-name=>'stsec',-value=>1,-secure=>1,-expires=>'+1y')]);
+		[$self->query->cookie(-name=>'stsec',-value=>1,-secure=>$self->cfg('ignore_ssl') ? 0 : 1,-expires=>'+1y')]);
 }
 
 # using C::A::P::AutoRunmode, we set this to be called in the event of an error
