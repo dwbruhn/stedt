@@ -487,7 +487,8 @@ var setup = { // in the form setup.[tablename].[fieldname]
 			size: 160,
 			transform: function (v,key,rec) {
 				if (!v) return '';
-				var tags = rec[1].split(',');
+				var analysis = rec[1] || ''; // might be NULL from the SQL query
+				var tags = analysis.split(',');
 				var result = SYLSTATION.syllabify(v);
 				var a = result[0].map(function (s,i) {
 					var delim = result[1][i] || '&thinsp;';
