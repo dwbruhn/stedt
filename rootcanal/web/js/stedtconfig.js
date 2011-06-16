@@ -126,7 +126,7 @@ var make_one_table = function (tablename, tabledata) {
 			// add the cell if column is visible
 			if (!setup[tablename][tabledata.fields[i]].hide) {
 				cell = row.insertCell(-1);
-				cell.innerHTML = xform	? xform(v.escapeHTML(), rec[k], rec, i)
+				cell.innerHTML = xform	? xform(v ? v.escapeHTML() : '', rec[k], rec, i)
 										: v ? v.escapeHTML() : '';
 			}
 		});
