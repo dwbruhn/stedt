@@ -113,6 +113,7 @@ $t->editable(
 	'analysis', 'user_an',
 	'lexicon.reflex',
 	'lexicon.gloss',
+	'lexicon.gfn',
 	'lexicon.srcid',
 	'lexicon.semcat', 
 );

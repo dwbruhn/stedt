@@ -26,7 +26,7 @@ $t->fields(
 	'languagenames.grpid',
 );
 $t->searchable(
-#	'languagenames.lgid',
+	'languagenames.lgid',
 	'languagenames.srcabbr',
 	'languagenames.language',
 #	'languagenames.lgabbr',

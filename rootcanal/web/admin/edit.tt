@@ -1,4 +1,4 @@
-[% PROCESS header.tt title="STEDT Database - Edit " _ t.table -%]
+[% PROCESS header.tt title="Edit " _ t.table _ " - STEDT Database" -%]
 <form>
 <table width="100%" style="table-layout:fixed;">
 <tr>
