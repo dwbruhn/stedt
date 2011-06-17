@@ -47,6 +47,7 @@ $t->editable(
 	'languagenames.lgsort'  ,
 	'languagenames.notes'   ,
 	'languagenames.lgcode',
+	'languagenames.silcode',
 	'languagenames.srcofdata',
 #	'languagenames.pinotes' ,
 #	'languagenames.picode'  ,
