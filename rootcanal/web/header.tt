@@ -24,17 +24,17 @@
 var stedtuserprivs = [% c.param('userprivs') %];
 $('header').show();
 </script>
-Logged in: [% user %]
-| <a href="[% self_url %]/admin">administration page</a>
-| <a href="[% self_url %]/account">account settings</a>
-| <a href="[% self_url %]/logout">log out</a>
+logged in as: <b><i>[% user %]</i></b>
+| <a href="[% self_url %]/admin">tools</a>
+| <a href="[% self_url %]/account">account</a>
+| <a href="[% self_url %]/logout">logout</a>
 | 
 [%- ELSE -%]
 <script>
 var stedtuserprivs = 0;
 </script>
 [% END -%]
-<a href="[% self_base %]help.html" target="_blank">Help</a>
+<a href="[% self_base %]help.html" target="_blank">help</a>
 <script src="[% self_base %]js/stedtconfig.js"></script>
 </span>
 <a href='http://stedt.berkeley.edu/' title='STEDT Home Page' target="_blank"><img src='[% self_base %]img/STB32x32.gif' alt='STEDT Logo' width='32' height='32' class="left" border=0></a>
