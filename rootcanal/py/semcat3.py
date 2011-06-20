@@ -1,5 +1,4 @@
-#!/usr/bin/env /Library/Frameworks/Python.framework/Versions/2.6/bin/python
-# keep !/usr/bin/env python
+#!/usr/bin/python
 
 import sys
 
@@ -14,8 +13,8 @@ import MySQLdb
 
 def opendb(options):
 
-    options.db = MySQLdb.connect(user="root", db="stedt")
-    #options.db = MySQLdb.connect(passwd="PASSWORD", user="stedtuser", host="192.168.100.222", db="stedt")
+    #options.db = MySQLdb.connect(user="root", db="stedt")
+    options.db = MySQLdb.connect(passwd="PASSWORD", user="stedtuser", db="stedt")
     #options.cursor=options.db.cursor()
 
     cursor = options.db.cursor()
