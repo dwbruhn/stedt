@@ -1,12 +1,6 @@
+[% PROCESS header.tt title="STEDT Database: Login Page" %]
 [% self_url = c.query.url('-absolute',1) -%]
 [% self_base = self_url.replace('[^/]+$' , '') -%]
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
-        "http://www.w3.org/TR/html4/loose.dtd">
-<html lang="en">
-<head>
-	<meta http-equiv="content-type" content="text/html; charset=utf-8">
-	<title>STEDT Database - Login Error</title>
-</head>
 <body>
 [%- IF !c.query.cookie('stsec') %]
 <p>Oops. You must be using a secure connection to do that. Try connecting via https...</p>
