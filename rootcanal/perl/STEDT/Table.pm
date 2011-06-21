@@ -289,6 +289,52 @@ sub save_value {
 	$sub->($id, $value) if $sub;
 }
 
+# take a CGI object with fields as params.
+# returns the id (value of the key field) and the values in the new row.
+# if error, return error string in the third return value.
+sub add_record {
+	my ($self, $q, $privs) = @_;
+	
+	# check for valid data
+	my $sub = $self->add_check();
+	if ($sub && (my $err = $sub->($q))) {
+		return 0, 0, $err;
+	}
+	
+	# make list of fields to be populated
+	my @fields;
+	for my $param ($q->param) {
+		push @fields, $param if $self->in_addable($param);
+	}
+
+	# add a new record
+	my $sth = $self->{dbh}->prepare("INSERT $self->{table} ("
+		. join(',', @fields)
+		. ") VALUES ("
+		. join(',', (('?') x @fields))
+		. ")");
+	eval { $sth->execute(map {$q->param($_)} @fields)	};
+	if ($@) {
+		return 0, 0, $sth->errstr;
+	}
+
+	my $id = $q->param($self->{key})
+		|| $self->{dbh}->selectrow_array("SELECT LAST_INSERT_ID()");
+		# only get the last insert id if the key wasn't explicitly set
+	for my $field (@fields) {
+		my $sub = $self->save_hooks($field);
+		$sub->($id, $q->param($field)) if $sub;
+	}
+	
+	$q->delete_all();
+	$q->param($self->{key},$id);
+	my ($query_string) = $self->get_query($q, $privs);
+	my $a = $self->{dbh}->selectall_arrayref($query_string);
+	# my %result;
+	# @result{$self->fields_for_priv($privs)} = @{$a->[0]};
+	return $id, $a->[0]; # \%result;
+}
+
 sub delete_data {
 	my $self = shift;
 	my $cgi = shift;

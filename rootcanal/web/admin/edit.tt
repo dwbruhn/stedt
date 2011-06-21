@@ -111,6 +111,7 @@ var add_record = function () { new Ajax.Request('[% self_url %]/add/[% t.table %
 		rec.each(function (v,i) {
 			var xform = setup['[% t.table %]'][head_cells[i].id].transform;
 			var cell = row.insertCell(-1);
+			if (setup['[% t.table %]'][head_cells[i].id].hide) cell.style.display = 'none';
 			if (v) {
 				cell.innerHTML = xform	? xform(v.escapeHTML(), row.id, rec, i)
 										: v.escapeHTML();

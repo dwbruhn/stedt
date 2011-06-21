@@ -3,7 +3,8 @@ use base STEDT::Table;
 use strict;
 
 sub new {
-my $t = shift->SUPER::new(my $dbh = shift, 'etyma', 'etyma.tag'); # dbh, table, key
+my ($self, $dbh, $uid) = @_;
+my $t = $self->SUPER::new($dbh, 'etyma', 'etyma.tag'); # dbh, table, key
 
 $t->query_from(q|etyma LEFT JOIN notes USING (tag) LEFT JOIN lx_et_hash USING (tag) JOIN `etyma` AS `super` ON etyma.supertag = super.tag|);
 $t->order_by('super.chapter, super.sequence, etyma.plgord');
@@ -120,7 +121,16 @@ $t->save_hooks(
 		
 		my $sth = $dbh->prepare(qq{UPDATE etyma SET etyma.plgord=? WHERE etyma.tag=?});
 		$sth->execute($i, $id);
-	}
+	},
+	# this is really more of an "add" hook, not a save hook,
+	# but the tag will presumably only ever be set when adding a new record
+	# SO, we take this opportunity to set the supertag and the uid
+	'etyma.tag' => sub {
+		my ($id, $value) = @_;
+		# simultaneously set the supertag field
+		my $sth = $dbh->prepare(qq{UPDATE etyma SET supertag=tag,uid=? WHERE tag=?});
+		$sth->execute($uid, $id);
+	},
 );
 $t->footer_extra(sub {
 	my $cgi = shift;

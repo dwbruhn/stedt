@@ -67,46 +67,16 @@ sub add : Runmode {
 	my $t = $self->load_table_module($tbl);
 	my $q = $self->query;
 	
-	# check for valid data
-	my $sub = $t->add_check();
-	if ($sub && (my $err = $sub->($q))) {
+	my ($id, $result, $err) = $t->add_record($q, $self->param('userprivs'));
+	if ($err) {
 		$self->header_props(-status => 400);
 		return $err;
 	}
 	
-	# make list of fields to be populated
-	my @fields;
-	for my $param ($q->param) {
-		push @fields, $param if $t->in_addable($param);
-	}
-
-	# add a new record
-	my $sth = $self->dbh->prepare("INSERT $tbl ("
-		. join(',', @fields)
-		. ") VALUES ("
-		. join(',', (('?') x @fields))
-		. ")");
-	eval { $sth->execute(map {$q->param($_)} @fields)	};
-	if ($@) {
-		$self->header_props(-status => 400);
-		return $sth->errstr;
-	}
-
-	my $id = $q->param($t->{key})
-		|| $self->dbh->selectrow_array("SELECT LAST_INSERT_ID()");
-		# only get the last insert id if the key wasn't explicitly set
-	for my $field (@fields) {
-		my $sub = $t->save_hooks($field);
-		$sub->($id, $q->param($field)) if $sub;
-	}
-	
 	# now retrieve it and send back some html
+	$id =~ s/"/\\"/g;
 	$self->header_add('-x-json'=>qq|{"id":"$id"}|);
-	$q->delete_all();
-	$q->param($t->{key},$id);
-	my ($query_string) = $t->get_query($q, $self->param('userprivs'));
-	my $a = $self->dbh->selectall_arrayref($query_string);
-	return to_json($a->[0]);
+	return to_json($result);
 }
 
 

@@ -91,7 +91,7 @@ sub searchresults_from_querystring {
 				s/^\*//;
 				$query->param('etyma.protoform' => $_);
 			}
-			elsif (/^\d+$/) {
+			elsif ($token =~ /^\d+$/) {
 				$query->param('etyma.tag' => $token);
 			}
 			else {

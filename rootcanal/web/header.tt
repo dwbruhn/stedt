@@ -24,7 +24,7 @@
 var stedtuserprivs = [% c.param('userprivs') %];
 $('header').show();
 </script>
-logged in as: <b><i>[% user %]</i></b>
+logged in as <b>[% user %]</b>.
 | <a href="[% self_url %]/admin">tools</a>
 | <a href="[% self_url %]/account">account</a>
 | <a href="[% self_url %]/logout">logout</a>
