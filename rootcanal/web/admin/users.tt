@@ -6,11 +6,11 @@
 
 <table>
 <tr>
-	<th>uid</th>
 	<th>username</th>
-	<th>password</th>
+	<th>uid</th>
 	<th>email</th>
 	<th>privs</th>
+	<th>tags</th>
 </tr>
 [% FOREACH row IN users -%]
 <tr>

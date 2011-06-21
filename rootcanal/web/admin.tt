@@ -1,6 +1,4 @@
 [% PROCESS header.tt title="STEDT Database: Admin Page" %]
-[% self_url = c.query.url('-absolute',1) -%]
-[% self_base = self_url.replace('[^/]+$' , '') -%]
 <body>
 <p/>
 Edit tables:
