@@ -29,7 +29,7 @@ sub users : Runmode {
 	my $self = shift;
 	return $self->tt_process("admin/https_warning.tt") unless $self->param('userprivs') >= 16;
 
-	my $a = $self->dbh->selectall_arrayref("SELECT * FROM users");
+	my $a = $self->dbh->selectall_arrayref("SELECT username,uid,email,privs,count(tag)  FROM users LEFT JOIN lx_et_hash  USING (uid) group BY uid");
 	return $self->tt_process("admin/users.tt", {users=>$a});
 }
 
