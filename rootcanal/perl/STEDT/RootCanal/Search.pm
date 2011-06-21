@@ -1,6 +1,5 @@
 package STEDT::RootCanal::Search;
 use strict;
-use feature 'switch';
 use base 'STEDT::RootCanal::Base';
 use JSON;
 
@@ -87,30 +86,30 @@ sub searchresults_from_querystring {
 
 	# figure out the table and the search terms
 	if ($tbl eq 'etyma') {
-		for my $token (split / /, $s) { given ($token) {
-			when (/^\*/) {
+		for my $token (split / /, $s) {
+			if ($token =~ /^\*/) {
 				s/^\*//;
 				$query->param('etyma.protoform' => $_);
 			}
-			when (/^\d+$/) {
+			elsif (/^\d+$/) {
 				$query->param('etyma.tag' => $token);
 			}
-			default {
+			else {
 				$query->param('etyma.protogloss' => $token);
 			}
-		}}
+		}
 		if ($s eq '') {
 			$query->param('etyma.chapter'=>'9.' . (int(rand 9) + 1));
 		}
 	} elsif ($tbl eq 'lexicon') {
-		for my $token (split / /, $s) { given ($token) {
-			when (/^\d+$/) {
+		for my $token (split / /, $s) {
+			if ($token =~ /^\d+$/) {
 				$query->param('analysis' => $token);
 			}
-			default {
+			else {
 				$query->param('lexicon.gloss' => $token);
 			}
-		}}
+		}
 		if ($s eq '') {
 			$query->param('analysis'=>1764);
 		}

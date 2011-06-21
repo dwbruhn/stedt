@@ -1,6 +1,5 @@
 package STEDT::RootCanal::Edit;
 use strict;
-use feature 'switch';
 use base 'STEDT::RootCanal::Base';
 use Encode;
 use CGI;

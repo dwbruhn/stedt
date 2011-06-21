@@ -82,7 +82,7 @@ $uid = 0 if $uid == 8;
 	# set this so that below, if $uid has non-zero value,
 	# we generate a second analysis column
 
-my $t = shift->SUPER::new(my $dbh = shift, 'lexicon', 'lexicon.rn'); # dbh, table, key
+my $t = shift->SUPER::new($dbh = shift, 'lexicon', 'lexicon.rn'); # dbh, table, key
 
 $t->query_from(q|lexicon LEFT JOIN languagenames USING (lgid) LEFT JOIN languagegroups USING (grpid)|);
 $t->order_by('languagegroups.ord, languagenames.lgsort, lexicon.reflex, languagenames.srcabbr, lexicon.srcid');

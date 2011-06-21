@@ -27,7 +27,7 @@ sub cgiapp_init {
 	
 	# read our login info from the config file
 	# then set up a database connection
-	$self->dbh_config("dbi:mysql:stedt", $self->cfg('login'), $self->cfg('pass'),
+	$self->dbh_config("dbi:mysql:database=stedt", $self->cfg('login'), $self->cfg('pass'),
 		{RaiseError => 1,AutoCommit => 1});
 
 	# set the database connection to use unicode, or you'll be sorry
