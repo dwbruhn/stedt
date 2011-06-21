@@ -201,7 +201,11 @@ sub get_query {
 }
 
 # helper WHERE bits
-sub where_int { my ($k,$v) = @_; $v =~ /^([<>])(.+)/ ? "$k$1$2" : "$k=$v" }
+# $v has single quotes and backslashes escaped already, so they should be
+# save to use in a single-quote context. Any other use of $v
+# (e.g. used bare as an integer) must be carefully controlled!
+# See where_int for an example where non-digits are stripped.
+sub where_int { my ($k,$v) = @_; $v =~ s/\D//g; return "'bad int!'='0'" unless $v =~ /\d/; $v =~ /^([<>])(.+)/ ? "$k$1$2" : "$k=$v" }
 sub where_rlike { my ($k,$v) = @_; "$k RLIKE '$v'" }
 sub where_word { my ($k,$v) = @_; "$k RLIKE '[[:<:]]${v}[[:>:]]'" }
 sub where_beginword { my ($k,$v) = @_; "$k RLIKE '[[:<:]]$v'" }

@@ -126,21 +126,24 @@ $t->wheres(
 		if ($v eq '0') { # use special value of 0 to search for empty analysis
 			return "0 = (SELECT COUNT(*) FROM lx_et_hash WHERE rn=lexicon.rn AND uid=8)";
 		} else {
+			my $is_string = ($v !~ /^\d+$/);
 			unless ($t->{query_from} =~ / lx_et_hash ON \(lexicon.rn/) {
 				$t->{query_from} .= ' LEFT JOIN lx_et_hash ON (lexicon.rn = lx_et_hash.rn AND lx_et_hash.uid=8)';
 			}
-			return "lx_et_hash.tag=$v";
+			return $is_string ? "lx_et_hash.tag_str='$v'" : "lx_et_hash.tag=$v";
 		}
 	},
 	'user_an' => sub {
 		my ($k,$v) = @_;
+		$v =~ s/\D//g; return "'bad int!'='0'" unless $v =~ /\d/;
 		if ($v eq '0') {
 			return "0 = (SELECT COUNT(*) FROM lx_et_hash WHERE rn=lexicon.rn AND uid=$uid)";
 		} else {
+			my $is_string = ($v !~ /^\d+$/);
 			unless ($t->{query_from} =~ / lx_et_hash AS l_e_h2 ON \(lexicon.rn/) {
 				$t->{query_from} .= " LEFT JOIN lx_et_hash AS l_e_h2 ON (lexicon.rn = l_e_h2.rn AND l_e_h2.uid=$uid)";
 			}
-			return "l_e_h2.tag=$v";
+			return $is_string ? "l_e_h2.tag_str='$v'" : "l_e_h2.tag=$v";
 		}
 	},
 	'lexicon.gloss' => 'word',#sub { my ($k,$v) = @_; "$k RLIKE '[[:<:]]$v'" },
