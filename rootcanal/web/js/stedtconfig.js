@@ -461,6 +461,11 @@ var setup = { // in the form setup.[tablename].[fieldname]
 		'etyma.public' : {
 			label: 'public',
 			size: 15
+		},
+		'users.username' : {
+			label: 'user',
+			size: 60,
+			noedit: true
 		}
 	},
 	lexicon : {

@@ -6,7 +6,7 @@ sub new {
 my ($self, $dbh, $uid) = @_;
 my $t = $self->SUPER::new($dbh, 'etyma', 'etyma.tag'); # dbh, table, key
 
-$t->query_from(q|etyma JOIN `etyma` AS `super` ON etyma.supertag = super.tag|);
+$t->query_from(q|etyma JOIN `etyma` AS `super` ON etyma.supertag = super.tag LEFT JOIN `users` ON etyma.uid = users.uid|);
 $t->order_by('super.chapter, super.sequence, etyma.plgord');
 $t->fields('etyma.tag',
 	'etyma.supertag',
@@ -23,6 +23,7 @@ $t->fields('etyma.tag',
 	'etyma.allofams' ,
 	'etyma.possallo' ,
 	'etyma.public',
+	'users.username',
 );
 $t->field_visible_privs(
 	'etyma.supertag' => 16,
@@ -37,7 +38,8 @@ $t->field_visible_privs(
 	'etyma.allofams'  => 16,
 	'etyma.public' => 16,
 	'u_recs' => 16,
-	'o_recs' => 16
+	'o_recs' => 16,
+	'users.username' => 16,
 );
 $t->searchable('etyma.tag',
 	'num_recs',
