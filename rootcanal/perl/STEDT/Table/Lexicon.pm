@@ -237,11 +237,13 @@ $t->add_form_items(
 			-onChange => <<EOF) .
 new Ajax.Request('$self_url/json_lg/' + \$('add_srcabbr').value, {
 	method: 'get',
-    onSuccess: function(transport,json){
+    onSuccess: function(transport){
+		var response = transport.responseText;
+		var recs = response.evalJSON();
 		var lg_menu = \$('add_language');
 		lg_menu.options.length = 0;
-		for (var i=0; i<json.ids.length; i++) {
-			lg_menu.options[i] = new Option(json.names[i],json.ids[i]);
+		for (var i=0; i<recs.length; i++) {
+			lg_menu.options[i] = new Option(recs[i][1],recs[i][0]);
 		}
     },
     onFailure: function(){ alert('Error when attempting to retrieve language names.') }

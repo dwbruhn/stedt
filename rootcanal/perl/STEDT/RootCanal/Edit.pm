@@ -109,11 +109,9 @@ sub json_lg : Runmode {
 	my $self = shift;
 	my $srcabbr = $self->param('srcabbr');
 	my $a = $self->dbh->selectall_arrayref("SELECT lgid, language FROM languagenames WHERE srcabbr LIKE ? ORDER BY language", undef, $srcabbr);
-	my @ids = map {$_->[0]} @$a;
-	my @names = map {qq|"$_->[1]"|} @$a;
-	$self->header_add('-x-json'=>qq|{"ids":[| . join(',',@ids)
-		. qq|],"names":[| . join(',',@names) . "]}");
-	return;
+#	my @ids = map {$_->[0]} @$a;
+#	my @names = map {qq|"$_->[1]"|} @$a;
+	return to_json($a);
 }
 
 sub single_record : Runmode {

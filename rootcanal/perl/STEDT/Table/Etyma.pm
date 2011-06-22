@@ -6,16 +6,18 @@ sub new {
 my ($self, $dbh, $uid) = @_;
 my $t = $self->SUPER::new($dbh, 'etyma', 'etyma.tag'); # dbh, table, key
 
-$t->query_from(q|etyma LEFT JOIN notes USING (tag) LEFT JOIN lx_et_hash USING (tag) JOIN `etyma` AS `super` ON etyma.supertag = super.tag|);
+$t->query_from(q|etyma JOIN `etyma` AS `super` ON etyma.supertag = super.tag|);
 $t->order_by('super.chapter, super.sequence, etyma.plgord');
 $t->fields('etyma.tag',
 	'etyma.supertag',
 	'etyma.printseq' ,
-	'COUNT(DISTINCT lx_et_hash.rn) AS num_recs',
+	'(SELECT COUNT(DISTINCT rn) FROM lx_et_hash WHERE tag=etyma.tag AND uid=8) AS num_recs',
+	"(SELECT COUNT(DISTINCT rn) FROM lx_et_hash WHERE tag=etyma.tag AND uid=$uid) AS u_recs",
+	"(SELECT COUNT(DISTINCT rn) FROM lx_et_hash WHERE tag=etyma.tag AND uid !=8 AND uid != $uid) AS o_recs",
 	'etyma.chapter', 'etyma.protoform', 'etyma.protogloss',
 	'etyma.plg', 'etyma.plgord',
 	'etyma.notes', 'etyma.hptbid',
-	'COUNT(DISTINCT notes.noteid) AS num_notes',
+	'(SELECT COUNT(*) FROM notes WHERE tag=etyma.tag) AS num_notes',
 	'etyma.sequence' ,
 	'etyma.xrefs',
 	'etyma.allofams' ,
@@ -34,6 +36,8 @@ $t->field_visible_privs(
 	'etyma.possallo'  => 16,
 	'etyma.allofams'  => 16,
 	'etyma.public' => 16,
+	'u_recs' => 16,
+	'o_recs' => 16
 );
 $t->searchable('etyma.tag',
 	'num_recs',

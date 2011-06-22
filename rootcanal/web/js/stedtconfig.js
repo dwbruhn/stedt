@@ -372,6 +372,16 @@ var setup = { // in the form setup.[tablename].[fieldname]
 				 	: v + '&nbsp;r\'s';
 			}
 		},
+		'u_recs' : {
+			label: 'u',
+			noedit: true,
+			size: 30,
+		},
+		'o_recs' : {
+			label: 'o',
+			noedit: true,
+			size: 30,
+		},
 		'etyma.chapter' : {
 			label: 'ch.',
 			size: 70
