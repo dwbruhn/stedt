@@ -7,17 +7,20 @@
 # ./makeFasc.sh 1 7 2
 #
 # first, get to the right place
+set -x
 cd ~stedt-cgi-ssl/rootcanals/
+cd tex/
+rm $1-$2-$3.*
+cd ..
 # generate the .tex file
 perl extract.pl $1 $2 $3
 cd tex/
-rm "$1-$2-$3.*"
-texfile=`ls $1-$2-$3*.tex` 
+texfile=`ls $1-$2-$3.tex` 
 # TeX it!     
-xelatex $texfile
-xelatex $texfile
-xelatex $texfile
-pdffile=`ls $1-$2-$3*.pdf`
+xelatex $texfile > /dev/null
+xelatex $texfile > /dev/null
+xelatex $texfile > /dev/null
+pdffile=`ls $1-$2-$3.pdf`
 pdffile=${pdffile%.*}
 DATETIME=`date '+%Y%m%d'`
 #DATETIME=`date '+%Y%m%d_%H%M%S'`
