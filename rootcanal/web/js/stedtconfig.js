@@ -478,6 +478,7 @@ var setup = { // in the form setup.[tablename].[fieldname]
 		},
 		'analysis' : {
 			label: 'analysis',
+			noedit: stedtuserprivs < 32,
 			hide: stedtuserprivs < 16,
 			size: 80,
 			transform: function (v) {
@@ -494,11 +495,12 @@ var setup = { // in the form setup.[tablename].[fieldname]
 		},
 		'languagenames.lgid' : {
 			label:'lgid',
-			noedit: true,
+			noedit: stedtuserprivs < 32,
 			hide: true
 		},
 		'lexicon.reflex' : {
 			label: 'form',
+			noedit: stedtuserprivs < 16,
 			size: 160,
 			transform: function (v,key,rec) {
 				if (!v) return '';
@@ -526,10 +528,12 @@ var setup = { // in the form setup.[tablename].[fieldname]
 		},
 		'lexicon.gloss' : {
 			label: 'gloss',
+			noedit: stedtuserprivs < 32,
 			size: 160
 		},
 		'lexicon.gfn' : {
 			label: 'gfn',
+			noedit: stedtuserprivs < 32,
 			size: 30
 		},
 		'languagenames.language' : {
