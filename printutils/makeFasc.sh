@@ -27,5 +27,5 @@ DATETIME=`date '+%Y%m%d'`
 # move the new pdf to the dissemination directory
 cp $pdffile.pdf ~stedt/public_html/dissemination/$pdffile-$DATETIME-1.pdf
 # update the ToC for the electronic etymologies
-perl ~stedt/public_html/makeToC.pl > ~stedt/public_html/dissemination.html       
+perl ~stedt-cgi-ssl/rootcanals/makeToC.pl > ~stedt/public_html/dissemination.html       
 echo "done with $texfile" 
