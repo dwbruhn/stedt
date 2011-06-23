@@ -81,6 +81,10 @@ th {
 	overflow: hidden;
 }
 
+.etyma_edit_table th { background-color: #C93; }
+.srcbib_edit_table th { background-color: gray; }
+.languagenames_edit_table th { background-color: black; }
+
 th A:link     		{ color: white; }
 th A:visited   		{ color: white; }
 th A:hover   		{ color: teal; text-decoration: underline; }

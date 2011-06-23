@@ -1,6 +1,6 @@
 [% PROCESS header.tt title="Edit " _ t.table _ " - STEDT Database" -%]
 <form>
-<table width="100%" style="table-layout:fixed;">
+<table class="[% t.table %]_edit_table" width="100%" style="table-layout:fixed;">
 <tr>
 [% FOREACH col IN t.searchable -%]
 <th width="50">[% col.replace('^.*\.','') %]</th>
@@ -42,7 +42,7 @@ Displaying items [% a %]-[% b %] of [% result.data.size %].
 [%- END -%]
 
 <form>
-<table id="[% t.table %]_resulttable" class="[% IF !manual %]sortable [% END %]resizable editable" width="100%" style="table-layout:fixed;">
+<table id="[% t.table %]_resulttable" class="[% IF !manual %]sortable [% END %]resizable editable [% t.table %]_edit_table" width="100%" style="table-layout:fixed;">
 <thead><tr>
 [%- FOREACH col IN result.fields %]
 <th id="[% col %]">
