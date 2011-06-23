@@ -50,7 +50,7 @@ binmode(STDERR, ":utf8");
 # build etyma hash
 print STDERR "building etyma data...\n";
 my %tag2info; # this is (and should only be) used inside xml2tex, for looking up etyma refs
-for (@{$dbh->selectall_arrayref("SELECT tag,chapter,printseq,protoform,protogloss FROM etyma")}) {
+for (@{$dbh->selectall_arrayref("SELECT tag,chapter,printseq,protoform,protogloss FROM etyma WHERE uid=8")}) {
 	my ($tag,$chapter,@info) = map {decode_utf8($_)} @$_;
 	if ($chapter =~ /^9.\d$/) {
 		push @info, 'TBRS'; # "volume" info to print for cross refs in the notes
@@ -152,7 +152,8 @@ FROM lexicon LEFT JOIN notes ON notes.rn=lexicon.rn, languagenames, languagegrou
 WHERE (lx_et_hash.tag = $e{tag}
 AND lx_et_hash.rn=lexicon.rn
 AND languagenames.lgid=lexicon.lgid
-AND languagenames.grpid=languagegroups.grpid)
+AND languagenames.grpid=languagegroups.grpid
+AND lx_et_hash.uid=8)
 ORDER BY languagegroups.ord, languagenames.lgsort, reflex, languagenames.srcabbr, lexicon.srcid
 EndOfSQL
 	my $recs = $dbh->selectall_arrayref($sql);
