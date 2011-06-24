@@ -24,17 +24,24 @@
 var stedtuserprivs = [% c.param('userprivs') %];
 $('header').show();
 </script>
-logged in as <b>[% user %]</b>.
-| <a href="[% self_url %]/admin">tools</a>
-| <a href="[% self_url %]/account">account</a>
-| <a href="[% self_url %]/logout">logout</a>
-| 
+<span class="left"> logged in as <b>[% user %]</b></span>
+<span class="left"><form name="dropdown" method="POST">
+<select name="DDMenu" onchange="location.href=(form.DDMenu.options[form.DDMenu.selectedIndex].value)">
+<option value="[% self_url %]/admin">Tools</option>
+<option value="#"></option>
+<option value="[% self_url %]/edit/etyma">Etyma</option>
+<option value="[% self_url %]/edit/lexicon">Lexicon</option>
+<option value="[% self_url %]/account">Account</option>
+<option value="[% self_url %]/admin/users">Users</option>
+</select>
+</form></span>
+<span class="left"><a href="[% self_url %]/logout">logout</a></span>
 [%- ELSE -%]
 <script>
 var stedtuserprivs = 0;
 </script>
 [% END -%]
-<a href="[% self_base %]help.html" target="_blank">help</a>
+<span class="left"><a href="[% self_base %]help.html" target="_blank">help</a></span>
 <script src="[% self_base %]js/stedtconfig.js"></script>
 </span>
 <a href='http://stedt.berkeley.edu/' title='STEDT Home Page' target="_blank"><img src='[% self_base %]img/STB32x32.gif' alt='STEDT Logo' width='32' height='32' class="left" border=0></a>

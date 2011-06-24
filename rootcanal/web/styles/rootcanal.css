@@ -38,9 +38,8 @@ td, .editable-cell-form textarea
 /* table cells and their editable versions should look the same */
 /* (looks like we're only using textareas, not text inputs) */
 {
-	font-family: "STEDTU", "Doulos SIL", "Charis SIL", "Gentium",
-		"TITUS Cyberbit Basic", "SILDoulosUnicodeIPA", "Thryomanes",
-		"Cardo", "Lucida Grande", "Arial Unicode MS", "Lucida Sans Unicode";
+	font-family: "Doulos SIL", "Charis SIL", "Gentium", "SILDoulosUnicodeIPA", "Thryomanes",
+		"Cardo", "Lucida Grande", "Arial Unicode MS", "Lucida Sans Unicode","STEDTU";
 	font-size: medium;
 }
 
@@ -58,6 +57,10 @@ td, .editable-cell-form textarea
 {
 	float: right;
 	padding: 0 0 1ex 1em;
+}
+
+.dropdown {
+	padding: 0 1em 0 0;
 }
 
 .notepreview
