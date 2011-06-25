@@ -50,7 +50,7 @@ binmode(STDERR, ":utf8");
 # build etyma hash
 print STDERR "building etyma data...\n";
 my %tag2info; # this is (and should only be) used inside xml2tex, for looking up etyma refs
-for (@{$dbh->selectall_arrayref("SELECT tag,chapter,printseq,protoform,protogloss FROM etyma WHERE uid=8")}) {
+for (@{$dbh->selectall_arrayref("SELECT tag,chapter,printseq,protoform,protogloss FROM etyma")}) {
 	my ($tag,$chapter,@info) = map {decode_utf8($_)} @$_;
 	if ($chapter =~ /^9.\d$/) {
 		push @info, 'TBRS'; # "volume" info to print for cross refs in the notes
@@ -90,7 +90,7 @@ my @etyma; # array of infos to be passed on to the template
 my $etyma_in_chapter = $dbh->selectall_arrayref(
 	qq#SELECT e.tag, e.printseq, e.protoform, e.protogloss, e.plg, e.hptbid, e.tag=e.supertag AS is_main
 		FROM `etyma` AS `e` JOIN `etyma` AS `super` ON e.supertag = super.tag
-		WHERE e.chapter = '$fasc.$chap' AND e.printseq != ''
+		WHERE e.uid=8 AND e.chapter = '$fasc.$chap' AND e.printseq != ''
 		ORDER BY super.sequence, e.plgord#);
 
 
@@ -150,10 +150,9 @@ SELECT DISTINCT languagegroups.ord, grp, language, lexicon.rn,
    analysis, reflex, gloss, languagenames.srcabbr, lexicon.srcid, notes.rn
 FROM lexicon LEFT JOIN notes ON notes.rn=lexicon.rn, languagenames, languagegroups, lx_et_hash
 WHERE (lx_et_hash.tag = $e{tag}
-AND lx_et_hash.rn=lexicon.rn
+AND lx_et_hash.rn=lexicon.rn AND lx_et_hash.uid=8
 AND languagenames.lgid=lexicon.lgid
-AND languagenames.grpid=languagegroups.grpid
-AND lx_et_hash.uid=8)
+AND languagenames.grpid=languagegroups.grpid)
 ORDER BY languagegroups.ord, languagenames.lgsort, reflex, languagenames.srcabbr, lexicon.srcid
 EndOfSQL
 	my $recs = $dbh->selectall_arrayref($sql);
