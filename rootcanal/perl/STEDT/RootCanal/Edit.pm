@@ -7,7 +7,7 @@ use JSON;
 
 sub table : StartRunmode {
 	my $self = shift;
-	return $self->tt_process("admin/https_warning.tt") unless $self->param('userprivs') >= 16;
+	if (my $err = $self->require_privs(1)) { return $err; }
 	my $tbl = $self->param('tbl');
 	my $t = $self->load_table_module($tbl);
 	my $q = $self->query;
@@ -58,12 +58,12 @@ sub table : StartRunmode {
 
 sub add : Runmode {
 	my $self = shift;
-	if ($self->param('userprivs') < 16) {
-		$self->header_props(-status => 403);
-		return "User not logged in";
-	}
 
 	my $tbl = $self->param('tbl');
+	my $privs = $tbl eq 'etyma' ? 1 : 16;
+	# taggers can only add etyma, not lexicon/languagename/etc. records
+	if (my $err = $self->require_privs($privs)) { return $err; }
+
 	my $t = $self->load_table_module($tbl);
 	my $q = $self->query;
 	
@@ -89,7 +89,7 @@ sub update : Runmode {
 	my $t;
 	
 	if ($self->param('user')
-	   && ($self->param('userprivs') > 1) ### need to figure out who can edit what
+	   && ($self->has_privs(1))
 	   && ($t = $self->load_table_module($tblname))
 	   && $t->in_editable($field)) {
 		my $oldval = $t->get_value($field, $id);
@@ -109,14 +109,12 @@ sub json_lg : Runmode {
 	my $self = shift;
 	my $srcabbr = $self->param('srcabbr');
 	my $a = $self->dbh->selectall_arrayref("SELECT lgid, language FROM languagenames WHERE srcabbr LIKE ? ORDER BY language", undef, $srcabbr);
-#	my @ids = map {$_->[0]} @$a;
-#	my @names = map {qq|"$_->[1]"|} @$a;
 	return to_json($a);
 }
 
 sub single_record : Runmode {
 	my $self = shift;
-	return $self->tt_process("admin/https_warning.tt") unless $self->param('userprivs') >= 16;
+	if (my $err = $self->require_privs(16)) { return $err; }
 	my $tbl = $self->param('tbl');
 	my $id = $self->param('id');
 	my $t = $self->load_table_module($tbl);
@@ -162,10 +160,7 @@ sub single_record : Runmode {
 
 sub makesubroot : Runmode {
 	my $self = shift;
-	if ($self->param('userprivs') < 16) {
-		$self->header_props(-status => 403);
-		return "User not logged in";
-	}
+	if (my $err = $self->require_privs(1)) { return $err; }
 	my $tag = $self->param('src');
 	my $dst = $self->param('dst');
 	my $supertag = $self->param('srcsuper');

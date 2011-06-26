@@ -2,7 +2,7 @@ setup.languagenames = {
 	_key: 'languagenames.lgid',
 	'languagenames.lgid': {
 		noedit: true,
-		hide: stedtuserprivs < 16,
+		hide: !(stedtuserprivs & 1),
 		size:40
 	},
 	'num_recs': {

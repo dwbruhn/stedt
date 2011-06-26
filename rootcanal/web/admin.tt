@@ -8,6 +8,11 @@ Edit tables:
 [% END -%]
 </ul>
 
+Fun stuff:
+<ul>
+<li><a href="[% self_url %]/chapters">The Chapter Browser</a></li>
+</ul>
+
 Activity:
 <ul>
 <li><a href="[% self_url %]/admin/queries">view recent queries</a></li>

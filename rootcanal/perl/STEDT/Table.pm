@@ -82,7 +82,7 @@ sub fields {
 		}
 		$self->{fields} = [@a];
 		%{$self->{is_field}} = map {$_,1} @a;	# for efficient lookup later
-		%{$self->{field_visible_privs}} = map {$_,1} @a;	# all visible by default
+		%{$self->{field_visible_privs}} = map {$_,31} @a;	# all visible by default
 		@{$self->{full_fields}}{@a} = @full_fields;
 		die "key not in fields list!" unless $self->{is_field}{$self->{key}};
 	} else {

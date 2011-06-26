@@ -30,6 +30,11 @@ sub gsarpa : Runmode {
 	return $self->tt_process("admin/create_account.tt", { err => $errs });
 }
 
+my %secret_codes = {
+	allofam => 2,				# casual user
+	rhinoglottophilia => 1,		# tagger
+	columbicubiculomania => 31,	# superuser with all bits set
+};
 
 # create/update account if attempting to do so
 sub acct_dfv_profile {
@@ -49,7 +54,7 @@ sub acct_dfv_profile {
 			newpwd2 => FV_eq_with('newpwd'),
 			email   => email(),
 			secret_code => sub { my ($dfv, $val) = @_; $dfv->name_this('secret');
-				return $val eq 'rhinoglottophilia';
+				return $secret_codes{$val};
 			},
 			oldpwd => sub { my ($dfv, $val) = @_; $dfv->name_this('password_correct');
 				my ($p1, $p2) = $self->dbh->selectrow_array("SELECT password, SHA1(?) FROM users WHERE uid=?", undef, $val, $self->session->param('uid'));
@@ -93,8 +98,9 @@ sub create : Runmode {
 	my $dbh = $self->dbh;
 	my $sth = $dbh->prepare("INSERT users ("
 		. join(',', qw|username password email privs|)
-		. ") VALUES (?, SHA1(?), ?, 16)");
-	eval { $sth->execute($u, $q->param('newpwd'), $q->param('email'))	};
+		. ") VALUES (?, SHA1(?), ?, ?)");
+	my $privs = $secret_codes{$q->param('secret_code')};
+	eval { $sth->execute($u, $q->param('newpwd'), $q->param('email'), $privs)	};
 	if ($@) {
 		my $err = "Can't create new account: $@";
 		die $err; # give unexpected error page!

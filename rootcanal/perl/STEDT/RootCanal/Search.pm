@@ -116,7 +116,7 @@ sub searchresults_from_querystring {
 	}
 
 	# only show public etyma 
-	if ($tbl eq 'etyma' && $self->param('userprivs') < 2) {
+	if ($tbl eq 'etyma' && !$self->has_privs(1)) {
 		$query->param('etyma.public' => 1);
 	}
 

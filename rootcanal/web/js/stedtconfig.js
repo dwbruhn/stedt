@@ -140,13 +140,13 @@ var make_one_table = function (tablename, tabledata) {
 	TableKit.tables[t.id].raw = {};
 	TableKit.tables[t.id].raw.data = rawData;
 	TableKit.tables[t.id].raw.cols = rawDataCols;
-	if (stedtuserprivs >= 16) {
+	if (stedtuserprivs & 1) {
 		TableKit.Editable.init(t);
 		TableKit.tables[t.id].editAjaxURI = baseRef + 'update';
 		TableKit.tables[t.id].editAjaxExtraParams = '&tbl=' + tablename;
-		TableKit.tables[t.id].editAjaxTransform = function (tbl, fld, key, val, rec) {
+		TableKit.tables[t.id].editAjaxTransform = function (tbl, fld, key, val, rec, n) {
 			var xform = setup[tbl][fld].transform;
-			return xform ? xform(val, key, rec) : val;
+			return xform ? xform(val, key, rec, n) : val;
 		};
 	}
 	if (setup[tablename]._postprocess) {
@@ -234,7 +234,7 @@ function SylStation() {
 };
 var SYLSTATION = new SylStation(); // for efficiency, we make this object once
 
-var stedtadmin = stedtuserprivs >= 16;
+var stedttagger = stedtuserprivs & 16;
 var skipped_roots = {};
 var public_roots = {};
 [1,2,34,35,90,95,20,98,70,97,71,92,66,67,109,119,103,111,138,132,142,
@@ -346,7 +346,7 @@ var setup = { // in the form setup.[tablename].[fieldname]
 		'etyma.tag' : {
 			label: 'TAG',
 			noedit: true,
-			hide: stedtuserprivs < 16,
+			hide: !(stedtuserprivs & 1),
 			size: 40,
 			transform: function (v) {
 				return '<span id="tag' + v
@@ -356,7 +356,7 @@ var setup = { // in the form setup.[tablename].[fieldname]
 		'etyma.supertag' : {
 			label: 'super',
 			nosort: true,
-			hide: stedtuserprivs < 16,
+			hide: !(stedtuserprivs & 1),
 			size: 40,
 			transform: function (v,key) {
 				 return v === key ? '' : v;
@@ -473,13 +473,13 @@ var setup = { // in the form setup.[tablename].[fieldname]
 		'lexicon.rn' : {
 			label: 'rn',
 			noedit: true,
-			hide: stedtuserprivs < 16,
+			hide: !(stedtuserprivs & 1),
 			size: 70
 		},
 		'analysis' : {
 			label: 'analysis',
-			noedit: stedtuserprivs < 32,
-			hide: stedtuserprivs < 16,
+			noedit: !(stedtuserprivs & 16),
+			hide: !(stedtuserprivs & 1),
 			size: 80,
 			transform: function (v) {
 				return v.replace(/, */g,', ');
@@ -487,7 +487,7 @@ var setup = { // in the form setup.[tablename].[fieldname]
 		},
 		'user_an' : {
 			label: 'my analysis',
-			hide: stedtuserprivs < 16,
+			hide: !(stedtuserprivs & 1),
 			size: 80,
 			transform: function (v) {
 				return v.replace(/, */g,', ');
@@ -495,12 +495,12 @@ var setup = { // in the form setup.[tablename].[fieldname]
 		},
 		'languagenames.lgid' : {
 			label:'lgid',
-			noedit: stedtuserprivs < 32,
+			noedit: true,
 			hide: true
 		},
 		'lexicon.reflex' : {
 			label: 'form',
-			noedit: stedtuserprivs < 16,
+			noedit: !(stedtuserprivs & 1),
 			size: 160,
 			transform: function (v,key,rec) {
 				if (!v) return '';
@@ -509,7 +509,7 @@ var setup = { // in the form setup.[tablename].[fieldname]
 				var result = SYLSTATION.syllabify(v);
 				var a = result[0].map(function (s,i) {
 					var delim = result[1][i] || '&thinsp;';
-					var makelink = !skipped_roots[tags[i]] && (stedtadmin || public_roots[tags[i]]);
+					var makelink = !skipped_roots[tags[i]] && (stedttagger || public_roots[tags[i]]);
 					return (parseInt(tags[i], 10) && makelink)
 						? '<a href="' + baseRef + 'etymon/' + tags[i] + '" target="stedt_etymon"'
 							+ ' class="r' + tags[i] + '">'
@@ -528,12 +528,12 @@ var setup = { // in the form setup.[tablename].[fieldname]
 		},
 		'lexicon.gloss' : {
 			label: 'gloss',
-			noedit: stedtuserprivs < 32,
+			noedit: !(stedtuserprivs & 16),
 			size: 160
 		},
 		'lexicon.gfn' : {
 			label: 'gfn',
-			noedit: stedtuserprivs < 32,
+			noedit: !(stedtuserprivs & 16),
 			size: 30
 		},
 		'languagenames.language' : {

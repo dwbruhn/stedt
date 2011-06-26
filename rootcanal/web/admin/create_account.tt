@@ -9,7 +9,7 @@ username: <input type="text" size="10" name="newuser" maxlength="15">[% err.newu
 password: <input type="password" size="10" name="newpwd">[% err.newpwd %]<br>
 confirm password: <input type="password" size="10" name="newpwd2">[% err.newpwd2 %]<br>
 email (in case you forget your password): <input type="text" size="30" name="email">[% err.email %]<br>
-secret code: <input type="password" size="10" name="secret_code">[% err.secret_code %]<br>
+secret code: <input type="text" size="10" name="secret_code">[% err.secret_code %]<br>
 <input name="btn" type="submit" value="Create">
 </form>
 

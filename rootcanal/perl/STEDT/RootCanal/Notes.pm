@@ -7,23 +7,26 @@ use utf8;
 sub chapter_browser : RunMode {
 	my $self = shift;
 	my $public = '';
+	my $blessed = '';
 	my $public_ch = '';
-	if ($self->param('userprivs') < 16) {
+	unless ($self->has_privs(1)) {
 		$public = "AND etyma.public=1";
+		$blessed = 'AND etyma.uid=8';
 		$public_ch = 'HAVING num_public OR public_notes';
 	}
 	# from the chapters table
 	my $chapters = $self->dbh->selectall_arrayref(<<SQL);
 SELECT chapters.chapter, chapters.chaptertitle, SUM(etyma.public) AS num_public,
 	COUNT(DISTINCT etyma.tag), COUNT(DISTINCT notes.noteid), MAX(notes.notetype = 'G'), MAX(notes.notetype != 'I') as public_notes
-FROM chapters LEFT JOIN etyma USING (chapter) LEFT JOIN notes ON (notes.id=chapters.chapter)
+FROM chapters LEFT JOIN etyma ON (etyma.chapter=chapters.chapter $blessed)
+	LEFT JOIN notes ON (notes.id=chapters.chapter)
 GROUP BY 1 $public_ch ORDER BY 1
 SQL
 	# chapters that appear in etyma but not in chapters table
 	my $e_ghost_chaps = $self->dbh->selectall_arrayref(<<SQL);
 SELECT etyma.chapter, SUM(etyma.public), COUNT(*)
 FROM etyma NATURAL LEFT JOIN chapters
-WHERE chapter != ''  $public AND chapters.chaptertitle IS NULL GROUP BY 1 ORDER BY 1
+WHERE chapter != ''  $public $blessed AND chapters.chaptertitle IS NULL GROUP BY 1 ORDER BY 1
 SQL
 	# chapters that appear in notes but not in chapters table
 	my $n_ghost_chaps = $self->dbh->selectall_arrayref(<<SQL);
@@ -43,7 +46,7 @@ sub chapter : RunMode {
 	my $title = $self->dbh->selectrow_array("SELECT chaptertitle FROM chapters WHERE chapter=?", undef, $chap);
 	$title ||= '[chapter does not exist in chapters table!]';
 	
-	my $INTERNAL_NOTES = $self->param('userprivs') >= 16;
+	my $INTERNAL_NOTES = $self->has_privs(1);
 	my $internal_note_search = '';
 	$internal_note_search = "AND notetype != 'I'" unless $INTERNAL_NOTES;
 	my (@notes, @footnotes);
@@ -60,7 +63,7 @@ sub chapter : RunMode {
 	my $t = $self->load_table_module('etyma');
 	my $q = $self->query->new;
 	$q->param('etyma.chapter'=>$chap);
-	$q->param('etyma.public'=>1) if $self->param('userprivs') < 16;
+	$q->param('etyma.public'=>1) unless $self->has_privs(1);
 	my $result = $t->search($q, $self->param('userprivs'));
 	for my $row (@{$result->{data}}) {
 		map {$_ = decode_utf8($_)} @$row; # apparently because we decode_utf8 on some stuff above, we have to do it here too. Compare with Edit/table and edit.tt, where it looks like it's going in binary mode?
@@ -104,10 +107,7 @@ sub add : RunMode {
 
 sub delete : RunMode {
 	my $self = shift;
-	if ($self->param('userprivs') < 16) {
-		$self->header_props(-status => 403);
-		return "User not logged in";
-	}
+	if (my $err = $self->require_privs(1)) { return $err; }
 	my $dbh = $self->dbh;
 	my $q = $self->query;
 	my $noteid = $q->param('noteid');
@@ -130,10 +130,7 @@ sub delete : RunMode {
 
 sub save : RunMode {
 	my $self = shift;
-	if ($self->param('userprivs') < 16) {
-		$self->header_props(-status => 403);
-		return "User not logged in";
-	}
+	if (my $err = $self->require_privs(1)) { return $err; }
 	my $dbh = $self->dbh;
 	my $q = $self->query;
 	my $noteid = $q->param('noteid');
@@ -166,10 +163,7 @@ sub save : RunMode {
 
 sub reorder : RunMode {
 	my $self = shift;
-	if ($self->param('userprivs') < 16) {
-		$self->header_props(-status => 403);
-		return "User not logged in";
-	}
+	if (my $err = $self->require_privs(1)) { return $err; }
 	my @ids = map {/(\d+)$/} split /\&/, $self->query->param('ids');
 	# change the order, but don't update the modification time for something so minor.
 	my $sth = $self->dbh->prepare("UPDATE notes SET ord=?, datetime=datetime WHERE noteid=?");
@@ -337,7 +331,7 @@ sub notes_for_rn : StartRunmode {
 	my $self = shift;
 	my $rn = $self->param('rn');
 	
-	my $INTERNAL_NOTES = $self->param('userprivs') >= 16;
+	my $INTERNAL_NOTES = $self->has_privs(1);
 	my $internal_note_search = '';
 	$internal_note_search = "AND notetype != 'I'" unless $INTERNAL_NOTES;
 
@@ -356,7 +350,7 @@ sub etymon : Runmode {
 	my $self = shift;
 	my $tag = $self->param('tag');
 	
-	my $INTERNAL_NOTES = $self->param('userprivs') >= 16;
+	my $INTERNAL_NOTES = $self->has_privs(1);
 	my $internal_note_search = '';
 	$internal_note_search = "AND notetype != 'I' AND notetype != 'O'" unless $INTERNAL_NOTES;
 	my (@etyma, @footnotes);

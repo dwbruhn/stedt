@@ -4,7 +4,7 @@ setup['lexicon']['notes.rn'] = {
 	noedit: true,
 	size: 80,
 	transform : function (v) {
-		if (v === '') return stedtuserprivs ? '<a href="#" class="lexadd">[+]</a>' : '';
+		if (v === '') return (stedtuserprivs & 1) ? '<a href="#" class="lexadd">[+]</a>' : '';
 		var a = $A(v.match(/\d+/g)).map(function (s) {
 			return '<a href="#foot' + s + '" id="toof' + s + '">' + s + '</a>';
 		});
@@ -12,7 +12,7 @@ setup['lexicon']['notes.rn'] = {
 	}
 };
 for (var i = 1; i < num_tables; i++) {
-	TableKit.Raw.init('lexicon' + i, 'lexicon', stedtuserprivs >= 16 ? (baseRef+'update') : null);
+	TableKit.Raw.init('lexicon' + i, 'lexicon', (stedtuserprivs & 1) ? (baseRef+'update') : null);
 	TableKit.Rows.stripe('lexicon' + i);
 }
 

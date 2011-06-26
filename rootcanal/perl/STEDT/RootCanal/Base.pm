@@ -93,4 +93,21 @@ sub load_table_module {
 	return $tbl_class->new($self->dbh, $uid);
 }
 
+# helper methods for authentication
+
+# check if the user has the right privilege bits set.
+# return error page if not secure.
+sub require_privs {
+	my ($self, $privs) = @_;
+	return if ($self->param('userprivs') & $privs);
+	return $self->tt_process("admin/https_warning.tt") unless $self->param('user');
+	$self->header_props(-status => 403);
+	return 'You do not have sufficient privileges to perform that operation.';
+}
+
+sub has_privs {
+	my ($self, $privs) = @_;
+	return $self->param('userprivs') & $privs;
+}
+
 1;
