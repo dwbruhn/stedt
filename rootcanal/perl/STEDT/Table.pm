@@ -97,7 +97,7 @@ sub fields_for_priv {
 	
 	for (@{$self->{fields}}) {
 		push @result, ($fullnames ? $self->{full_fields}{$_} : $_)
-			if $priv >= $self->{field_visible_privs}{$_};
+			if $priv & $self->{field_visible_privs}{$_};
 	}
 	return @result;
 }
