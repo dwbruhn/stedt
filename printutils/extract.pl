@@ -147,7 +147,8 @@ foreach (@$etyma_in_chapter) {
 	# do entries
 	my $sql = <<EndOfSQL; # this order forces similar reflexes together, and helps group srcabbr's
 SELECT DISTINCT languagegroups.ord, grp, language, lexicon.rn, 
-   analysis, reflex, gloss, languagenames.srcabbr, lexicon.srcid, notes.rn
+   (SELECT GROUP_CONCAT(tag_str ORDER BY ind) FROM lx_et_hash WHERE rn=lexicon.rn AND uid=8) AS analysis,
+   reflex, gloss, languagenames.srcabbr, lexicon.srcid, notes.rn
 FROM lexicon LEFT JOIN notes ON notes.rn=lexicon.rn, languagenames, languagegroups, lx_et_hash
 WHERE (lx_et_hash.tag = $e{tag}
 AND lx_et_hash.rn=lexicon.rn AND lx_et_hash.uid=8
