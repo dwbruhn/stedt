@@ -4,6 +4,7 @@ use base 'STEDT::RootCanal::Base';
 use Encode;
 use CGI;
 use JSON;
+use utf8;
 
 sub table : StartRunmode {
 	my $self = shift;
@@ -80,6 +81,44 @@ sub add : Runmode {
 }
 
 
+# check to see if the only change involves adding or deleting delimiters. if so, it
+# directly modifies the second argument by replacing added spaces with a STEDT delim,
+# and also strips out surrounding whitespace.
+sub delims_only {
+	my @a = split '', $_[0]; # split our strings into chars
+	my @b = split '', ($_[1] =~ /(\S.*\S)/)[0]; # ignore starting/trailing whitespace ((...)[0] forces list context)
+	my $delims_only = 1;
+	my $i = 0;
+	my $j = 0;
+	
+	while ($delims_only && $i < @a && $j < @b) { # while the strings match and we haven't reached the end yet...
+		if ($a[$i] ne $b[$j]) { # do nothing if they match at the current indexes
+			unless (
+				($i+1 < @a && $a[$i+1] eq $b[$j] && $a[$i] =~ /[◦\|]/ && $i++) ||
+					# char was deleted and it was '◦' or '|'
+				($j+1 < @b && $b[$j+1] eq $a[$i] && ($b[$j] =~ /[◦\|]/ || ($b[$j] eq ' ' && ($b[$j] = '◦'))) && $j++)
+					# char was added and it was '◦' or '|',
+					# or it was a space, in which case we change it to be '◦', and so yes that's *supposed* to be an assignment operator!
+					# Finally, increment the counter if all the other tests pass.
+					) {
+				$delims_only = 0;
+			}
+		}
+		$i++;
+		$j++;
+	}
+	return 0 if !$delims_only;
+	# make sure both strings have been read to the end
+	if (($i == @a && $j == @b) ||
+		($j == @b && $i+1 == @a && $a[$i] eq '|') ||
+		($i == @a && $j+1 == @b && $b[$j] eq '|') # special case: allow add/delete of overriding delim at the end
+		) {
+		$_[1] = join '', @b;	# modify-in-place
+		return 1;
+	}
+	return 0;
+}
+
 sub update : Runmode {
 	my $self = shift;
 	my $q = $self->query;
@@ -91,9 +130,23 @@ sub update : Runmode {
 	if ($self->param('user')
 	   && ($self->has_privs(1))
 	   && ($t = $self->load_table_module($tblname))
-	   && $t->in_editable($field)) {
-		my $oldval = $t->get_value($field, $id);
-		$t->save_value($field, $value, $id);
+	   && ($t->{field_editable_privs}{$field} & $self->param('userprivs') || $t->in_editable($field))) {
+		my $oldval = decode_utf8($t->get_value($field, $id));
+
+		# special case for lexicon form editing by taggers: restrict to delimiters
+		if ($tblname eq 'lexicon' && $field eq 'lexicon.reflex') {
+			my $delims_only = delims_only($oldval,$value);
+			# this has the effect of converting spaces to stedt delimiters if the only things added were delimiters
+			
+			if ($self->param('userprivs') == 1 && !$delims_only) {
+				# this prevents taggers from making modifications to the form field
+				# other than adding and removing delimiters
+				$self->header_props(-status => 403);
+				return "You are only allowed to add delimiters to the form!";
+			}
+		}
+
+		$t->save_value($field, $value, $id, $self->param('userprivs'));
 		$self->dbh->do("INSERT changelog VALUES (?,?,?,?,?,?,NOW())", undef,
 			$self->session->param('uid'), $tblname, $field =~ /([^.]+)$/, $id, $oldval || '', $value); # $oldval might be undefined (and interpreted as NULL by mysql)
 		return $value;

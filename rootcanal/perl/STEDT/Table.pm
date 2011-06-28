@@ -28,12 +28,18 @@ our %ivars = map {$_,1} qw(
 
 our %hash_vars = map {$_,1} qw(
 	field_visible_privs
+	field_editable_privs
 	sizes
 	search_form_items
 	
 	add_form_items
 	save_hooks
 );
+
+# for backwards compatibility, you can set either "editable" or "field_editable_privs".
+# "editable" will allow editing by all users; "field_editable_privs" lets you set
+# more fine-grained privileges. If both are set (to non-zero values), you will
+# get the more lenient of the two (because the two are "or"ed together). So don't do that.
 
 our %set_vars = map {$_,1} qw(
 	calculated_fields
@@ -251,7 +257,7 @@ sub query_where {
 			# but make an exception for pseudo-fields - right now this means the former
 			# lexicon.analysis field which is now calculated using a GROUP_CONCAT and is editable,
 			# so we check if the key is editable
-			if ($self->in_calculated_fields($key) && !$self->in_editable($key)) {
+			if ($self->in_calculated_fields($key) && !($self->{field_editable_privs}{$key} || $self->in_editable($key))) { # check if it's editable by *someone*; if it is, the search term should go in WHERE, not HAVING
 				push(@havings, "(" . join(" OR ", @restrictions) .")");
 			} else {
 				push(@wheres, "(" . join(" OR ", @restrictions) .")");
@@ -280,9 +286,9 @@ sub get_value {
 
 sub save_value {
 	my $self = shift;
-	my ($field, $value, $id) = @_;
+	my ($field, $value, $id, $privs) = @_;
 	
-	die "bad field name passed in!" unless $self->in_editable($field); # this will help prevent sql injection attacks
+	die "bad field name or insufficient privileges!" unless $self->{field_editable_privs}{$field} & $privs || $self->in_editable($field); # this will help prevent sql injection attacks
 	unless ($self->in_calculated_fields($field)) { # don't do this for pseudo-fields
 		my $update = qq{UPDATE $self->{table} SET $field=? WHERE $self->{key}=?};
 		my $update_sth = $self->{dbh}->prepare($update);

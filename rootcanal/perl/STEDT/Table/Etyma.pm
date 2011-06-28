@@ -50,14 +50,20 @@ $t->searchable('etyma.tag',
 	'num_notes',
 	'etyma.public',
 );
-$t->editable(
-	'etyma.supertag', 'etyma.printseq', 'etyma.sequence',
-	'etyma.chapter', 'etyma.protoform', 'etyma.protogloss',
-	'etyma.plg', 'etyma.notes', 'etyma.hptbid',
-	'etyma.xrefs',
-	'etyma.possallo' ,
-	'etyma.allofams' ,
-	'etyma.public'
+$t->field_editable_privs(
+	'etyma.supertag' => 1,
+	'etyma.printseq' => 16,
+	'etyma.sequence' => 16,
+	'etyma.chapter' => 1,
+	'etyma.protoform' => 1,
+	'etyma.protogloss' => 1,
+	'etyma.plg' => 1,
+	'etyma.notes' => 1,
+	'etyma.hptbid' => 1,
+	'etyma.xrefs' => 16,
+	'etyma.possallo' => 16,
+	'etyma.allofams' => 16,
+	'etyma.public' => 16,
 );
 
 # Stuff for searching

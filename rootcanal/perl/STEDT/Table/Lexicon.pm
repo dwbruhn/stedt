@@ -109,13 +109,14 @@ $t->searchable('lexicon.rn', 'analysis', 'user_an', 'lexicon.reflex',
 	'lexicon.semcat', 
 	'lexicon.lgid', 
 );
-$t->editable(
-	'analysis', 'user_an',
-	'lexicon.reflex',
-	'lexicon.gloss',
-	'lexicon.gfn',
-	'lexicon.srcid',
-	'lexicon.semcat', 
+$t->field_editable_privs(
+	'analysis' => 16,
+	'user_an' => 1,
+	'lexicon.reflex' => 1,
+	'lexicon.gloss' => 16,
+	'lexicon.gfn' => 16,
+	'lexicon.srcid' => 16,
+	'lexicon.semcat' => 16, 
 );
 
 $t->wheres(

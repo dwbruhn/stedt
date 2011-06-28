@@ -571,6 +571,7 @@ var setup = { // in the form setup.[tablename].[fieldname]
 		'lexicon.srcid' : {
 			label: 'source',
 			size: 140,
+			noedit: !(stedtuserprivs & 16),
 			transform : function (v, key, rec, n) {
 				return '<a href="' + baseRef + 'source/' + rec[n-1] + '" target="stedt_src">' + rec[n-1] + '</a>'
 					+ (v ? ':&thinsp;' + v : '');
