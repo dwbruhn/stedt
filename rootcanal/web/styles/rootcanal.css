@@ -87,6 +87,7 @@ th {
 .etyma_edit_table th { background-color: #C93; }
 .srcbib_edit_table th { background-color: gray; }
 .languagenames_edit_table th { background-color: black; }
+.hptb_edit_table th { background-color: green; }
 
 th A:link     		{ color: white; }
 th A:visited   		{ color: white; }
