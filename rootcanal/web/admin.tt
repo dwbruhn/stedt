@@ -3,7 +3,7 @@
 <p/>
 Edit tables:
 <ul>
-[% FOREACH tbl IN ['etyma', 'lexicon', 'languagenames', 'srcbib'] -%]
+[% FOREACH tbl IN ['etyma', 'lexicon', 'languagenames', 'srcbib', 'hptb'] -%]
 	<li><a href="[% self_url %]/edit/[% tbl %]">[% tbl %]</a></li>
 [% END -%]
 </ul>
