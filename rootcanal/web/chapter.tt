@@ -83,7 +83,9 @@
 <script src="[% self_base %]js/tbl/etyma.js"></script>
 <script>
 var footnote_counter = [% footnotes.size %];
+[% IF result.data.size # can't init the table if there's no data -%]
 TableKit.Raw.init('etyma_resulttable', 'etyma'[% IF user %], '[% self_url %]/update'[% END %]);
+[% END -%]
 </script>
 <script src="[% self_base %]js/notes.js"></script>
 </body>
