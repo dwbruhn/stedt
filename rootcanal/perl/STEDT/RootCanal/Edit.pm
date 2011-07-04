@@ -46,13 +46,21 @@ sub table : StartRunmode {
 		}
 	}
 
+	# special case: include footnotes for lexicon table
+	my @footnotes;
+	my $footnote_index = 1;
+	if ($tbl eq 'lexicon') {
+		use STEDT::RootCanal::Notes;
+		collect_lex_notes($self, $result->{data}, $self->has_privs(1), \@footnotes, \$footnote_index);
+	}
+
 	# pass to tt: searchable fields, results, addable fields, etc.
 	return $self->tt_process("admin/edit.tt", {
 		t=>$t,
 		result => $result,
 		manual => $manual_paging, sortlinks => \%sortlinks,
 		a => $a, b => $b, pagenum => $pagenum,
-		
+		footnotes => (($tbl eq 'lexicon' && $self->has_privs(1)) ? \@footnotes : undef)
 	});
 }
 

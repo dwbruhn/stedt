@@ -158,3 +158,9 @@ function showaddform (spec, id) { // C, E, L; F for comparanda (special handling
 	};
 	return false;
 };
+
+// show/hide the editing form
+function show_edit (n) {
+	$('form' + n).toggle();
+	return false;
+};

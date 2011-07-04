@@ -445,6 +445,7 @@ var setup = { // in the form setup.[tablename].[fieldname]
 		'etyma.printseq'  : {
 			label: '(#)',
 			size: 50,
+			noedit: !(stedtuserprivs & 16),
 			transform: function (v) {
 				if (v === '') return '';
 				return '(' + v + ')';

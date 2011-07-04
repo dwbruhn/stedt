@@ -5,11 +5,11 @@
 [% IF e.is_main %]<h1>#[% e.tag %] [% e.plg %] [% e.protoform %] [% e.protogloss %]</h1>
 [%- ELSE %]<h2>#[% e.tag %] [% e.plg %] [% e.protoform %] [% e.protogloss %]</h2>[% END %]
 
-[% IF user -%]
+[% IF c.has_privs(1) -%]
 <div id="allnotes[% e.tag %]" class="container">
 <p class="edit">
-<label><input type="checkbox" value="off" class="reordcheckbox"[% IF e.notes.size < 2 %] disabled[% END %]>Drag to reorder</label>
-<a href="#" onclick="showaddform('E',[% e.tag %])">Add a note...</a>
+[% IF c.has_privs(16) %]<label><input type="checkbox" value="off" class="reordcheckbox"[% IF e.notes.size < 2 %] disabled[% END %]>Drag to reorder</label>[% END %]
+<a href="#" onclick="return showaddform('E',[% e.tag %])">Add a note...</a>
 </p>
 [% FOREACH n IN e.notes -%]
 [% PROCESS notes_etyma.tt -%]
@@ -43,27 +43,27 @@
 [% IF e.comparanda.size -%]
 [% label = 'Chinese comparand' _ (e.comparanda.size == 1 ? 'um' : 'a') -%]
 <h2>[% label %]</h2>
-[% IF user -%]
+[% IF c.has_privs(1) -%]
 <div id="allcomparanda[% e.tag %]" class="container">
 <p class="edit">
 <label><input type="checkbox" value="off" class="reordcheckbox"[% IF e.comparanda.size < 2 %] disabled[% END %]>Drag to reorder</label>
-<a href="#" onclick="showaddform('F',[% e.tag %])">Add a note...</a>
+<a href="#" onclick="return showaddform('F',[% e.tag %])">Add a note...</a>
 </p>
 [% FOREACH n IN e.comparanda -%]
 [% PROCESS notes_comparanda.tt -%]
 [% END -%]
-</div>[% ELSE # if user -%]
+</div>[% ELSE # if has_privs(1) -%]
 [% FOREACH n IN e.comparanda -%]
 <p>[% n.text %]</p>
 [% END -%]
-[% END # if user -%]
+[% END # if has_privs(1) -%]
 [% END # if comparanda -%]
 [% END # foreach etyma %]
 
 <br>
 [% fncounter = 0 -%]
 [% FOREACH n IN footnotes -%]
-[% IF n.super || !user %]
+[% IF n.super || (n.uid != c.session.param('uid') && !c.has_privs(16)) %]
 [% fncounter = fncounter+1 -%]
 <div class="footnote[% IF n.super %] fnote-[% n.super %][% END %]" id="foot[% fncounter %]">
 <a href="#toof[% fncounter %]" class="left">^ [% fncounter %].</a>
@@ -73,7 +73,7 @@
 [% END -%]
 [% END -%]
 
-[% IF user -%]
+[% IF c.has_privs(1) -%]
 <form id="addnoteform" method="post" action="[% self_url %]/notes/add" style="display:none">
 <div class="right">
 <p>notetype: <select name="notetype"></select></p>

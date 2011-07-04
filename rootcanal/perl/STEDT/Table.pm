@@ -179,7 +179,7 @@ sub search {
 	my $ary = $sth->fetchall_arrayref();
 
 	my $result = {table => $self->{table}, fields => [$self->fields_for_priv($privs)], data => $ary};
-	$result->{debug} = $where if $privs >= 16;
+	$result->{debug} = $where if $privs & 1;
 	return $result;
 }
 
@@ -208,7 +208,7 @@ sub get_query {
 
 # helper WHERE bits
 # $v has single quotes and backslashes escaped already, so they should be
-# save to use in a single-quote context. Any other use of $v
+# safe to use in a single-quote context. Any other use of $v
 # (e.g. used bare as an integer) must be carefully controlled!
 # See where_int for an example where non-digits are stripped.
 sub where_int { my ($k,$v) = @_; $v =~ s/\D//g; return "'bad int!'='0'" unless $v =~ /\d/; $v =~ /^([<>])(.+)/ ? "$k$1$2" : "$k=$v" }

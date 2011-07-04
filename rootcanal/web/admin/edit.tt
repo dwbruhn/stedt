@@ -69,6 +69,7 @@ Displaying items [% a %]-[% b %] of [% result.data.size %].
 No records found. (WHERE [% result.debug %])
 [% END %]
 
+[% IF c.has_privs(t.table == 'etyma' ? 1 : 16) %]
 <a href="#" onclick="$('add_form_span').toggle(); scrollEnd(); return false;">Add a record...</a>
 <span id="add_form_span" style="display:none">
 <form id="add_form" onsubmit="add_record(); return false;">
@@ -87,6 +88,58 @@ No records found. (WHERE [% result.debug %])
 <input name="btn" type="submit" value="Add Record">
 </form>
 </span>
+[% END %]
+
+[% IF footnotes -%]
+[% fncounter = 0 -%]
+[% FOREACH n IN footnotes -%]
+[% IF n.super || (n.uid != c.session.param('uid') && !c.has_privs(16)) %]
+[% fncounter = fncounter+1 -%]
+<div class="footnote[% IF n.super %] fnote-[% n.super %][% END %]" id="foot[% fncounter %]">
+<a href="#toof[% fncounter %]" class="left">^ [% fncounter %].</a>
+<div class="notepreview">[% n.text %]</div></div>
+[% ELSE -%]
+[% PROCESS notes_lex.tt -%]
+[% END -%]
+[% END -%]
+
+[% IF c.has_privs(1) -%]
+<form id="addnoteform" method="post" action="[% self_url %]/notes/add" style="display:none">
+<div class="right">
+<p>notetype: <select name="notetype"></select></p>
+<textarea name="xmlnote"  rows="15" cols="50"></textarea>
+<br>
+<input type="submit" name="btn" value="Add Note">
+<input type="button" value="Cancel" onclick="$('addnoteform').hide()">
+</div>
+<input type="hidden" name="spec">
+<input type="hidden" name="id">
+<input type="hidden" name="ord">
+<input type="hidden" name="fn_counter">
+<h1>New Note</h1>
+<p>The following markup codes will be converted to XML tags:</p>
+<pre>&lt;return&gt;&lt;return&gt; - paragraph break
+&lt;return&gt; - line break
+[[_subscript]]
+[[^superscript]]
+[[~emphasis]] (italic)
+[[@strong]] (bold)
+[[:gloss]] (deprecated)
+[[*reconstruction]]
+[[#76 ALT GLOSS]] (tag reference)
+[[漢字]]
+[[stɛt ⪤ fɑnt]] (plain)
+[[+stɛt ⪤ fɑnt]] (bold)
+{{%footnote}}
+</pre>
+</form>
+[% END -%]
+
+<script>
+var footnote_counter = [% footnotes.size %];
+</script>
+<script src="[% self_base %]js/notes.js"></script>
+[% END # if footnotes -%]
 
 
 <script src="[% self_base %]js/tbl/[% t.table %].js"></script>
@@ -124,6 +177,13 @@ var add_record = function () { new Ajax.Request('[% self_url %]/add/[% t.table %
     },
     onFailure: function(transport){ alert('Error: ' + transport.responseText) }
 })};
+$$('.lexadd').each(function (a) { // this is only needed for edit/lexicon, but let's stick it here in the general edit.tt template for now anyway
+	var id = $(a).up('tr').id;
+	a.onclick = function () {
+		showaddform('L',id);
+		return false;
+	};
+});
 </script>
 </body>
 </html>

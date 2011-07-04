@@ -4,7 +4,7 @@
 <div id="allnotes" class="container">
 <p class="edit">
 <label><input type="checkbox" value="off" class="reordcheckbox"[% IF notes.size < 2 %] disabled[% END %]>Drag to reorder</label>
-<a href="#" onclick="showaddform('C','[% chap %]')">Add a note...</a>
+<a href="#" onclick="return showaddform('C','[% chap %]')">Add a note...</a>
 </p>
 [% FOREACH n IN notes -%]
 [% PROCESS notes_chapter.tt -%]

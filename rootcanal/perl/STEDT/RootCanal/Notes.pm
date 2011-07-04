@@ -1,8 +1,9 @@
 package STEDT::RootCanal::Notes;
 use strict;
-use base 'STEDT::RootCanal::Base';
+use base 'STEDT::RootCanal::Base', 'Exporter';
 use Encode;
 use utf8;
+our @EXPORT = qw(collect_lex_notes);
 
 sub chapter_browser : RunMode {
 	my $self = shift;
@@ -79,17 +80,18 @@ sub chapter : RunMode {
 
 sub add : RunMode {
 	my $self = shift;
-	if ($self->param('userprivs') < 16) {
+	unless ($self->has_privs(1)) {
 		$self->header_props(-status => 403);
-		return "User not logged in";
+		return "User not logged in" unless $self->param('user');
+		return "User not allowed to add notes!";
 	}
 	my $dbh = $self->dbh;
 	my $q = $self->query;
 	my ($spec, $id, $ord, $type, $xml) = ($q->param('spec'), $q->param('id'),
 		$q->param('ord'), $q->param('notetype'), markup2xml($q->param('xmlnote')));
 	my $key = $spec eq 'L' ? 'rn' : $spec eq 'E' ? 'tag' : 'id';
-	my $sth = $dbh->prepare("INSERT notes (spec, $key, ord, notetype, xmlnote) VALUES (?,?,?,?,?)");
-	$sth->execute($spec, $id, $ord, $type, $xml);
+	my $sth = $dbh->prepare("INSERT notes (spec, $key, ord, notetype, xmlnote, uid) VALUES (?,?,?,?,?,?)");
+	$sth->execute($spec, $id, $ord, $type, $xml, $self->session->param('uid'));
 
 	my $kind = $spec eq 'L' ? 'lex' : $spec eq 'C' ? 'chapter' : # special handling for comparanda
 		$type eq 'F' ? 'comparanda' : 'etyma';
@@ -112,7 +114,11 @@ sub delete : RunMode {
 	my $q = $self->query;
 	my $noteid = $q->param('noteid');
 	my $lastmod = $q->param('mod');
-	my $mod_time = $dbh->selectrow_array("SELECT datetime FROM notes WHERE noteid=?", undef, $noteid);
+	my ($mod_time, $note_uid) = $dbh->selectrow_array("SELECT datetime,uid FROM notes WHERE noteid=?", undef, $noteid);
+	if ($self->session->param('uid') != $note_uid && !$self->has_privs(16)) {
+		$self->header_props(-status => 403);
+		return "User not allowed to delete someone else's note.";
+	}
 	
 	$dbh->do("LOCK TABLE notes WRITE");
 	if ($lastmod eq $mod_time) {
@@ -135,8 +141,14 @@ sub save : RunMode {
 	my $q = $self->query;
 	my $noteid = $q->param('noteid');
 	my $lastmod = $q->param('mod');
-	my $mod_time = $dbh->selectrow_array("SELECT datetime FROM notes WHERE noteid=?", undef, $noteid);
+	my ($mod_time, $note_uid) = $dbh->selectrow_array("SELECT datetime,uid FROM notes WHERE noteid=?", undef, $noteid);
 	my $xml;
+
+	# only allow taggers to modify their own notes
+	if ($self->session->param('uid') != $note_uid && !$self->has_privs(16)) {
+		$self->header_props(-status => 403);
+		return "User not allowed to modify someone else's note.";
+	}
 	
 	# check mod time to ensure no one changed it before us
 	$dbh->do("LOCK TABLE notes WRITE");
@@ -163,7 +175,7 @@ sub save : RunMode {
 
 sub reorder : RunMode {
 	my $self = shift;
-	if (my $err = $self->require_privs(1)) { return $err; }
+	if (my $err = $self->require_privs(16)) { return $err; }
 	my @ids = map {/(\d+)$/} split /\&/, $self->query->param('ids');
 	# change the order, but don't update the modification time for something so minor.
 	my $sth = $self->dbh->prepare("UPDATE notes SET ord=?, datetime=datetime WHERE noteid=?");
@@ -289,10 +301,22 @@ sub _qtd {
 	return $s;
 }
 
-# returns the note, and an array of footnotes in html
+# returns the note in html; an array of footnotes is added to if there are
+# footnotes in the note text.
+# The footnotes array is only relevant to notes (e.g. etyma notes, chapter notes)
+# that can have footnotes inside them; lexicon notes should not contain footnotes,
+# since they are inherently footnotes! However, the $footnotes and $i arguments
+# are still obligatory.
+#
+# first arg: xml to be converted.
+# $c: the CGI::App object, so we can pass context info when necessary.
+# $footnotes: array ref, to add the converted footnotes, etc. to.
+# $i: ref to a footnote number counter, to be incremented for each footnote. Should be initialized to 1.
+# $super_id: the note id of the note, to be embedded in the footnote data.
+
 sub xml2html {
 	local $_ = shift;
-	my ($c, $footnotes, $i, $super_id) = @_; # array ref and ref to footnote number counter
+	my ($c, $footnotes, $i, $super_id) = @_;
 	s|<par>|<p>|g;
 	s|</par>|</p>|g;
 	s|<emph>|<i>|g;
@@ -335,11 +359,13 @@ sub notes_for_rn : StartRunmode {
 	my $internal_note_search = '';
 	$internal_note_search = "AND notetype != 'I'" unless $INTERNAL_NOTES;
 
-	my $notes = $self->dbh->selectall_arrayref("SELECT xmlnote FROM notes WHERE rn=? $internal_note_search", undef, $rn);
+	my $notes = $self->dbh->selectall_arrayref("SELECT xmlnote,uid,username FROM notes LEFT JOIN users USING (uid) WHERE rn=? $internal_note_search", undef, $rn);
 	my @notes;
 	my (@dummy, $dummy);
 	for (@$notes) {
 		 my $xml = decode_utf8($_->[0]);
+		 my $uid = $_->[1];
+		 $xml .= " [$_->[1]]" unless $uid == 8; # append the username
 		 push @notes, xml2html($xml, $self, \@dummy, \$dummy);
 	}
 	return join '<p>', @notes;
@@ -351,8 +377,6 @@ sub etymon : Runmode {
 	my $tag = $self->param('tag');
 	
 	my $INTERNAL_NOTES = $self->has_privs(1);
-	my $internal_note_search = '';
-	$internal_note_search = "AND notetype != 'I' AND notetype != 'O'" unless $INTERNAL_NOTES;
 	my (@etyma, @footnotes);
 	my $footnote_index = 1;
 	my $sql = qq#SELECT e.tag, e.printseq, e.protoform, e.protogloss, e.plg, e.hptbid, e.tag=e.supertag AS is_main
@@ -434,32 +458,7 @@ GROUP BY lexicon.rn
 ORDER BY languagegroups.ord, languagenames.lgsort, reflex, languagenames.srcabbr, lexicon.srcid
 EndOfSQL
 		if (@$recs) { # skip if no records
-			for my $rec (@$recs) {
-				$_ = decode_utf8($_) foreach @$rec;
-				if ($rec->[-1]) { # if there are any notes...
-					# only select notes which are generic (empty id) OR those that have specifically been marked as belonging to this etymon/reflex combination
-					my @results = @{$self->dbh->selectall_arrayref("SELECT noteid, notetype, datetime, xmlnote, id FROM notes "
-							. "WHERE notes.rn=? AND (`id`=$e{tag} OR `id`='') $internal_note_search ORDER BY ord",
-							undef, $rec->[0])};
-					$rec->[-1] = '';
-					# NB: these are footnotes, and they don't have footnotes inside them!
-					foreach (@results) {
-						my ($noteid, $notetype, $lastmod, $note, $id) = @$_;
-						my $xml = decode_utf8($note);
-						$note = xml2html($xml, $self, \@footnotes, \$footnote_index);
-						if ($notetype eq 'I') {
-							$note =~ s/^/[Internal] <i>/;
-							$note =~ s|$|</i>|;
-						}
-						$note =~ s/^/[Source note] / if $notetype eq 'O';
-						push @footnotes, {noteid=>$noteid, type=>$notetype, lastmod=>$lastmod,
-							text=>$note, id=>$id, # id is for lex notes specific to particular etyma. editing this field is not yet supported, but this is here as a placeholder for now.
-							markup=>xml2markup($xml), num_lines=>guess_num_lines($xml)
-						};
-						$rec->[-1] .= ' ' . $footnote_index++;
-					}
-				}
-			}
+			collect_lex_notes($self, $recs, $INTERNAL_NOTES, \@footnotes, \$footnote_index, $e{tag});
 			$e{records} = $recs;
 		}
 	
@@ -501,5 +500,45 @@ EndOfSQL
 	# ]
 }
 
+# this sub is tacked on here and exposed (via Exporter) so other modules can use it.
+# $c: CGI::App obj
+# $r: arrayref of arrayrefs (a result set from a lexicon table SQL query)
+# $internal: whether or not to show internal notes
+# $a, $i: an array ref and a scalar ref. see xml2html for these.
+# $tag: tag number if we're restricting notes to those associated with a particular etymon/rn pair.
+sub collect_lex_notes {
+	my ($c, $r, $internal, $a, $i, $tag) = @_;
+	my $internal_note_search = '';
+	$internal_note_search = "AND notetype != 'I' AND notetype != 'O'" unless $internal;
+	my $tag_search = '';
+	$tag_search = "AND (`id`=$tag OR `id`='')" if $tag;
+	for my $rec (@$r) {
+		$_ = decode_utf8($_) foreach @$rec; # if even one string is decoded, TT will want *everything* to be decoded, otherwise you'll get garbage utf8
+		if ($rec->[-1]) { # if there are any notes...
+			# only select notes which are generic (empty id) OR those that have specifically been marked as belonging to this etymon/reflex combination
+			my @results = @{$c->dbh->selectall_arrayref("SELECT noteid, notetype, datetime, xmlnote, id, uid, username FROM notes LEFT JOIN users USING (uid) "
+					. "WHERE notes.rn=? $tag_search $internal_note_search ORDER BY ord",
+					undef, $rec->[0])};
+			$rec->[-1] = '';
+			# NB: these are footnotes, and they don't have footnotes inside them!
+			foreach (@results) {
+				my ($noteid, $notetype, $lastmod, $note, $id, $uid, $username) = @$_;
+				my $xml = decode_utf8($note);
+				$note = xml2html($xml, $c, $a, $i);
+				if ($notetype eq 'I') {
+					$note =~ s/^/[Internal] <i>/;
+					$note =~ s|$|</i>|;
+				}
+				$note =~ s/^/[Source note] / if $notetype eq 'O';
+				push @$a, {noteid=>$noteid, type=>$notetype, lastmod=>$lastmod,
+					text=>$note, id=>$id, # id is for lex notes specific to particular etyma.
+					markup=>xml2markup($xml), num_lines=>guess_num_lines($xml),
+					uid=>$uid, username=>$username
+				};
+				$rec->[-1] .= ' ' . $$i++;
+			}
+		}
+	}
+}
 
 1;

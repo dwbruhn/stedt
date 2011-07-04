@@ -1,7 +1,7 @@
 [% fncounter = fncounter+1 # the value must be incremented in this file because it is called both from etymon.tt and from Notes.pm -%]
 <div class="lexnote" id="reorddiv_[% n.noteid %]">[%# this is not actually sortable, but we need the id for deleting purposes %]
 <a href="#toof[% fncounter %]" id="foot[% fncounter %]" class="left footnote">^ [% fncounter %].</a>
-<form id="form[% n.noteid %]" class="noteform right">
+<form id="form[% n.noteid %]" class="noteform right" style="display:none">
 <input type="hidden" name="noteid" value="[% n.noteid %]">
 <input type="hidden" name="mod" value="[% n.lastmod %]">
 notetype:<select name="notetype">
@@ -21,4 +21,5 @@ last mod: <span id="lastmod[% n.noteid %]">[% n.lastmod %]</span>
 </form>
 <div id="preview[% n.noteid %]" class="notepreview footnote">
 [%- n.text -%]
+ <input type="button" value="Edit" onclick="return show_edit([% n.noteid %]);">
 </div><br class="edit" clear="right"></div>
