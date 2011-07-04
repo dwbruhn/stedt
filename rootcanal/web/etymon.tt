@@ -67,7 +67,7 @@
 [% fncounter = fncounter+1 -%]
 <div class="footnote[% IF n.super %] fnote-[% n.super %][% END %]" id="foot[% fncounter %]">
 <a href="#toof[% fncounter %]" class="left">^ [% fncounter %].</a>
-<div class="notepreview">[% n.text %]</div></div>
+<div class="notepreview">[% n.text %][% IF n.uid != 8 %] [[% n.username %]][% END %]</div></div>
 [% ELSE -%]
 [% PROCESS notes_lex.tt -%]
 [% END -%]
