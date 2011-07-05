@@ -32,6 +32,10 @@ div#info
 	margin-left: 0.5em;
 }
 
+/* for the groups page */
+div#lgtree { position:fixed; overflow:auto; top:3em; bottom:0px; left:0px; width:18em; } 
+div#lginfo { position:fixed; overflow:auto; top:3em; bottom:0px; right:0px; left:19em; } 
+
 tr { vertical-align: top; }
 td { text-indent: -1em; padding-left: 1em; }
 td, .editable-cell-form textarea

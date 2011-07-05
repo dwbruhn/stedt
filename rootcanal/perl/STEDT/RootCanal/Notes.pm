@@ -470,6 +470,9 @@ GROUP BY lexicon.rn
 ORDER BY languagegroups.ord, languagenames.lgsort, reflex, languagenames.srcabbr, lexicon.srcid
 EndOfSQL
 		if (@$recs) { # skip if no records
+			for my $r (@$recs) {
+				$_ = decode_utf8($_) foreach @$r;
+			}
 			collect_lex_notes($self, $recs, $INTERNAL_NOTES, \@footnotes, \$footnote_index, $e{tag});
 			$e{records} = $recs;
 		}
@@ -526,7 +529,6 @@ sub collect_lex_notes {
 	my $tag_search = '';
 	$tag_search = "AND (`id`=$tag OR `id`='')" if $tag;
 	for my $rec (@$r) {
-		$_ = decode_utf8($_) foreach @$rec; # if even one string is decoded, TT will want *everything* to be decoded, otherwise you'll get garbage utf8
 		if ($rec->[-1]) { # if there are any notes...
 			# only select notes which are generic (empty id) OR those that have specifically been marked as belonging to this etymon/reflex combination
 			my @results = @{$c->dbh->selectall_arrayref("SELECT noteid, notetype, datetime, xmlnote, id, uid, username FROM notes LEFT JOIN users USING (uid) "

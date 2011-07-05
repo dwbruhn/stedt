@@ -14,6 +14,9 @@ sub table : StartRunmode {
 	my $q = $self->query;
 	
 	my $result = $t->search($q, $self->param('userprivs'));
+	for my $r (@{$result->{data}}) {
+		$_ = decode_utf8($_) foreach @$r;
+	}
 	# it doesn't seem to be too inefficient to pull out all the results
 	# and then count them and/or send partial results to the browser (for paging)
 	# The alternative is to do a COUNT * first, which mysql should be optimized for,
