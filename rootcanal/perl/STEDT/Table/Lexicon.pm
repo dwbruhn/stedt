@@ -106,7 +106,7 @@ $t->searchable('lexicon.rn', 'analysis', 'user_an', 'lexicon.reflex',
 	'lexicon.gloss', 'languagenames.language', 'languagegroups.grp',
 	'languagegroups.grpid',
 	'languagenames.srcabbr', 'lexicon.srcid',
-	'lexicon.semcat', 
+#	'lexicon.semcat', 
 	'lexicon.lgid', 
 );
 $t->field_editable_privs(
@@ -117,6 +117,21 @@ $t->field_editable_privs(
 	'lexicon.gfn' => 16,
 	'lexicon.srcid' => 16,
 	'lexicon.semcat' => 16, 
+);
+
+# Stuff for searching
+$t->search_form_items(
+	'languagegroups.grp' => sub {
+		my $cgi = shift;
+		my $grps = $dbh->selectall_arrayref("SELECT grpno, CONCAT(grpno,' ',LEFT(grp,15),' (id:',grpid,')') FROM languagegroups");
+		my @grp_nos = map {$_->[0]} @$grps;
+		my %grp_labels;
+		@grp_labels{@grp_nos} = map {$_->[1]} @$grps;
+		
+		return $cgi->popup_menu(-name => 'languagegroups.grp', -values=>['',@grp_nos],
+  								-default=>'', -override=>1,
+  								-labels=>\%grp_labels);
+	}
 );
 
 $t->wheres(
