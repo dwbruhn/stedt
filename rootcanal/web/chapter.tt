@@ -1,6 +1,6 @@
 ﻿[% PROCESS header.tt title="STEDT Chapter " _ chap -%]
 <h1>[% chap %] [% chaptitle %]</h1>
-[% IF user -%]
+[% IF c.has_privs(16) -%]
 <div id="allnotes" class="container">
 <p class="edit">
 <label><input type="checkbox" value="off" class="reordcheckbox"[% IF notes.size < 2 %] disabled[% END %]>Drag to reorder</label>
@@ -18,7 +18,7 @@
 <p>[% n.text %]</p>
 [% END # notetype -%]
 [% END # foreach -%]
-[% END # if user -%]
+[% END # if has_privs(16) -%]
 
 [% IF result.data.size -%]
 <h2>Etyma in this chapter</h2>
@@ -48,43 +48,15 @@
 <a href="#toof[% loop.count %]">^ [% loop.count %].</a> [% n.text %]</div>
 [% END -%]
 
-[% IF user -%]
-<form id="addnoteform" method="post" action="[% self_url %]/notes/add" style="display:none">
-<div class="right">
-<p>notetype: <select name="notetype"></select></p>
-<textarea name="xmlnote"  rows="15" cols="50"></textarea>
-<br>
-<input type="submit" name="btn" value="Add Note">
-<input type="button" value="Cancel" onclick="$('addnoteform').hide()">
-</div>
-<input type="hidden" name="spec" value="C">
-<input type="hidden" name="id">
-<input type="hidden" name="ord">
-<input type="hidden" name="fn_counter">
-<h1>New Note</h1>
-<p>The following markup codes will be converted to XML tags:</p>
-<pre>&lt;return&gt;&lt;return&gt; - paragraph break
-&lt;return&gt; - line break
-[[_subscript]]
-[[^superscript]]
-[[~emphasis]] (italic)
-[[@strong]] (bold)
-[[:gloss]] (deprecated)
-[[*reconstruction]]
-[[#76 ALT GLOSS]] (tag reference)
-[[漢字]]
-[[stɛt ⪤ fɑnt]] (plain)
-[[+stɛt ⪤ fɑnt]] (bold)
-{{%footnote}}
-</pre>
-</form>
+[% IF c.has_privs(16) -%]
+[% PROCESS addnoteform.tt -%]
 [% END -%]
 
 <script src="[% self_base %]js/tbl/etyma.js"></script>
 <script>
 var footnote_counter = [% footnotes.size %];
 [% IF result.data.size # can't init the table if there's no data -%]
-TableKit.Raw.init('etyma_resulttable', 'etyma'[% IF user %], '[% self_url %]/update'[% END %]);
+TableKit.Raw.init('etyma_resulttable', 'etyma'[% IF c.has_privs(16) %], '[% self_url %]/update'[% END %]);
 [% END -%]
 </script>
 <script src="[% self_base %]js/notes.js"></script>

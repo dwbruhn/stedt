@@ -42,11 +42,3 @@ for (var i = 1; i < num_tables; i++) {
 		}
 	});
 }
-
-$$('.lexadd').each(function (a) {
-	var id = $(a).up('tr').id;
-	a.onclick = function () {
-		showaddform('L',id);
-		return false;
-	};
-});

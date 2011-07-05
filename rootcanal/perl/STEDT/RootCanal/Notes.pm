@@ -52,12 +52,13 @@ sub chapter : RunMode {
 	$internal_note_search = "AND notetype != 'I'" unless $INTERNAL_NOTES;
 	my (@notes, @footnotes);
 	my $footnote_index = 1;
-	foreach (@{$self->dbh->selectall_arrayref("SELECT noteid, notetype, datetime, xmlnote, ord FROM notes "
+	foreach (@{$self->dbh->selectall_arrayref("SELECT noteid, notetype, datetime, xmlnote, ord, uid, username FROM notes LEFT JOIN users USING (uid)"
 			. "WHERE spec='C' AND id=? $internal_note_search ORDER BY ord", undef, $chap)}) {
 		my $xml = decode_utf8($_->[3]);
 		push @notes, { noteid=>$_->[0], type=>$_->[1], lastmod=>$_->[2], 'ord'=>$_->[4],
 			text=>xml2html($xml, $self, \@footnotes, \$footnote_index, $_->[0]),
-			markup=>xml2markup($xml), num_lines=>guess_num_lines($xml)
+			markup=>xml2markup($xml), num_lines=>guess_num_lines($xml),
+			uid=>$_->[5], username=>$_->[6]
 		};
 	}
 	
@@ -87,11 +88,15 @@ sub add : RunMode {
 	}
 	my $dbh = $self->dbh;
 	my $q = $self->query;
-	my ($spec, $id, $ord, $type, $xml) = ($q->param('spec'), $q->param('id'),
-		$q->param('ord'), $q->param('notetype'), markup2xml($q->param('xmlnote')));
+	my ($spec, $id, $ord, $type, $xml, $uid) = ($q->param('spec'), $q->param('id'),
+		$q->param('ord'), $q->param('notetype'), markup2xml($q->param('xmlnote')), $q->param('uid'));
 	my $key = $spec eq 'L' ? 'rn' : $spec eq 'E' ? 'tag' : 'id';
+	if ($uid != 8 && $uid != $self->session->param('uid')) {
+		# force uid to be either 8 or the current user's uid
+		$uid = $self->session->param('uid');
+	}
 	my $sth = $dbh->prepare("INSERT notes (spec, $key, ord, notetype, xmlnote, uid) VALUES (?,?,?,?,?,?)");
-	$sth->execute($spec, $id, $ord, $type, $xml, $self->session->param('uid'));
+	$sth->execute($spec, $id, $ord, $type, $xml, $uid);
 
 	my $kind = $spec eq 'L' ? 'lex' : $spec eq 'C' ? 'chapter' : # special handling for comparanda
 		$type eq 'F' ? 'comparanda' : 'etyma';
@@ -102,7 +107,9 @@ sub add : RunMode {
 	return join "\r", ${$self->tt_process("notes_$kind.tt", {
 		n=>{noteid=>$noteid, type=>$type, lastmod=>$lastmod, 'ord'=>$ord,
 			text=>xml2html($xml, $self, \@a, \$i, $spec eq 'E' ? $id : undef),
-			markup=>xml2markup($xml), num_lines=>guess_num_lines($xml)},
+			markup=>xml2markup($xml), num_lines=>guess_num_lines($xml),
+			uid=>$uid, username=>($uid==8 ? 'stedt' : $self->param('user'))
+			},
 		fncounter=>$q->param('fn_counter')
 	})}, map {$_->{text}} @a;
 }
@@ -155,9 +162,13 @@ sub save : RunMode {
 	if ($lastmod eq $mod_time) {
 		my $sql = "UPDATE notes SET notetype=?, xmlnote=? WHERE noteid=?";
 		my @args = ($q->param('notetype'), markup2xml($q->param('xmlnote')));
-		if ($q->param('id')) {
+		if ($q->param('id')) { # actually an optional tag number, for lexicon notes
 			$sql =~ s/ WHERE/, id=? WHERE/;
 			push @args, $q->param('id');
+		}
+		if ($q->param('uid')) {
+			$sql =~ s/ WHERE/, uid=? WHERE/;
+			push @args, $q->param('uid');
 		}
 		my $sth = $dbh->prepare($sql);
 		$sth->execute(@args, $noteid);
@@ -410,7 +421,7 @@ ORDER BY is_main DESC, e.plgord#;
 		# etymon notes
 		$e{notes} = [];
 		my $seen_hptb; # don't generate an HPTB reference if there's a custom HPTB note already
-		foreach (@{$self->dbh->selectall_arrayref("SELECT noteid, notetype, datetime, xmlnote, ord FROM notes "
+		foreach (@{$self->dbh->selectall_arrayref("SELECT noteid, notetype, datetime, xmlnote, ord, uid, username FROM notes LEFT JOIN users USING (uid) "
 				. "WHERE tag=$e{tag} AND notetype != 'F' ORDER BY ord")}) {
 			my $notetype = $_->[1];
 			my $xml = decode_utf8($_->[3]);
@@ -418,7 +429,8 @@ ORDER BY is_main DESC, e.plgord#;
 			$seen_hptb = 1 if $notetype eq 'H';
 			push @{$e{notes}}, { noteid=>$_->[0], type=>$notetype, lastmod=>$_->[2], 'ord'=>$_->[4],
 				text=>xml2html($xml, $self, \@footnotes, \$footnote_index, $_->[0]),
-				markup=>xml2markup($xml), num_lines=>guess_num_lines($xml)
+				markup=>xml2markup($xml), num_lines=>guess_num_lines($xml),
+				uid=>$_->[5], username=>$_->[6]
 			};
 		}
 		if ($e{hptbid} && !$seen_hptb) {
@@ -464,7 +476,7 @@ EndOfSQL
 	
 		# Chinese comparanda
 		$e{comparanda} = [];
-		my $comparanda = $self->dbh->selectall_arrayref("SELECT noteid, datetime, xmlnote, ord FROM notes WHERE tag=$e{tag} AND notetype = 'F' ORDER BY ord");
+		my $comparanda = $self->dbh->selectall_arrayref("SELECT noteid, datetime, xmlnote, ord, uid, username FROM notes LEFT JOIN users USING (uid) WHERE tag=$e{tag} AND notetype = 'F' ORDER BY ord");
 		for my $row (@$comparanda) {
 			my $note = $row->[2];
 			$note = decode_utf8($note);
@@ -475,7 +487,8 @@ EndOfSQL
 #			$note =~ s/(\[JAM\])/\\hfill $1/g;
 			push @{$e{comparanda}}, { noteid=>$row->[0], lastmod=>$row->[1], 'ord'=>$_->[3],
 				text=>xml2html($note, $self, \@footnotes, \$footnote_index, $row->[0]),
-				markup=>xml2markup($note), num_lines=>guess_num_lines($note)
+				markup=>xml2markup($note), num_lines=>guess_num_lines($note),
+				uid=>$_->[4], username=>$_->[5]
 			};
 		}
 	}

@@ -471,6 +471,15 @@ var setup = { // in the form setup.[tablename].[fieldname]
 	},
 	lexicon : {
 		_key: 'lexicon.rn',
+		_postprocess: function () {
+			$$('.lexadd').each(function (a) {
+				var id = $(a).up('tr').id;
+				a.onclick = function () {
+					showaddform('L',id);
+					return false;
+				};
+			});
+		},
 		'lexicon.rn' : {
 			label: 'rn',
 			noedit: true,

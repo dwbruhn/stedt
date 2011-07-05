@@ -104,35 +104,7 @@ No records found. (WHERE [% result.debug %])
 [% END -%]
 
 [% IF c.has_privs(1) -%]
-<form id="addnoteform" method="post" action="[% self_url %]/notes/add" style="display:none">
-<div class="right">
-<p>notetype: <select name="notetype"></select></p>
-<textarea name="xmlnote"  rows="15" cols="50"></textarea>
-<br>
-<input type="submit" name="btn" value="Add Note">
-<input type="button" value="Cancel" onclick="$('addnoteform').hide()">
-</div>
-<input type="hidden" name="spec">
-<input type="hidden" name="id">
-<input type="hidden" name="ord">
-<input type="hidden" name="fn_counter">
-<h1>New Note</h1>
-<p>The following markup codes will be converted to XML tags:</p>
-<pre>&lt;return&gt;&lt;return&gt; - paragraph break
-&lt;return&gt; - line break
-[[_subscript]]
-[[^superscript]]
-[[~emphasis]] (italic)
-[[@strong]] (bold)
-[[:gloss]] (deprecated)
-[[*reconstruction]]
-[[#76 ALT GLOSS]] (tag reference)
-[[漢字]]
-[[stɛt ⪤ fɑnt]] (plain)
-[[+stɛt ⪤ fɑnt]] (bold)
-{{%footnote}}
-</pre>
-</form>
+[% PROCESS addnoteform.tt -%]
 [% END -%]
 
 <script>
@@ -173,17 +145,14 @@ var add_record = function () { new Ajax.Request('[% self_url %]/add/[% t.table %
 		rawData[row.id] = rec;
 		TableKit.reload();
 		scrollEnd();
-		$$('.add_reset').each(function(i) {i.value = ''});
+		if (setup[tablename]._postprocess) {
+			var fn = setup[tablename]._postprocess;
+			fn();
+		}
+		$$('.add_reset').each(function(i) {if (i.name !== 'lexicon.lgid') i.value = ''});
     },
     onFailure: function(transport){ alert('Error: ' + transport.responseText) }
 })};
-$$('.lexadd').each(function (a) { // this is only needed for edit/lexicon, but let's stick it here in the general edit.tt template for now anyway
-	var id = $(a).up('tr').id;
-	a.onclick = function () {
-		showaddform('L',id);
-		return false;
-	};
-});
 </script>
 </body>
 </html>

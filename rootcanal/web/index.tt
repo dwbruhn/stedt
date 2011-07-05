@@ -42,6 +42,6 @@ Search lexicon: <input name="s" type="text" size="50" id="lexicon_searchinput" >
 <div id="info" style="display:none;"></div>
 </div>
 
-<script src="[% self_base %]js/stedtedit.js"></script>
+<script src="[% self_base %]js/simplesearch.js"></script>
 </body>
 </html>
