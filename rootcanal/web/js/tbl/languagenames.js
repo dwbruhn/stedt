@@ -15,7 +15,7 @@ setup.languagenames = {
 	'languagenames.srcabbr': {
 		size:70,
  		transform : function (v) {
-			return '<a href="' + baseRef + 'source/' + v + '" target="stedt_src">' + v + '</a>';
+			return '<a href="' + baseRef + 'edit/srcbib?srcbib.srcabbr=' + v + '" target="edit_src">' + v + '</a>';
 		}
 	},
 	'languagenames.lgabbr': {
