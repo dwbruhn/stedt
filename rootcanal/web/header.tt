@@ -1,4 +1,4 @@
-[% # PROCESS, don't INCLUDE this file to keep these variables defined -%]
+﻿[% # PROCESS, don't INCLUDE this file to keep these variables defined -%]
 [% self_url = c.query.url('-absolute',1) -%]
 [% self_base = self_url.replace('[^/]+$', '') -%]
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
@@ -46,6 +46,7 @@ $('header').show();
 var stedtuserprivs = 0;
 </script>
 [% END -%]
+﻿[% # by including a zero-width no-break space (U+FEFF) here, and saving this file with a utf-8 BOM, we can force Template Toolkit to generate all pages as utf-8 instead of latin-whatever. I think we could also try using {binmode=>':utf8'} in the Template::process() call, but since for our purposes that's wrapped up inside the C::A::P::TT module there's no easy way to access that. -%]
 <span class="left"><a href="[% self_base %]help.html" target="_blank">help</a></span>
 <script src="[% self_base %]js/stedtconfig.js"></script>
 </span>
