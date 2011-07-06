@@ -410,11 +410,12 @@ var setup = { // in the form setup.[tablename].[fieldname]
 		'etyma.hptbid' : {
 			label: 'HPTB',
 			size: 70,
+			hide: !(stedtuserprivs & 1),
 			transform: function (v) {
 				if (v === '') return '';
 				v = v.replace(/, */g,', ');
-				return '<a href="hptb.pl?submit=Search&hptbid=' + v
-					+ '" target="hptbwindow">' + v + '</a>';
+				return '<a href="' + baseRef + 'edit/hptb' + '?hptb.hptbid=' + v
+					+ '" target="stedt_hptb">' + v + '</a>';
 			}
 		},
 		'num_notes' : {
