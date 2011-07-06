@@ -24,33 +24,33 @@
 var stedtuserprivs = [% c.param('userprivs') %];
 $('header').show();
 </script>
-<span class="left"> logged in as <b>[% user %]</b></span>
-<span class="left"><form name="dropdown" method="POST">
-[% IF c.has_privs(1) -%]
+logged in as <b>[% user %]</b>
+ <form name="dropdown" method="POST" style="display:inline">
 <select name="DDMenu" onchange="location.href=(form.DDMenu.options[form.DDMenu.selectedIndex].value)">
 <option value="#">Select...</option>
+[% IF c.has_privs(1) # only authorized users can do the following, but anyone logged in with an account should be able to access their account page -%]
 <option value="[% self_url %]/edit/etyma">Etyma</option>
 <option value="[% self_url %]/edit/lexicon">Lexicon</option>
 <option value="[% self_url %]/edit/languagenames">LgNames</option>
 <option value="[% self_url %]/edit/srcbib">SrcBib</option>
 <option value="[% self_url %]/edit/hptb">HPTB</option>
-<option value="[% self_url %]/account">Account</option>
 <option value="[% self_url %]/admin/users">Users</option>
 <option value="[% self_url %]/admin">Tools</option>
-</select>
 [% END -%]
-</form></span>
-<span class="left"><a href="[% self_url %]/logout">logout</a></span>
-[%- ELSE -%]
+<option value="[% self_url %]/account">Account</option>
+</select>
+</form>
+  <a href="[% self_url %]/logout">logout</a>
+[% ELSE -%]
 <script>
 var stedtuserprivs = 0;
 </script>
 [% END -%]
 ﻿[% # by including a zero-width no-break space (U+FEFF) here, and saving this file with a utf-8 BOM, we can force Template Toolkit to generate all pages as utf-8 instead of latin-whatever. I think we could also try using {binmode=>':utf8'} in the Template::process() call, but since for our purposes that's wrapped up inside the C::A::P::TT module there's no easy way to access that. -%]
-<span class="left"><a href="[% self_base %]help.html" target="_blank">help</a></span>
+  <a href="[% self_base %]help.html" target="_blank">help</a>
 <script src="[% self_base %]js/stedtconfig.js"></script>
 </span>
 <a href='http://stedt.berkeley.edu/' title='STEDT Home Page' target="_blank"><img src='[% self_base %]img/STB32x32.gif' alt='STEDT Logo' width='32' height='32' class="left" border=0></a>
 <b>[% title %]</b>
-<hr>
+<hr style="clear:both; margin-left:45px">
 </div>
