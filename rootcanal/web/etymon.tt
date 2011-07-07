@@ -31,6 +31,13 @@ Reflexes tagged by <select name="DDMenu" onchange="location.href=(form.DDMenu.op
 [% END -%]
 
 [% IF e.records -%]
+[% IF c.has_privs(16) %]
+<form action="[% self_url %]/notes/accept" method="post">
+<input name="tag" value="[% e.tag %]" type="hidden">
+<input name="uid" value="[% uid %]" type="hidden">
+<input type="submit" value="Accept tagging by [% username %] for tag #[% e.tag %]">
+</form>
+[% END # has_privs 16 %]
 <table id="lexicon[% lexicon_id %]">[% lexicon_id = lexicon_id+1 %]
 <thead><tr>
 [%- FOREACH fld IN fields -%]

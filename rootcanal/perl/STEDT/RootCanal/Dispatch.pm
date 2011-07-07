@@ -15,7 +15,6 @@ sub dispatch_args {
 			'notes/l/:rn'      => { app=>'Notes', rm => 'notes_for_rn' },
 			'edit/:tbl'	   => { app=>'Edit', rm => 'table' },
 			'edit/:tbl/:id'	   => { app=>'Edit', rm => 'single_record' },
-			'accept/:tbl'      => { app=>'Edit', rm => 'accept' },
 			'add/:tbl'	   => { app=>'Edit', rm => 'add' },
 			'json_lg/:srcabbr' => { app=>'Edit', rm => 'json_lg' },
 			'makesubroot/:src/:dst/:srcsuper'=> { app=>'Edit', rm => 'makesubroot' },

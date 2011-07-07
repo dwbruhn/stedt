@@ -3,6 +3,7 @@ use strict;
 use base 'STEDT::RootCanal::Base', 'Exporter';
 use Encode;
 use utf8;
+use CGI::Application::Plugin::Redirect;
 our @EXPORT = qw(collect_lex_notes);
 
 sub chapter_browser : RunMode {
@@ -382,6 +383,32 @@ sub notes_for_rn : StartRunmode {
 	return join '<p>', @notes;
 }
 
+sub accept : Runmode {
+	my $self = shift;
+	unless ($self->has_privs(16)) {
+		$self->header_props(-status => 403);
+		return "User not allowed to approve tags!";
+	}
+	my $q = $self->query();
+	my $tag = $q->param('tag');
+	my $uid = $q->param('uid');
+	# make sure our params are actually defined?
+	
+	if ($uid == 8) { # prevent accidental deleting of approved tagging
+		$self->header_props(-status => 400);
+		return "Already approved!";
+	}
+	
+	$self->dbh->do("UPDATE etyma SET uid=8 WHERE tag=?", undef, $tag);
+	my ($rns) = $self->dbh->selectrow_array("SELECT GROUP_CONCAT(DISTINCT rn) FROM lx_et_hash WHERE uid=? AND tag=?", undef, $uid, $tag);
+	if ($rns) {
+		$self->dbh->do("DELETE FROM lx_et_hash WHERE uid=8 AND rn IN ($rns)");
+		$self->dbh->do("UPDATE lx_et_hash SET uid=8 WHERE uid=? AND rn IN ($rns)", undef, $uid);
+		# add these changes to the changelog
+	}
+	return $self->redirect($q->url(-absolute=>1) . "/etymon/$tag/$uid");
+}
+
 # return an etymon page with notes, reflexes, etc.
 sub etymon : Runmode {
 	my $self = shift;
@@ -454,13 +481,14 @@ ORDER BY is_main DESC, e.plgord#;
 		$uid = 8 unless ($uid);
 		my $recs = $self->dbh->selectall_arrayref(<<EndOfSQL);
 SELECT lexicon.rn,
-	(SELECT GROUP_CONCAT(tag_str ORDER BY ind) FROM lx_et_hash WHERE rn=lexicon.rn AND uid=$uid) AS analysis,
+	(SELECT GROUP_CONCAT(tag_str ORDER BY ind) FROM lx_et_hash WHERE rn=lexicon.rn AND uid=8) AS analysis,
+	(SELECT GROUP_CONCAT(tag_str ORDER BY ind) FROM lx_et_hash WHERE rn=lexicon.rn AND uid=$uid) AS user_an,
 	languagenames.lgid, lexicon.reflex, lexicon.gloss, lexicon.gfn,
 	languagenames.language, languagegroups.grpid, languagegroups.grpno, languagegroups.grp,
 	languagenames.srcabbr, lexicon.srcid, languagegroups.ord,
 	(SELECT COUNT(*) FROM notes WHERE notes.rn = lexicon.rn) AS num_notes
 FROM lexicon
-	LEFT JOIN lx_et_hash ON (lexicon.rn=lx_et_hash.rn AND lx_et_hash.uid=$uid),
+	LEFT JOIN lx_et_hash ON (lexicon.rn=lx_et_hash.rn AND (lx_et_hash.uid=8 OR lx_et_hash.uid=$uid)),
 	languagenames,
 	languagegroups
 WHERE (lx_et_hash.tag = $e{tag}
@@ -497,7 +525,7 @@ EndOfSQL
 		}
 	}
 
-	my $userlist = $self->dbh->selectall_arrayref("SELECT uid,username,count(tag) as count FROM users LEFT JOIN lx_et_hash USING (uid) WHERE tag=? GROUP BY uid ",undef,$tag);
+	my $userlist = $self->dbh->selectall_arrayref("SELECT uid,username,count(distinct rn) as count FROM users LEFT JOIN lx_et_hash USING (uid) WHERE tag=? GROUP BY uid ",undef,$tag);
 
         my $username;
 	my $hasstedtreflexes = 0;
@@ -523,7 +551,7 @@ EndOfSQL
 		etyma    => \@etyma,
 		users    => \@users,
 		username => $username, uid => $uid,
-		fields => ['lexicon.rn', 'analysis', 'languagenames.lgid', 'lexicon.reflex', 'lexicon.gloss', 'lexicon.gfn',
+		fields => ['lexicon.rn', 'analysis', 'user_an', 'languagenames.lgid', 'lexicon.reflex', 'lexicon.gloss', 'lexicon.gfn',
 			'languagenames.language', 'languagegroups.grpid', 'languagegroups.grpno', 'languagegroups.grp',
 			'languagenames.srcabbr', 'lexicon.srcid', 'languagegroups.ord', 'notes.rn'],
 		footnotes => \@footnotes
