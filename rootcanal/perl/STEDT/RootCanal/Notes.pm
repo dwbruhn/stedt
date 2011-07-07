@@ -386,9 +386,10 @@ sub notes_for_rn : StartRunmode {
 sub etymon : Runmode {
 	my $self = shift;
 	my $tag = $self->param('tag');
+	my $uid = $self->param('uid');
 	
 	my $INTERNAL_NOTES = $self->has_privs(1);
-	my (@etyma, @footnotes);
+	my (@etyma, @footnotes,@users);
 	my $footnote_index = 1;
 	my $sql = qq#SELECT e.tag, e.printseq, e.protoform, e.protogloss, e.plg, e.hptbid, e.tag=e.supertag AS is_main
 FROM `etyma` AS `e` JOIN `etyma` AS `super` ON e.supertag = super.tag
@@ -449,17 +450,18 @@ ORDER BY is_main DESC, e.plgord#;
 			push @{$e{notes}}, {type=>'H', text=>$text};
 		}
 	
-	
 		# do entries
+		#$uid = $self->session->param('uid');
+		$uid = 8 unless ($uid);
 		my $recs = $self->dbh->selectall_arrayref(<<EndOfSQL);
 SELECT lexicon.rn,
-	(SELECT GROUP_CONCAT(tag_str ORDER BY ind) FROM lx_et_hash WHERE rn=lexicon.rn AND uid=8) AS analysis,
+	(SELECT GROUP_CONCAT(tag_str ORDER BY ind) FROM lx_et_hash WHERE rn=lexicon.rn AND uid=$uid) AS analysis,
 	languagenames.lgid, lexicon.reflex, lexicon.gloss, lexicon.gfn,
 	languagenames.language, languagegroups.grpid, languagegroups.grpno, languagegroups.grp,
 	languagenames.srcabbr, lexicon.srcid, languagegroups.ord,
 	(SELECT COUNT(*) FROM notes WHERE notes.rn = lexicon.rn) AS num_notes
 FROM lexicon
-	LEFT JOIN lx_et_hash ON (lexicon.rn=lx_et_hash.rn AND lx_et_hash.uid=8),
+	LEFT JOIN lx_et_hash ON (lexicon.rn=lx_et_hash.rn AND lx_et_hash.uid=$uid),
 	languagenames,
 	languagegroups
 WHERE (lx_et_hash.tag = $e{tag}
@@ -476,6 +478,7 @@ EndOfSQL
 			collect_lex_notes($self, $recs, $INTERNAL_NOTES, \@footnotes, \$footnote_index, $e{tag});
 			$e{records} = $recs;
 		}
+		#else { $e{records} = "no reflexes for tag #$tag" }
 	
 		# Chinese comparanda
 		$e{comparanda} = [];
@@ -496,8 +499,32 @@ EndOfSQL
 		}
 	}
 
+	my $userlist = $self->dbh->selectall_arrayref("SELECT uid,username,count(tag) as count FROM users LEFT JOIN lx_et_hash USING (uid) WHERE tag=? GROUP BY uid ",undef,$tag);
+
+        my $username;
+	my $hasstedtreflexes = 0;
+	foreach (@$userlist) {
+		my %e; # hash of infos to be added to @users
+		push @users, \%e;
+		$e{uid} = $_->[0];
+		$e{username} = $_->[1];
+		$e{count} = $_->[2];
+		# get the username of the "current" uid as we pass through...
+		$username =  $_->[1] if ($uid == $_->[0]);
+		$hasstedtreflexes = 1 if (8 == $_->[0]);
+	      }
+	unless ($hasstedtreflexes) { # make a dummy entry for the stedt user if there are no "official" reflexes
+		my %e; # hash of infos to be added to @users
+		push @users, \%e;
+		$e{uid} = 8;
+		$e{username} = 'stedt';
+		$e{count} = '0';
+	}
+
 	return $self->tt_process("etymon.tt", {
 		etyma    => \@etyma,
+		users    => \@users,
+		username => $username, uid => $uid,
 		fields => ['lexicon.rn', 'analysis', 'languagenames.lgid', 'lexicon.reflex', 'lexicon.gloss', 'lexicon.gfn',
 			'languagenames.language', 'languagegroups.grpid', 'languagegroups.grpno', 'languagegroups.grp',
 			'languagenames.srcabbr', 'lexicon.srcid', 'languagegroups.ord', 'notes.rn'],

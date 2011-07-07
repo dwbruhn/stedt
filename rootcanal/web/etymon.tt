@@ -1,6 +1,15 @@
 ﻿[% cogs = [] %][% FOREACH e IN etyma %][% cogs.push(e.tag) %][% END -%]
 [% PROCESS header.tt title="STEDT Etymon #" _ etyma.0.tag cognates=cogs -%]
 [% lexicon_id = 1 %][% lastord = -1 -%]
+
+<form name="selectuser" method="POST" style="display:inline">
+Reflexes tagged by <select name="DDMenu" onclick="location.href=(form.DDMenu.options[form.DDMenu.selectedIndex].value)">
+[% FOREACH u IN users %]
+<option value="[% self_url %]/etymon/[% e.tag %]/[% u.uid %]" [% IF uid == u.uid %]selected[% END -%] >[% u.username %] ([% u.count %] reflexes)</option>
+[% END -%]
+</select>
+</form>
+
 [% FOREACH e IN etyma -%]
 [% IF e.is_main %]<h1>#[% e.tag %] [% e.plg %] [% e.protoform %] [% e.protogloss %]</h1>
 [%- ELSE %]<h2>#[% e.tag %] [% e.plg %] [% e.protoform %] [% e.protogloss %]</h2>[% END %]
