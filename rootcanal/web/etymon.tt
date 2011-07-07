@@ -3,7 +3,7 @@
 [% lexicon_id = 1 %][% lastord = -1 -%]
 
 <form name="selectuser" method="POST" style="display:inline">
-Reflexes tagged by <select name="DDMenu" onclick="location.href=(form.DDMenu.options[form.DDMenu.selectedIndex].value)">
+Reflexes tagged by <select name="DDMenu" onchange="location.href=(form.DDMenu.options[form.DDMenu.selectedIndex].value)">
 [% FOREACH u IN users %]
 <option value="[% self_url %]/etymon/[% e.tag %]/[% u.uid %]" [% IF uid == u.uid %]selected[% END -%] >[% u.username %] ([% u.count %] reflexes)</option>
 [% END -%]
