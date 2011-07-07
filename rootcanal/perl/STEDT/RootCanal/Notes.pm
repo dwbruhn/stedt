@@ -389,7 +389,7 @@ sub etymon : Runmode {
 	my $uid = $self->param('uid');
 	
 	my $INTERNAL_NOTES = $self->has_privs(1);
-	my (@etyma, @footnotes,@users);
+	my (@etyma, @footnotes, @users);
 	my $footnote_index = 1;
 	my $sql = qq#SELECT e.tag, e.printseq, e.protoform, e.protogloss, e.plg, e.hptbid, e.tag=e.supertag AS is_main
 FROM `etyma` AS `e` JOIN `etyma` AS `super` ON e.supertag = super.tag
@@ -451,7 +451,6 @@ ORDER BY is_main DESC, e.plgord#;
 		}
 	
 		# do entries
-		#$uid = $self->session->param('uid');
 		$uid = 8 unless ($uid);
 		my $recs = $self->dbh->selectall_arrayref(<<EndOfSQL);
 SELECT lexicon.rn,
@@ -478,7 +477,6 @@ EndOfSQL
 			collect_lex_notes($self, $recs, $INTERNAL_NOTES, \@footnotes, \$footnote_index, $e{tag});
 			$e{records} = $recs;
 		}
-		#else { $e{records} = "no reflexes for tag #$tag" }
 	
 		# Chinese comparanda
 		$e{comparanda} = [];
