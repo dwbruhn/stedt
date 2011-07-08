@@ -418,6 +418,9 @@ sub etymon : Runmode {
 		$self->header_props(-status => 400);
 		return "Invalid uid requested!"; # non-numeric, or the stedt uid
 	}
+	if ($selected_uid && !$self->has_privs(1)) {
+		return $self->redirect($self->query->url(-absolute=>1) . "/etymon/$tag");
+	}
 	
 	my $INTERNAL_NOTES = $self->has_privs(1);
 	my (@etyma, @footnotes, @users);
@@ -441,55 +444,58 @@ ORDER BY is_main DESC, e.plgord#;
 	my $self_count = 0;
 	my $stedt_count = 0;
 	my $mosttagged_uid;
+	my $selected_username;
 	my $userrecs = $self->dbh->selectall_arrayref("SELECT uid,username,COUNT(DISTINCT rn) as num_forms, uid=8 AS not_stedt FROM users LEFT JOIN lx_et_hash USING (uid) WHERE tag=? GROUP BY uid ORDER BY not_stedt, num_forms DESC",undef,$tag);
-	if (@$userrecs) {
-		# get number of stedt records (it's the last row, if it's there)
-		if ($userrecs->[-1][0] == 8) {
-			$stedt_count = $userrecs->[-1][2];
-			pop @$userrecs;
-		}
-		$mosttagged_uid = $userrecs->[0][0] if @$userrecs; # if no rows, don't make a new blank one implicitly by accessing it
-		foreach (@$userrecs) {
-			push @users, {uid=>$_->[0], username=>$_->[1], count=>$_->[2]};
-			$self_count = $_->[2] if ($_->[0] == $self_uid); # save this value while passing through
-		}
-	}
-
-	# so far, we have
-	# $selected_uid: may be '', guaranteed not to be 8
-	# $mosttagged_uid: defined if there are tagged records by any non-stedt account
-	# $self_uid: may be 8
-	# $self_count: > 0 if there are tagged records by the currently logged in user, unless currently logged in as stedt
-	if (!$selected_uid) {	# no uid specified, so pick a sensible default
-		if ($self_count) {	# if you've tagged any records, show your own tags
-			$selected_uid = $self_uid;
-		} elsif ($mosttagged_uid) {	# otherwise show the user who's tagged most
-			$selected_uid = $mosttagged_uid;
-		} elsif ($self_uid != 8) {	# no user tagging - show your own so you can tag
-			$selected_uid = $self_uid;
-		}
-	}
-	# at this point, if $selected_uid is still undef,
-	# it's because $self_uid is 8 and there is no user tagging at all
-	my $selected_username; # this will be set correctly, if not in this foreach loop, then in the if clause following.
-	foreach (@$userrecs) {
-		$selected_username = $_->[1] if ($_->[0] == $selected_uid);
-	}
-
-	if ($selected_uid && $self_uid != 8) {
-		if (!$self_count) {
-			# always allow switching to your own tagging
-			push @users, {uid=>$self_uid, username=>$self->param('user'), count=>0};
-			$selected_username = $self->param('user') if $self_uid == $selected_uid; # set this here since it wasn't in @users
-		}
-		if (!$selected_username && $selected_uid != $self_uid) {
-			# if a user who hasn't tagged anything is selected, add them to the popup list
-			($selected_username) = $self->dbh->selectrow_array("SELECT username FROM users WHERE uid=?", undef, $selected_uid);
-			if (!$selected_username) {
-				$self->header_props(-status => 400);
-				return "No user for that uid!";
+	if ($self->has_privs(1)) {
+		if (@$userrecs) {
+			# get number of stedt records (it's the last row, if it's there)
+			if ($userrecs->[-1][0] == 8) {
+				$stedt_count = $userrecs->[-1][2];
+				pop @$userrecs;
 			}
-			push @users, {uid=>$selected_uid, username=>$selected_username, count=>0};
+			$mosttagged_uid = $userrecs->[0][0] if @$userrecs; # if no rows, don't make a new blank one implicitly by accessing it
+			foreach (@$userrecs) {
+				push @users, {uid=>$_->[0], username=>$_->[1], count=>$_->[2]};
+				$self_count = $_->[2] if ($_->[0] == $self_uid); # save this value while passing through
+			}
+		}
+	
+		# so far, we have
+		# $selected_uid: may be '', guaranteed not to be 8
+		# $mosttagged_uid: defined if there are tagged records by any non-stedt account
+		# $self_uid: may be 8
+		# $self_count: > 0 if there are tagged records by the currently logged in user, unless currently logged in as stedt
+		if (!$selected_uid ) {	# no uid specified, so pick a sensible default
+			if ($self_count) {	# if you've tagged any records, show your own tags
+				$selected_uid = $self_uid;
+			} elsif ($mosttagged_uid) {	# otherwise show the user who's tagged most
+				$selected_uid = $mosttagged_uid;
+			} elsif ($self_uid != 8) {	# no user tagging - show your own so you can tag
+				$selected_uid = $self_uid;
+			}
+		}
+		# at this point, if $selected_uid is still undef,
+		# it's because $self_uid is 8 and there is no user tagging at all
+		# $selected_username will now be set correctly, if not in this foreach loop, then in the if clause following.
+		foreach (@$userrecs) {
+			$selected_username = $_->[1] if ($_->[0] == $selected_uid);
+		}
+	
+		if ($selected_uid && $self_uid != 8) {
+			if (!$self_count) {
+				# always allow switching to your own tagging
+				push @users, {uid=>$self_uid, username=>$self->param('user'), count=>0};
+				$selected_username = $self->param('user') if $self_uid == $selected_uid; # set this here since it wasn't in @users
+			}
+			if (!$selected_username && $selected_uid != $self_uid) {
+				# if a user who hasn't tagged anything is selected, add them to the popup list
+				($selected_username) = $self->dbh->selectrow_array("SELECT username FROM users WHERE uid=?", undef, $selected_uid);
+				if (!$selected_username) {
+					$self->header_props(-status => 400);
+					return "No user for that uid!";
+				}
+				push @users, {uid=>$selected_uid, username=>$selected_username, count=>0};
+			}
 		}
 	}
 
