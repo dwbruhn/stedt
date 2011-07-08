@@ -413,7 +413,11 @@ sub accept : Runmode {
 sub etymon : Runmode {
 	my $self = shift;
 	my $tag = $self->param('tag');
-	my $uid = $self->param('uid');
+	my $selected_uid = $self->param('uid');
+	if ($selected_uid ne '' && ($selected_uid !~ /^\d+$/ || $selected_uid == 8)) {
+		$self->header_props(-status => 400);
+		return "Invalid uid requested!"; # non-numeric, or the stedt uid
+	}
 	
 	my $INTERNAL_NOTES = $self->has_privs(1);
 	my (@etyma, @footnotes, @users);
@@ -430,7 +434,62 @@ ORDER BY is_main DESC, e.plgord#;
 		if (!$tag) {
 			die "no etymon with tag #$tag";
 		}
-		return $self->redirect($self->query->url(-absolute=>1) . "/etymon/$tag" . ($uid ? "/$uid" : ''));
+		return $self->redirect($self->query->url(-absolute=>1) . "/etymon/$tag" . ($selected_uid ? "/$selected_uid" : ''));
+	}
+
+	my $self_uid = $self->session->param('uid');
+	my $self_count = 0;
+	my $stedt_count = 0;
+	my $mosttagged_uid;
+	my $userrecs = $self->dbh->selectall_arrayref("SELECT uid,username,COUNT(DISTINCT rn) as num_forms, uid=8 AS not_stedt FROM users LEFT JOIN lx_et_hash USING (uid) WHERE tag=? GROUP BY uid ORDER BY not_stedt, num_forms DESC",undef,$tag);
+	if (@$userrecs) {
+		# get number of stedt records (it's the last row, if it's there)
+		if ($userrecs->[-1][0] == 8) {
+			$stedt_count = $userrecs->[-1][2];
+			pop @$userrecs;
+		}
+		$mosttagged_uid = $userrecs->[0][0] if @$userrecs; # if no rows, don't make a new blank one implicitly by accessing it
+		foreach (@$userrecs) {
+			push @users, {uid=>$_->[0], username=>$_->[1], count=>$_->[2]};
+			$self_count == $_->[2] if ($_->[0] == $self_uid); # save this value while passing through
+		}
+	}
+
+	# so far, we have
+	# $selected_uid: may be '', guaranteed not to be 8
+	# $mosttagged_uid: defined if there are tagged records by any non-stedt account
+	# $self_uid: may be 8
+	# $self_count: > 0 if there are tagged records by the currently logged in user, unless currently logged in as stedt
+	if (!$selected_uid) {	# no uid specified, so pick a sensible default
+		if ($self_count) {	# if you've tagged any records, show your own tags
+			$selected_uid = $self_uid;
+		} elsif ($mosttagged_uid) {	# otherwise show the user who's tagged most
+			$selected_uid = $mosttagged_uid;
+		} elsif ($self_uid != 8) {	# no user tagging - show your own so you can tag
+			$selected_uid = $self_uid;
+		}
+	}
+	# at this point, if $selected_uid is still undef,
+	# it's because $self_uid is 8 and there is no user tagging at all
+	my $selected_username;	# defined if there are tagged records by the selected user
+	foreach (@$userrecs) {
+		$selected_username = $_->[1] if ($_->[0] == $selected_uid);
+	}
+
+	if ($selected_uid && $self_uid != 8) {
+		if (!$self_count) {
+			# always allow switching to your own tagging
+			push @users, {uid=>$self_uid, username=>$self->param('user'), count=>0};
+		}
+		if (!$selected_username && $selected_uid != $self_uid) {
+			# if a user who hasn't tagged anything is selected, add them to the popup list
+			($selected_username) = $self->dbh->selectrow_array("SELECT username FROM users WHERE uid=?", undef, $selected_uid);
+			if (!$selected_username) {
+				$self->header_props(-status => 400);
+				return "No user for that uid!";
+			}
+			push @users, {uid=>$selected_uid, username=>$selected_username, count=>0};
+		}
 	}
 
 	foreach (@$etyma_for_tag) {
@@ -480,17 +539,23 @@ ORDER BY is_main DESC, e.plgord#;
 		}
 	
 		# do entries
-		$uid = 8 unless ($uid);
+		my $user_analysis_col = '';
+		my $user_analysis_where = '';
+		if ($selected_uid) {
+			# OK to concatenate the uid into the query since we've made sure it's just digits
+			$user_analysis_col = "(SELECT GROUP_CONCAT(tag_str ORDER BY ind) FROM lx_et_hash WHERE rn=lexicon.rn AND uid=$selected_uid) AS user_an,";
+			$user_analysis_where = "OR lx_et_hash.uid=$selected_uid";
+		}
 		my $recs = $self->dbh->selectall_arrayref(<<EndOfSQL);
 SELECT lexicon.rn,
 	(SELECT GROUP_CONCAT(tag_str ORDER BY ind) FROM lx_et_hash WHERE rn=lexicon.rn AND uid=8) AS analysis,
-	(SELECT GROUP_CONCAT(tag_str ORDER BY ind) FROM lx_et_hash WHERE rn=lexicon.rn AND uid=$uid) AS user_an,
+	$user_analysis_col
 	languagenames.lgid, lexicon.reflex, lexicon.gloss, lexicon.gfn,
 	languagenames.language, languagegroups.grpid, languagegroups.grpno, languagegroups.grp,
 	languagenames.srcabbr, lexicon.srcid, languagegroups.ord,
 	(SELECT COUNT(*) FROM notes WHERE notes.rn = lexicon.rn) AS num_notes
 FROM lexicon
-	LEFT JOIN lx_et_hash ON (lexicon.rn=lx_et_hash.rn AND (lx_et_hash.uid=8 OR lx_et_hash.uid=$uid)),
+	LEFT JOIN lx_et_hash ON (lexicon.rn=lx_et_hash.rn AND (lx_et_hash.uid=8 $user_analysis_where)),
 	languagenames,
 	languagegroups
 WHERE (lx_et_hash.tag = $e{tag}
@@ -527,33 +592,13 @@ EndOfSQL
 		}
 	}
 
-	my $userlist = $self->dbh->selectall_arrayref("SELECT uid,username,count(distinct rn) as count FROM users LEFT JOIN lx_et_hash USING (uid) WHERE tag=? GROUP BY uid ",undef,$tag);
-
-        my $username;
-	my $hasstedtreflexes = 0;
-	foreach (@$userlist) {
-		my %e; # hash of infos to be added to @users
-		push @users, \%e;
-		$e{uid} = $_->[0];
-		$e{username} = $_->[1];
-		$e{count} = $_->[2];
-		# get the username of the "current" uid as we pass through...
-		$username =  $_->[1] if ($uid == $_->[0]);
-		$hasstedtreflexes = 1 if (8 == $_->[0]);
-	      }
-	unless ($hasstedtreflexes) { # make a dummy entry for the stedt user if there are no "official" reflexes
-		my %e; # hash of infos to be added to @users
-		push @users, \%e;
-		$e{uid} = 8;
-		$e{username} = 'stedt';
-		$e{count} = '0';
-	}
-
 	return $self->tt_process("etymon.tt", {
 		etyma    => \@etyma,
 		users    => \@users,
-		username => $username, uid => $uid,
-		fields => ['lexicon.rn', 'analysis', 'user_an', 'languagenames.lgid', 'lexicon.reflex', 'lexicon.gloss', 'lexicon.gfn',
+		selected_username => $selected_username, selected_uid => $selected_uid,
+		stedt_count => $stedt_count, supertag => $tag,
+		fields => ['lexicon.rn', 'analysis', ($selected_uid ? 'user_an' : ()),
+			'languagenames.lgid', 'lexicon.reflex', 'lexicon.gloss', 'lexicon.gfn',
 			'languagenames.language', 'languagegroups.grpid', 'languagegroups.grpno', 'languagegroups.grp',
 			'languagenames.srcabbr', 'lexicon.srcid', 'languagegroups.ord', 'notes.rn'],
 		footnotes => \@footnotes

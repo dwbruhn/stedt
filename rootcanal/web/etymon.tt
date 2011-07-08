@@ -2,13 +2,20 @@
 [% PROCESS header.tt title="STEDT Etymon #" _ etyma.0.tag cognates=cogs -%]
 [% lexicon_id = 1 %][% lastord = -1 -%]
 
+[% IF c.has_privs(1) %]
+[% stedt_count %] records tagged by <b>stedt</b> under this etymon.
+[% IF selected_uid %]
 <form name="selectuser" method="POST" style="display:inline">
 Reflexes tagged by <select name="DDMenu" onchange="location.href=(form.DDMenu.options[form.DDMenu.selectedIndex].value)">
 [% FOREACH u IN users %]
-<option value="[% self_url %]/etymon/[% e.tag %]/[% u.uid %]" [% IF uid == u.uid %]selected[% END -%] >[% u.username %] ([% u.count %] reflexes)</option>
+<option value="[% self_url %]/etymon/[% supertag %]/[% u.uid %]" [% IF selected_uid == u.uid %]selected[% END %] >[% u.username %] ([% u.count %] tagged forms)</option>
 [% END -%]
 </select>
 </form>
+[% ELSE %]
+(No user tagging for this etymon.)
+[% END # selected_uid %]
+[% END # has_privs 1 %]
 
 [% FOREACH e IN etyma -%]
 [% IF e.is_main %]<h1>#[% e.tag %] [% e.plg %] [% e.protoform %] [% e.protogloss %]</h1>
@@ -31,11 +38,11 @@ Reflexes tagged by <select name="DDMenu" onchange="location.href=(form.DDMenu.op
 [% END -%]
 
 [% IF e.records -%]
-[% IF c.has_privs(16) %]
+[% IF selected_uid && c.has_privs(16) %]
 <form action="[% self_url %]/notes/accept" method="post">
 <input name="tag" value="[% e.tag %]" type="hidden">
-<input name="uid" value="[% uid %]" type="hidden">
-<input type="submit" value="Accept tagging by [% username %] for tag #[% e.tag %]">
+<input name="uid" value="[% selected_uid %]" type="hidden">
+<input type="submit" value="Accept tagging by [% selected_username %] for tag #[% e.tag %]">
 </form>
 [% END # has_privs 16 %]
 <table id="lexicon[% lexicon_id %]">[% lexicon_id = lexicon_id+1 %]
