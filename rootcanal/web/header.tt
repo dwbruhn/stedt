@@ -9,7 +9,8 @@
 	<link rel="stylesheet" href="[% self_base %]styles/rootcanal.css">
 [% IF cognates.size -%]
 	<style type="text/css">
-[%- FOREACH n IN cognates %].r[% n %] { background-color:yellow; } [% END %]</style>
+[%- FOREACH n IN cognates %].r[% n %] { background-color:yellow; } [% END -%]
+[%- FOREACH n IN cognates %].u[% n %] { background-color:#6FF; } [% END %]</style>
 [% END -%]
 	<script src="[% self_base %]scriptaculous/lib/prototype.js"></script>
 	<script src="[% self_base %]scriptaculous/src/scriptaculous.js"></script>

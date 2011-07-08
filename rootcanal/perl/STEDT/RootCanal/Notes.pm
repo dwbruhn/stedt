@@ -451,7 +451,7 @@ ORDER BY is_main DESC, e.plgord#;
 		$mosttagged_uid = $userrecs->[0][0] if @$userrecs; # if no rows, don't make a new blank one implicitly by accessing it
 		foreach (@$userrecs) {
 			push @users, {uid=>$_->[0], username=>$_->[1], count=>$_->[2]};
-			$self_count == $_->[2] if ($_->[0] == $self_uid); # save this value while passing through
+			$self_count = $_->[2] if ($_->[0] == $self_uid); # save this value while passing through
 		}
 	}
 

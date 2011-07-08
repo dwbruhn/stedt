@@ -19,6 +19,26 @@ setup['lexicon']['other_an'] = {
 		return v.replace(/, */g,', ');
 	},
 };
+if (stedt_other_username) {
+	setup['lexicon']['lexicon.reflex']['transform'] = function (v,key,rec) {
+			if (!v) return '';
+			var analysis = rec[1] || ''; // might be NULL from the SQL query
+			var an2 = rec[2] || '';
+			var tags = analysis.split(',');
+			var t2 = an2.split(',');
+			var result = SYLSTATION.syllabify(v);
+			var a = result[0].map(function (s,i) {
+				var delim = result[1][i] || '&thinsp;';
+				var makelink = !skipped_roots[tags[i]];
+				return (parseInt(tags[i], 10) && makelink)
+					? '<a href="' + baseRef + 'etymon/' + tags[i] + '" target="stedt_etymon"'
+						+ ' class="r' + tags[i] + ' u' + t2[i] + '">'
+						+ s + '</a>'  + delim
+					: '<span class="r' + tags[i] + ' u' + t2[i] + '">' + s + '</span>' + delim;
+			});
+			return a.join('');
+	};
+}
 for (var i = 1; i < num_tables; i++) {
 	TableKit.Raw.init('lexicon' + i, 'lexicon', (stedtuserprivs & 1) ? (baseRef+'update') : null);
 	TableKit.Rows.stripe('lexicon' + i);
