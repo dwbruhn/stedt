@@ -425,11 +425,13 @@ ORDER BY is_main DESC, e.plgord#;
 	my $etyma_for_tag = $self->dbh->selectall_arrayref($sql, undef, $tag);
 	if (!@$etyma_for_tag) {
 		# if it failed the first time, this is probably a mesoroot.
-		# get the mesoroot's supertag and try one more time
+		# get the mesoroot's supertag and redirect to it
 		($tag) = $self->dbh->selectrow_array("SELECT supertag FROM etyma WHERE tag=?", undef, $tag);
-		$etyma_for_tag = $self->dbh->selectall_arrayref($sql, undef, $tag);
+		if (!$tag) {
+			die "no etymon with tag #$tag";
+		}
+		return $self->redirect($self->query->url(-absolute=>1) . "/etymon/$tag" . ($uid ? "/$uid" : ''));
 	}
-	if (!@$etyma_for_tag) { die "no etymon with tag #$tag" }
 
 	foreach (@$etyma_for_tag) {
 		my %e; # hash of infos to be added to @etyma
