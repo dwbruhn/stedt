@@ -10,7 +10,7 @@
 	<th>uid</th>
 	<th>email</th>
 	<th>privs</th>
-	<th>tags</th>
+	<th>tagged forms</th>
 </tr>
 [% FOREACH row IN users -%]
 <tr>
