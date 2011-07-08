@@ -1,5 +1,4 @@
 [% PROCESS header.tt title="STEDT Database: Login Page" %]
-<body>
 [% IF msg -%]
 <p>[% msg %]</p>
 [% END -%]

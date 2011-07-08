@@ -1,5 +1,4 @@
 [% PROCESS header.tt title="STEDT Database: Account Info" %]
-<body>
 <div id="lgtree">
 <table>
 <tr><th>Group #</th><th>Group Name</th></tr>

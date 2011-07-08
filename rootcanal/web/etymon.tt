@@ -39,7 +39,7 @@ Reflexes tagged by <select name="DDMenu" onchange="location.href=(form.DDMenu.op
 
 [% IF e.records -%]
 [% IF selected_uid && c.has_privs(16) %]
-<form action="[% self_url %]/notes/accept" method="post">
+<form action="[% self_url %]/notes/accept" method="post" onsubmit="return confirm('Are you sure you want to approve all the tagging by [% selected_username %] for tag #[% e.tag %]? Any conflicting tags will be clobbered!')">
 <input name="tag" value="[% e.tag %]" type="hidden">
 <input name="uid" value="[% selected_uid %]" type="hidden">
 <input type="submit" value="Accept tagging by [% selected_username %] for tag #[% e.tag %]">
@@ -104,6 +104,7 @@ Reflexes tagged by <select name="DDMenu" onchange="location.href=(form.DDMenu.op
 var footnote_counter = [% footnotes.size %];
 [% FOREACH c IN cogs %]skipped_roots[[% c %]]=true;[% END %]
 num_tables=[% lexicon_id %];
+var stedt_other_username = '[% selected_username || '' %]';
 </script>
 <script src="[% self_base %]js/etymon.js"></script>
 <script src="[% self_base %]js/notes.js"></script>

@@ -1,6 +1,4 @@
 [% PROCESS header.tt title="STEDT Database: Admin Page" %]
-<body>
-<p/>
 Edit tables:
 <ul>
 [% FOREACH tbl IN ['etyma', 'lexicon', 'languagenames', 'srcbib', 'hptb'] -%]

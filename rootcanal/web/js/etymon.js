@@ -11,6 +11,14 @@ setup['lexicon']['notes.rn'] = {
 		return a.join(' ');
 	}
 };
+setup['lexicon']['other_an'] = {
+	label: stedt_other_username + '\'s analysis',
+	noedit: true, // currently not possible to even let superusers edit others' tagging, since Lexicon.pm is only passed the current uid!
+	size: 80,
+	transform: function (v) {
+		return v.replace(/, */g,', ');
+	},
+};
 for (var i = 1; i < num_tables; i++) {
 	TableKit.Raw.init('lexicon' + i, 'lexicon', (stedtuserprivs & 1) ? (baseRef+'update') : null);
 	TableKit.Rows.stripe('lexicon' + i);

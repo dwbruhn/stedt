@@ -471,7 +471,7 @@ ORDER BY is_main DESC, e.plgord#;
 	}
 	# at this point, if $selected_uid is still undef,
 	# it's because $self_uid is 8 and there is no user tagging at all
-	my $selected_username;	# defined if there are tagged records by the selected user
+	my $selected_username; # this will be set correctly, if not in this foreach loop, then in the if clause following.
 	foreach (@$userrecs) {
 		$selected_username = $_->[1] if ($_->[0] == $selected_uid);
 	}
@@ -480,6 +480,7 @@ ORDER BY is_main DESC, e.plgord#;
 		if (!$self_count) {
 			# always allow switching to your own tagging
 			push @users, {uid=>$self_uid, username=>$self->param('user'), count=>0};
+			$selected_username = $self->param('user') if $self_uid == $selected_uid; # set this here since it wasn't in @users
 		}
 		if (!$selected_username && $selected_uid != $self_uid) {
 			# if a user who hasn't tagged anything is selected, add them to the popup list
@@ -597,7 +598,8 @@ EndOfSQL
 		users    => \@users,
 		selected_username => $selected_username, selected_uid => $selected_uid,
 		stedt_count => $stedt_count, supertag => $tag,
-		fields => ['lexicon.rn', 'analysis', ($selected_uid ? 'user_an' : ()),
+		fields => ['lexicon.rn', 'analysis',
+			($selected_uid ? ($selected_uid==$self_uid?'user_an':'other_an') : ()),
 			'languagenames.lgid', 'lexicon.reflex', 'lexicon.gloss', 'lexicon.gfn',
 			'languagenames.language', 'languagegroups.grpid', 'languagegroups.grpno', 'languagegroups.grp',
 			'languagenames.srcabbr', 'lexicon.srcid', 'languagegroups.ord', 'notes.rn'],

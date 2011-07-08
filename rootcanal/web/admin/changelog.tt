@@ -1,7 +1,4 @@
 [% PROCESS header.tt title="STEDT Database: Database Updates" %]
-[% self_url = c.query.url('-absolute',1) -%]
-[% self_base = self_url.replace('[^/]+$' , '') -%]
-<body>
 <p>[% changes.size %] most recent changes:</p>
 
 <table>
