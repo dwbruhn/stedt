@@ -445,7 +445,7 @@ ORDER BY is_main DESC, e.plgord#;
 	my $stedt_count = 0;
 	my $mosttagged_uid;
 	my $selected_username;
-	my $userrecs = $self->dbh->selectall_arrayref("SELECT uid,username,COUNT(DISTINCT rn) as num_forms, uid=8 AS not_stedt FROM users LEFT JOIN lx_et_hash USING (uid) WHERE tag=? GROUP BY uid ORDER BY not_stedt, num_forms DESC",undef,$tag);
+	my $userrecs = $self->dbh->selectall_arrayref("SELECT users.uid,username,COUNT(DISTINCT rn) as num_forms, users.uid=8 AS not_stedt FROM users JOIN lx_et_hash USING (uid) JOIN etyma USING (tag) WHERE supertag=? GROUP BY uid ORDER BY not_stedt, num_forms DESC",undef,$tag);
 	if ($self->has_privs(1)) {
 		if (@$userrecs) {
 			# get number of stedt records (it's the last row, if it's there)

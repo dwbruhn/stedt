@@ -146,6 +146,7 @@ $t->wheres(
 			unless ($t->{query_from} =~ / lx_et_hash ON \(lexicon.rn/) {
 				$t->{query_from} .= ' LEFT JOIN lx_et_hash ON (lexicon.rn = lx_et_hash.rn AND lx_et_hash.uid=8)';
 			}
+			$v = '' if $v eq '\\\\'; # hack to find empty tag_str using a backslash
 			return $is_string ? "lx_et_hash.tag_str='$v'" : "lx_et_hash.tag=$v";
 		}
 	},
