@@ -1,7 +1,17 @@
 [% PROCESS header.tt title="STEDT Database: Account Info" %]
 [%- user = c.param('user') -%]
 [% IF reset -%]
+
+<pre>
+[% message %]
+</pre>
+
 A new password has been generated and sent to the email address in your account record.
+
+Once you receive this email, please click on the link below and login with your new password.
+
+<a href="[% self_url %]/account/login">Login</a>
+
 [% ELSIF user -%]
 [% IF updated %]<p>Information updated successfully.</p>[% END -%]
 
