@@ -1,6 +1,7 @@
 package STEDT::RootCanal::Account;
 use strict;
 use base 'STEDT::RootCanal::Base';
+use Mail::Sendmail;
 use CGI::Application::Plugin::Redirect;
 
 # for creating and maintaining a personal account
@@ -228,12 +229,7 @@ sub password_reset : Runmode {
 	my $pwd;
 	$pwd .= ('A'..'Z','a'..'z',0..9)[int rand 62] for (0..8);
 	
-	open (SENDMAIL, "| /usr/sbin/sendmail -t -n") or die("couldn't sendmail: $!");
-	print SENDMAIL <<End_of_Mail;
-From: STEDT <stedt\@berkeley.edu>
-To: $email
-Reply-To: stedt\@berkeley.edu
-Subject: STEDT Root Canal account
+	my $msg = <<End_of_Mail;
 
 Your password has been changed.
 
@@ -241,7 +237,17 @@ New password: $pwd
 
 Please log in to change it to something more memorable.
 End_of_Mail
-	close SENDMAIL or die("couldn't sendmail: $! - $?");
+
+	my %mail = (
+		    To         => $email',
+		    Subject    => "STEDT Root Canal account",
+		    From       => 'STEDT <stedt\@socrates.berkeley.edu>',
+		    'Reply-To' => 'STEDT <stedt\@socrates.berkeley.edu>',
+		    Message    => $msg,
+		   );
+
+	sendmail(%mail) or die $Mail::Sendmail::error;
+	print "OK. Log says:\n", $Mail::Sendmail::log;
 
 	# try to update the database AFTER you send the email. Otherwise
 	# if sendmail fails, the password is changed but there's no record of it.
