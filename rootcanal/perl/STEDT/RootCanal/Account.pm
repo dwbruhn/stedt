@@ -229,6 +229,7 @@ sub password_reset : Runmode {
 	my $pwd;
 	$pwd .= ('A'..'Z','a'..'z',0..9)[int rand 62] for (0..8);
 	
+        my $loginurl = $self->query->url() . '/account/login';
 	my $msg = <<End_of_Mail;
 
 Your password has been changed.
@@ -236,13 +237,16 @@ Your password has been changed.
 New password: $pwd
 
 Please log in to change it to something more memorable.
+
+$loginurl
+
 End_of_Mail
 
 	my %mail = (
 		    To         => "$email",
 		    Subject    => "STEDT Root Canal account",
-		    From       => 'STEDT <stedt\@socrates.berkeley.edu>',
-		    'Reply-To' => 'STEDT <stedt\@socrates.berkeley.edu>',
+		    From       => 'stedt@socrates.berkeley.edu',
+		    'Reply-To' => 'stedt@socrates.berkeley.edu',
 		    Message    => "$msg",
 		   );
 
@@ -254,7 +258,7 @@ End_of_Mail
 
 	return $self->tt_process("account.tt", {
 		'reset' => 1,
-		'message' => "OK. Log says:\n", $Mail::Sendmail::log
+		'message' => $Mail::Sendmail::log
 	});
 }
 
