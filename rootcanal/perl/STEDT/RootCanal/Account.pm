@@ -239,15 +239,14 @@ Please log in to change it to something more memorable.
 End_of_Mail
 
 	my %mail = (
-		    To         => $email',
+		    To         => "$email",
 		    Subject    => "STEDT Root Canal account",
 		    From       => 'STEDT <stedt\@socrates.berkeley.edu>',
 		    'Reply-To' => 'STEDT <stedt\@socrates.berkeley.edu>',
-		    Message    => $msg,
+		    Message    => "$msg",
 		   );
 
 	sendmail(%mail) or die $Mail::Sendmail::error;
-	print "OK. Log says:\n", $Mail::Sendmail::log;
 
 	# try to update the database AFTER you send the email. Otherwise
 	# if sendmail fails, the password is changed but there's no record of it.
@@ -255,6 +254,7 @@ End_of_Mail
 
 	return $self->tt_process("account.tt", {
 		'reset' => 1,
+		'message' => "OK. Log says:\n", $Mail::Sendmail::log
 	});
 }
 
