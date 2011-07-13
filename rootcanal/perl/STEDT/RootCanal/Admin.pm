@@ -13,7 +13,7 @@ sub changes : Runmode {
 	my $self = shift;
 	if (my $err = $self->require_privs(1)) { return $err; }
 
-	my $a = $self->dbh->selectall_arrayref("SELECT username,`table`,col,id,oldval,newval,time FROM changelog LEFT JOIN users USING (uid) ORDER BY time DESC LIMIT 20");
+	my $a = $self->dbh->selectall_arrayref("SELECT username,`table`,col,id,oldval,newval,time FROM changelog LEFT JOIN users USING (uid) ORDER BY time DESC LIMIT 500");
 	return $self->tt_process("admin/changelog.tt", {changes=>$a});
 }
 
@@ -21,7 +21,7 @@ sub queries : Runmode {
 	my $self = shift;
 	if (my $err = $self->require_privs(1)) { return $err; }
 
-	my $a = $self->dbh->selectall_arrayref("SELECT `table`,query,ip,time FROM querylog ORDER BY time DESC LIMIT 100");
+	my $a = $self->dbh->selectall_arrayref("SELECT `table`,query,ip,time FROM querylog ORDER BY time DESC LIMIT 500");
 	return $self->tt_process("admin/querylog.tt", {queries=>$a});
 }
 
