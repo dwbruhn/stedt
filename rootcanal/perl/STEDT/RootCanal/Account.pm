@@ -243,11 +243,11 @@ $loginurl
 End_of_Mail
 
 	my %mail = (
-		    To         => "$email",
+		    To         => $email,
 		    Subject    => "STEDT Root Canal account",
 		    From       => 'stedt@socrates.berkeley.edu',
 		    'Reply-To' => 'stedt@socrates.berkeley.edu',
-		    Message    => "$msg",
+		    Message    => $msg,
 		   );
 
 	sendmail(%mail) or die $Mail::Sendmail::error;

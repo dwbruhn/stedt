@@ -441,12 +441,12 @@ ORDER BY is_main DESC, e.plgord#;
 	}
 
 	my $self_uid = $self->session->param('uid');
-	my $self_count = 0;
 	my $stedt_count = 0;
-	my $mosttagged_uid;
 	my $selected_username;
-	my $userrecs = $self->dbh->selectall_arrayref("SELECT users.uid,username,COUNT(DISTINCT rn) as num_forms, users.uid=8 AS not_stedt FROM users JOIN lx_et_hash USING (uid) JOIN etyma USING (tag) WHERE supertag=? GROUP BY uid ORDER BY not_stedt, num_forms DESC",undef,$tag);
 	if ($self->has_privs(1)) {
+		my $self_count = 0;
+		my $mosttagged_uid;
+		my $userrecs = $self->dbh->selectall_arrayref("SELECT users.uid,username,COUNT(DISTINCT rn) as num_forms, users.uid=8 AS not_stedt FROM users JOIN lx_et_hash USING (uid) JOIN etyma USING (tag) WHERE supertag=? GROUP BY uid ORDER BY not_stedt, num_forms DESC",undef,$tag);
 		if (@$userrecs) {
 			# get number of stedt records (it's the last row, if it's there)
 			if ($userrecs->[-1][0] == 8) {
@@ -476,12 +476,12 @@ ORDER BY is_main DESC, e.plgord#;
 		}
 		# at this point, if $selected_uid is still undef,
 		# it's because $self_uid is 8 and there is no user tagging at all
-		# $selected_username will now be set correctly, if not in this foreach loop, then in the if clause following.
-		foreach (@$userrecs) {
-			$selected_username = $_->[1] if ($_->[0] == $selected_uid);
-		}
-	
+
+		# final cleanup: add certain users to the list; set $selected_username
 		if ($selected_uid && $self_uid != 8) {
+			foreach (@$userrecs) {
+				$selected_username = $_->[1] if ($_->[0] == $selected_uid);
+			}
 			if (!$self_count) {
 				# always allow switching to your own tagging
 				push @users, {uid=>$self_uid, username=>$self->param('user'), count=>0};
