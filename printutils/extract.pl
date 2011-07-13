@@ -82,6 +82,7 @@ if ($vol != 1) {
 print STDERR "generating chapter $chap...\n";
 my $title = $dbh->selectrow_array(qq#SELECT chaptertitle FROM `chapters` WHERE `chapter` = '$fasc.$chap'#);
 my $flowchartids = $dbh->selectcol_arrayref("SELECT noteid FROM notes WHERE spec='C' AND id='$fasc.$chap' AND notetype='G'");
+print STDERR "title is '$title'...\n";
 my $chapter_notes = [map {xml2tex(decode_utf8($_))} @{$dbh->selectcol_arrayref(
 	"SELECT xmlnote FROM notes WHERE spec='C' AND id='$fasc.$chap' AND notetype = 'T' ORDER BY ord")}
 	];
@@ -94,9 +95,10 @@ my $etyma_in_chapter = $dbh->selectall_arrayref(
 		ORDER BY super.sequence, e.plgord#);
 
 
+print STDERR (scalar @$etyma_in_chapter) . " etyma in this chapter\n";
 foreach (@$etyma_in_chapter) {
 	my %e; # hash of infos to be added to @etyma
-	push @etyma, \%e;
+	my $text;
 
 	# heading stuff
 	@e{qw/tag printseq protoform protogloss plg hptbid is_main/}
@@ -106,7 +108,7 @@ foreach (@$etyma_in_chapter) {
 
 	$e{protoform} =~ s/⪤} +/⪤} */g;
 	$e{protoform} =~ s/ OR +/ or */g;
-	$e{protoform} =~ s/\\textasciitilde\\ +/textasciitilde\\ */g;
+	$e{protoform} =~ s/\\textasciitilde\\ +/\\textasciitilde\\ */g;
 	$e{protoform} =~ s/ = +/ = */g;
 	$e{protoform} = '*' . $e{protoform};
 	$e{protoform} =~ s/(\*\S+)/\\textbf{$1}/g; # bold only the protoform, not allofam or "or"
@@ -128,7 +130,7 @@ foreach (@$etyma_in_chapter) {
 		push @{$e{notes}}, {type=>$notetype, text=>xml2tex(decode_utf8($_->[1]))};
 	}
 	if ($e{hptbid} && !$seen_hptb) {
-		my $text = "See \\textit{HPTB} ";
+		$text = "See \\textit{HPTB} ";
 		my @refs = split /,/, $e{hptbid};
 		my @strings;
 		for my $id (@refs) {
@@ -157,11 +159,13 @@ AND languagenames.grpid=languagegroups.grpid)
 ORDER BY languagegroups.ord, languagenames.lgsort, reflex, languagenames.srcabbr, lexicon.srcid
 EndOfSQL
 	my $recs = $dbh->selectall_arrayref($sql);
+	print STDERR $e{tag} . ": ";
+	my $numrecs = scalar(@$recs);
 	if (@$recs) { # skip if no records
 		for my $rec (@$recs) {
 			$_ = decode_utf8($_) foreach @$rec; # do it here so we don't have to later
 		}
-		### print scalar(@$recs) . " records. ";
+		print STDERR "  " . scalar(@$recs) . " records. ";
 		
 		# we must make two passes through the data here:
 		# 1. consolidate identical forms
@@ -191,8 +195,8 @@ EndOfSQL
 		}
 		
 		# 2. print the forms
-		### print((scalar(@$recs)-$deletedforms) . " distinct forms.") if $deletedforms;
-		my $text;
+		print STDERR "  " . ((scalar(@$recs)-$deletedforms) . " distinct forms.") if $deletedforms;
+		$text = "";
 		$text .= "{\\footnotesize\n";
 		$text .= "\\fascicletablebegin\n";
 		
@@ -257,6 +261,10 @@ EndOfSQL
 		$text .= "\\end{longtable}\n" unless $lastgrpno eq ''; # if there were no forms, skip this
 		$text .= "}\n\n";
 		$e{records} = $text;
+		print STDERR "\n";
+	}
+	else {
+		print STDERR "skipped, no records\n";
 	}
 
 
@@ -275,6 +283,7 @@ EndOfSQL
 		$note =~ s/(\[JAM\])/\\hfill $1/g;
 		push @{$e{comparanda}}, xml2tex($note,1); # don't convert curly braces
 	}
+	push @etyma, \%e if $numrecs > 0;
 }
 
 # print rootlets
