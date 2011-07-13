@@ -98,7 +98,7 @@ my $etyma_in_chapter = $dbh->selectall_arrayref(
 print STDERR (scalar @$etyma_in_chapter) . " etyma in this chapter\n";
 foreach (@$etyma_in_chapter) {
 	my %e; # hash of infos to be added to @etyma
-	my $text;
+	push @etyma, \%e;
 
 	# heading stuff
 	@e{qw/tag printseq protoform protogloss plg hptbid is_main/}
@@ -130,7 +130,7 @@ foreach (@$etyma_in_chapter) {
 		push @{$e{notes}}, {type=>$notetype, text=>xml2tex(decode_utf8($_->[1]))};
 	}
 	if ($e{hptbid} && !$seen_hptb) {
-		$text = "See \\textit{HPTB} ";
+		my $text = "See \\textit{HPTB} ";
 		my @refs = split /,/, $e{hptbid};
 		my @strings;
 		for my $id (@refs) {
@@ -159,8 +159,7 @@ AND languagenames.grpid=languagegroups.grpid)
 ORDER BY languagegroups.ord, languagenames.lgsort, reflex, languagenames.srcabbr, lexicon.srcid
 EndOfSQL
 	my $recs = $dbh->selectall_arrayref($sql);
-	print STDERR $e{tag} . ": ";
-	my $numrecs = scalar(@$recs);
+	print STDERR "#$e{tag}: ";
 	if (@$recs) { # skip if no records
 		for my $rec (@$recs) {
 			$_ = decode_utf8($_) foreach @$rec; # do it here so we don't have to later
@@ -196,7 +195,7 @@ EndOfSQL
 		
 		# 2. print the forms
 		print STDERR "  " . ((scalar(@$recs)-$deletedforms) . " distinct forms.") if $deletedforms;
-		$text = "";
+		my $text;
 		$text .= "{\\footnotesize\n";
 		$text .= "\\fascicletablebegin\n";
 		
@@ -262,8 +261,12 @@ EndOfSQL
 		$text .= "}\n\n";
 		$e{records} = $text;
 		print STDERR "\n";
-	}
-	else {
+	} else {
+		$e{records} = '';
+		# set this explicitly so Template doesn't reuse the value from
+		# the previous iteration of the loop. (This reuse is side effect of how
+		# TT handles FOREACH directives when not specifying a target variable,
+		# which is the case for this particular loop in the template.)
 		print STDERR "skipped, no records\n";
 	}
 
@@ -283,7 +286,6 @@ EndOfSQL
 		$note =~ s/(\[JAM\])/\\hfill $1/g;
 		push @{$e{comparanda}}, xml2tex($note,1); # don't convert curly braces
 	}
-	push @etyma, \%e if $numrecs > 0;
 }
 
 # print rootlets
