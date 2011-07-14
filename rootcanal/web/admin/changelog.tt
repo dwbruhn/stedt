@@ -1,7 +1,7 @@
-[% PROCESS header.tt title="STEDT Database: Database Updates" %]
+﻿[% PROCESS header.tt title="STEDT Database: Database Updates" %]
 <p>[% changes.size %] most recent changes:</p>
 
-<table>
+<table class="sortable resizable">
 <tr>
 	<th>username</th>
 	<th>table</th>
