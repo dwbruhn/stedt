@@ -88,7 +88,7 @@ sub add : RunMode {
 	my $dbh = $self->dbh;
 	my $q = $self->query;
 	my ($spec, $id, $ord, $type, $xml, $uid) = ($q->param('spec'), $q->param('id'),
-		$q->param('ord'), $q->param('notetype'), markup2xml($q->param('xmlnote')), $q->param('uid'));
+		$q->param('ord'), $q->param('notetype'), decode_utf8(markup2xml($q->param('xmlnote'))), $q->param('uid'));
 	my $key = $spec eq 'L' ? 'rn' : $spec eq 'E' ? 'tag' : 'id';
 	if ($uid != 8 && $uid != $self->param('uid')) {
 		# force uid to be either 8 or the current user's uid
@@ -225,6 +225,7 @@ sub guess_num_lines {
 	return $n < 3 ? 3 : $n;
 }
 
+# markup2xml returns encoded (binary) utf8, you may need to decode
 my $LEFT_BRACKET = encode_utf8('⟦');
 my $RIGHT_BRACKET = encode_utf8('⟧');
 sub markup2xml {
