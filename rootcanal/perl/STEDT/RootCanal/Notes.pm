@@ -55,7 +55,7 @@ sub chapter : RunMode {
 	my $footnote_index = 1;
 	foreach (@{$self->dbh->selectall_arrayref("SELECT noteid, notetype, datetime, xmlnote, ord, uid, username FROM notes LEFT JOIN users USING (uid)"
 			. "WHERE spec='C' AND id=? $internal_note_search ORDER BY ord", undef, $chap)}) {
-		my $xml = decode_utf8($_->[3]);
+		my $xml = $_->[3];
 		push @notes, { noteid=>$_->[0], type=>$_->[1], lastmod=>$_->[2], 'ord'=>$_->[4],
 			text=>xml2html($xml, $self, \@footnotes, \$footnote_index, $_->[0]),
 			markup=>xml2markup($xml), num_lines=>guess_num_lines($xml),
@@ -68,9 +68,6 @@ sub chapter : RunMode {
 	$q->param('etyma.chapter'=>$chap);
 	$q->param('etyma.public'=>1) unless $self->has_privs(1);
 	my $result = $t->search($q);
-	for my $row (@{$result->{data}}) {
-		map {$_ = decode_utf8($_)} @$row; # apparently because we decode_utf8 on some stuff above, we have to do it here too. Compare with Edit/table and edit.tt, where it looks like it's going in binary mode?
-	}
 	
 	return $self->tt_process("chapter.tt", {
 		chap => $chap, chaptitle=>$title,
@@ -83,7 +80,7 @@ sub chapter : RunMode {
 sub add : RunMode {
 	my $self = shift;
 	unless ($self->has_privs(1)) {
-		$self->header_props(-status => 403);
+		$self->header_add(-status => 403);
 		return "User not logged in" unless $self->param('user');
 		return "User not allowed to add notes!";
 	}
@@ -124,7 +121,7 @@ sub delete : RunMode {
 	my $lastmod = $q->param('mod');
 	my ($mod_time, $note_uid) = $dbh->selectrow_array("SELECT datetime,uid FROM notes WHERE noteid=?", undef, $noteid);
 	if ($self->session->param('uid') != $note_uid && !$self->has_privs(16)) {
-		$self->header_props(-status => 403);
+		$self->header_add(-status => 403);
 		return "User not allowed to delete someone else's note.";
 	}
 	
@@ -135,7 +132,7 @@ sub delete : RunMode {
 		$sth->execute($noteid);
 	} else {
 		$self->dbh->do("UNLOCK TABLES");
-		$self->header_props(-status => 409);
+		$self->header_add(-status => 409);
  		return "Someone else has modified this note (since $lastmod)! The note was not deleted.";
  	}
 	$self->dbh->do("UNLOCK TABLES");
@@ -154,7 +151,7 @@ sub save : RunMode {
 
 	# only allow taggers to modify their own notes
 	if ($self->session->param('uid') != $note_uid && !$self->has_privs(16)) {
-		$self->header_props(-status => 403);
+		$self->header_add(-status => 403);
 		return "User not allowed to modify someone else's note.";
 	}
 	
@@ -176,13 +173,13 @@ sub save : RunMode {
 		($xml, $lastmod) = $dbh->selectrow_array("SELECT xmlnote, datetime FROM notes WHERE noteid=?", undef, $noteid);
 	} else {
 		$self->dbh->do("UNLOCK TABLES");
-		$self->header_props(-status => 409);
+		$self->header_add(-status => 409);
  		return "Someone else has modified this note! Your changes were not saved.";
  	}
 	$self->dbh->do("UNLOCK TABLES");
 	$self->header_add('-x-json'=>qq|{"lastmod":"$lastmod"}|);
 	my @a; my $i = 1;
-	return join("\r", xml2html(decode_utf8($xml), $self, \@a, \$i), map {$_->{text}} @a);
+	return join("\r", xml2html($xml, $self, \@a, \$i), map {$_->{text}} @a);
 }
 
 sub reorder : RunMode {
@@ -278,9 +275,8 @@ sub _markup2xml {
 
 sub _tag2info {
 	my ($t, $s, $c) = @_;
-	my @a = $c->dbh->selectrow_array("SELECT etyma.protoform,etyma.protogloss FROM etyma WHERE tag=?", undef, $t);
-	return "[ERROR! Dead etyma ref #$t!]" unless $a[0];
-	my ($form, $gloss) = map {decode_utf8($_)} @a;
+	my ($form, $gloss) = $c->dbh->selectrow_array("SELECT etyma.protoform,etyma.protogloss FROM etyma WHERE tag=?", undef, $t);
+	return "[ERROR! Dead etyma ref #$t!]" unless $form;
 	$form =~ s/-/‑/g; # non-breaking hyphens
 	$form =~ s/^/*/;
 	$form =~ s/⪤ /⪤ */g;		# add a star for proto-allofams
@@ -375,9 +371,9 @@ sub notes_for_rn : StartRunmode {
 	my @notes;
 	my (@dummy, $dummy);
 	for (@$notes) {
-		 my $xml = decode_utf8($_->[0]);
+		 my $xml = $_->[0];
 		 my $uid = $_->[1];
-		 $xml .= " [$_->[1]]" unless $uid == 8; # append the username
+		 $xml .= " [$_->[2]]" unless $uid == 8; # append the username
 		 push @notes, xml2html($xml, $self, \@dummy, \$dummy);
 	}
 	return join '<p>', @notes;
@@ -386,7 +382,7 @@ sub notes_for_rn : StartRunmode {
 sub accept : Runmode {
 	my $self = shift;
 	unless ($self->has_privs(16)) {
-		$self->header_props(-status => 403);
+		$self->header_add(-status => 403);
 		return "User not allowed to approve tags!";
 	}
 	my $q = $self->query();
@@ -395,7 +391,7 @@ sub accept : Runmode {
 	# make sure our params are actually defined?
 	
 	if ($uid == 8) { # prevent accidental deleting of approved tagging
-		$self->header_props(-status => 400);
+		$self->header_add(-status => 400);
 		return "Already approved!";
 	}
 	
@@ -405,10 +401,11 @@ sub accept : Runmode {
 		$self->dbh->do("DELETE FROM lx_et_hash WHERE uid=8 AND rn IN ($rns)");
 		$self->dbh->do("UPDATE lx_et_hash SET uid=8 WHERE uid=? AND rn IN ($rns)", undef, $uid);
 		# add these changes to the changelog
-		my $oldvals = "tagging uid=" . $uid . ", accepting uid=" . $self->session->param('uid') . ", tag=" . $tag ;
+		my ($username) = $self->dbh->selectrow_array("SELECT username FROM users WHERE uid=?", undef, $uid);
+		my $oldvals = "uid=$uid ($username)";
 		$rns =~ s/,/, /g;
 		$self->dbh->do("INSERT changelog VALUES (?,?,?,?,?,?,NOW())", undef,
-			       $uid, 'lx_et_hash', 'accept',' ', $oldvals, $rns);
+			       $self->session->param('uid'), 'lx_et_hash', '=accept', "tag=$tag", $oldvals, $rns);
 	}
 	return $self->redirect($q->url(-absolute=>1) . "/etymon/$tag/$uid");
 }
@@ -419,7 +416,7 @@ sub etymon : Runmode {
 	my $tag = $self->param('tag');
 	my $selected_uid = $self->param('uid');
 	if ($selected_uid ne '' && ($selected_uid !~ /^\d+$/ || $selected_uid == 8)) {
-		$self->header_props(-status => 400);
+		$self->header_add(-status => 400);
 		return "Invalid uid requested!"; # non-numeric, or the stedt uid
 	}
 	if ($selected_uid && !$self->has_privs(1)) {
@@ -495,7 +492,7 @@ ORDER BY is_main DESC, e.plgord#;
 				# if a user who hasn't tagged anything is selected, add them to the popup list
 				($selected_username) = $self->dbh->selectrow_array("SELECT username FROM users WHERE uid=?", undef, $selected_uid);
 				if (!$selected_username) {
-					$self->header_props(-status => 400);
+					$self->header_add(-status => 400);
 					return "No user for that uid!";
 				}
 				push @users, {uid=>$selected_uid, username=>$selected_username, count=>0};
@@ -508,8 +505,7 @@ ORDER BY is_main DESC, e.plgord#;
 		push @etyma, \%e;
 	
 		# heading stuff
-		@e{qw/tag printseq protoform protogloss plg hptbid is_main/}
-			= map {decode_utf8($_)} @$_;
+		@e{qw/tag printseq protoform protogloss plg hptbid is_main/} = @$_;
 		$e{plg} = $e{plg} eq 'PTB' ? '' : "$e{plg}";
 	
 		$e{protoform} =~ s/⪤ +/⪤ */g;
@@ -524,7 +520,7 @@ ORDER BY is_main DESC, e.plgord#;
 		foreach (@{$self->dbh->selectall_arrayref("SELECT noteid, notetype, datetime, xmlnote, ord, uid, username FROM notes LEFT JOIN users USING (uid) "
 				. "WHERE tag=$e{tag} AND notetype != 'F' ORDER BY ord")}) {
 			my $notetype = $_->[1];
-			my $xml = decode_utf8($_->[3]);
+			my $xml = $_->[3];
 			next if $notetype eq 'I' && !$INTERNAL_NOTES;
 			$seen_hptb = 1 if $notetype eq 'H';
 			push @{$e{notes}}, { noteid=>$_->[0], type=>$notetype, lastmod=>$_->[2], 'ord'=>$_->[4],
@@ -540,7 +536,6 @@ ORDER BY is_main DESC, e.plgord#;
 			for my $id (@refs) {
 				my ($pform, $plg, $pages) =
 					$self->dbh->selectrow_array("SELECT protoform, plg, pages FROM hptb WHERE hptbid=?", undef, $id);
-				$pform = decode_utf8($pform);
 				my $p = ($pages =~ /,/ ? "pp" : "p");
 				push @strings, ($plg eq 'PTB' ? '' : "$plg ") . "<b>$pform</b>, $p. $pages";
 			}
@@ -577,9 +572,6 @@ GROUP BY lexicon.rn
 ORDER BY languagegroups.ord, languagenames.lgsort, reflex, languagenames.srcabbr, lexicon.srcid
 EndOfSQL
 		if (@$recs) { # skip if no records
-			for my $r (@$recs) {
-				$_ = decode_utf8($_) foreach @$r;
-			}
 			collect_lex_notes($self, $recs, $INTERNAL_NOTES, \@footnotes, \$footnote_index, $e{tag});
 			$e{records} = $recs;
 		}
@@ -589,7 +581,6 @@ EndOfSQL
 		my $comparanda = $self->dbh->selectall_arrayref("SELECT noteid, datetime, xmlnote, ord, uid, username FROM notes LEFT JOIN users USING (uid) WHERE tag=$e{tag} AND notetype = 'F' ORDER BY ord");
 		for my $row (@$comparanda) {
 			my $note = $row->[2];
-			$note = decode_utf8($note);
 #			$note =~ s/(Karlgren|Li|Baxter): /\\hfill $1: /g;
 			$note =~ s/ Citations:/<br>Citations:/g;
 			$note =~ s/ Correspondences:/<br>Correspondences:/g;
@@ -650,7 +641,7 @@ sub collect_lex_notes {
 			# NB: these are footnotes, and they don't have footnotes inside them!
 			foreach (@results) {
 				my ($noteid, $notetype, $lastmod, $note, $id, $uid, $username) = @$_;
-				my $xml = decode_utf8($note);
+				my $xml = $note;
 				$note = xml2html($xml, $c, $a, $i);
 				if ($notetype eq 'I') {
 					$note =~ s/^/[Internal] <i>/;

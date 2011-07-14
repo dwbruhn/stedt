@@ -28,13 +28,17 @@ sub cgiapp_init {
 	# read our login info from the config file
 	# then set up a database connection
 	$self->dbh_config("dbi:mysql:database=stedt", $self->cfg('login'), $self->cfg('pass'),
-		{RaiseError => 1,AutoCommit => 1});
+		{RaiseError => 1, AutoCommit => 1, mysql_enable_utf8 => 1 });
 
 	# set the database connection to use unicode, or you'll be sorry
 	$self->dbh->do("SET NAMES 'utf8';");
 	
-	# this tells CGI::App to set the HTML headers correctly
+	# this tells CGI::App to set the HTTP headers correctly
 	$self->header_props(-charset => 'UTF-8');
+
+	# this tells perl to expect everything passed to it to be utf8
+	binmode STDOUT, ':utf8';
+	# there's no point doing this for STDIN because CGI receives %-encoded strings. You need to do decode_utf8 on individual CGI params as necessary.
 
 	# a rough test to see if we're running over SSL
 	# if we are, send a different session id over the secure connection
@@ -76,7 +80,7 @@ sub cgiapp_prerun {
 # using C::A::P::AutoRunmode, we set this to be called in the event of an error
 sub unable_to_comply : ErrorRunmode {
 	my ($self, $err) = @_;
-	$self->header_props(-status => 500); # server error
+	$self->header_add(-status => 500); # server error
 	return $err; # just the text, ma'am (it might show up in a javascript alert)
 }
 
@@ -84,6 +88,7 @@ sub unable_to_comply : ErrorRunmode {
 # optionally pass in a specific uid; 0 or 8 both mean STEDT user only (see Table.pm)
 sub load_table_module {
 	my ($self, $tbl, $uid) = @_;
+	$tbl or die "no table specified!";
 	$tbl =~ /\W/ and die "table name contained illegal characters!"; # prevent sneaky injection attacks
 	$tbl =~ s/^(.)/\u$1/; # uppercase the first char
 	my $tbl_class = "STEDT::Table::$tbl";
@@ -101,7 +106,7 @@ sub require_privs {
 	my ($self, $privs) = @_;
 	return if ($self->param('userprivs') & $privs);
 	return $self->tt_process("admin/https_warning.tt") unless $self->param('user');
-	$self->header_props(-status => 403);
+	$self->header_add(-status => 403);
 	return 'You do not have sufficient privileges to perform that operation.';
 }
 

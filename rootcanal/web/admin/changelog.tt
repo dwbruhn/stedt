@@ -1,7 +1,14 @@
-[% PROCESS header.tt title="STEDT Database: Database Updates" %]
+[% PROCESS header.tt title="Change Log - STEDT Database" %]
 <p>[% changes.size %] most recent changes:</p>
 
-<table class="sortable resizable" width="200">
+<table class="sortable resizable" width="100%" style="table-layout:fixed">
+<col style="width:6em">
+<col style="width:8em">
+<col style="width:6em">
+<col style="width:7em">
+<col style="width:auto">
+<col style="width:auto">
+<col style="width:10em">
 <tr>
 	<th>username</th>
 	<th>table</th>
@@ -14,7 +21,7 @@
 [% FOREACH row IN changes -%]
 <tr>
 [% FOREACH col IN row -%]
-<td style="max-width:300px">[% col | html %]</td>
+<td>[% col | html %]</td>
 [% END -%]
 </tr>
 [% END -%]

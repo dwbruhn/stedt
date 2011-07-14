@@ -14,9 +14,6 @@ sub table : StartRunmode {
 	my $q = $self->query;
 	
 	my $result = $t->search($q);
-	for my $r (@{$result->{data}}) {
-		$_ = decode_utf8($_) foreach @$r;
-	}
 	# it doesn't seem to be too inefficient to pull out all the results
 	# and then count them and/or send partial results to the browser (for paging)
 	# The alternative is to do a COUNT * first, which mysql should be optimized for,
@@ -70,23 +67,21 @@ sub table : StartRunmode {
 
 sub add : Runmode {
 	my $self = shift;
-	my $q = $self->query;
-
-	my ($tblname, $id) = ($self->param('tbl'), $q->param($self->{key}));
-
+	my $tblname = $self->param('tbl');
 	my $privs = $tblname eq 'etyma' ? 1 : 16;
 	# taggers can only add etyma, not lexicon/languagename/etc. records
 	if (my $err = $self->require_privs($privs)) { return $err; }
 
 	my $t = $self->load_table_module($tblname);
+	my $q = $self->query;
 	
 	my ($id, $result, $err) = $t->add_record($q);
 	if ($err) {
-		$self->header_props(-status => 400);
+		$self->header_add(-status => 400);
 		return $err;
 	}
 	$self->dbh->do("INSERT changelog VALUES (?,?,?,?,?,?,NOW())", undef,
-		       $self->session->param('uid'), $tblname, 'record', $id, '', $id);
+		       $self->session->param('uid'), $tblname, '+added', $id, '', '');
 	
 	# now retrieve it and send back some html
 	$id =~ s/"/\\"/g;
@@ -145,7 +140,7 @@ sub update : Runmode {
 	   && ($self->has_privs(1))
 	   && ($t = $self->load_table_module($tblname))
 	   && ($t->{field_editable_privs}{$field} & $self->param('userprivs') || $t->in_editable($field))) {
-		my $oldval = decode_utf8($t->get_value($field, $id));
+		my $oldval = $t->get_value($field, $id);
 
 		# special case for lexicon form editing by taggers: restrict to delimiters
 		if ($tblname eq 'lexicon' && $field eq 'lexicon.reflex') {
@@ -155,7 +150,7 @@ sub update : Runmode {
 			if ($self->param('userprivs') == 1 && !$delims_only) {
 				# this prevents taggers from making modifications to the form field
 				# other than adding and removing delimiters
-				$self->header_props(-status => 403);
+				$self->header_add(-status => 403);
 				return "You are only allowed to add delimiters to the form!";
 			}
 		}
@@ -165,7 +160,7 @@ sub update : Runmode {
 			$self->session->param('uid'), $tblname, $field =~ /([^.]+)$/, $id, $oldval || '', $value); # $oldval might be undefined (and interpreted as NULL by mysql)
 		return $value;
 	} else {
-		$self->header_props(-status => 403); # Forbidden
+		$self->header_add(-status => 403); # Forbidden
 		return "User not logged in" unless $self->param('user');
 		return "Field $field not editable";
 	}
