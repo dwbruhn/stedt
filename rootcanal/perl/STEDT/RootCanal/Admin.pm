@@ -1,6 +1,7 @@
 package STEDT::RootCanal::Admin;
 use strict;
 use base 'STEDT::RootCanal::Base';
+use Encode;
 
 sub main : StartRunmode {
 	my $self = shift;
@@ -14,6 +15,9 @@ sub changes : Runmode {
 	if (my $err = $self->require_privs(1)) { return $err; }
 
 	my $a = $self->dbh->selectall_arrayref("SELECT username,`table`,col,id,oldval,newval,time FROM changelog LEFT JOIN users USING (uid) ORDER BY time DESC LIMIT 500");
+	for my $row (@$a) {
+		$_ = decode_utf8($_) foreach @$row;
+	}
 	return $self->tt_process("admin/changelog.tt", {changes=>$a});
 }
 

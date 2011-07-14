@@ -515,21 +515,25 @@ var setup = { // in the form setup.[tablename].[fieldname]
 				if (!v) return '';
 				var analysis = rec[1] || ''; // might be NULL from the SQL query
 				var tags = analysis.split(',');
-				var result = SYLSTATION.syllabify(v);
+				var result = SYLSTATION.syllabify(v.unescapeHTML());
+				// since the transform receives escaped HTML, but SylStation
+				// treats semicolons as delims, we have to unescape (e.g.
+				// things like "&amp;" back to "&") before passing to SylStation
+				// and re-escape below when putting together the HTML string.
 				var a = result[0].map(function (s,i) {
 					var delim = result[1][i] || '&thinsp;';
 					var makelink = !skipped_roots[tags[i]] && (stedttagger || public_roots[tags[i]]);
 					return (parseInt(tags[i], 10) && makelink)
 						? '<a href="' + baseRef + 'etymon/' + tags[i] + '" target="stedt_etymon"'
 							+ ' class="r' + tags[i] + '">'
-							+ s + '</a>'  + delim
+							+ s.escapeHTML() + '</a>'  + delim
 // 						? '<a href="' + baseRef + 'etyma/' + tags[i]
 // 							+ '" onclick="'
 // //							+ 'alert(event.element().cumulativeScrollOffset());'
 // 							+ 'show_root(' + tags[i]  // + ', findPos(event.element())
 // 							+ '); return false;"'
 // 							+ '" class="r' + tags[i] + '">'
-// 							+ s + '</a>' + delim
+// 							+ s.escapeHTML() + '</a>' + delim
 						: '<span class="r' + tags[i] + '">' + s + '</span>' + delim;
 				});
 				return a.join('');
