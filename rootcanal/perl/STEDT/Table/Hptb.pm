@@ -4,7 +4,7 @@ use strict;
 
 sub new {
 my ($self, $dbh, $privs) = @_;
-my $t = $self->SUPER::new($dbh, 'hptb', 'hptb.hptbid');
+my $t = $self->SUPER::new($dbh, 'hptb', 'hptb.hptbid', $privs);
 
 $t->query_from('hptb LEFT JOIN et_hptb_hash USING (hptbid)');
 $t->order_by('hptb.protogloss'); # default is the key
