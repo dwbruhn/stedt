@@ -488,7 +488,7 @@ var setup = { // in the form setup.[tablename].[fieldname]
 		},
 		'analysis' : {
 			label: 'analysis',
-			noedit: !(stedtuserprivs & 16),
+			noedit: !(stedtuserprivs & 8),
 			hide: !(stedtuserprivs & 1),
 			size: 80,
 			transform: function (v) {

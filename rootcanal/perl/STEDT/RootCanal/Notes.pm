@@ -18,10 +18,11 @@ sub chapter_browser : RunMode {
 	}
 	# from the chapters table
 	my $chapters = $self->dbh->selectall_arrayref(<<SQL);
-SELECT chapters.chapter, chapters.chaptertitle, SUM(etyma.public) AS num_public,
-	COUNT(DISTINCT etyma.tag), COUNT(DISTINCT notes.noteid), MAX(notes.notetype = 'G'), MAX(notes.notetype != 'I') as public_notes
-FROM chapters LEFT JOIN etyma ON (etyma.chapter=chapters.chapter $blessed)
-	LEFT JOIN notes ON (notes.id=chapters.chapter)
+SELECT chapters.chapter, chapters.chaptertitle,
+	(SELECT COUNT(*) FROM etyma WHERE chapter=chapters.chapter AND public=1 $blessed) AS num_public,
+	(SELECT COUNT(*) FROM etyma WHERE chapter=chapters.chapter $blessed),
+	COUNT(DISTINCT notes.noteid), MAX(notes.notetype = 'G'), MAX(notes.notetype != 'I') as public_notes
+FROM chapters LEFT JOIN notes ON (notes.id=chapters.chapter)
 GROUP BY 1 $public_ch ORDER BY 1
 SQL
 	# chapters that appear in etyma but not in chapters table
@@ -89,9 +90,9 @@ sub add : RunMode {
 	my ($spec, $id, $ord, $type, $xml, $uid) = ($q->param('spec'), $q->param('id'),
 		$q->param('ord'), $q->param('notetype'), markup2xml($q->param('xmlnote')), $q->param('uid'));
 	my $key = $spec eq 'L' ? 'rn' : $spec eq 'E' ? 'tag' : 'id';
-	if ($uid != 8 && $uid != $self->session->param('uid')) {
+	if ($uid != 8 && $uid != $self->param('uid')) {
 		# force uid to be either 8 or the current user's uid
-		$uid = $self->session->param('uid');
+		$uid = $self->param('uid');
 	}
 	my $sth = $dbh->prepare("INSERT notes (spec, $key, ord, notetype, xmlnote, uid) VALUES (?,?,?,?,?,?)");
 	$sth->execute($spec, $id, $ord, $type, $xml, $uid);
@@ -120,7 +121,7 @@ sub delete : RunMode {
 	my $noteid = $q->param('noteid');
 	my $lastmod = $q->param('mod');
 	my ($mod_time, $note_uid) = $dbh->selectrow_array("SELECT datetime,uid FROM notes WHERE noteid=?", undef, $noteid);
-	if ($self->session->param('uid') != $note_uid && !$self->has_privs(16)) {
+	if ($self->param('uid') != $note_uid && !$self->has_privs(8)) {
 		$self->header_add(-status => 403);
 		return "User not allowed to delete someone else's note.";
 	}
@@ -150,7 +151,7 @@ sub save : RunMode {
 	my $xml;
 
 	# only allow taggers to modify their own notes
-	if ($self->session->param('uid') != $note_uid && !$self->has_privs(16)) {
+	if ($self->param('uid') != $note_uid && !$self->has_privs(8)) {
 		$self->header_add(-status => 403);
 		return "User not allowed to modify someone else's note.";
 	}
@@ -184,7 +185,7 @@ sub save : RunMode {
 
 sub reorder : RunMode {
 	my $self = shift;
-	if (my $err = $self->require_privs(16)) { return $err; }
+	if (my $err = $self->require_privs(8)) { return $err; }
 	my @ids = map {/(\d+)$/} split /\&/, $self->query->param('ids');
 	# change the order, but don't update the modification time for something so minor.
 	my $sth = $self->dbh->prepare("UPDATE notes SET ord=?, datetime=datetime WHERE noteid=?");
@@ -381,7 +382,7 @@ sub notes_for_rn : StartRunmode {
 
 sub accept : Runmode {
 	my $self = shift;
-	unless ($self->has_privs(16)) {
+	unless ($self->has_privs(8)) {
 		$self->header_add(-status => 403);
 		return "User not allowed to approve tags!";
 	}
@@ -405,7 +406,7 @@ sub accept : Runmode {
 		my $oldvals = "uid=$uid ($username)";
 		$rns =~ s/,/, /g;
 		$self->dbh->do("INSERT changelog VALUES (?,?,?,?,?,?,NOW())", undef,
-			       $self->session->param('uid'), 'lx_et_hash', '=accept', "tag=$tag", $oldvals, $rns);
+			       $self->param('uid'), 'lx_et_hash', '=accept', "tag=$tag", $oldvals, $rns);
 	}
 	return $self->redirect($q->url(-absolute=>1) . "/etymon/$tag/$uid");
 }
@@ -414,10 +415,10 @@ sub accept : Runmode {
 sub etymon : Runmode {
 	my $self = shift;
 	my $tag = $self->param('tag');
-	my $selected_uid = $self->param('uid');
-	if ($selected_uid ne '' && ($selected_uid !~ /^\d+$/ || $selected_uid == 8)) {
+	my $selected_uid = $self->param('uid2');
+	if ($selected_uid ne '' && ($selected_uid !~ /^[1-9]\d*$/ || $selected_uid == 8)) {
 		$self->header_add(-status => 400);
-		return "Invalid uid requested!"; # non-numeric, or the stedt uid
+		return "Invalid uid requested!"; # non-numeric, or 0, or the stedt uid
 	}
 	if ($selected_uid && !$self->has_privs(1)) {
 		return $self->redirect($self->query->url(-absolute=>1) . "/etymon/$tag");
@@ -441,7 +442,7 @@ ORDER BY is_main DESC, e.plgord#;
 		return $self->redirect($self->query->url(-absolute=>1) . "/etymon/$tag" . ($selected_uid ? "/$selected_uid" : ''));
 	}
 
-	my $self_uid = $self->session->param('uid');
+	my $self_uid = $self->param('uid');
 	my $stedt_count = 0;
 	my $selected_username;
 	if ($self->has_privs(1)) {
@@ -479,16 +480,16 @@ ORDER BY is_main DESC, e.plgord#;
 		# it's because $self_uid is 8 and there is no user tagging at all
 
 		# final cleanup: add certain users to the list; set $selected_username
-		if ($selected_uid && $self_uid != 8) {
+		if ($selected_uid) {
 			foreach (@$userrecs) {
 				$selected_username = $_->[1] if ($_->[0] == $selected_uid);
 			}
-			if (!$self_count) {
+			if (!$self_count && $self_uid != 8) {
 				# always allow switching to your own tagging
 				push @users, {uid=>$self_uid, username=>$self->param('user'), count=>0};
 				$selected_username = $self->param('user') if $self_uid == $selected_uid; # set this here since it wasn't in @users
 			}
-			if (!$selected_username && $selected_uid != $self_uid) {
+			if (!$selected_username) {
 				# if a user who hasn't tagged anything is selected, add them to the popup list
 				($selected_username) = $self->dbh->selectrow_array("SELECT username FROM users WHERE uid=?", undef, $selected_uid);
 				if (!$selected_username) {
@@ -600,7 +601,7 @@ EndOfSQL
 		selected_username => $selected_username, selected_uid => $selected_uid,
 		stedt_count => $stedt_count, supertag => $tag,
 		fields => ['lexicon.rn', 'analysis',
-			($selected_uid ? ($selected_uid==$self_uid?'user_an':'other_an') : ()),
+			($selected_uid ? 'user_an' : ()),
 			'languagenames.lgid', 'lexicon.reflex', 'lexicon.gloss', 'lexicon.gfn',
 			'languagenames.language', 'languagegroups.grpid', 'languagegroups.grpno', 'languagegroups.grp',
 			'languagenames.srcabbr', 'lexicon.srcid', 'languagegroups.ord', 'notes.rn'],

@@ -11,7 +11,7 @@ sub dispatch_args {
 			'search/:tbl'      => { app=>'Search', rm => 'blah' },
 			'source/:srcabbr'  => { app=>'Search', rm => 'source' },
 			'group/:id/:lgid?' => { app=>'Search', rm => 'group' },
-			'etymon/:tag/:uid?'=> { app=>'Notes', rm => 'etymon' },
+			'etymon/:tag/:uid2?'=> { app=>'Notes', rm => 'etymon' },
 			'notes/l/:rn'      => { app=>'Notes', rm => 'notes_for_rn' },
 			'edit/:tbl'	   => { app=>'Edit', rm => 'table' },
 			'edit/:tbl/:id'	   => { app=>'Edit', rm => 'single_record' },

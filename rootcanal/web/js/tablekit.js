@@ -1051,7 +1051,6 @@ TableKit.Editable.CellEditor.prototype = {
 		var row = cell.up('tr');
 		var table = cell.up('table');
 		// *** DY added custom params
-		var xform;
 		var s_extra = TableKit.option('editAjaxExtraParams', table.id);
 		var s = s_extra + '&row=' + (TableKit.getRowIndex(row)+1) + '&cell=' + (TableKit.getCellIndex(cell)+1) + '&id=' + row.id + '&field=' + head.id + '&' + Form.serialize(form);
 		// *** DY why is the request saved to this.ajax? it doesn't seem to be used for anything
@@ -1065,9 +1064,9 @@ TableKit.Editable.CellEditor.prototype = {
 				var text = t.responseText;
 				var raw = TableKit.tables[table.id].raw;
 				if (raw) raw.data[row.id][raw.cols[head.id]] = text;
-				xform = TableKit.tables[table.id].editAjaxTransform; // dunno why the TableKit.option(...) call doesn't work...
+				var xform = TableKit.tables[table.id].editAjaxTransform; // dunno why the TableKit.option(...) call doesn't work...
 				if (xform) {
-					var re = /tbl=(.+)/;
+					var re = /tbl=([^&]+)/;
 					var tbl = re.exec(s_extra)[1];
 					cell.innerHTML = xform(tbl, head.id, row.id, text.escapeHTML(), raw ? raw.data[row.id] : null, raw ? raw.cols[head.id] : 0);
 				}

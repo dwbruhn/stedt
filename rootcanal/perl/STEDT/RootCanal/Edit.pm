@@ -80,7 +80,7 @@ sub add : Runmode {
 		return $err;
 	}
 	$self->dbh->do("INSERT changelog VALUES (?,?,?,?,?,?,NOW())", undef,
-		       $self->session->param('uid'), $tblname, '+added', $id, '', '');
+		       $self->param('uid'), $tblname, '+added', $id, '', '');
 	
 	# now retrieve it and send back some html
 	$id =~ s/"/\\"/g;
@@ -131,13 +131,18 @@ sub update : Runmode {
 	my $self = shift;
 	my $q = $self->query;
 
-	my ($tblname, $field, $id, $value) = ($q->param('tbl'), $q->param('field'),
-		$q->param('id'), decode_utf8($q->param('value')));
+	my ($tblname, $field, $id, $value, $fake_uid) = ($q->param('tbl'), $q->param('field'),
+		$q->param('id'), decode_utf8($q->param('value')), $q->param('uid2'));
+	undef $fake_uid if $fake_uid == $self->param('uid');
+	if ($fake_uid && !$self->has_privs(8)) {
+		$self->header_add(-status => 403); # Forbidden
+		return "You are not allowed to edit other people's tags.";
+	}
 	my $t;
 	
 	if ($self->param('user')
 	   && ($self->has_privs(1))
-	   && ($t = $self->load_table_module($tblname))
+	   && ($t = $self->load_table_module($tblname, $fake_uid))
 	   && ($t->{field_editable_privs}{$field} & $self->param('userprivs') || $t->in_editable($field))) {
 		my $oldval = $t->get_value($field, $id);
 
@@ -155,8 +160,11 @@ sub update : Runmode {
 		}
 
 		$t->save_value($field, $value, $id);
+		if ($fake_uid) {
+			$field = "other_an:$fake_uid";
+		}
 		$self->dbh->do("INSERT changelog VALUES (?,?,?,?,?,?,NOW())", undef,
-			$self->session->param('uid'), $tblname, $field =~ /([^.]+)$/, $id, $oldval || '', $value); # $oldval might be undefined (and interpreted as NULL by mysql)
+			$self->param('uid'), $tblname, $field =~ /([^.]+)$/, $id, $oldval || '', $value); # $oldval might be undefined (and interpreted as NULL by mysql)
 		return $value;
 	} else {
 		$self->header_add(-status => 403); # Forbidden
@@ -206,7 +214,7 @@ sub single_record : Runmode {
 		# update successful! now update the "changes" table
 		for my $col (@keys) {
 			$self->dbh->do("INSERT changelog VALUES (?,?,?,?,?,?,NOW())", undef,
-				$self->session->param('uid'), $tbl, $col, $id, $result->[$colname2num{$col}], $updated{$col});
+				$self->param('uid'), $tbl, $col, $id, $result->[$colname2num{$col}], $updated{$col});
 		}
 		$sth->execute($id);
 		$result = $sth->fetchrow_arrayref;
@@ -230,7 +238,7 @@ sub makesubroot : Runmode {
 
 	# update successful! now update the "changes" table
 	$self->dbh->do("INSERT changelog VALUES (?,?,?,?,?,?,NOW())", undef,
-		$self->session->param('uid'), 'etyma', 'supertag', $tag, $supertag, $newsuper);
+		$self->param('uid'), 'etyma', 'supertag', $tag, $supertag, $newsuper);
 	return '';
 }
 

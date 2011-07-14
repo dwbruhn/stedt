@@ -6,7 +6,7 @@
 <tr><th>Ch.</th><th>Title</th><th>[% IF c.has_privs(1) %]public[% ELSE %]num. etyma[% END %]</th>
 [%- IF c.has_privs(1) %]<th>etyma</th>[% END %]<th>notes</th><th>flowchart?</th><td width="80%">[% # dummy to expand the table width %]</td></tr>
 [% FOREACH r IN ch -%]
-<tr><td>[% r.0 %]</td><td>[% r.1 %]</td><td>[% r.4 ? (r.2 / r.4) || '' : r.2 || '' # because of the way the query is constructed, you have to divide by the number of notes to get the actual number of public etyma %]</td>
+<tr><td>[% r.0 %]</td><td>[% r.1 %]</td><td>[% r.2 || '' %]</td>
 [%- IF c.has_privs(1) %]<td>[% IF r.3 %]<a href="[% self_url %]/edit/etyma?etyma.chapter=[% r.0 | uri %]">[% r.3 %][% END %]</td>[% END -%]
 <td><a href="[% self_url %]/chap/1/[% r.0 | uri %]">[% IF r.4 %][% r.4 %] note[% r.4 == 1 ? '' : 's' %][% ELSE %]-[% END %]</a></td><td>[% IF r.5 %]✓[% END %]</td></tr>
 [% END -%]

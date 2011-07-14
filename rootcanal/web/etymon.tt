@@ -24,7 +24,7 @@ Reflexes <span class="u[% supertag %]">tagged by <select name="DDMenu" onchange=
 [% IF c.has_privs(1) -%]
 <div id="allnotes[% e.tag %]" class="container">
 <p class="edit">
-[% IF c.has_privs(16) %]<label><input type="checkbox" value="off" class="reordcheckbox"[% IF e.notes.size < 2 %] disabled[% END %]>Drag to reorder</label>[% END %]
+[% IF c.has_privs(8) %]<label><input type="checkbox" value="off" class="reordcheckbox"[% IF e.notes.size < 2 %] disabled[% END %]>Drag to reorder</label>[% END %]
 <a href="#" onclick="return showaddform('E',[% e.tag %])">Add a note...</a>
 </p>
 [% FOREACH n IN e.notes -%]
@@ -38,13 +38,13 @@ Reflexes <span class="u[% supertag %]">tagged by <select name="DDMenu" onchange=
 [% END -%]
 
 [% IF e.records -%]
-[% IF selected_uid && c.has_privs(16) %]
+[% IF selected_uid && c.has_privs(8) %]
 <form action="[% self_url %]/notes/accept" method="post" onsubmit="return confirm('Are you sure you want to approve all the tagging by [% selected_username %] for tag #[% e.tag %]? Any conflicting tags will be clobbered!')" class="u[% supertag %]" style="display:inline; padding:3px">
 <input name="tag" value="[% e.tag %]" type="hidden">
 <input name="uid" value="[% selected_uid %]" type="hidden">
 <input type="submit" value="Accept tagging by [% selected_username %] for tag #[% e.tag %]">
 </form>
-[% END # has_privs 16 %]
+[% END # has_privs 8 %]
 <table id="lexicon[% lexicon_id %]">[% lexicon_id = lexicon_id+1 %]
 <thead><tr>
 [%- FOREACH fld IN fields -%]
@@ -86,7 +86,7 @@ Reflexes <span class="u[% supertag %]">tagged by <select name="DDMenu" onchange=
 <br>
 [% fncounter = 0 -%]
 [% FOREACH n IN footnotes -%]
-[% IF n.super || (n.uid != c.session.param('uid') && !c.has_privs(16)) %]
+[% IF n.super || (n.uid != c.param('uid') && !c.has_privs(8)) %]
 [% fncounter = fncounter+1 -%]
 <div class="footnote[% IF n.super %] fnote-[% n.super %][% END %]" id="foot[% fncounter %]">
 <a href="#toof[% fncounter %]" class="left">^ [% fncounter %].</a>
@@ -105,6 +105,7 @@ var footnote_counter = [% footnotes.size %];
 [% FOREACH c IN cogs %]skipped_roots[[% c %]]=true;[% END %]
 num_tables=[% lexicon_id %];
 var stedt_other_username = '[% selected_username || '' %]';
+var uid2 = '[% selected_uid %]';
 </script>
 <script src="[% self_base %]js/etymon.js"></script>
 <script src="[% self_base %]js/notes.js"></script>

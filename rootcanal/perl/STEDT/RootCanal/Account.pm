@@ -11,7 +11,7 @@ sub account : StartRunmode {
 	my ($username, $email);
 	
 	# look these up so we can put it on the update form
-	if (defined(my $uid = $self->session->param('uid'))) {
+	if (defined(my $uid = $self->param('uid'))) {
 		($username, $email) = $self->dbh->selectrow_array("SELECT username, email FROM users WHERE uid=?", undef, $uid);
 	}
 
@@ -58,7 +58,7 @@ sub acct_dfv_profile {
 				return $secret_codes{$val};
 			},
 			oldpwd => sub { my ($dfv, $val) = @_; $dfv->name_this('password_correct');
-				my ($p1, $p2) = $self->dbh->selectrow_array("SELECT password, SHA1(?) FROM users WHERE uid=?", undef, $val, $self->session->param('uid'));
+				my ($p1, $p2) = $self->dbh->selectrow_array("SELECT password, SHA1(?) FROM users WHERE uid=?", undef, $val, $self->param('uid'));
 				return $p1 eq $p2;
 			},
 		},
@@ -125,7 +125,7 @@ sub update : Runmode {
 	# everything was optional (except for the oldpassword),
 	# so we only update if it's non-empty
 	
-	my $uid = $self->session->param('uid');
+	my $uid = $self->param('uid');
 	my $val;
 	if ($val = $q->param('newuser')) {
 		$dbh->do("UPDATE users SET username=? WHERE uid=?", undef, $val, $uid)
@@ -185,9 +185,7 @@ sub login_fail : Runmode {
 sub _login {
 	my ($self, $uid, $username, $privs) = @_;
 	$self->session->param('uid', $uid);	# for authentication
-	$self->session->expire('uid', "1d");
-	$self->param(user => $username);	# for template display
-	$self->param(userprivs => $privs);
+	$self->user_session_init($uid, $username, $privs);
 	# redirect to the page they were trying to go to, or the main page otherwise
 	return $self->redirect($self->query->param('url') || $self->query->url(-absolute=>1));
 }

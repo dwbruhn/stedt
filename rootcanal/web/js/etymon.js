@@ -11,15 +11,8 @@ setup['lexicon']['notes.rn'] = {
 		return a.join(' ');
 	}
 };
-setup['lexicon']['other_an'] = {
-	label: stedt_other_username + '\'s analysis',
-	noedit: true, // currently not possible to even let superusers edit others' tagging, since Lexicon.pm is only passed the current uid!
-	size: 80,
-	transform: function (v) {
-		return v.replace(/, */g,', ');
-	},
-};
 if (stedt_other_username) {
+	setup['lexicon']['user_an']['label'] = stedt_other_username + '\'s analysis';
 	setup['lexicon']['lexicon.reflex']['transform'] = function (v,key,rec) {
 			if (!v) return '';
 			var analysis = rec[1] || ''; // might be NULL from the SQL query
@@ -42,7 +35,7 @@ if (stedt_other_username) {
 for (var i = 1; i < num_tables; i++) {
 	TableKit.Raw.init('lexicon' + i, 'lexicon', (stedtuserprivs & 1) ? (baseRef+'update') : null);
 	TableKit.Rows.stripe('lexicon' + i);
-	// add the modification for selected_uid here #####
+	TableKit.tables['lexicon' + i].editAjaxExtraParams += '&uid2=' + uid2;
 }
 
 // put in section headings for language groups

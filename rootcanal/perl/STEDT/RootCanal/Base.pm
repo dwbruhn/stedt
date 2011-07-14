@@ -63,18 +63,23 @@ sub cgiapp_prerun {
 	my $self = shift;
 	my $uid = $self->session->param('uid');
 	if (defined $uid) {
-		my ($user, $privs) =
-			$self->dbh->selectrow_array("SELECT username, privs FROM users WHERE uid=?", undef, $uid);
-		
-		# save username for access by the template
-		$self->param(user => $user);
-		$self->param(userprivs => $privs);
+		$self->user_session_init($uid,
+			$self->dbh->selectrow_array("SELECT username, privs FROM users WHERE uid=?", undef, $uid));
 	}
-	# set/reset expiration
-	$self->session->expire("1y");
 	# additional cookie to test for a secure connection on the next HTTP request
 	$self->header_add(-cookie=>
 		[$self->query->cookie(-name=>'stsec',-value=>1,-secure=>$self->cfg('ignore_ssl') ? 0 : 1,-expires=>'+1y')]);
+}
+
+# save username, etc. for access by the template, etc.
+sub user_session_init {
+	my ($self, $uid, $username, $privs) = @_;
+	$self->param(uid => $uid);
+	$self->param(user => $username);
+	$self->param(userprivs => $privs);
+
+	# also set/reset session expiration
+	$self->session->expire("1y");
 }
 
 # using C::A::P::AutoRunmode, we set this to be called in the event of an error
@@ -94,7 +99,7 @@ sub load_table_module {
 	my $tbl_class = "STEDT::Table::$tbl";
 	eval "require $tbl_class" or die $@;
 	
-	$uid = $self->session->param('uid') unless defined($uid);
+	$uid = $self->param('uid') unless defined($uid);
 	return $tbl_class->new($self->dbh, $self->param('userprivs'), $uid);
 }
 

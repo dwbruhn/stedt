@@ -72,10 +72,11 @@ a separate row containing each analysis belonging to a record.
 
 sub new {
 
-# in addition to the usual $dbh argument which all STEDT::Table modules expect,
 # STEDT::Table::Lexicon looks for an additional, optional $uid. If specified,
 # there will be an additional column returned giving the analyses belonging
-# to that uid.
+# to that uid; saving a new analysis will also use this uid.
+# In practice, we usually pass 0 just to suppress display of the second column,
+# and non-zero values are just for "authorizers" modifying other people's tags.
 
 my ($self, $dbh, $privs, $uid) = @_;
 $uid = 0 if $uid == 8;

@@ -5,10 +5,10 @@
 <br>
 <input type="submit" name="btn" value="Add Note">
 <input type="button" value="Cancel" onclick="$('addnoteform').hide()">
-[% IF c.has_privs(16) -%]
+[% IF c.has_privs(8) -%]
 <div class="right">username: <select name="uid">
 <option value="8">stedt</option>
-<option selected="selected" value="[% c.session.param('uid') %]">[% user %]</option>
+<option selected="selected" value="[% c.param('uid') %]">[% user %]</option>
 </select></div>
 [% END -%]
 </div>
