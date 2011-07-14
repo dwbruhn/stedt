@@ -405,6 +405,10 @@ sub accept : Runmode {
 		$self->dbh->do("DELETE FROM lx_et_hash WHERE uid=8 AND rn IN ($rns)");
 		$self->dbh->do("UPDATE lx_et_hash SET uid=8 WHERE uid=? AND rn IN ($rns)", undef, $uid);
 		# add these changes to the changelog
+		my $oldvals = "tagging uid=" . $uid . ", accepting uid=" . $self->session->param('uid') . ", tag=" . $tag ;
+		$rns =~ s/,/, /g;
+		$self->dbh->do("INSERT changelog VALUES (?,?,?,?,?,?,NOW())", undef,
+			       $uid, 'lx_et_hash', 'accept',' ', $oldvals, $rns);
 	}
 	return $self->redirect($q->url(-absolute=>1) . "/etymon/$tag/$uid");
 }

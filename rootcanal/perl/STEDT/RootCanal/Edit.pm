@@ -70,20 +70,23 @@ sub table : StartRunmode {
 
 sub add : Runmode {
 	my $self = shift;
+	my $q = $self->query;
 
-	my $tbl = $self->param('tbl');
-	my $privs = $tbl eq 'etyma' ? 1 : 16;
+	my ($tblname, $id) = ($self->param('tbl'), $q->param($self->{key}));
+
+	my $privs = $tblname eq 'etyma' ? 1 : 16;
 	# taggers can only add etyma, not lexicon/languagename/etc. records
 	if (my $err = $self->require_privs($privs)) { return $err; }
 
-	my $t = $self->load_table_module($tbl);
-	my $q = $self->query;
+	my $t = $self->load_table_module($tblname);
 	
 	my ($id, $result, $err) = $t->add_record($q);
 	if ($err) {
 		$self->header_props(-status => 400);
 		return $err;
 	}
+	$self->dbh->do("INSERT changelog VALUES (?,?,?,?,?,?,NOW())", undef,
+		       $self->session->param('uid'), $tblname, 'record', $id, '', $id);
 	
 	# now retrieve it and send back some html
 	$id =~ s/"/\\"/g;
