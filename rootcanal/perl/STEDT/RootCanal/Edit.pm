@@ -13,7 +13,7 @@ sub table : StartRunmode {
 	my $t = $self->load_table_module($tbl);
 	my $q = $self->query;
 	
-	my $result = $t->search($q, $self->param('userprivs'));
+	my $result = $t->search($q);
 	for my $r (@{$result->{data}}) {
 		$_ = decode_utf8($_) foreach @$r;
 	}
@@ -79,7 +79,7 @@ sub add : Runmode {
 	my $t = $self->load_table_module($tbl);
 	my $q = $self->query;
 	
-	my ($id, $result, $err) = $t->add_record($q, $self->param('userprivs'));
+	my ($id, $result, $err) = $t->add_record($q);
 	if ($err) {
 		$self->header_props(-status => 400);
 		return $err;
@@ -157,7 +157,7 @@ sub update : Runmode {
 			}
 		}
 
-		$t->save_value($field, $value, $id, $self->param('userprivs'));
+		$t->save_value($field, $value, $id);
 		$self->dbh->do("INSERT changelog VALUES (?,?,?,?,?,?,NOW())", undef,
 			$self->session->param('uid'), $tblname, $field =~ /([^.]+)$/, $id, $oldval || '', $value); # $oldval might be undefined (and interpreted as NULL by mysql)
 		return $value;

@@ -77,12 +77,12 @@ sub new {
 # there will be an additional column returned giving the analyses belonging
 # to that uid.
 
-my ($self, $dbh, $uid) = @_;
+my ($self, $dbh, $privs, $uid) = @_;
 $uid = 0 if $uid == 8;
 	# set this so that below, if $uid has non-zero value,
 	# we generate a second analysis column
 
-my $t = $self->SUPER::new($dbh, 'lexicon', 'lexicon.rn'); # dbh, table, key
+my $t = $self->SUPER::new($dbh, 'lexicon', 'lexicon.rn', $privs); # dbh, table, key, privs
 
 $t->query_from(q|lexicon LEFT JOIN languagenames USING (lgid) LEFT JOIN languagegroups USING (grpid)|);
 $t->order_by('languagegroups.ord, languagenames.lgsort, lexicon.reflex, languagenames.srcabbr, lexicon.srcid');
@@ -108,6 +108,9 @@ $t->searchable('lexicon.rn', 'analysis', 'user_an', 'lexicon.reflex',
 	'languagenames.srcabbr', 'lexicon.srcid',
 #	'lexicon.semcat', 
 	'lexicon.lgid', 
+);
+$t->field_visible_privs(
+	'user_an' => 1,
 );
 $t->field_editable_privs(
 	'analysis' => 16,

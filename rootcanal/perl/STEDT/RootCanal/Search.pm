@@ -120,7 +120,7 @@ sub searchresults_from_querystring {
 		$query->param('etyma.public' => 1);
 	}
 
-	return $t->search($query, $self->param('userprivs'));
+	return $t->search($query);
 }
 
 sub blah : Runmode { # this sub wants a nicer name
@@ -144,7 +144,7 @@ sub blah : Runmode { # this sub wants a nicer name
 		}
 	} else { # just pass the query on
 		my $t = $self->load_table_module($tbl, 0);
-		$result = $t->search($self->query, $self->param('userprivs'));
+		$result = $t->search($self->query);
 	}
 
 	$self->header_add('-type' => 'application/json');

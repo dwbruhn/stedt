@@ -234,7 +234,7 @@ function SylStation() {
 };
 var SYLSTATION = new SylStation(); // for efficiency, we make this object once
 
-var stedttagger = stedtuserprivs & 16;
+var stedttagger = stedtuserprivs & 1;
 var skipped_roots = {};
 var public_roots = {};
 [1,2,34,35,90,95,20,98,70,97,71,92,66,67,109,119,103,111,138,132,142,
@@ -410,7 +410,6 @@ var setup = { // in the form setup.[tablename].[fieldname]
 		'etyma.hptbid' : {
 			label: 'HPTB',
 			size: 70,
-			hide: !(stedtuserprivs & 1),
 			transform: function (v) {
 				if (v === '') return '';
 				v = v.replace(/, */g,', ');
@@ -498,7 +497,6 @@ var setup = { // in the form setup.[tablename].[fieldname]
 		},
 		'user_an' : {
 			label: 'my analysis',
-			hide: !(stedtuserprivs & 1),
 			size: 80,
 			transform: function (v) {
 				return v.replace(/, */g,', ');

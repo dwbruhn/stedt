@@ -3,7 +3,7 @@ use base STEDT::Table;
 use strict;
 
 sub new {
-my ($self, $dbh) = @_;
+my ($self, $dbh, $privs) = @_;
 my $t = $self->SUPER::new($dbh, 'hptb', 'hptb.hptbid');
 
 $t->query_from('hptb LEFT JOIN et_hptb_hash USING (hptbid)');

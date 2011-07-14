@@ -90,7 +90,7 @@ sub load_table_module {
 	eval "require $tbl_class" or die $@;
 	
 	$uid = $self->session->param('uid') unless defined($uid);
-	return $tbl_class->new($self->dbh, $uid);
+	return $tbl_class->new($self->dbh, $self->param('userprivs'), $uid);
 }
 
 # helper methods for authentication

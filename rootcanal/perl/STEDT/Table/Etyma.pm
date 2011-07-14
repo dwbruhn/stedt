@@ -3,8 +3,8 @@ use base STEDT::Table;
 use strict;
 
 sub new {
-my ($self, $dbh, $uid) = @_;
-my $t = $self->SUPER::new($dbh, 'etyma', 'etyma.tag'); # dbh, table, key
+my ($self, $dbh, $privs, $uid) = @_;
+my $t = $self->SUPER::new($dbh, 'etyma', 'etyma.tag', $privs); # dbh, table, key, privs
 
 $t->query_from(q|etyma JOIN `etyma` AS `super` ON etyma.supertag = super.tag LEFT JOIN `users` ON etyma.uid = users.uid|);
 $t->order_by('super.chapter, super.sequence, etyma.plgord');

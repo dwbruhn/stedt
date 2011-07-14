@@ -62,13 +62,12 @@ my %preset_wheres = (
 sub new {
 	my $class = shift;
 	my $self = {};
-	$self->{dbh} = shift;
-	$self->{table} = shift; # THIS MUST BE FILLED IN BY A SUBCLASS
-	
-	my $key = shift;
-	$self->{key} = $key;
-	$self->{wheres}{$key} = \&where_int;
-	
+	@{$self}{qw/dbh table key privs/} = @_;
+		# table and key must be set by each subclass!
+
+	# set some defaults
+	$self->{privs} ||= 2;  # 2 is the priv bit for non-special users
+	$self->{wheres}{$self->{key}} = \&where_int;
 	$self->{search_limit} = 1000;
 	return bless $self, $class;
 }
@@ -97,13 +96,12 @@ sub fields {
 }
 
 sub fields_for_priv {
-	my ($self, $priv, $fullnames) = @_;
-	$priv = 1 if !$priv;
+	my ($self, $fullnames) = @_;
 	my @result;
 	
 	for (@{$self->{fields}}) {
 		push @result, ($fullnames ? $self->{full_fields}{$_} : $_)
-			if $priv & $self->{field_visible_privs}{$_};
+			if $self->{privs} & $self->{field_visible_privs}{$_};
 	}
 	return @result;
 }
@@ -162,7 +160,7 @@ sub AUTOLOAD {
 
 sub search {
 	my $self = shift;
-	my ($cgi, $privs, $debug) = @_; ### pass in the query as a cgi obj
+	my ($cgi, $debug) = @_; ### pass in the query as a cgi obj
 	my $dbh = $self->{dbh};
     
 	# sort by a separate key if specified
@@ -171,15 +169,15 @@ sub search {
 	}
 
     # construct our query
-    my ($query, $where) = $self->get_query($cgi, $privs);
+    my ($query, $where) = $self->get_query($cgi);
 	
 	# fetch the data so we can count the rows
 	my $sth = $dbh->prepare($query);
 	$sth->execute();
 	my $ary = $sth->fetchall_arrayref();
 
-	my $result = {table => $self->{table}, fields => [$self->fields_for_priv($privs)], data => $ary};
-	$result->{debug} = $where if $privs & 1;
+	my $result = {table => $self->{table}, fields => [$self->fields_for_priv()], data => $ary};
+	$result->{debug} = $where if $self->{privs} & 1;
 	return $result;
 }
 
@@ -191,10 +189,9 @@ sub search {
 sub get_query {
 	my $self = shift;
 	my $cgi = shift;
-	my $privs = shift;
 	
 	my ($where, $having) = $self->query_where($cgi);
-	my $flds = join(', ', $self->fields_for_priv($privs, 'full'));
+	my $flds = join(', ', $self->fields_for_priv('full'));
 	my $from = $self->{query_from} || $self->{table};
 	return "SELECT $flds FROM $from GROUP BY $self->{key} LIMIT 1", '[first item]' unless $where;
 	
@@ -286,9 +283,11 @@ sub get_value {
 
 sub save_value {
 	my $self = shift;
-	my ($field, $value, $id, $privs) = @_;
+	my ($field, $value, $id) = @_;
 	
-	die "bad field name or insufficient privileges!" unless $self->{field_editable_privs}{$field} & $privs || $self->in_editable($field); # this will help prevent sql injection attacks
+	die "bad field name or insufficient privileges!"
+		unless $self->{field_editable_privs}{$field} & $self->{privs}
+			|| $self->in_editable($field); # this will help prevent sql injection attacks
 	unless ($self->in_calculated_fields($field)) { # don't do this for pseudo-fields
 		my $update = qq{UPDATE $self->{table} SET $field=? WHERE $self->{key}=?};
 		my $update_sth = $self->{dbh}->prepare($update);
@@ -303,7 +302,7 @@ sub save_value {
 # returns the id (value of the key field) and the values in the new row.
 # if error, return error string in the third return value.
 sub add_record {
-	my ($self, $q, $privs) = @_;
+	my ($self, $q) = @_;
 	
 	# check for valid data
 	my $sub = $self->add_check();
@@ -338,10 +337,10 @@ sub add_record {
 	
 	$q->delete_all();
 	$q->param($self->{key},$id);
-	my ($query_string) = $self->get_query($q, $privs);
+	my ($query_string) = $self->get_query($q);
 	my $a = $self->{dbh}->selectall_arrayref($query_string);
 	# my %result;
-	# @result{$self->fields_for_priv($privs)} = @{$a->[0]};
+	# @result{$self->fields_for_priv()} = @{$a->[0]};
 	return $id, $a->[0]; # \%result;
 }
 

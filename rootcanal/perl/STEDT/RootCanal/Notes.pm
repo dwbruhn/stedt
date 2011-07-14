@@ -67,7 +67,7 @@ sub chapter : RunMode {
 	my $q = $self->query->new;
 	$q->param('etyma.chapter'=>$chap);
 	$q->param('etyma.public'=>1) unless $self->has_privs(1);
-	my $result = $t->search($q, $self->param('userprivs'));
+	my $result = $t->search($q);
 	for my $row (@{$result->{data}}) {
 		map {$_ = decode_utf8($_)} @$row; # apparently because we decode_utf8 on some stuff above, we have to do it here too. Compare with Edit/table and edit.tt, where it looks like it's going in binary mode?
 	}
