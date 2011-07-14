@@ -2,7 +2,6 @@ package STEDT::RootCanal::Edit;
 use strict;
 use base 'STEDT::RootCanal::Base';
 use Encode;
-use CGI;
 use JSON;
 use utf8;
 
@@ -35,7 +34,7 @@ sub table : StartRunmode {
 		$pagenum = $n;
 		
 		# make links for manual sorting
-		my $fakeq = CGI->new('');
+		my $fakeq = $q->new();
 		for my $fld ($t->searchable()) {
 			# copy in the old, non-empty parameters
 			$fakeq->param($fld, $q->param($fld)) if $q->param($fld);

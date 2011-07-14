@@ -8,11 +8,12 @@
 </tr>
 <tr>
 [% FOREACH col IN t.searchable -%]
-<td>[%- sub = t.search_form_items(col) %]
+<td>
+[%- sub = t.search_form_items(col) %]
 [%- IF t.search_form_items(col) %]
 [%- sub(c.query) %]
 [%- ELSE -%]
-<input type="text" name="[% col %]" style="width:100%">
+<input type="text" name="[% col %]"[% IF c.query.param(col) %] value="[% c.query.param(col) %]"[% END %] style="width:100%">
 [%- END %]</td>
 [% END -%]
 </tr>
@@ -40,6 +41,9 @@ Displaying items [% a %]-[% b %] of [% result.data.size %].
 [% UNLESS b == result.data.size %]<input name="next" type="submit" value="Next Page">[% END %]
 </form>
 [%- END -%]
+[%- ELSE -%]
+No records found. (WHERE [% result.debug %])
+[% END # result.data.size -%]
 
 <form>
 <table id="[% t.table %]_resulttable" class="[% IF !manual %]sortable [% END %]resizable editable [% t.table %]_edit_table" width="100%" style="table-layout:fixed;">
@@ -55,19 +59,18 @@ Displaying items [% a %]-[% b %] of [% result.data.size %].
 [%- END %]
 </tr></thead>
 <tbody>
+[% IF result.data.size -%]
 [% FOREACH row IN result.data.slice(a - 1, b - 1) -%]
 <tr>
 [%- FOREACH s IN row -%]
 <td>[% s | html %]</td>
 [%- END -%]
 </tr>
-[% END -%]
+[% END # FOREACH row -%]
+[% END # IF -%]
 </tbody>
 </table>
 </form>
-[%- ELSE -%]
-No records found. (WHERE [% result.debug %])
-[% END %]
 
 [% IF c.has_privs(t.table == 'etyma' ? 1 : 16) %]
 <a href="#" onclick="$('add_form_span').toggle(); scrollEnd(); return false;">Add a record...</a>

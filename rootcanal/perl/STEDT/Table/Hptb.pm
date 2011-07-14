@@ -49,7 +49,7 @@ $t->search_form_items(
 			$plgs->[0][0] = '0';
 		}
 		
-		return $cgi->popup_menu(-name => 'hptb.plg', -values=>['', map {@$_} @$plgs], -labels=>{'0'=>'(no value)'},  -default=>'', -override=>1);
+		return $cgi->popup_menu(-name => 'hptb.plg', -values=>['', map {@$_} @$plgs], -labels=>{'0'=>'(no value)'},  -default=>'');
 	}
 );
 

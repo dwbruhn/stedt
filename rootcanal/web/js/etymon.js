@@ -42,6 +42,7 @@ if (stedt_other_username) {
 for (var i = 1; i < num_tables; i++) {
 	TableKit.Raw.init('lexicon' + i, 'lexicon', (stedtuserprivs & 1) ? (baseRef+'update') : null);
 	TableKit.Rows.stripe('lexicon' + i);
+	// add the modification for selected_uid here #####
 }
 
 // put in section headings for language groups

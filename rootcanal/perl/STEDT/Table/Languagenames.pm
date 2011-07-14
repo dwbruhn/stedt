@@ -65,7 +65,7 @@ $t->search_form_items(
 		@grp_labels{@grp_nos} = map {$_->[1]} @$grps;
 		
 		return $cgi->popup_menu(-name => 'languagegroups.grp', -values=>['',@grp_nos],
-  								-default=>'', -override=>1,
+  								-default=>'', # -override=>1,
   								-labels=>\%grp_labels);
 	}
 );

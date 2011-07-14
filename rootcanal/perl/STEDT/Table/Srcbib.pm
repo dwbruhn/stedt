@@ -3,7 +3,7 @@ use base STEDT::Table;
 use strict;
 
 sub new {
-my $t = shift->SUPER::new(my $dbh = shift, 'srcbib', 'srcbib.srcabbr');
+my $t = shift->SUPER::new(my $dbh = shift, 'srcbib', 'srcbib.srcabbr', shift);
 
 $t->query_from('srcbib LEFT JOIN languagenames USING (srcabbr) LEFT JOIN lexicon USING (lgid)');
 $t->order_by('srcbib.srcabbr, srcbib.year'); # default is the key
