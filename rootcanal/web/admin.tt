@@ -16,6 +16,7 @@ Activity:
 <ul>
 <li><a href="[% self_url %]/admin/queries">view recent queries</a></li>
 <li><a href="[% self_url %]/admin/changes">view change log</a></li>
+<li><a href="[% self_url %]/admin/progress">view progress report</a></li>
 </ul>
 
 Accounts:

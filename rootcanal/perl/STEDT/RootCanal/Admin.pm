@@ -33,6 +33,17 @@ sub users : Runmode {
 	return $self->tt_process("admin/users.tt", {users=>$a});
 }
 
+sub progress : Runmode {
+	my $self = shift;
+	if (my $err = $self->require_privs(1)) { return $err; }
+
+	my $a = $self->dbh->selectall_arrayref("SELECT username,users.uid,COUNT(DISTINCT tag),COUNT(DISTINCT rn) FROM users LEFT JOIN lx_et_hash USING (uid) LEFT JOIN etyma USING (tag) WHERE users.uid !=8 AND tag != 0 GROUP BY uid;");
+	my $b = $self->dbh->selectall_arrayref("SELECT username,users.uid,tag,protoform,protogloss,COUNT(DISTINCT rn) FROM users LEFT JOIN lx_et_hash USING (uid) LEFT JOIN etyma USING (tag) WHERE users.uid !=8 AND tag != 0 GROUP BY uid,tag;");
+
+	return $self->tt_process("admin/progress.tt", {etymaused=>$a, tagging=>$b});
+}
+
+
 sub listpublic : Runmode {
 	my $self = shift;
 	if (my $err = $self->require_privs(16)) { return $err; }
