@@ -1,4 +1,4 @@
-[% PROCESS header.tt title="STEDT Database: Query Log" %]
+[% PROCESS header.tt title="Query Log - STEDT Database" %]
 <p>[% queries.size %] most recent queries:</p>
 
 <table class="sortable resizable">

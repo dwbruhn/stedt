@@ -11,7 +11,7 @@
 	<style type="text/css">
 [%- FOREACH n IN cognates %].r[% n %] { background-color:yellow; } [% END -%]
 [%- FOREACH n IN cognates %].u[% n %] { background-color:#6FF; } [% END %]</style>
-[% END -%]
+[% END # cognates -%]
 	<script src="[% self_base %]scriptaculous/lib/prototype.js"></script>
 	<script src="[% self_base %]scriptaculous/src/scriptaculous.js"></script>
 	<script src="[% self_base %]js/tablekit.js"></script>
@@ -37,16 +37,18 @@ logged in as <b>[% user %]</b>
 <option value="[% self_url %]/edit/hptb">HPTB</option>
 <option value="[% self_url %]/admin/users">Users</option>
 <option value="[% self_url %]/admin">Tools</option>
-[% END -%]
+[% END # has_privs(1) -%]
 <option value="[% self_url %]/account">Account</option>
 </select>
 </form>
   <a href="[% self_url %]/logout">logout</a>
-[% ELSE -%]
+[% ELSE # user -%]
 <script>
 var stedtuserprivs = 0;
-</script>
+[% UNLESS suppress_header %]$('header').show();
 [% END -%]
+</script>
+[% END # user -%]
 ﻿[% # by including a zero-width no-break space (U+FEFF) here, and saving this file with a utf-8 BOM, we can force Template Toolkit to generate all pages as utf-8 instead of latin-whatever. I think we could also try using {binmode=>':utf8'} in the Template::process() call, but since for our purposes that's wrapped up inside the C::A::P::TT module there's no easy way to access that. -%]
   <a href="[% self_base %]help.html" target="_blank">help</a>
 <script src="[% self_base %]js/stedtconfig.js"></script>

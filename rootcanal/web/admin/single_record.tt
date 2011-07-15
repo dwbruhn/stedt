@@ -1,4 +1,4 @@
-[% PROCESS header.tt title="STEDT Database - Edit record " _ id _ " from " _ t.table -%]
+[% PROCESS header.tt title=t.table _ ":" _ id -%]
 <form action="[% self_url %]/edit/[% t.table %]/[% id %]" method="post">
 <table>
 [% FOREACH val IN result -%]

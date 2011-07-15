@@ -4,7 +4,8 @@
 [%- new_url = c.query.url('-path',1,'-query',1).replace('^http:', 'https:') -%]
 <p><a href="[% new_url | url %]">[% new_url | html %]</a></p>
 [%- ELSIF !c.param('user') -%]
-<p>You must log in first.</p>
+<h1>STEDT Database Login</h1>
+<p>The page you are trying to access requires you to log in first.</p>
 <form method="post" action="[% self_url %]/account/login">
 username: <input type="text" size="10" name="user">
 password: <input type="password" size="10" name="pwd">
