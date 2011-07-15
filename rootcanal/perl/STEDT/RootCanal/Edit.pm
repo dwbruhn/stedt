@@ -2,7 +2,6 @@ package STEDT::RootCanal::Edit;
 use strict;
 use base 'STEDT::RootCanal::Base';
 use Encode;
-use JSON;
 use utf8;
 
 sub table : StartRunmode {
@@ -49,8 +48,8 @@ sub table : StartRunmode {
 	my @footnotes;
 	my $footnote_index = 1;
 	if ($tbl eq 'lexicon') {
-		use STEDT::RootCanal::Notes;
-		collect_lex_notes($self, $result->{data}, $self->has_privs(1), \@footnotes, \$footnote_index);
+		require STEDT::RootCanal::Notes;
+		STEDT::RootCanal::Notes::collect_lex_notes($self, $result->{data}, $self->has_privs(1), \@footnotes, \$footnote_index);
 	}
 
 	# pass to tt: searchable fields, results, addable fields, etc.
@@ -85,7 +84,8 @@ sub add : Runmode {
 	# now retrieve it and send back some html
 	$id =~ s/"/\\"/g;
 	$self->header_add('-x-json'=>qq|{"id":"$id"}|);
-	return to_json($result);
+	require JSON;
+	return JSON::to_json($result);
 }
 
 
@@ -178,7 +178,8 @@ sub json_lg : Runmode {
 	my $self = shift;
 	my $srcabbr = $self->param('srcabbr');
 	my $a = $self->dbh->selectall_arrayref("SELECT lgid, language FROM languagenames WHERE srcabbr LIKE ? ORDER BY language", undef, $srcabbr);
-	return to_json($a);
+	require JSON;
+	return JSON::to_json($a);
 }
 
 sub single_record : Runmode {

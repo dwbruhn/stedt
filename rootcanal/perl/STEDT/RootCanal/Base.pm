@@ -5,7 +5,6 @@ use CGI::Application::Plugin::TT;
 use CGI::Application::Plugin::Session;
 use CGI::Application::Plugin::AutoRunmode;
 use CGI::Application::Plugin::DBH qw/dbh_config dbh/;
-use CGI::Application::Plugin::ValidateRM;
 use CGI::Application::Plugin::ConfigAuto qw/cfg/;
 
 # This is the base class for different STEDT::RootCanal modules.

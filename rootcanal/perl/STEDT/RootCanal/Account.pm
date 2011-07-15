@@ -1,7 +1,6 @@
 package STEDT::RootCanal::Account;
 use strict;
 use base 'STEDT::RootCanal::Base';
-use Mail::Sendmail;
 use CGI::Application::Plugin::Redirect;
 
 # for creating and maintaining a personal account
@@ -42,7 +41,8 @@ sub acct_dfv_profile {
 	my $self = shift;
 	my $updating = shift;
 	my $flds = [qw/newuser newpwd newpwd2 email secret_code/];
-	use Data::FormValidator::Constraints qw(:closures);
+	require Data::FormValidator::Constraints;
+	import Data::FormValidator::Constraints ':closures';
 	my $p = {
 		constraint_methods => {
 			newuser => [FV_length_between(2,15), sub { my ($dfv, $val) = @_; $dfv->name_this('username_unique');
@@ -90,6 +90,8 @@ sub create : Runmode {
 	if (!$q->cookie('stsec')) {
 		return "You must be using a secure connection to do this. Try changing your URL to https...";
 	}
+	require CGI::Application::Plugin::ValidateRM;
+	import CGI::Application::Plugin::ValidateRM;
 	my $dfv_results = $self->check_rm('gsarpa', $self->acct_dfv_profile(),
 		{target=>'acct_form', ignore_fields => ['newpwd','newpwd2']})
 	|| return $self->check_rm_error_page;
@@ -115,6 +117,8 @@ sub create : Runmode {
 sub update : Runmode {
 	my $self = shift;
 	
+	require CGI::Application::Plugin::ValidateRM;
+	import CGI::Application::Plugin::ValidateRM;
 	my $dfv_results = $self->check_rm('account', $self->acct_dfv_profile('update'),
 		{target=>'acct_form', ignore_fields => ['newpwd','newpwd2','oldpwd']})
 	|| return $self->check_rm_error_page;
@@ -194,7 +198,10 @@ sub password_reset : Runmode {
 	my $self = shift;
 	my $dbh = $self->dbh;
 	
-	use Data::FormValidator::Constraints qw(:closures);
+	require CGI::Application::Plugin::ValidateRM;
+	import CGI::Application::Plugin::ValidateRM;
+	require Data::FormValidator::Constraints;
+	import Data::FormValidator::Constraints ':closures';
 	my $dfv_results = $self->check_rm('login_fail', {
 		require_some => { all_empty => [1, qw/username email/]},
 		constraint_methods => {
@@ -248,7 +255,8 @@ End_of_Mail
 		    Message    => $msg,
 		   );
 
-	sendmail(%mail) or die $Mail::Sendmail::error;
+	require Mail::Sendmail;
+	Mail::Sendmail::sendmail(%mail) or die $Mail::Sendmail::error;
 
 	# try to update the database AFTER you send the email. Otherwise
 	# if sendmail fails, the password is changed but there's no record of it.

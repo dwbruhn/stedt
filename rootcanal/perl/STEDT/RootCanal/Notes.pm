@@ -1,10 +1,9 @@
 package STEDT::RootCanal::Notes;
 use strict;
-use base 'STEDT::RootCanal::Base', 'Exporter';
+use base 'STEDT::RootCanal::Base';
 use Encode;
 use utf8;
 use CGI::Application::Plugin::Redirect;
-our @EXPORT = qw(collect_lex_notes);
 
 sub chapter_browser : RunMode {
 	my $self = shift;

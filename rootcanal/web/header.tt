@@ -26,7 +26,8 @@ var stedtuserprivs = [% c.param('userprivs') %];
 $('header').show();
 </script>
 logged in as <b>[% user %]</b>
- <form name="dropdown" method="POST" style="display:inline">
+[%- IF c.has_privs(1) %]. &nbsp; <a href="[% self_url %]/admin">tools</a>&nbsp;[% END %]
+<form name="dropdown" method="POST" style="display:inline">
 <select name="DDMenu" onchange="location.href=(form.DDMenu.options[form.DDMenu.selectedIndex].value)">
 <option value="#">Select...</option>
 [% IF c.has_privs(1) # only authorized users can do the following, but anyone logged in with an account should be able to access their account page -%]
@@ -36,7 +37,6 @@ logged in as <b>[% user %]</b>
 <option value="[% self_url %]/edit/srcbib">SrcBib</option>
 <option value="[% self_url %]/edit/hptb">HPTB</option>
 <option value="[% self_url %]/admin/users">Users</option>
-<option value="[% self_url %]/admin">Tools</option>
 [% END # has_privs(1) -%]
 <option value="[% self_url %]/account">Account</option>
 </select>

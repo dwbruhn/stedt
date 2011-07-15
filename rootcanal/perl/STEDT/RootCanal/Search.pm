@@ -1,8 +1,6 @@
 package STEDT::RootCanal::Search;
 use strict;
 use base 'STEDT::RootCanal::Base';
-use JSON;
-
 
 sub extractions : Runmode {
 	my $self = shift;
@@ -148,7 +146,8 @@ sub blah : Runmode { # this sub wants a nicer name
 	}
 
 	$self->header_add('-type' => 'application/json');
-	return to_json($result);
+	require JSON;
+	return JSON::to_json($result);
 }
 
 1;
