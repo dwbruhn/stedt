@@ -19,6 +19,7 @@
 </tr>
 </table>
 <input name="search" type="submit" value="Search">
+<input type="button" value="Clear" onclick="clear_form(this.form)">
 </form>
 
 [% IF result.data.size -%]
@@ -156,6 +157,28 @@ var add_record = function () { new Ajax.Request('[% self_url %]/add/[% t.table %
     },
     onFailure: function(transport){ alert('Error: ' + transport.responseText) }
 })};
+var clear_form = function (f) {
+	$A(f.elements).each(function (x) {
+		if (x.type !== undefined) switch (x.type.toLowerCase()) {
+			case "text":
+			case "password":
+			case "textarea":
+			case "hidden":
+				x.value = "";
+				break;
+			case "radio":
+			case "checkbox":
+				if (x.checked) x.checked = false;
+				break;
+			case "select-one":
+			case "select-multi":
+				x.selectedIndex = 0;
+				break;
+			default:
+				break;
+		}
+	});
+};
 </script>
 </body>
 </html>

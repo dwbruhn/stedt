@@ -10,6 +10,7 @@ sub table : StartRunmode {
 	my $tbl = $self->param('tbl');
 	my $t = $self->load_table_module($tbl);
 	my $q = $self->query;
+	$q->param($_, decode_utf8($q->param($_))) foreach $q->param; # the template will expect these all to be utf8, so convert them here
 	
 	my $result = $t->search($q);
 	# it doesn't seem to be too inefficient to pull out all the results
