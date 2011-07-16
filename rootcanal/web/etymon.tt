@@ -1,6 +1,6 @@
 ﻿[% cogs = [] %][% FOREACH e IN etyma %][% cogs.push(e.tag) %][% END -%]
 [% PROCESS header.tt title="STEDT Etymon #" _ etyma.0.tag cognates=cogs -%]
-[% lexicon_id = 1 %][% lastord = -1 -%]
+[% lexicon_id = 1 %]
 
 [% IF c.has_privs(1) %]
 [% stedt_count %] records <span class="r[% supertag %]">tagged by <b>stedt</b></span> under this etymon.
@@ -18,8 +18,10 @@ Reflexes <span class="u[% supertag %]">tagged by <select name="DDMenu" onchange=
 [% END # has_privs 1 %]
 
 [% FOREACH e IN etyma -%]
-[% IF e.is_main %]<h1>#[% e.tag %] [% e.plg %] [% e.protoform %] [% e.protogloss %]</h1>
-[%- ELSE %]<h2>#[% e.tag %] [% e.plg %] [% e.protoform %] [% e.protogloss %]</h2>[% END %]
+[% IF e.is_main %]<h1>[% ELSE %]<h2>[% END -%]
+#[% e.tag %] [% e.plg %] [% e.protoform %] [% e.protogloss %]
+[%- IF e.uid != 8 %] <span class="u[% supertag %]">(proposed by [% e.username %])</span>[% END -%]
+[%- IF e.is_main %]</h1>[% ELSE %]</h2>[% END %]
 
 [% IF c.has_privs(1) -%]
 <div id="allnotes[% e.tag %]" class="container">

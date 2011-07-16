@@ -427,8 +427,8 @@ sub etymon : Runmode {
 	my $INTERNAL_NOTES = $self->has_privs(1);
 	my (@etyma, @footnotes, @users);
 	my $footnote_index = 1;
-	my $sql = qq#SELECT e.tag, e.printseq, e.protoform, e.protogloss, e.plg, e.hptbid, e.tag=e.supertag AS is_main
-FROM `etyma` AS `e` JOIN `etyma` AS `super` ON e.supertag = super.tag
+	my $sql = qq#SELECT e.tag, e.printseq, e.protoform, e.protogloss, e.plg, e.hptbid, e.tag=e.supertag AS is_main, e.uid, users.username
+FROM `etyma` AS `e` JOIN `etyma` AS `super` ON e.supertag = super.tag LEFT JOIN users ON (e.uid=users.uid)
 WHERE e.supertag=?
 ORDER BY is_main DESC, e.plgord#;
 	my $etyma_for_tag = $self->dbh->selectall_arrayref($sql, undef, $tag);
@@ -524,7 +524,7 @@ ORDER BY is_main DESC, e.plgord#;
 		push @etyma, \%e;
 	
 		# heading stuff
-		@e{qw/tag printseq protoform protogloss plg hptbid is_main/} = @$_;
+		@e{qw/tag printseq protoform protogloss plg hptbid is_main uid username/} = @$_;
 		$e{plg} = $e{plg} eq 'PTB' ? '' : "$e{plg}";
 	
 		$e{protoform} =~ s/⪤ +/⪤ */g;

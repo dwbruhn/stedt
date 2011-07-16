@@ -31,6 +31,7 @@ user: <select name="uid">
 [% IF n.type == 'O' %][Orig/Source][% END -%]
 [% n.text -%]
 [% IF n.type == 'I' %]</i>[% END -%]
+[% IF n.uid != 8 %] [[% n.username %]][% END %]
 </div><hr class="edit" style="clear:right"></div>
 [% ELSE -%]
 <p>[% n.text %]</p>

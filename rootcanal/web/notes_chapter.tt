@@ -38,5 +38,6 @@ user: <select name="uid">
 [% IF n.type == 'I' %][Internal Note:] <i>[% END -%]
 [% n.text -%]
 [% IF n.type == 'I' %]</i>[% END -%]
+[% IF n.uid != 8 %] [[% n.username %]][% END %]
 [% END -%]
 </div><hr class="edit" style="clear:right"></div>

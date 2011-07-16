@@ -25,13 +25,38 @@ if (stedt_other_username) {
 			var a = result[0].map(function (s,i) {
 				var delim = result[1][i] || '&thinsp;';
 				var makelink = !skipped_roots[tags[i]];
+				var syl_class = ''; // figure out what class to assign (so it shows up with the right color)
+				if (tags[i] && t2[i]) {
+					syl_class = tags[i]===t2[i] ? 'u' + t2[i] : 'approve-conflict'; // if stedt and user tags match, use the user's style; otherwise mark this syllable as a conflict
+				} else if (tags[i]) { // if only one of the columns is defined, then simply mark it as such.
+					syl_class = 'r' + tags[i];
+				} else if (t2[i]) {
+					syl_class = 'u' + t2[i];
+				}
+				if (syl_class) { syl_class = ' class="' + syl_class + '"' }
 				return (parseInt(tags[i], 10) && makelink)
 					? '<a href="' + baseRef + 'etymon/' + tags[i] + '" target="stedt_etymon"'
-						+ ' class="r' + tags[i] + ' u' + t2[i] + '">'
+						+ syl_class + '>'
 						+ s + '</a>'  + delim
-					: '<span class="r' + tags[i] + ' u' + t2[i] + '">' + s + '</span>' + delim;
+					: '<span' + syl_class + '>' + s + '</span>' + delim;
 			});
 			return a.join('');
+	};
+	setup['lexicon']['user_an']['transform'] = function (v) {
+		var s = v.replace(/, */g,', ');
+		// hilite this gray if it doesn't contain the etyma we're concerned with on this page
+		var to_be_approved = $A(v.split(',')).any(function (t) { return skipped_roots[t]; });
+		if (to_be_approved) return s;
+		return '<div class="approve-ignore">' + s + '</div>';
+	};
+	setup['lexicon']['analysis']['transform'] = function (v,key,rec,n) {
+		var s = v.replace(/, */g,', ');
+		// hilite this magenta if it would get clobbered on approval, i.e.
+		// if it's not empty, the two cols are different, and the user_an is not gray
+		if (v && v !== rec[n+1] && $A(rec[n+1].split(',')).any(function (t) { return skipped_roots[t]; })) {
+			return '<div class="approve-replacing">' + s + '</div>';
+		}
+		return s;
 	};
 }
 for (var i = 1; i < num_tables; i++) {

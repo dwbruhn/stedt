@@ -51,6 +51,10 @@ td, .editable-cell-form textarea
 	background-color:yellow; /* #99ff99*/
 }
 
+.approve-ignore { background-color: gray; text-indent:0px; margin-left:-1em; }
+.approve-replacing { background-color: magenta; text-indent:0px; margin-left:-1em; }
+.approve-conflict { background-color:magenta; }
+
 .left
 {
 	float: left;
