@@ -107,6 +107,7 @@ sub load_table_module {
 # check if the user has the right privilege bits set.
 # return error page if not secure.
 sub require_privs {
+	no warnings 'uninitialized';
 	my ($self, $privs) = @_;
 	return if ($self->param('userprivs') & $privs);
 	return $self->tt_process("admin/https_warning.tt") unless $self->param('user');
@@ -115,6 +116,7 @@ sub require_privs {
 }
 
 sub has_privs {
+	no warnings 'uninitialized';
 	my ($self, $privs) = @_;
 	return $self->param('userprivs') & $privs;
 }

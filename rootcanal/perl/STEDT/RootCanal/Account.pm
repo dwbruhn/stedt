@@ -30,23 +30,22 @@ sub gsarpa : Runmode {
 	return $self->tt_process("admin/create_account.tt", { err => $errs });
 }
 
-my %secret_codes = {
+my %secret_codes = (
 	allofam => 2,				# casual user
 	rhinoglottophilia => 1,		# tagger
 	columbicubiculomania => 31,	# superuser with all bits set
-};
+);
 
 # create/update account if attempting to do so
 sub acct_dfv_profile {
 	my $self = shift;
 	my $updating = shift;
 	my $flds = [qw/newuser newpwd newpwd2 email secret_code/];
-	require Data::FormValidator::Constraints;
 	import Data::FormValidator::Constraints ':closures';
 	my $p = {
 		constraint_methods => {
 			newuser => [FV_length_between(2,15), sub { my ($dfv, $val) = @_; $dfv->name_this('username_unique');
-				return 1 if $self->param('user') eq $val;
+				return 1 if $updating && $self->param('user') eq $val;
 				return 0 == $self->dbh->selectrow_array("SELECT COUNT(*) FROM users WHERE username=?", undef, $val);
 			}],
 			newpwd  => [FV_min_length(5), sub { my ($dfv, $val) = @_; $dfv->name_this('pwd_secure');
@@ -108,9 +107,12 @@ sub create : Runmode {
 		my $err = "Can't create new account: $@";
 		die $err; # give unexpected error page!
 	}
-	return $self->tt_process("login.tt", {
-		blank => 1,
-		msg => "Account for $u created successfully!"
+	my $uid = $dbh->selectrow_array("SELECT LAST_INSERT_ID()");
+	my $current_user = $self->param('user');
+	$self->_login($uid, $u, $privs) unless $current_user;
+	return $self->tt_process("admin/create_account_success.tt", {
+		current => $current_user,
+		msg => "Account for $u (uid:$uid) created successfully!."
 	});
 }
 
@@ -170,7 +172,9 @@ sub login : Runmode {
 	if (defined($uid) && $pwd eq $pwd2) {
 		# success!
 
-		return $self->_login($uid, $u, $privs);
+		$self->_login($uid, $u, $privs);
+		# redirect to the page they were trying to go to, or the main page otherwise
+		return $self->redirect($self->query->param('url') || $self->query->url(-absolute=>1));
 	}
 	return $self->login_fail({});
 }
@@ -184,14 +188,11 @@ sub login_fail : Runmode {
 	});
 }
 
-# helper function to set params and stuff,
-# then redirect to the main page
+# helper function to set params and stuff
 sub _login {
 	my ($self, $uid, $username, $privs) = @_;
 	$self->session->param('uid', $uid);	# for authentication
 	$self->user_session_init($uid, $username, $privs);
-	# redirect to the page they were trying to go to, or the main page otherwise
-	return $self->redirect($self->query->param('url') || $self->query->url(-absolute=>1));
 }
 
 sub password_reset : Runmode {

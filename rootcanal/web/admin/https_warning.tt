@@ -11,7 +11,7 @@ username: <input type="text" size="10" name="user">
 password: <input type="password" size="10" name="pwd">
 <input type="hidden" name="url" value="[% c.query.url('-path',1,'-query',1) | url %]">
 <input type="submit" value="log in">
-<p><a href="[% self_url %]/account">create account</a></p>
+<p><a href="[% self_url %]/account/gsarpa">create account</a></p>
 </form>
 [% END %]
 </body>

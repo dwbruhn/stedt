@@ -151,7 +151,7 @@ sub AUTOLOAD {
 
 	} elsif ($name =~ s/^in_// && $set_vars{$name}) {
 		my $key = shift;
-		return $self->{$name}{$key} == 1;
+		return $self->{$name}{$key};
 
 	} else {
 		die "Undefined method $AUTOLOAD called in TableEdit";
@@ -264,7 +264,7 @@ sub query_where {
 	my $conj = ' AND ';
 	if (scalar $self->search_by_disjunction()) {
 		my @flds = $self->search_by_disjunction();
-		my $n = grep { $cgi->param($_) ne '' } @flds;
+		my $n = grep { defined $cgi->param($_) } @flds;
 		$conj = ' OR ' if $n == scalar @flds;
 	}
 	if ($query_ok) {
