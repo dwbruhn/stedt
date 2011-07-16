@@ -501,6 +501,24 @@ ORDER BY is_main DESC, e.plgord#;
 		}
 	}
 
+	my $user_analysis_col = '';
+	my $user_analysis_where = '';
+	my $no_meso = '';
+	if ($selected_uid && @$etyma_for_tag) {
+		# OK to concatenate the uid into the query since we've made sure it's just digits
+		$user_analysis_col = "(SELECT GROUP_CONCAT(tag_str ORDER BY ind) FROM lx_et_hash WHERE rn=lexicon.rn AND uid=$selected_uid) AS user_an,";
+		$user_analysis_where = "OR lx_et_hash.uid=$selected_uid";
+
+		# if there's two columns, we need to make sure the first column
+		# in the superroot section does not contain records tagged with mesoroots,
+		# since those will show up later on and we don't want them to appear twice.
+		my $supertag = $etyma_for_tag->[0][0];
+		$no_meso = "AND lexicon.rn NOT IN (SELECT lexicon.rn FROM lexicon
+			LEFT JOIN lx_et_hash AS leh1 ON (lexicon.rn=leh1.rn AND leh1.uid=8)
+			LEFT JOIN lx_et_hash AS leh2 ON (lexicon.rn=leh2.rn AND leh2.uid=$selected_uid)
+			LEFT JOIN etyma AS e2 ON (leh2.tag=e2.tag)
+		WHERE (leh1.tag=$supertag AND e2.supertag=$supertag AND e2.tag != e2.supertag))";
+	}
 	foreach (@$etyma_for_tag) {
 		my %e; # hash of infos to be added to @etyma
 		push @etyma, \%e;
@@ -546,13 +564,6 @@ ORDER BY is_main DESC, e.plgord#;
 		}
 	
 		# do entries
-		my $user_analysis_col = '';
-		my $user_analysis_where = '';
-		if ($selected_uid) {
-			# OK to concatenate the uid into the query since we've made sure it's just digits
-			$user_analysis_col = "(SELECT GROUP_CONCAT(tag_str ORDER BY ind) FROM lx_et_hash WHERE rn=lexicon.rn AND uid=$selected_uid) AS user_an,";
-			$user_analysis_where = "OR lx_et_hash.uid=$selected_uid";
-		}
 		my $recs = $self->dbh->selectall_arrayref(<<EndOfSQL);
 SELECT lexicon.rn,
 	(SELECT GROUP_CONCAT(tag_str ORDER BY ind) FROM lx_et_hash WHERE rn=lexicon.rn AND uid=8) AS analysis,
@@ -562,16 +573,16 @@ SELECT lexicon.rn,
 	languagenames.srcabbr, lexicon.srcid, languagegroups.ord,
 	(SELECT COUNT(*) FROM notes WHERE notes.rn = lexicon.rn) AS num_notes
 FROM lexicon
-	LEFT JOIN lx_et_hash ON (lexicon.rn=lx_et_hash.rn AND (lx_et_hash.uid=8 $user_analysis_where)),
-	languagenames,
-	languagegroups
+	LEFT JOIN lx_et_hash ON (lexicon.rn=lx_et_hash.rn AND (lx_et_hash.uid=8 $user_analysis_where))
+	LEFT JOIN languagenames USING (lgid)
+	LEFT JOIN languagegroups ON (languagenames.grpid=languagegroups.grpid)
 WHERE (lx_et_hash.tag = $e{tag}
-	AND languagenames.lgid=lexicon.lgid
-	AND languagenames.grpid=languagegroups.grpid
+	$no_meso
 )
 GROUP BY lexicon.rn
 ORDER BY languagegroups.ord, languagenames.lgsort, reflex, languagenames.srcabbr, lexicon.srcid
 EndOfSQL
+		$no_meso = ''; # only need this for the first iteration (the superroot).
 		if (@$recs) { # skip if no records
 			collect_lex_notes($self, $recs, $INTERNAL_NOTES, \@footnotes, \$footnote_index, $e{tag});
 			$e{records} = $recs;
