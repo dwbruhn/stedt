@@ -468,7 +468,7 @@ ORDER BY is_main DESC, e.plgord#;
 		# get the mesoroot's supertag and redirect to it
 		($tag) = $self->dbh->selectrow_array("SELECT supertag FROM etyma WHERE tag=?", undef, $tag);
 		if (!$tag) {
-			die "no etymon with tag #$tag";
+			die "no etymon with tag #" . $self->param('tag');
 		}
 		return $self->redirect($self->query->url(-absolute=>1) . "/etymon/$tag" . ($selected_uid ? "/$selected_uid" : ''));
 	}
