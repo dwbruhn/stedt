@@ -151,7 +151,7 @@ var make_one_table = function (tablename, tabledata) {
 	}
 	if (setup[tablename]._postprocess) {
 		var fn = setup[tablename]._postprocess;
-		fn();
+		fn('');
 	}
 };
 var ajax_make_table = function (transport,json){ // function suitable for the onSuccess callback
@@ -314,9 +314,9 @@ function show_tag(tag,loc) {
 var setup = { // in the form setup.[tablename].[fieldname]
 	etyma : {
 		_key: 'etyma.tag',   // maybe send it from the server?
-		_postprocess: function () {
+		_postprocess: function (context) {
 			var scrollElem = $('etyma') || window; // if we're not in the combo view, there's no etyma div; if we pass a nonexistent element to Draggable, prototype will crash (in firefox and possibly other browsers)
-			$$('.tagid').each(function(obj, index) {
+			$$(context + ' .tagid').each(function(obj, index) {
 				make_draggable_id(obj, scrollElem);
 			});
 			// put in a special sort function for all columns of the table
@@ -471,8 +471,8 @@ var setup = { // in the form setup.[tablename].[fieldname]
 	},
 	lexicon : {
 		_key: 'lexicon.rn',
-		_postprocess: function () {
-			$$('.lexadd').each(function (a) {
+		_postprocess: function (context) {
+			$$(context + ' .lexadd').each(function (a) {
 				var id = $(a).up('tr').id;
 				a.onclick = function () {
 					showaddform('L',id);

@@ -11,7 +11,7 @@ Reflexes <span class="u[% supertag %]">tagged by <select name="DDMenu" onchange=
 <option value="[% self_url %]/etymon/[% supertag %]/[% u.uid %]" [% IF selected_uid == u.uid %]selected[% END %] >[% u.username %] ([% u.count %] tagged forms)</option>
 [% END -%]
 </select>
-</form></span>
+</span></form>
 [% ELSE %]
 (No user tagging for this etymon.)
 [% END # selected_uid %]

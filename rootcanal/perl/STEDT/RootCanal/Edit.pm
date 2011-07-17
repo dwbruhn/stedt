@@ -131,9 +131,13 @@ sub delims_only {
 sub update : Runmode {
 	my $self = shift;
 	my $q = $self->query;
+	unless ($self->has_privs(1)) {
+		$self->header_add(-status => 403);
+		return "Insufficient privileges.";
+	}
 
 	my ($tblname, $field, $id, $value, $fake_uid) = ($q->param('tbl'), $q->param('field'),
-		$q->param('id'), decode_utf8($q->param('value')), $q->param('uid2'));
+		$q->param('id'), decode_utf8($q->param('value')), $q->param('uid2')||0);
 	undef $fake_uid if $fake_uid == $self->param('uid');
 	if ($fake_uid && !$self->has_privs(8)) {
 		$self->header_add(-status => 403); # Forbidden
@@ -141,9 +145,7 @@ sub update : Runmode {
 	}
 	my $t;
 	
-	if ($self->param('user')
-	   && ($self->has_privs(1))
-	   && ($t = $self->load_table_module($tblname, $fake_uid))
+	if (($t = $self->load_table_module($tblname, $fake_uid))
 	   && ($t->{field_editable_privs}{$field} & $self->param('userprivs') || $t->in_editable($field))) {
 		my $oldval = $t->get_value($field, $id);
 
@@ -169,7 +171,6 @@ sub update : Runmode {
 		return $value;
 	} else {
 		$self->header_add(-status => 403); # Forbidden
-		return "User not logged in" unless $self->param('user');
 		return "Field $field not editable";
 	}
 }

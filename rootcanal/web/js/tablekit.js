@@ -358,7 +358,7 @@ TableKit.Raw = {
 		}
 		if (setup[tablename]._postprocess) {
 			var fn = setup[tablename]._postprocess;
-			fn();
+			fn('');
 		}
 	}
 };
@@ -1062,13 +1062,27 @@ TableKit.Editable.CellEditor.prototype = {
 				data.active = false;
 				data.refresh = true; // mark cell cache for refreshing, in case cell contents has changed and sorting is applied
 				var text = t.responseText;
+				var re = /tbl=([^&]+)/;
+				var tbl = re.exec(s_extra)[1]; // extract the table name (used for looking things up in setup), which is different from table.id!
 				var raw = TableKit.tables[table.id].raw;
 				if (raw) raw.data[row.id][raw.cols[head.id]] = text;
-				var xform = TableKit.tables[table.id].editAjaxTransform; // dunno why the TableKit.option(...) call doesn't work...
-				if (xform) {
-					var re = /tbl=([^&]+)/;
-					var tbl = re.exec(s_extra)[1];
-					cell.innerHTML = xform(tbl, head.id, row.id, text.escapeHTML(), raw ? raw.data[row.id] : null, raw ? raw.cols[head.id] : 0);
+				var xform;
+				if (raw) {
+					var colheads = table.tHead.rows[0].cells;
+					var rowdata = raw.data[row.id];
+					$A(row.cells).each(function (c,i) {
+						xform = setup[tbl][colheads[i].id].transform;
+						if (xform) c.innerHTML = xform(rowdata[i].escapeHTML(), row.id, rowdata, i);
+					});
+					if (setup[tbl]._postprocess) {
+						var fn = setup[tbl]._postprocess;
+						fn('tr#' + row.id);
+					}
+				} else {
+					xform = TableKit.tables[table.id].editAjaxTransform; // dunno why the TableKit.option(...) call doesn't work...
+					if (xform) {
+						cell.innerHTML = xform(tbl, head.id, row.id, text.escapeHTML(), raw ? raw.data[row.id] : null, raw ? raw.cols[head.id] : 0);
+					}
 				}
 				// restore possible hanging ident
 				cell.style.paddingLeft = null;

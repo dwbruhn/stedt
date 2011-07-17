@@ -504,6 +504,8 @@ ORDER BY is_main DESC, e.plgord#;
 	my $user_analysis_col = '';
 	my $user_analysis_where = '';
 	my $no_meso = '';
+	my $supertag = $etyma_for_tag->[0][0] if @$etyma_for_tag;
+	my $supertag_done = 0;
 	if ($selected_uid && @$etyma_for_tag) {
 		# OK to concatenate the uid into the query since we've made sure it's just digits
 		$user_analysis_col = "(SELECT GROUP_CONCAT(tag_str ORDER BY ind) FROM lx_et_hash WHERE rn=lexicon.rn AND uid=$selected_uid) AS user_an,";
@@ -512,7 +514,6 @@ ORDER BY is_main DESC, e.plgord#;
 		# if there's two columns, we need to make sure the first column
 		# in the superroot section does not contain records tagged with mesoroots,
 		# since those will show up later on and we don't want them to appear twice.
-		my $supertag = $etyma_for_tag->[0][0];
 		$no_meso = "AND lexicon.rn NOT IN (SELECT lexicon.rn FROM lexicon
 			LEFT JOIN lx_et_hash AS leh1 ON (lexicon.rn=leh1.rn AND leh1.uid=8)
 			LEFT JOIN lx_et_hash AS leh2 ON (lexicon.rn=leh2.rn AND leh2.uid=$selected_uid)
@@ -564,6 +565,14 @@ ORDER BY is_main DESC, e.plgord#;
 		}
 	
 		# do entries
+		if ($supertag_done && $no_meso) {
+			# for mesoroots, make sure we don't list items that were in the superroot section
+			$no_meso = "AND lexicon.rn NOT IN (SELECT lexicon.rn FROM lexicon
+				LEFT JOIN lx_et_hash AS leh1 ON (lexicon.rn=leh1.rn AND leh1.uid=8)
+				LEFT JOIN lx_et_hash AS leh2 ON (lexicon.rn=leh2.rn AND leh2.uid=$selected_uid)
+			WHERE (leh1.tag=$e{tag} AND leh2.tag=$supertag))";
+		}
+		$supertag_done = 1;
 		my $recs = $self->dbh->selectall_arrayref(<<EndOfSQL);
 SELECT lexicon.rn,
 	(SELECT GROUP_CONCAT(tag_str ORDER BY ind) FROM lx_et_hash WHERE rn=lexicon.rn AND uid=8) AS analysis,
@@ -582,7 +591,6 @@ WHERE (lx_et_hash.tag = $e{tag}
 GROUP BY lexicon.rn
 ORDER BY languagegroups.ord, languagenames.lgsort, reflex, languagenames.srcabbr, lexicon.srcid
 EndOfSQL
-		$no_meso = ''; # only need this for the first iteration (the superroot).
 		if (@$recs) { # skip if no records
 			collect_lex_notes($self, $recs, $INTERNAL_NOTES, \@footnotes, \$footnote_index, $e{tag});
 			$e{records} = $recs;
