@@ -389,19 +389,50 @@ sub accept : Runmode {
 	my $q = $self->query();
 	my $tag = $q->param('tag');
 	my $uid = $q->param('uid');
-	# make sure our params are actually defined?
 	
+	if ($uid !~ /^\d+$/ || $tag !~ /^\d+$/) {
+		$self->header_add(-status => 400);
+		return "Invalid tag/uid!";
+	}
 	if ($uid == 8) { # prevent accidental deleting of approved tagging
 		$self->header_add(-status => 400);
 		return "Already approved!";
 	}
 	
+	# update the etyma record
 	$self->dbh->do("UPDATE etyma SET uid=8 WHERE tag=?", undef, $tag);
+	my ($old_uid) = $self->dbh->selectrow_array("SELECT uid FROM etyma WHERE tag=$tag");
+	$self->dbh->do("INSERT changelog VALUES (?,?,?,?,?,?,NOW())", undef,
+			   $self->param('uid'), 'etyma', 'uid', $tag, $old_uid, 8) unless $old_uid == 8;
+
+	# GROUP_CONCAT has an upper limit (default 1024 bytes) which can be increased to the server max.
+	# Since we are expecting a long list here, and since the value of the
+	# "IN (...)" is also constrained by the server maximum, increase group_concat_max_len:
+	my (undef, $max_len) = $self->dbh->selectrow_array("SHOW VARIABLES WHERE Variable_name='max_allowed_packet'");
+	die "oops couldn't get max_allowed_packet from mysql" unless $max_len;
+	$self->dbh->do("SET SESSION group_concat_max_len = $max_len");
 	my ($rns) = $self->dbh->selectrow_array("SELECT GROUP_CONCAT(DISTINCT rn) FROM lx_et_hash WHERE uid=? AND tag=?", undef, $uid, $tag);
 	if ($rns) {
+		# figure out changes for the changelog
+		my $changed_recs = $self->dbh->selectall_arrayref(<<END);
+SELECT lexicon.rn,
+	(SELECT GROUP_CONCAT(tag_str ORDER BY ind) FROM lx_et_hash WHERE rn=lexicon.rn AND uid=8) AS analysis,
+	(SELECT GROUP_CONCAT(tag_str ORDER BY ind) FROM lx_et_hash WHERE rn=lexicon.rn AND uid=$uid) AS user_an
+FROM lexicon
+	JOIN lx_et_hash AS leh1 ON (lexicon.rn=leh1.rn AND leh1.uid=8)
+	JOIN lx_et_hash AS leh2 ON (lexicon.rn=leh2.rn AND leh2.uid=$uid)
+WHERE leh2.tag=$tag
+GROUP BY lexicon.rn
+END
+		# bless the tagging
 		$self->dbh->do("DELETE FROM lx_et_hash WHERE uid=8 AND rn IN ($rns)");
 		$self->dbh->do("UPDATE lx_et_hash SET uid=8 WHERE uid=? AND rn IN ($rns)", undef, $uid);
 		# add these changes to the changelog
+		foreach (@$changed_recs) {
+			my ($rn, $old, $new) = @$_;
+			$self->dbh->do("INSERT changelog VALUES (?,?,?,?,?,?,NOW())", undef,
+					   $self->param('uid'), 'lexicon', 'analysis', $rn, $old, $new) unless $old eq $new;
+		}
 		my ($username) = $self->dbh->selectrow_array("SELECT username FROM users WHERE uid=?", undef, $uid);
 		my $oldvals = "uid=$uid ($username)";
 		$rns =~ s/,/, /g;
@@ -515,9 +546,9 @@ ORDER BY is_main DESC, e.plgord#;
 		# in the superroot section does not contain records tagged with mesoroots,
 		# since those will show up later on and we don't want them to appear twice.
 		$no_meso = "AND lexicon.rn NOT IN (SELECT lexicon.rn FROM lexicon
-			LEFT JOIN lx_et_hash AS leh1 ON (lexicon.rn=leh1.rn AND leh1.uid=8)
-			LEFT JOIN lx_et_hash AS leh2 ON (lexicon.rn=leh2.rn AND leh2.uid=$selected_uid)
-			LEFT JOIN etyma AS e2 ON (leh2.tag=e2.tag)
+			JOIN lx_et_hash AS leh1 ON (lexicon.rn=leh1.rn AND leh1.uid=8)
+			JOIN lx_et_hash AS leh2 ON (lexicon.rn=leh2.rn AND leh2.uid=$selected_uid)
+			JOIN etyma AS e2 ON (leh2.tag=e2.tag)
 		WHERE (leh1.tag=$supertag AND e2.supertag=$supertag AND e2.tag != e2.supertag))";
 	}
 	foreach (@$etyma_for_tag) {
@@ -568,8 +599,8 @@ ORDER BY is_main DESC, e.plgord#;
 		if ($supertag_done && $no_meso) {
 			# for mesoroots, make sure we don't list items that were in the superroot section
 			$no_meso = "AND lexicon.rn NOT IN (SELECT lexicon.rn FROM lexicon
-				LEFT JOIN lx_et_hash AS leh1 ON (lexicon.rn=leh1.rn AND leh1.uid=8)
-				LEFT JOIN lx_et_hash AS leh2 ON (lexicon.rn=leh2.rn AND leh2.uid=$selected_uid)
+				JOIN lx_et_hash AS leh1 ON (lexicon.rn=leh1.rn AND leh1.uid=8)
+				JOIN lx_et_hash AS leh2 ON (lexicon.rn=leh2.rn AND leh2.uid=$selected_uid)
 			WHERE (leh1.tag=$e{tag} AND leh2.tag=$supertag))";
 		}
 		$supertag_done = 1;
@@ -582,7 +613,7 @@ SELECT lexicon.rn,
 	languagenames.srcabbr, lexicon.srcid, languagegroups.ord,
 	(SELECT COUNT(*) FROM notes WHERE notes.rn = lexicon.rn) AS num_notes
 FROM lexicon
-	LEFT JOIN lx_et_hash ON (lexicon.rn=lx_et_hash.rn AND (lx_et_hash.uid=8 $user_analysis_where))
+	JOIN lx_et_hash ON (lexicon.rn=lx_et_hash.rn AND (lx_et_hash.uid=8 $user_analysis_where))
 	LEFT JOIN languagenames USING (lgid)
 	LEFT JOIN languagegroups ON (languagenames.grpid=languagegroups.grpid)
 WHERE (lx_et_hash.tag = $e{tag}
