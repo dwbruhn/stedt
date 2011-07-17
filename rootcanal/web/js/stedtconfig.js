@@ -375,12 +375,12 @@ var setup = { // in the form setup.[tablename].[fieldname]
 		'u_recs' : {
 			label: 'u',
 			noedit: true,
-			size: 30,
+			size: 30
 		},
 		'o_recs' : {
 			label: 'o',
 			noedit: true,
-			size: 30,
+			size: 30
 		},
 		'etyma.chapter' : {
 			label: 'ch.',
@@ -500,7 +500,7 @@ var setup = { // in the form setup.[tablename].[fieldname]
 			size: 80,
 			transform: function (v) {
 				return v.replace(/, */g,', ');
-			},
+			}
 		},
 		'languagenames.lgid' : {
 			label:'lgid',
