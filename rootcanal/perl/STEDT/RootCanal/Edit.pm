@@ -137,8 +137,8 @@ sub update : Runmode {
 	}
 
 	my ($tblname, $field, $id, $value, $fake_uid) = ($q->param('tbl'), $q->param('field'),
-		$q->param('id'), decode_utf8($q->param('value')), $q->param('uid2')||0);
-	undef $fake_uid if $fake_uid == $self->param('uid');
+		$q->param('id'), decode_utf8($q->param('value')), $q->param('uid2'));
+	undef $fake_uid if $fake_uid && ($fake_uid == $self->param('uid')); # $fake_uid should be undef for the current user
 	if ($fake_uid && !$self->has_privs(8)) {
 		$self->header_add(-status => 403); # Forbidden
 		return "You are not allowed to edit other people's tags.";
