@@ -7,7 +7,8 @@
 <img src="[% self_base %]img/stedt_rgb.jpg" alt="STEDT Logo" border="0" width="400" height="128"></a>
 <br><br><br>
 <form id="simple_search" method="post">
-<input type="text" name="s" id ="simple_searchinput" size="64" maxlength="128">
+<i>(proto)gloss:</i> <input type="text" name="s" id ="simple_searchinput" size="48" maxlength="128">
+<i>language:</i> <input type="text" name="lg" id ="simple_searchlg" size="32" maxlength="96">
 <input type="submit" name="search" value="Search" >
 <a href="[% self_base %]help.html" target="_blank">Help</a>
 </form>
@@ -21,7 +22,7 @@
 <div id="etyma" style="display:none;">
 <div align="center">[% # search div %]
 <form id="etyma_search" method="post">
-Search etyma: <input name="s" type="text" size="50" id="etyma_searchinput" ><input name="btn" type="submit" value="Search">
+Search etyma: <input name="s" type="text" size="50" id="etyma_searchinput" ><input name="lg" type="hidden" id="etyma_searchlg" ><input name="btn" type="submit" value="Search">
 [%- IF c.has_privs(16) %]<a href="#" onclick="show_advanced_search('etyma')">Advanced Search</a>[% END %]
 </form>
 </div>
@@ -35,7 +36,7 @@ Search etyma: <input name="s" type="text" size="50" id="etyma_searchinput" ><inp
 <div id="lexicon" style="display:none;">
 <div align="center">
 <form id="lexicon_search" method="post">
-Search lexicon: <input name="s" type="text" size="50" id="lexicon_searchinput" ><input name="btn" type="submit" value="Search">
+Search lexicon:&nbsp;&nbsp;<i>gloss:</i> <input name="s" type="text" size="48" id="lexicon_searchinput"> <i>language: </i><input name="lg" type="text" size="32" id="lexicon_searchlg" ><input name="btn" type="submit" value="Search">
 </form>
 </div>
 <div id="lexicon_results"></div>

@@ -2,7 +2,7 @@
 function stedt_simplesearch_init() {
 	function create_searchfn(divname) { return function (e) {
 		new Ajax.Request(baseRef + 'search/' + divname, {
-			parameters: { s : $F(divname + '_searchinput') },
+			parameters: { s : $F(divname + '_searchinput'), lg : $F(divname + '_searchlg')},
 			onSuccess: ajax_make_table,
 			onFailure: function (transport){ alert('Error: ' + transport.responseText); },
 			onComplete: function (transport){ $(divname + '_search').enable(); }

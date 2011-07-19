@@ -78,7 +78,7 @@ sub group : Runmode {
 }
 
 sub searchresults_from_querystring {
-	my ($self, $s, $tbl) = @_;
+	my ($self, $s, $tbl, $lg) = @_;
 	my $t = $self->load_table_module($tbl, 0);
 	my $query = $self->query->new; # for some reason faster than saying "new CGI"? disk was thrashing.
 
@@ -100,6 +100,7 @@ sub searchresults_from_querystring {
 			$query->param('etyma.chapter'=>'9.' . (int(rand 9) + 1));
 		}
 	} elsif ($tbl eq 'lexicon') {
+		$query->param('languagenames.language' => $lg);
 		for my $token (split / /, $s) {
 			if ($token =~ /^\d+$/) {
 				$query->param('analysis' => $token);
@@ -108,7 +109,7 @@ sub searchresults_from_querystring {
 				$query->param('lexicon.gloss' => $token);
 			}
 		}
-		if ($s eq '') {
+		if ($s eq '' && $lg eq '') {
 			$query->param('analysis'=>1764);
 		}
 	}
@@ -124,19 +125,20 @@ sub searchresults_from_querystring {
 sub blah : Runmode { # this sub wants a nicer name
 	my $self = shift;
 	my $s = $self->query->param('s');
+	my $lg = $self->query->param('lg');
 	my $tbl = $self->param('tbl');
 	my $result; # hash ref for the results
 
 	$self->dbh->do("INSERT querylog VALUES (?,?,?,NOW())", undef,
-		$tbl, $s, $ENV{REMOTE_ADDR}) if $s;
+		$tbl, $lg ? "$s {$lg}" : $s, $ENV{REMOTE_ADDR}) if $s || $lg;
 
 	if (defined($s)) {
 		if ($tbl eq 'simple') {
 			$result->{table} = 'simple';
 			$result->{etyma} = $self->searchresults_from_querystring($s, 'etyma');
-			$result->{lexicon} = $self->searchresults_from_querystring($s, 'lexicon');
+			$result->{lexicon} = $self->searchresults_from_querystring($s, 'lexicon', $lg);
 		} elsif ($tbl eq 'lexicon' || $tbl eq 'etyma') {
-			$result = $self->searchresults_from_querystring($s, $tbl);
+			$result = $self->searchresults_from_querystring($s, $tbl, $lg);
 		} else {
 			die "bad table name!";
 		}
