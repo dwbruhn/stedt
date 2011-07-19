@@ -87,7 +87,7 @@ sub searchresults_from_querystring {
 		for my $token (split / /, $s) {
 			if ($token =~ /^\*/) {
 				s/^\*//;
-				$query->param('etyma.protoform' => $_);
+				$query->param('etyma.protoform' => $token);
 			}
 			elsif ($token =~ /^\d+$/) {
 				$query->param('etyma.tag' => $token);
