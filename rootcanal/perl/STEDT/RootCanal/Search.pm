@@ -1,6 +1,7 @@
 package STEDT::RootCanal::Search;
 use strict;
 use base 'STEDT::RootCanal::Base';
+use Encode;
 
 sub extractions : Runmode {
 	my $self = shift;
@@ -83,20 +84,21 @@ sub searchresults_from_querystring {
 	my $query = $self->query->new; # for some reason faster than saying "new CGI"? disk was thrashing.
 
 	# figure out the table and the search terms
+	# and make sure there's a (unicode) letter in there somewhere
 	if ($tbl eq 'etyma') {
 		for my $token (split / /, $s) {
-			if ($token =~ /^\*/) {
-				s/^\*//;
+			if ($token =~ /^\*\p{Letter}/) {
+				$token =~ s/^\*//;
 				$query->param('etyma.protoform' => $token);
 			}
 			elsif ($token =~ /^\d+$/) {
 				$query->param('etyma.tag' => $token);
 			}
-			else {
+			elsif ($token =~ /\p{Letter}/) {
 				$query->param('etyma.protogloss' => $token);
 			}
 		}
-		if ($s eq '') {
+		if (!$query->param) {
 			$query->param('etyma.chapter'=>'9.' . (int(rand 9) + 1));
 		}
 	} elsif ($tbl eq 'lexicon') {
@@ -105,11 +107,11 @@ sub searchresults_from_querystring {
 			if ($token =~ /^\d+$/) {
 				$query->param('analysis' => $token);
 			}
-			else {
+			elsif ($token =~ /\p{Letter}/) {
 				$query->param('lexicon.gloss' => $token);
 			}
 		}
-		if ($s eq '' && $lg eq '') {
+		if (!$query->param) {
 			$query->param('analysis'=>1764);
 		}
 	}
@@ -124,8 +126,8 @@ sub searchresults_from_querystring {
 
 sub blah : Runmode { # this sub wants a nicer name
 	my $self = shift;
-	my $s = $self->query->param('s');
-	my $lg = $self->query->param('lg');
+	my $s = decode_utf8($self->query->param('s'));
+	my $lg = decode_utf8($self->query->param('lg'));
 	my $tbl = $self->param('tbl');
 	my $result; # hash ref for the results
 

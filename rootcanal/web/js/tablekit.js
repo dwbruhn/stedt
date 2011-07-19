@@ -1072,7 +1072,8 @@ TableKit.Editable.CellEditor.prototype = {
 					var rowdata = raw.data[row.id];
 					$A(row.cells).each(function (c,i) {
 						xform = setup[tbl][colheads[i].id].transform;
-						if (xform) c.innerHTML = xform(rowdata[i].escapeHTML(), row.id, rowdata, i);
+						c.innerHTML = xform ? xform(rowdata[i].escapeHTML(), row.id, rowdata, i)
+											: rowdata[i].escapeHTML();
 					});
 					if (setup[tbl]._postprocess) {
 						var fn = setup[tbl]._postprocess;
@@ -1080,8 +1081,13 @@ TableKit.Editable.CellEditor.prototype = {
 					}
 				} else {
 					xform = TableKit.tables[table.id].editAjaxTransform; // dunno why the TableKit.option(...) call doesn't work...
+					// n.b.: the xform here in the "else" clause is a generic fn for the entire table and is likely defined all the time;
+					// this is different from the xform in the "if" directly above, which is per-column and may be undefined.
+					// At some point this confusing "generic" xform mechanism should probably be gotten rid of, since it's superseded by the per-column xforms used by the raw data.
 					if (xform) {
 						cell.innerHTML = xform(tbl, head.id, row.id, text.escapeHTML(), raw ? raw.data[row.id] : null, raw ? raw.cols[head.id] : 0);
+					} else {
+						cell.innerHTML = text.escapeHTML();
 					}
 				}
 				// restore possible hanging ident
