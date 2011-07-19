@@ -182,7 +182,9 @@ function show_supporting_forms(tag) {
 function SylStation() {
 	var tonechars = "⁰¹²³⁴⁵⁶⁷⁸0-9ˊˋ";
 	var delimchars = "-=≡≣+.,;/~◦⪤ ";
-	var rebytonepostfix = "([^" + delimchars + tonechars + "]+[" + tonechars + "]+)([" + delimchars + "]*)";
+	var rebytonepostfix = "([^" + delimchars + tonechars + "]+[" + tonechars + "]+(?:\\|$)?)([" + delimchars + "]*)";
+		// special case "(?:\\|$)?" here to handle trailing overriding delimiter
+		// (non-grouping | at end of string; it's double-escaped since the backslash needs to show up in the regex)
 	var rebytoneprefix = "([" + tonechars + "]{1,2}[^" + delimchars + tonechars + "]+)([" + delimchars + "]*)";
 	var rebydelims = "([^" + delimchars + "]+)([" + delimchars + "]*)";
 
@@ -211,6 +213,11 @@ function SylStation() {
 				syl_ary.push(tmp_syl);
 			}
 			delim_ary.push(tmp_delim.replace(/◦/,'&thinsp;')); // STEDT delim -> thin space
+			// if this &thinsp; shows up in the interface, it's because
+			// it was overridden by an overriding delimiter. No one should
+			// be overriding a STEDT delimiter; they can just delete it.
+			// So consider this a feature of sorts... STEDT delims get converted
+			// to an escaped HTML char code if they're overridden!
 		}
 		syl_ary[0] = syl_ary[0] || '';
 		if (is_suffix) {
@@ -534,7 +541,7 @@ var setup = { // in the form setup.[tablename].[fieldname]
 // 							+ '); return false;"'
 // 							+ '" class="r' + tags[i] + '">'
 // 							+ s.escapeHTML() + '</a>' + delim
-						: '<span class="r' + tags[i] + '">' + s + '</span>' + delim;
+						: '<span class="r' + tags[i] + '">' + s.escapeHTML() + '</span>' + delim;
 				});
 				return a.join('');
 			}

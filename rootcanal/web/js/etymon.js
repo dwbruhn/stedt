@@ -21,7 +21,7 @@ if (stedt_other_username) {
 			var an2 = rec[2] || '';
 			var tags = analysis.split(',');
 			var t2 = an2.split(',');
-			var result = SYLSTATION.syllabify(v);
+			var result = SYLSTATION.syllabify(v.unescapeHTML());
 			var a = result[0].map(function (s,i) {
 				var delim = result[1][i] || '&thinsp;';
 				var makelink = !skipped_roots[tags[i]];
@@ -37,8 +37,8 @@ if (stedt_other_username) {
 				return (parseInt(tags[i], 10) && makelink)
 					? '<a href="' + baseRef + 'etymon/' + tags[i] + '" target="stedt_etymon"'
 						+ syl_class + '>'
-						+ s + '</a>'  + delim
-					: '<span' + syl_class + '>' + s + '</span>' + delim;
+						+ s.escapeHTML() + '</a>'  + delim
+					: '<span' + syl_class + '>' + s.escapeHTML() + '</span>' + delim;
 			});
 			return a.join('');
 	};
