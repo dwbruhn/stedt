@@ -46,8 +46,7 @@ sub new {
     my $self = {
 	'regexes' => {
 	    'bytonepostfix' =>
-		qq<([^$tonchar]+[$tonchar]+)> . 
-		qq<([$delim]*)>,
+		qr<([^$delim$tonchar]+[$tonchar]+(?:\|$)?)([$delim]*)>,
 	    'bytoneprefix' =>
 	        qq<([$tonchar]{1,2}[^$delim$tonchar]+)> .
 	        	# remember delim comes first because it starts with hyphen!
