@@ -374,7 +374,7 @@ TableKit.Rows = {
 	addStripeClass : function(t,r,i) {
 		t = t || r.up('table');
 		var op = TableKit.option('rowEvenClass rowOddClass', t.id);
-		var css = ((i+1)%2 === 0 ? op[0] : op[1]);
+		var css = (i&1 ? op[0] : op[1]); // using "& 1" is faster than "% 2", apparently
 		// using prototype's assClassName/RemoveClassName was not efficient for large tables, hence:
 		var cn = r.className.split(/\s+/);
 		var newCn = [];

@@ -81,7 +81,7 @@ sub group : Runmode {
 sub searchresults_from_querystring {
 	my ($self, $s, $tbl, $lg) = @_;
 	my $t = $self->load_table_module($tbl, 0);
-	my $query = $self->query->new; # for some reason faster than saying "new CGI"? disk was thrashing.
+	my $query = $self->query->new(''); # for some reason faster than saying "new CGI"? disk was thrashing.
 
 	# figure out the table and the search terms
 	# and make sure there's a (unicode) letter in there somewhere
@@ -98,11 +98,13 @@ sub searchresults_from_querystring {
 				$query->param('etyma.protogloss' => $token);
 			}
 		}
-		if (!$query->param) {
+		if (!$s) {
 			$query->param('etyma.chapter'=>'9.' . (int(rand 9) + 1));
+		} elsif (!$query->param) {
+			$query->param('etyma.tag' => 2436);
 		}
 	} elsif ($tbl eq 'lexicon') {
-		$query->param('languagenames.language' => $lg);
+		$query->param('languagenames.language' => $lg) if $lg =~ /\p{Letter}/;
 		for my $token (split / /, $s) {
 			if ($token =~ /^\d+$/) {
 				$query->param('analysis' => $token);
@@ -111,8 +113,10 @@ sub searchresults_from_querystring {
 				$query->param('lexicon.gloss' => $token);
 			}
 		}
-		if (!$query->param) {
+		if (!$s && !$lg) {
 			$query->param('analysis'=>1764);
+		} elsif (!$query->param) {
+			$query->param('analysis'=>5035);
 		}
 	}
 

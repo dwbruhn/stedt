@@ -41,8 +41,11 @@ logged in as <b>[% user %]</b>
 <option value="[% self_url %]/account">Account</option>
 </select>
 </form>
-  <a href="[% self_url %]/logout">logout</a>
+  <a href="[% self_url %]/logout">log out</a>
 [% ELSE # user -%]
+[% IF c.param('https') -%]
+<a href="[% self_url %]/account/login?url=[% c.query.url('-path',1,'-query',1) | url %]">log in</a>
+[% END -%]
 <script>
 var stedtuserprivs = 0;
 [% UNLESS suppress_header %]$('header').show();

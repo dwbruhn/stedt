@@ -6,7 +6,11 @@ sub main : StartRunmode {
 	my $self = shift;
 	if (my $err = $self->require_privs(1)) { return $err; }
 	
-	return $self->tt_process("admin.tt");
+	my %h;
+	if ($self->has_privs(16)) {
+		$h{num_sessions} = $self->dbh->selectrow_array("SELECT COUNT(*) FROM sessions");
+	}
+	return $self->tt_process("admin.tt", \%h);
 }
 
 sub changes : Runmode {
@@ -52,5 +56,18 @@ sub listpublic : Runmode {
 	return "[" . join(',', @$a) . "]";
 }
 
+sub expire_sessions : Runmode {
+	my $self = shift;
+	if (my $err = $self->require_privs(16)) { return $err; }
+	local *STDOUT; # override STDOUT since ExpireSessions stupidly prints to it
+	open(STDOUT, ">", \my $tmp) or die "couldn't open memory file: $!";
+	require CGI::Session::ExpireSessions;
+	import CGI::Session::ExpireSessions;
+	CGI::Session::ExpireSessions->new(dbh=>$self->dbh,
+		delta=>2551443,
+		verbose=>1)->expire_db_sessions;
+	# mean length of synodic month is approximately 29.53059 days
+	return $tmp;
+}
 
 1;

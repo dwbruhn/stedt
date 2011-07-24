@@ -375,7 +375,7 @@ var setup = { // in the form setup.[tablename].[fieldname]
 			size: 50,
 			transform: function (v,key) {
 				 return v != 0
-				 	? '<a href="#" onclick="show_supporting_forms(' + key + ')">' + v + '&nbsp;r\'s</a>'
+				 	? '<a href="#" onclick="return show_supporting_forms(' + key + ')">' + v + '&nbsp;r\'s</a>'
 				 	: v + '&nbsp;r\'s';
 			}
 		},

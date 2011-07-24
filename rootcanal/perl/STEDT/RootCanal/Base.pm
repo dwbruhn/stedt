@@ -43,6 +43,7 @@ sub cgiapp_init {
 	# if we are, send a different session id over the secure connection
 	# for testing purposes, we can ignore presence of secure connection
 	my $secure = $self->cfg('ignore_ssl') ? 1: ($self->query->cookie('stsec') ? 1 : 0);
+	$self->param('https'=>$secure);
 
 	# set up the session, telling it to use the above database connection
 	# to store the session info.

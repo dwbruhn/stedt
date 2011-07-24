@@ -28,6 +28,9 @@ Accounts:
 Tools:
 <ul>
 <li><a href="[% self_url %]/admin/listpublic">list of public etyma tag #s</a></li>
+[% IF c.has_privs(16) -%]
+<li><a href="[% self_url %]/admin/expire_sessions">expire sessions older than 1 month</a> ([% num_sessions %] currently in sessions table)</li>
+[% END -%]
 </ul>
 
 </body>
