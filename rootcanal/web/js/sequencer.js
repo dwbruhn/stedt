@@ -75,6 +75,11 @@ var handle_etymon_move = function (c) {
 		}
 	} else {
 		reletter(c);
+		Sortable.create(c.id, {tag:'div', only:'etymon', scroll:window,
+			containment:$$(".etymon-container,.uncontainer"),
+			dropOnEmpty:true,
+			onUpdate:handle_etymon_move
+		});
 	}
 };
 
