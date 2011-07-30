@@ -47,15 +47,31 @@ my %groupno2name = EtymaSets::groupno2name($dbh);
 my $syls = SyllabificationStation->new();
 binmode(STDERR, ":utf8");
 
+# add warning about unsequenced items
+my $hidden_etyma = $dbh->selectall_arrayref(
+	qq#SELECT e.tag, e.protoform, e.protogloss, e.plg
+		FROM `etyma` AS `e` JOIN `etyma` AS `super` ON e.supertag = super.tag
+		WHERE e.uid=8 AND super.chapter = '$fasc.$chap' AND super.sequence < 1#);
+if (@$hidden_etyma) {
+	print STDERR "Warning: The following etyma have a sequence number of 0\nand will not be included:\n";
+	for my $e (@$hidden_etyma) {
+		print STDERR join("\t", map {decode_utf8($_)} @$e), "\n";
+	}
+	print "Do you want to continue? [Y/n] ";
+	if (<STDIN> =~ /^n/i) {
+		exit(1);
+	}
+}
+
 # build etyma hash
 print STDERR "building etyma data...\n";
 my %tag2info; # this is (and should only be) used inside xml2tex, for looking up etyma refs
-for (@{$dbh->selectall_arrayref("SELECT tag,chapter,printseq,protoform,protogloss FROM etyma")}) {
+for (@{$dbh->selectall_arrayref("SELECT tag,chapter,sequence,protoform,protogloss FROM etyma")}) {
 	my ($tag,$chapter,@info) = map {decode_utf8($_)} @$_;
 	if ($chapter =~ /^9.\d$/) {
 		push @info, 'TBRS'; # "volume" info to print for cross refs in the notes
 	} elsif ($chapter ne "$fasc.$chap") {
-		$info[0] = ''; # make printseq empty if not in the current extraction
+		$info[0] = ''; # make sequence empty if not in the current extraction
 	}
 	$info[1] = '*' . $info[1];
 	$info[1] =~ s/⪤} +/⪤} */g;
@@ -89,9 +105,9 @@ my $chapter_notes = [map {xml2tex(decode_utf8($_))} @{$dbh->selectcol_arrayref(
 
 my @etyma; # array of infos to be passed on to the template
 my $etyma_in_chapter = $dbh->selectall_arrayref(
-	qq#SELECT e.tag, e.printseq, e.protoform, e.protogloss, e.plg, e.hptbid, e.tag=e.supertag AS is_main
+	qq#SELECT e.tag, e.sequence, e.protoform, e.protogloss, e.plg, e.hptbid, e.tag=e.supertag AS is_main
 		FROM `etyma` AS `e` JOIN `etyma` AS `super` ON e.supertag = super.tag
-		WHERE e.uid=8 AND e.chapter = '$fasc.$chap' AND e.printseq != ''
+		WHERE e.uid=8 AND super.chapter = '$fasc.$chap' AND super.sequence >= 1
 		ORDER BY super.sequence, e.plgord#);
 
 
@@ -101,8 +117,13 @@ foreach (@$etyma_in_chapter) {
 	push @etyma, \%e;
 
 	# heading stuff
-	@e{qw/tag printseq protoform protogloss plg hptbid is_main/}
+	@e{qw/tag seq protoform protogloss plg hptbid is_main/}
 		= map {escape_tex(decode_utf8($_))} @$_;
+
+	# prettify sequence number
+	$e{seq} =~ s/\.0$//;
+	$e{seq} =~ s/\.(\d)/chr(96+$1)/e;
+
 	# $e{plg} = '' unless $e{plg} eq 'IA';
 	$e{plg} = $e{plg} eq 'PTB' ? '' : "$e{plg}";
 
@@ -320,9 +341,11 @@ sub _tag2info {
 	my ($t, $s) = @_;
 	my $a_ref = $tag2info{$t};
 	return "\\textit{[ERROR! Dead etyma ref #$t!]}" unless $a_ref;
-	my ($printseq, $pform, $pgloss, $volume) = @{$a_ref};
-	if ($printseq) { # if the root is in chapter 9, then put the print ref
-		$t = "($printseq)";
+	my ($seq, $pform, $pgloss, $volume) = @{$a_ref};
+	if ($seq) { # if the root is in current extraction, put the print ref
+		$seq =~ s/\.0$//;
+		$seq =~ s/\.(\d)/chr(96+$1)/e;
+		$t = "($seq)";
 		$t = "$volume $t" if $volume;
 	} else {
 		my ($hptb_page) =

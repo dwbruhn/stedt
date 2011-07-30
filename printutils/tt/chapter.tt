@@ -69,13 +69,13 @@
 [% FOREACH etyma -%]
 \vspace{1em}
 {\large \parindent=-1em 
-[%- IF is_main %]([% printseq %])[% END -%]
+[%- IF is_main %]([% seq %])[% END -%]
  \hspace{\stretch{1}} [% plg %] [% protoform %]\hspace{\stretch{1}}\textbf{[% protogloss %]}
 \textit{\tiny[\#[% tag %]]}}
 \nopagebreak
 [% IF is_main -%]
-\addcontentsline{toc}{section}{([% printseq %]) [% plg %] [% protoform_text %] [% protogloss %]}
-% \markright{([% printseq %]) [\#[% tag %]] [% plg %] [% protoform %] [% protogloss %]}
+\addcontentsline{toc}{section}{([% seq %]) [% plg %] [% protoform_text %] [% protogloss %]}
+% \markright{([% seq %]) [\#[% tag %]] [% plg %] [% protoform %] [% protogloss %]}
 [% ELSE -%]
 \addcontentsline{toc}{subsection}{[% plg %] [% protoform_text %] [% protogloss %]}
 [% END -%]
