@@ -288,14 +288,18 @@ sub save_value {
 	die "bad field name or insufficient privileges!"
 		unless $self->{field_editable_privs}{$field} & $self->{privs}
 			|| $self->in_editable($field); # this will help prevent sql injection attacks
-	unless ($self->in_calculated_fields($field)) { # don't do this for pseudo-fields
+
+	my $continue = 1;
+	my $sub = $self->save_hooks($field);
+	$continue = $sub->($id, $value) if $sub;
+	# the sub will return a false value if we are to skip the next (saving) step
+	# (e.g. if it took care of it already)
+
+	unless ($self->in_calculated_fields($field) || !$continue) { # don't do this for pseudo-fields
 		my $update = qq{UPDATE $self->{table} SET $field=? WHERE $self->{key}=?};
 		my $update_sth = $self->{dbh}->prepare($update);
 		$update_sth->execute($value, $id);
 	}
-
-	my $sub = $self->save_hooks($field);
-	$sub->($id, $value) if $sub;
 }
 
 # take a CGI object with fields as params.

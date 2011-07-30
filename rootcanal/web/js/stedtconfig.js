@@ -19,10 +19,17 @@ makesubroot = function(dragged, destination, e) {
 	src = dragged.identify().sub('tag',''); // get just the numbers (id is "tag###")
 	dst = destination.identify().sub('tag','');
 	var srcsuper = data[src][cols['etyma.supertag']];
-	new Ajax.Request(baseRef + 'makesubroot/' + src + '/' + dst + '/' + srcsuper, {
+	new Ajax.Request(baseRef + 'update', {
+		parameters: {
+			tbl:'etyma',
+			field:'etyma.supertag',
+			id:src,
+			value: srcsuper == dst ? src : dst
+		},
 		onSuccess: function(transport) {
-			if (srcsuper == dst) {
-				// if it's already the subroot of the destination, 
+			if (srcsuper == dst || src == transport.responseText) {
+				// if it's already the subroot of the destination,
+				// (or if the call failed for whatever reason, in which case we should get the "src" number back)
 				// make it a main root, and resort.
 				data[src][cols['etyma.supertag']] = src;
 				destination.up('tbody').insert(dragged.up('tr'));
@@ -42,12 +49,16 @@ makesubroot = function(dragged, destination, e) {
 	});
 };
 var make_draggable_id = function (obj, scrollElement) { // scrollElement is the containing element which should be scrolled, if any
-	new Draggable(obj, { revert:true, constraint:'vertical', scroll:scrollElement });
+	var moved = 0;
+	new Draggable(obj, { revert:true, constraint:'vertical', scroll:scrollElement,
+		change: function () { moved = 1; }
+	});
 	Droppables.add(obj,
 	  { hoverclass : 'hoverdrop',
 		accept : 'tagid',
 		onDrop : makesubroot
 	  } );
+	obj.onclick = function (e) { if (moved) { e.stop(); moved = 0; } }; // don't follow the link if it was dragged
 };
 
 function show_notes(rn) {
@@ -351,13 +362,14 @@ var setup = { // in the form setup.[tablename].[fieldname]
 			};
 		},
 		'etyma.tag' : {
-			label: 'TAG',
+			label: '#',
 			noedit: true,
-			hide: !(stedtuserprivs & 1),
 			size: 40,
 			transform: function (v) {
-				return '<span id="tag' + v
-					+ '" class="tagid">' + v + '</span>';
+				var link = '<a href="' + baseRef + 'etymon/' + v
+						+ '" target="stedt_etymon">' + (stedtuserprivs ? '' : '#') + v + '</a>';
+				return '<span id="tag' + v + '" class="tagid">'
+					+ (link || v) + '</span>';
 			}
 		},
 		'etyma.supertag' : {
@@ -427,14 +439,8 @@ var setup = { // in the form setup.[tablename].[fieldname]
 		'num_notes' : {
 			label: 'notes',
 			noedit: true,
-			size: 150,
-			transform: function (v,key) {
-				return '<a href="' + baseRef + 'etymon/' + key + '" target="stedt_etymon">'
-					+ v + '&nbsp;note' + (v == 1 ? '' : 's')
-					+ '</a>';
-			}
-//also make sure non-logged in users can't add notes (take care of "0" case)
-
+			hide: !(stedtuserprivs & 1),
+			size: 70
 		},
 		'etyma.xrefs' : {
 			label: 'xrefs',
@@ -447,14 +453,17 @@ var setup = { // in the form setup.[tablename].[fieldname]
 		'etyma.sequence'  : {
 			label: 'seq',
 			noedit: true,
-			size: 55
-		},
-		'etyma.printseq'  : {
-			label: '(#)',
 			size: 50,
-			noedit: !(stedtuserprivs & 16),
-			transform: function (v) {
-				if (v === '') return '';
+			transform: function (v,k,rec,n) {
+				if (v < 1) return '';
+				v = v.sub(/\.?0+$/, '');
+				v = v.sub(/\.([1-9])/, function () {
+					return String.fromCharCode(96+parseInt(RegExp.$1,10));
+				});
+				if (stedtuserprivs & 8 && rec[n-1]) {
+					v = '<a href="' + baseRef + 'admin/seq?c=' + rec[n-1]
+					+ '" target="stedt_sequencer">' + v + '</a>'
+				}
 				return '(' + v + ')';
 			}
 		},

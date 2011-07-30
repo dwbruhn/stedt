@@ -163,11 +163,14 @@ sub update : Runmode {
 		}
 
 		$t->save_value($field, $value, $id);
+		$value = $t->get_value($field, $id); # fetch the new value in case it's not quite the same
 		if ($fake_uid) {
 			$field = "other_an:$fake_uid";
 		}
-		$self->dbh->do("INSERT changelog VALUES (?,?,?,?,?,?,NOW())", undef,
-			$self->param('uid'), $tblname, $field =~ /([^.]+)$/, $id, $oldval || '', $value); # $oldval might be undefined (and interpreted as NULL by mysql)
+		if ($oldval ne $value) {
+			$self->dbh->do("INSERT changelog VALUES (?,?,?,?,?,?,NOW())", undef,
+				$self->param('uid'), $tblname, $field =~ /([^.]+)$/, $id, $oldval || '', $value); # $oldval might be undefined (and interpreted as NULL by mysql)
+		}
 		return $value;
 	} else {
 		$self->header_add(-status => 403); # Forbidden
@@ -228,21 +231,6 @@ sub single_record : Runmode {
 		result => $result,
 		cols => $cols
 	});
-}
-
-sub makesubroot : Runmode {
-	my $self = shift;
-	if (my $err = $self->require_privs(1)) { return $err; }
-	my $tag = $self->param('src');
-	my $dst = $self->param('dst');
-	my $supertag = $self->param('srcsuper');
-	my $newsuper = ($supertag eq $dst) ? $tag : $dst;
-	$self->dbh->do("UPDATE etyma SET supertag=? WHERE tag=?", undef, $newsuper, $tag);
-
-	# update successful! now update the "changes" table
-	$self->dbh->do("INSERT changelog VALUES (?,?,?,?,?,?,NOW())", undef,
-		$self->param('uid'), 'etyma', 'supertag', $tag, $supertag, $newsuper);
-	return '';
 }
 
 1;

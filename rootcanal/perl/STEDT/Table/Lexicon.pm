@@ -199,6 +199,7 @@ $t->save_hooks(
 		my $update = qq{UPDATE lexicon SET analysis=? WHERE rn=?};
 		my $update_sth = $dbh->prepare($update);
 		$update_sth->execute($s, $rn);
+		return 0;
 	},
 	'user_an' => sub {
 		my ($rn, $s) = @_;
@@ -211,6 +212,7 @@ $t->save_hooks(
 			$sth->execute($rn, $tag, $index, $tag_str, $uid);
 			$index++;
 		}
+		return 0;
 	}
 );
 

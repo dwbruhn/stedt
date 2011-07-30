@@ -10,15 +10,15 @@ $t->query_from(q|etyma JOIN `etyma` AS `super` ON etyma.supertag = super.tag LEF
 $t->order_by('super.chapter, super.sequence, etyma.plgord');
 $t->fields('etyma.tag',
 	'etyma.supertag',
-	'etyma.printseq' ,
 	'(SELECT COUNT(DISTINCT rn) FROM lx_et_hash WHERE tag=etyma.tag AND uid=8) AS num_recs',
 	($uid ? "(SELECT COUNT(DISTINCT rn) FROM lx_et_hash WHERE tag=etyma.tag AND uid=$uid) AS u_recs" : ()),
 	($uid ? "(SELECT COUNT(DISTINCT rn) FROM lx_et_hash WHERE tag=etyma.tag AND uid !=8 AND uid != $uid) AS o_recs" : ()),
-	'etyma.chapter', 'etyma.protoform', 'etyma.protogloss',
+	'etyma.chapter',
+	'etyma.sequence',
+	'etyma.protoform', 'etyma.protogloss',
 	'etyma.plg', 'etyma.plgord',
 	'etyma.notes', 'etyma.hptbid',
 	'(SELECT COUNT(*) FROM notes WHERE tag=etyma.tag) AS num_notes',
-	'etyma.sequence' ,
 	'etyma.xrefs',
 	'etyma.allofams' ,
 	'etyma.possallo' ,
@@ -27,13 +27,13 @@ $t->fields('etyma.tag',
 );
 $t->field_visible_privs(
 	'etyma.supertag' => 1,
-	'etyma.chapter' => 1,
+	'etyma.chapter' => 2,
 	'etyma.plg' => 1,
 	'etyma.notes' => 1,
 	'etyma.hptbid' => 1,
 	'etyma.xrefs' => 1,
 	'etyma.exemplary' => 1,
-	'etyma.sequence'  => 1,
+	'etyma.sequence'  => 2,
 	'etyma.possallo'  => 1,
 	'etyma.allofams'  => 1,
 	'etyma.public' => 1,
@@ -45,14 +45,13 @@ $t->searchable('etyma.tag',
 	'num_recs',
 	'etyma.chapter',
 	'etyma.protoform', 'etyma.protogloss',
-	'etyma.plg', 'etyma.notes', 'etyma.printseq',
+	'etyma.plg', 'etyma.notes',
 	'etyma.xrefs',#'etyma.possallo','etyma.allofams'	# search these and tagging note and notes DB before deleting records. Also switch to OR searching below.
 	'num_notes',
 	'etyma.public',
 );
 $t->field_editable_privs(
 	'etyma.supertag' => 1,
-	'etyma.printseq' => 16,
 	'etyma.sequence' => 16,
 	'etyma.chapter' => 1,
 	'etyma.protoform' => 1,
@@ -88,7 +87,6 @@ $t->wheres(
 	'etyma.plg'	=> sub {my ($k,$v) = @_; $v = '' if $v eq '0'; "$k LIKE '$v'"},
 	'etyma.chapter' => sub { my ($k,$v) = @_; $v eq '0' ? "$k=''" : "$k LIKE '$v'" },
 	'etyma.protogloss'	=> 'word',
-	'etyma.printseq'=> sub { my ($k,$v) = @_; "$k RLIKE '^${v}[abc]*\$'" },
 	'etyma.hptbid' => sub {
 		my ($k,$v) = @_;
 		if ($v eq '0') {
@@ -100,14 +98,6 @@ $t->wheres(
 );
 
 $t->save_hooks(
-	'etyma.printseq' => sub {
-		my ($id, $value) = @_;
-		# simultaneously update sequence fld
-		my ($num, $c) = $value =~ /^(\d+)(.*)/;
-		$c = ord($c) - ord('a') + 1 if $c;
-		my $sth = $dbh->prepare(qq{UPDATE etyma SET etyma.sequence=? WHERE etyma.tag=?});
-		$sth->execute("$num.$c", $id);
-	},
 	'etyma.hptbid' => sub {
 		my ($tag, $s) = @_;
 		# simultaneously update et_hptb_hash
@@ -118,6 +108,7 @@ $t->save_hooks(
 			$sth->execute($tag, $id, $index) if ($id =~ /^\d+$/);
 			$index++;
 		}
+		return 1;
 	},
 	'etyma.plg' => sub {
 		my ($id, $value) = @_;
@@ -133,6 +124,7 @@ $t->save_hooks(
 		
 		my $sth = $dbh->prepare(qq{UPDATE etyma SET etyma.plgord=? WHERE etyma.tag=?});
 		$sth->execute($i, $id);
+		return 1;
 	},
 	# this is really more of an "add" hook, not a save hook,
 	# but the tag will presumably only ever be set when adding a new record
@@ -143,30 +135,17 @@ $t->save_hooks(
 		my $sth = $dbh->prepare(qq{UPDATE etyma SET supertag=tag,uid=? WHERE tag=?});
 		$sth->execute($uid, $id);
 	},
+	'etyma.supertag' => sub {
+		my ($id, $value) = @_;
+		# make sure supertag is a valid value
+		unless ($dbh->selectrow_array("SELECT COUNT(*) FROM etyma WHERE tag=?", undef, $value)) {
+			$value = $id; # otherwise set supertag = tag
+		}
+		my $sth = $dbh->prepare(qq{UPDATE etyma SET supertag=? WHERE tag=?});
+		$sth->execute($value, $id);
+		return 0;
+	},
 );
-$t->footer_extra(sub {
-	my $cgi = shift;
-	# special utility to renumber printseq
-    print $cgi->start_form(-onsubmit=><<EOF); # escape \\ once for perl, once for js
-var x = document.getElementById('update_form').elements;
-var r = new RegExp('\\\\d+', 'g');
-var n = document.getElementById('startfrom').value;
-var old_n = 0;
-for (i=0; i< x.length; i++) {
-	if (x[i].name.match(/^etyma.printseq/)) {
-		var a = x[i].value.match(/\\d+/); if (old_n == 0) old_n = a[0];
-		if (a[0] != old_n) n++;
-		x[i].value = x[i].value.replace(r,n)
-		old_n = a[0];
-	}
-}
-return false;
-EOF
-	print "starting from ", $cgi->textfield(-id=>'startfrom',-name =>'startfrom', -size =>4 ),
-		"... ",
-		$cgi->submit(-name=>'Renumber printseq');
-	print $cgi->end_form;
-});
 
 # Add form stuff
 $t->addable(
@@ -177,7 +156,6 @@ $t->addable(
 	'etyma.plg',
 	'etyma.notes',
 	'etyma.hptbid',
-	'etyma.printseq' ,
 );
 $t->add_form_items(
 	'etyma.tag' => sub {
