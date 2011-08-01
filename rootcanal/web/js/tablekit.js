@@ -532,9 +532,11 @@ TableKit.Sortable = {
 			if(cell.id && TableKit.Sortable.types[cell.id]) {
 				t = cell.id;
 			}
+			if(!t) {
   			t = $w(cell.className).detect(function(n){ // then look for a data type classname on the heading row cell
   				return (TableKit.Sortable.types[n]) ? true : false;
   			});
+			}
 			if(!t) {
 				var rows = TableKit.getBodyRows(table);
 				cell = rows[0].cells[index]; // grab same index cell from body row to try and match data type
@@ -583,7 +585,7 @@ TableKit.Sortable.Type.compare = function(a,b) {
 
 TableKit.Sortable.addSortType(
 	new TableKit.Sortable.Type('number', {
-		pattern : /^[-+]?[\d]*\.?[\d]+(?:[eE][-+]?[\d]+)?/,
+		pattern : /^[-+]?[\d]*\.?[\d]+(?:[eE][-+]?[\d]+)?$/,
 		normal : function(v) {
 			// This will grab the first thing that looks like a number from a string, so you can use it to order a column of various srings containing numbers.
 			v = parseFloat(v.replace(/^.*?([-+]?[\d]*\.?[\d]+(?:[eE][-+]?[\d]+)?).*$/,"$1"));
