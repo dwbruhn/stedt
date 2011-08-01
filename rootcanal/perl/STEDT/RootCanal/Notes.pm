@@ -707,6 +707,7 @@ sub collect_lex_notes {
 				$rec->[-1] .= ' ' . $$i++;
 			}
 		}
+		$rec->[-1] ||= '0';
 	}
 }
 

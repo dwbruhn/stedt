@@ -1,7 +1,7 @@
 /* Copyright (c) 2007 Andrew Tetlaw & Millstream Web Software
 * http://www.millstream.com.au/view/code/tablekit/
 * Version: 1.3b 2008-03-23
-* modified by Dominic Yu
+* modified by Dominic Yu; assumes Prototype 1.6 or later
 * 
 * Permission is hereby granted, free of charge, to any person
 * obtaining a copy of this software and associated documentation
@@ -24,13 +24,39 @@
 * SOFTWARE.
 */
 
-// Use the TableKit class constructure if you'd prefer to init your tables as JS objects
-// 1. If you use this style, the syntax is
-//  	var table = new TableKit(table, {options});
+/* TableKit is coded in an interesting way. There is a global TableKit object
+(it happens to also be a Class, made by Prototype) which basically acts
+as a namespace for a whole bunch of functions.
 
-// 2. Alternatively, set classes on your tables to auto-initialize tables. See last line.
-// 3. You can also initialize manually, with this syntax:
-//  	TableKit.Sortable.init(table, {options});
+There are also a bunch of options in the global TableKit.options hash.
+All options can be specific per-table, but options are loaded dynamically:
+if it can't find a table-specific setting, it will default to the global ones,
+except for sortable/editable/resizable (see "register :"), which are set to false.
+
+On dom:loaded, TableKit will look for tables which have class "sortable"
+(this class name can be customized, and in fact you can have a whole list of
+different classes that will init for sortable/editable/resizable).
+
+You can suppress this by setting the global TableKit.options.autoLoad to false.
+(The "load" method will still run, but it will end up doing nothing.)
+Note that you can also suppress autoloading of individual functions
+(sortable, editable, resizable) by setting those options to false. This does
+not seem useful, since if you didn't want it, you wouldn't have put the classes
+on in the first place, right?
+
+In addition to (or instead of, if you suppress it) using this automatic
+initialization, you can init individual tables manually:
+TableKit.Sortable|Editable|Resizable.init(table, {options}).
+
+Or you can use the class interface: new TableKit(table, {options}); but this
+is really just a wrapper around "manual" method, and all the options are still
+stored in the global TableKit.tables hash. The number of methods defined
+for the class is also rather paltry, and they're all simple wrappers around
+the respective functions in the TableKit.Xxx namespace.
+The advantage, of course, is that it's a simpler interface, and perhaps
+this is the way to go, assuming we improve the data storage/options problem.
+
+*/
 
 // this creates a class (i.e. a function you can call "new" on)
 // whose prototype includes the following functions.
@@ -38,7 +64,7 @@ var TableKit = Class.create({
 	initialize : function(elm, options) {
 		var table = $(elm);
 		if (table.tagName !== "TABLE") return; // make sure it *is* a table element
-		TableKit.register(table,Object.extend(TableKit.options,options || {}));
+		TableKit.register(table,options);
 		this.id = table.id;
 		var op = TableKit.option('sortable resizable editable', this.id);
 		if(op.sortable) {
@@ -62,21 +88,20 @@ var TableKit = Class.create({
 	}
 });
 
-// this adds attributes directly to the TableKit class!
+// this adds attributes directly to the TableKit object!
 // the global TableKit class-cum-object stores an array of table infos
 // in the "tables" attribute.
 // the structure of this info object is initialized in "register"
 // and contains a copy of all the default options.
-// the "register" call in the initializer above seems flawed because it calls
-// Object.extend() directly on the global Tablekit.options object, rather than
-// making a copy first.
+// Yes, the info object is a subset of the options object, plus a 'dom' attribute.
+// {dom:{head:null,rows:null,cells:{}}
 
 Object.extend(TableKit, {
 	getBodyRows : function(table) {
 		table = $(table);
 		var id = table.id;
 		if(!TableKit.tables[id].dom.rows) {
-			TableKit.tables[id].dom.rows = (table.tHead && table.tHead.rows.length > 0) ? $A(table.tBodies[0].rows) : $A(table.rows).without(table.rows[0]);
+			TableKit.tables[id].dom.rows = (table.tHead && table.tHead.rows.length > 0) ? $A(table.tBodies[0].rows) : $A(table.rows).slice(1);
 		}
 		return TableKit.tables[id].dom.rows;
 	},
@@ -120,12 +145,9 @@ Object.extend(TableKit, {
 			table.id = "tablekit-table-" + TableKit._getc();
 		}
 		var id = table.id;
-		TableKit.tables[id] = TableKit.tables[id] ? 
-		                        Object.extend(TableKit.tables[id], options || {}) : 
-		                        Object.extend(
-		                          {dom : {head:null,rows:null,cells:{}},sortable:false,resizable:false,editable:false},
-		                          options || {}
-		                        );
+		if (!TableKit.tables[id]) TableKit.tables[id] =
+			{dom:{head:null,rows:null,cells:{}}, sortable:false,resizable:false,editable:false};
+		if (options) Object.extend(TableKit.tables[id], options);
 	},
 	notify : function(eventName, table, event) {
 		if(TableKit.tables[table.id] &&  TableKit.tables[table.id].observers && TableKit.tables[table.id].observers[eventName]) {
@@ -133,37 +155,30 @@ Object.extend(TableKit, {
 		}
 		TableKit.options.observers[eventName](table, event)();
 	},
-	isSortable : function(table) {
-		return TableKit.tables[table.id] ? TableKit.tables[table.id].sortable : false;
-	},
-	isResizable : function(table) {
-		return TableKit.tables[table.id] ? TableKit.tables[table.id].resizable : false;
-	},
-	isEditable : function(table) {
-		return TableKit.tables[table.id] ? TableKit.tables[table.id].editable : false;
-	},
+	// convenience method to change global defaults; should be called before dom:loaded
 	setup : function(o) {
 		Object.extend(TableKit.options, o || {} );
 	},
-	option : function(s, id, o1, o2) {
-		o1 = o1 || TableKit.options;
-		o2 = o2 || (id ? (TableKit.tables[id] || {}) : {});
+	option1 : function(s, id) {
+		var o = TableKit.tables[id] || {};
+		return o[s] !== undefined ? o[s] : TableKit.options[s];
+	},
+	option : function(s, id) {
+		var o1 = TableKit.options;
+		var o2 = TableKit.tables[id] || {};
 		var key = id + s;
 		if(!TableKit._opcache[key]){
-			TableKit._opcache[key] = $A($w(s)).inject([],function(a,v){
-				a.push(a[v] = o2[v] || o1[v]);
-				return a;
+			TableKit._opcache[key] = $w(s).inject({},function(h,v){
+				h[v] = o2[v] !== undefined ? o2[v] : o1[v]; // o2[v] might be a legitimate false value!
+				return h;
 			});
 		}
 		return TableKit._opcache[key];
 	},
-	e : function(event) {
-		return event || window.event;
-	},
 	tables : {},
 	_opcache : {},
 	options : {
-		autoLoad : true,
+		autoLoad : true, // actually a global option, not needed for individual tables
 		stripe : true,
 		sortable : true,
 		resizable : true,
@@ -174,7 +189,7 @@ Object.extend(TableKit, {
 		columnClass : 'sortcol',
 		descendingClass : 'sortdesc',
 		ascendingClass : 'sortasc',
-		defaultSort : -1,
+		defaultSortDirection : 1,
 		noSortClass : 'nosort',
 		sortFirstAscendingClass : 'sortfirstasc',
 		sortFirstDecendingClass : 'sortfirstdesc',
@@ -259,6 +274,7 @@ Object.extend(TableKit, {
 	    TableKit.reloadTable(k);
 	  }
 	},
+	// this runs only once, on dom:loaded
 	load : function() {
 		if(TableKit.options.autoLoad) {
 			if(TableKit.options.sortable) {
@@ -294,7 +310,7 @@ TableKit.Raw = {
 	// <tablename> is the name of the key for the info in the setup hash.
 	init : function (t, tablename, edituri) {
 		var fields = [];
-		TableKit.options.defaultSort = 1;
+		TableKit.options.defaultSortDirection = 1;
 		var t = $(t);
 		t.width = '100%';
 		t.style.tableLayout = 'fixed';
@@ -432,7 +448,6 @@ TableKit.Sortable = {
 	},
 	_sort : function(e) {
 		if(TableKit.Resizable._onHandle) {return;}
-		e = TableKit.e(e);
 		Event.stop(e);
 		var cell = Event.element(e);
 		while(!(cell.tagName && cell.tagName.match(/td|th/gi))) {
@@ -456,11 +471,11 @@ TableKit.Sortable = {
 			table = table ? $(table) : cell.up('table');
 			index = TableKit.getCellIndex(cell);
 		}
-		var op = TableKit.option('noSortClass descendingClass ascendingClass defaultSort', table.id);
+		var op = TableKit.option('noSortClass descendingClass ascendingClass defaultSortDirection', table.id);
 		
 		if(cell.hasClassName(op.noSortClass)) {return;}	
 		//TableKit.notify('onSortStart', table);
-		order = order ? order : op.defaultSort;
+		order = order ? order : op.defaultSortDirection;
 		var rows = TableKit.getBodyRows(table);
 
 		if(cell.hasClassName(op.ascendingClass) || cell.hasClassName(op.descendingClass)) {
@@ -498,7 +513,7 @@ TableKit.Sortable = {
 		});
 	},
 	types : {},
-	detectors : [],
+	detectors : $w('date-iso date date-eu date-au time currency datasize number casesensitivetext text'),
 	addSortType : function() {
 		$A(arguments).each(function(o){
 			TableKit.Sortable.types[o.name] = o;
@@ -517,9 +532,9 @@ TableKit.Sortable = {
 			if(cell.id && TableKit.Sortable.types[cell.id]) {
 				t = cell.id;
 			}
-			t = $w(cell.classname).detect(function(n){ // then look for a data type classname on the heading row cell
-				return (TableKit.Sortable.types[n]) ? true : false;
-			});
+  			t = $w(cell.className).detect(function(n){ // then look for a data type classname on the heading row cell
+  				return (TableKit.Sortable.types[n]) ? true : false;
+  			});
 			if(!t) {
 				var rows = TableKit.getBodyRows(table);
 				cell = rows[0].cells[index]; // grab same index cell from body row to try and match data type
@@ -534,8 +549,6 @@ TableKit.Sortable = {
 	},
 	_coltypecache : {}
 };
-
-TableKit.Sortable.detectors = $A($w('date-iso date date-eu date-au time currency datasize number casesensitivetext text')); // setting it here because Safari complained when I did it above...
 
 TableKit.Sortable.Type = Class.create();
 TableKit.Sortable.Type.prototype = {
@@ -730,37 +743,33 @@ TableKit.Resizable = {
 			index = TableKit.getCellIndex(cell);
 		}
 		var pad = parseInt(cell.getStyle('paddingLeft'),10) + parseInt(cell.getStyle('paddingRight'),10);
-		w = Math.max(w-pad, TableKit.option('minWidth', table.id)[0]);
+		w = Math.max(w-pad, TableKit.option1('minWidth', table.id));
 		
 		cell.setStyle({'width' : w + 'px'});
 	},
 	initDetect : function(e) {
-		e = TableKit.e(e);
 		var cell = Event.element(e);
 		Event.observe(cell, 'mousemove', TableKit.Resizable.detectHandle);
 		Event.observe(cell, 'mousedown', TableKit.Resizable.startResize);
 	},
 	detectHandle : function(e) {
-		e = TableKit.e(e);
 		var cell = Event.element(e);
   		if(TableKit.Resizable.pointerPos(cell,Event.pointerX(e),Event.pointerY(e))){
-  			cell.addClassName(TableKit.option('resizeOnHandleClass', cell.up('table').id)[0]);
+  			cell.addClassName(TableKit.option1('resizeOnHandleClass', cell.up('table').id));
   			TableKit.Resizable._onHandle = true;
   		} else {
-  			cell.removeClassName(TableKit.option('resizeOnHandleClass', cell.up('table').id)[0]);
+  			cell.removeClassName(TableKit.option1('resizeOnHandleClass', cell.up('table').id));
   			TableKit.Resizable._onHandle = false;
   		}
 	},
 	killDetect : function(e) {
-		e = TableKit.e(e);
 		TableKit.Resizable._onHandle = false;
 		var cell = Event.element(e);
 		Event.stopObserving(cell, 'mousemove', TableKit.Resizable.detectHandle);
 		Event.stopObserving(cell, 'mousedown', TableKit.Resizable.startResize);
-		cell.removeClassName(TableKit.option('resizeOnHandleClass', cell.up('table').id)[0]);
+		cell.removeClassName(TableKit.option1('resizeOnHandleClass', cell.up('table').id));
 	},
 	startResize : function(e) {
-		e = TableKit.e(e);
 		if(!TableKit.Resizable._onHandle) {return;}
 		var cell = Event.element(e);
 		Event.stopObserving(cell, 'mousemove', TableKit.Resizable.detectHandle);
@@ -769,7 +778,7 @@ TableKit.Resizable = {
 		TableKit.Resizable._cell = cell;
 		var table = cell.up('table');
 		TableKit.Resizable._tbl = table;
-		if(TableKit.option('showHandle', table.id)[0]) {
+		if(TableKit.option1('showHandle', table.id)) {
 			TableKit.Resizable._handle = $(document.createElement('div')).addClassName('resize-handle').setStyle({
 				'top' : cell.cumulativeOffset()[1] + 'px',
 				'left' : Event.pointerX(e) + 'px',
@@ -782,12 +791,11 @@ TableKit.Resizable = {
 		Event.stop(e);
 	},
 	endResize : function(e) {
-		e = TableKit.e(e);
 		var cell = TableKit.Resizable._cell;
 		TableKit.Resizable.resize(null, cell, (Event.pointerX(e) - cell.cumulativeOffset()[0]));
 		Event.stopObserving(document, 'mousemove', TableKit.Resizable.drag);
 		Event.stopObserving(document, 'mouseup', TableKit.Resizable.endResize);
-		if(TableKit.option('showHandle', TableKit.Resizable._tbl.id)[0]) {
+		if(TableKit.option1('showHandle', TableKit.Resizable._tbl.id)) {
 			$$('div.resize-handle').each(function(elm){
 				document.body.removeChild(elm);
 			});
@@ -797,7 +805,6 @@ TableKit.Resizable = {
 		Event.stop(e);
 	},
 	drag : function(e) {
-		e = TableKit.e(e);
 		if(TableKit.Resizable._handle === null) {
 			try {
 				TableKit.Resizable.resize(TableKit.Resizable._tbl, TableKit.Resizable._cell, (Event.pointerX(e) - TableKit.Resizable._cell.cumulativeOffset()[0]));
@@ -829,7 +836,6 @@ TableKit.Editable = {
 		Event.observe(table.tBodies[0], 'click', TableKit.Editable._editCell);
 	},
 	_editCell : function(e) {
-		e = TableKit.e(e);
 		if (Event.findElement(e,'a')) return; // don't edit if clicking on a link
 		var cell = Event.findElement(e,'td');
 		if(cell) {
@@ -856,11 +862,11 @@ TableKit.Editable = {
 			table = (table && table.tagName && table.tagName !== "TABLE") ? $(table) : cell.up('table');
 			row = cell.up('tr');
 		}
-		var op = TableKit.option('noEditClass', table.id);
-		if(cell.hasClassName(op.noEditClass)) {return;}
+		var nec = TableKit.option1('noEditClass', table.id);
+		if(cell.hasClassName(nec)) {return;}
 		
 		var head = $(TableKit.getHeaderCells(table, cell)[TableKit.getCellIndex(cell)]);
-		if(head.hasClassName(op.noEditClass)) {return;}
+		if(head.hasClassName(nec)) {return;}
 		
 		var data = TableKit.getCellData(cell);
 		if(data.active) {return;}
@@ -875,7 +881,7 @@ TableKit.Editable = {
 		if(head.id && TableKit.Editable.types[head.id]) {
 			ftype = TableKit.Editable.types[head.id];
 		} else {
-			var n = $w(head.classname).detect(function(n){
+			var n = $w(head.className).detect(function(n){
 					return (TableKit.Editable.types[n]) ? true : false;
 			});
 			ftype = n ? TableKit.Editable.types[n] : ftype;
@@ -920,7 +926,7 @@ TableKit.Editable.CellEditor.prototype = {
 		
 		var form = $(document.createElement("form"));
 		form.id = cell.id + '-form';
-		form.addClassName(TableKit.option('formClassName', table.id)[0]);
+		form.addClassName(TableKit.option1('formClassName', table.id));
 		form.onsubmit = this._submit.bindAsEventListener(this);
 		
 		var field = document.createElement(op.element);
@@ -1051,10 +1057,10 @@ TableKit.Editable.CellEditor.prototype = {
 		var row = cell.up('tr');
 		var table = cell.up('table');
 		// *** DY added custom params
-		var s_extra = TableKit.option('editAjaxExtraParams', table.id);
+		var s_extra = TableKit.option1('editAjaxExtraParams', table.id);
 		var s = s_extra + '&row=' + (TableKit.getRowIndex(row)+1) + '&cell=' + (TableKit.getCellIndex(cell)+1) + '&id=' + row.id + '&field=' + head.id + '&' + Form.serialize(form);
 		// *** DY why is the request saved to this.ajax? it doesn't seem to be used for anything
-		this.ajax = new Ajax.Request(op.ajaxURI || TableKit.option('editAjaxURI', table.id)[0], Object.extend(op.ajaxOptions || TableKit.option('editAjaxOptions', table.id)[0], {
+		this.ajax = new Ajax.Request(op.ajaxURI || TableKit.option1('editAjaxURI', table.id), Object.extend(op.ajaxOptions || TableKit.option1('editAjaxOptions', table.id), {
 			// *** DY changed Ajax.Update to Request to better handle rawData: escapeHTML on client side, not server side
 			postBody : s,
 			onSuccess : function(t) {

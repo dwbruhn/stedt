@@ -52,7 +52,7 @@ function init_note_form(f) {
 		});
 	};
 };
-$$('.noteform').each(function (f) {init_note_form(f)});
+$$('.noteform').each(init_note_form);
 
 // note reordering
 $$('.reordcheckbox').each(function (c) {
@@ -65,10 +65,10 @@ $$('.reordcheckbox').each(function (c) {
 					onFailure: function(t){ alert('Error: ' + t.responseText) }
 				});
 			}});
-			$$('#' + container.id + ' form').invoke('hide');
+			container.select('form').invoke('hide');
 		} else {
 			Sortable.destroy(container.id);
-			$$('#' + container.id + ' form').invoke('show');
+			container.select('form').invoke('show');
 		}
 	};
 });
@@ -94,7 +94,7 @@ function showaddform (spec, id) { // C, E, L; F for comparanda (special handling
 		f.ord.value = 1;
 	}
 	if (container) {
-		var existing_notes = $$('#' + container.id + ' .reord');
+		var existing_notes = container.select('.reord');
 		if (existing_notes.size()) {
 			f.ord.value = +existing_notes.last().down('form').ord.value+1;
 		} else { // there are no existing notes; the first note's ord should be 1
@@ -135,7 +135,7 @@ function showaddform (spec, id) { // C, E, L; F for comparanda (special handling
 						f.up('body').insert(elem);
 					});
 					// enable the sort box if there are two or more sortable items
-					if ($$('#' + container.id + ' .reord').length > 1)
+					if (container.select('.reord').length > 1)
 						container.down('.reordcheckbox').enable();
 				} else {
 					// if it's a lex note, stick it in at the bottom, and add the footnotemark in the table

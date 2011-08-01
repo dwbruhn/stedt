@@ -203,34 +203,27 @@ function SylStation() {
 	var delim_ary; // array of the delimiters following the "syllables", above
 
 	var syllabify_by_regex = function (s, re) {
-		var is_suffix = /^-/.test(s);
-		if (is_suffix) s = s.replace(/^-/,'');
-	
-		var re1 = new RegExp("^" + re); // regexp for parsing out syllables in our while loop
-		var tmp_syl, tmp_delim; // vars for holding results from the regex test
-
+		var m, is_suffix = s.charAt(0) === '-';
+		if (is_suffix) s = s.substring(1);
+		re = new RegExp("^" + re);
 		syl_ary = []; // clear out our arrays
 		delim_ary = [];
-
-		while (re1.test(s)) {
-			s = s.replace(re1, '');
-			tmp_syl = RegExp.$1;
-			tmp_delim = RegExp.$2;
-			if (/\|/.test(tmp_syl) && syl_ary.length) {
-				tmp_syl = tmp_syl.replace(/\|/, '');          // overriding delim
-				syl_ary[syl_ary.length-1] += delim_ary.pop();
-				syl_ary[syl_ary.length-1] += tmp_syl;
+		while (m = re.exec(s)) {
+			s = s.substring(m[0].length);
+			if (m[1].indexOf('|')!==-1 && syl_ary.length) { // overriding delim
+				syl_ary[syl_ary.length-1] +=
+					delim_ary.pop() + m[1].replace(/\|/, '');
 			} else {
-				syl_ary.push(tmp_syl);
+				syl_ary.push(m[1]);
 			}
-			delim_ary.push(tmp_delim.replace(/◦/,'&thinsp;')); // STEDT delim -> thin space
+			delim_ary.push(m[2].replace(/◦/,'&thinsp;')); // STEDT delim -> thin space
 			// if this &thinsp; shows up in the interface, it's because
 			// it was overridden by an overriding delimiter. No one should
 			// be overriding a STEDT delimiter; they can just delete it.
 			// So consider this a feature of sorts... STEDT delims get converted
 			// to an escaped HTML char code if they're overridden!
 		}
-		syl_ary[0] = syl_ary[0] || '';
+		if (!syl_ary[0]) syl_ary[0] = '';
 		if (is_suffix) {
 			syl_ary[0] = "-" + syl_ary[0];
 		}
@@ -455,16 +448,18 @@ var setup = { // in the form setup.[tablename].[fieldname]
 			noedit: true,
 			size: 50,
 			transform: function (v,k,rec,n) {
-				if (v < 1) return '';
-				v = v.sub(/\.?0+$/, '');
-				v = v.sub(/\.([1-9])/, function () {
-					return String.fromCharCode(96+parseInt(RegExp.$1,10));
-				});
+				if (v !== '0.0') {
+					if (v.substr(-2) === '.0') v = v.slice(0,-2);
+					else v = v.slice(0,-2) + String.fromCharCode(96+ +v.substr(-1));
+					v = '(' + v + ')';
+				} else {
+					v = rec[n-1] ? '[-]' : '';
+				}
 				if (stedtuserprivs & 8 && rec[n-1]) {
-					v = '<a href="' + baseRef + 'admin/seq?c=' + rec[n-1]
+					return '<a href="' + baseRef + 'admin/seq?c=' + rec[n-1]
 					+ '" target="stedt_sequencer">' + v + '</a>'
 				}
-				return '(' + v + ')';
+				return v;
 			}
 		},
 		'etyma.possallo'  : {

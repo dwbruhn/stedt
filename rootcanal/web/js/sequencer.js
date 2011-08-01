@@ -1,15 +1,19 @@
-var SEQ = Class.create({
+var sequencer = {
 initialize: function () {	
 	$('all_tags').on('change', '.paf-btn', function (e) {this.repaf(e.findElement())}.bind(this));
+	this._handle_etymon_move = this.handle_etymon_move.bind(this); // cache bound versions
+	this._reseq = this.reseq.bind(this);
+	this._reseq_it = this.reseq_it.bind(this);
 	this.init_sort_all();
 },
 
 init_sort_all: function () {
 	var all_c = $$(".etymon-container,.uncontainer");
-	all_c.each(function (x) {this.init_sort(x, all_c)}.bind(this));
+	var f = function (x) {this.init_sort(x, all_c)}.bind(this);
+	all_c.each(f);
 	Sortable.create('all_tags', {
 		tag:'div', only:'allofam', scroll:window,
-		onUpdate:this.reseq.bind(this)
+		onUpdate:this._reseq
 	});
 },
 
@@ -20,7 +24,7 @@ init_sort: function (c,cc) {
 		tag:'div', only:'etymon', scroll:window,
 		containment:cc,
 		dropOnEmpty:true,
-		onUpdate:this.handle_etymon_move.bind(this)
+		onUpdate:this._handle_etymon_move
 	});
 },
 
@@ -36,16 +40,16 @@ cleanup : function () {
 // re-letter all the "etymon" divs, given a container; also re-init_sort
 reletter: function (c) {
 	if (c.up('.allofam-noseq')) {
-		$$('#' + c.id + ' .etymon').each(function (e) {
+		c.select('.etymon').each(function (e) {
 			e.down('.seq-str').innerHTML = '0';
 		});
 		return;
 	}
 	var seq = c.up('.allofam').down('.seq-num').innerHTML;
-	var etyma = Selector.findChildElements(c, ['.etymon','.paf']);
+	var etyma = c.select('.etymon','.paf');
 	if (etyma.length > 1) {
 		// reletter just the non-pafs
-		$$('#' + c.id + ' .etymon').each(function (e,i) {
+		c.select('.etymon').each(function (e,i) {
 			e.down('.seq-str').innerHTML = seq + String.fromCharCode(97+i);
 			e.down('.paf-btn').disabled = false;
 		});
@@ -58,11 +62,12 @@ reletter: function (c) {
 	}
 },
 
+reseq_it: function (a,i) {
+	a.down('.seq-num').innerHTML = i+1;
+	this.reletter(a.down('.etymon-container'));
+},
 reseq: function () {
-	$$('.allofam').each(function (a,i) {
-		a.down('.seq-num').innerHTML = i+1;
-		this.reletter(a.down('.etymon-container'));
-	}.bind(this));
+	$$('.allofam').each(this._reseq_it);
 },
 
 handle_etymon_move: function (c) {
@@ -114,7 +119,7 @@ handle_etymon_move: function (c) {
 repaf: function (x) {
 	var c = x.up('.etymon-container');
 	var was_paf = x.parentNode.className === 'paf';
-	$$('#' + c.id + ' .paf').each(function (e) {
+	c.select('.paf').each(function (e) {
 		e.down('.paf-btn').checked = false;
 		e.className = 'etymon';
 	});
@@ -127,19 +132,16 @@ repaf: function (x) {
 	}
 	this.reletter(c);
 	this.init_sort(c); // PAFs can't be sorted
-},
-});
-
-new SEQ();
+}
+}; // sequencer;
+sequencer.initialize();
 
 // send list of lists of tag nums (starting with the "n/a" set).
 // first item of tagnum list is 'P' if first tagnum is PAF.
 var self_serialize = function () {
 	if (!confirm("Are you sure you want to save the current sequencing?")) return false;
 	var list = $$('.allofam-noseq, .allofam').map(function (a) {
-		var tags = Selector.findChildElements(a, ['.etymon','.paf']).map(function (e) {
-			return e.id.sub(/\D+/,'');
-		});
+		var tags = a.select('.etymon','.paf').map(function (e) {return e.id.sub(/\D+/,'')});
 		if (a.down('.paf')) { tags.unshift('P'); }
 		return tags;
 	});

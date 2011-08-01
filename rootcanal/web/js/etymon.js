@@ -6,7 +6,7 @@ setup['lexicon']['notes.rn'] = {
 	transform : function (v) {
 		var addlink = '<a href="#" class="lexadd">[+]</a>';
 		if (v === '0') return (stedtuserprivs & 1) ? addlink : '';
-		var a = $A(v.match(/\d+/g)).map(function (s) {
+		var a = v.match(/\d+/g).map(function (s) {
 			return '<a href="#foot' + s + '" id="toof' + s + '">' + s + '</a>';
 		});
 		a.push(addlink);
@@ -43,9 +43,10 @@ if (stedt_other_username) {
 			return a.join('');
 	};
 	setup['lexicon']['user_an']['transform'] = function (v) {
+		if (!v) return '';
 		var s = v.replace(/, */g,', ');
 		// hilite this gray if it doesn't contain the etyma we're concerned with on this page
-		var to_be_approved = $A(v.split(',')).any(function (t) { return skipped_roots[t]; });
+		var to_be_approved = v.split(',').any(function (t) { return skipped_roots[t]; });
 		if (to_be_approved) return s;
 		return '<div class="approve-ignore">' + s + '</div>';
 	};
@@ -53,7 +54,7 @@ if (stedt_other_username) {
 		var s = v.replace(/, */g,', ');
 		// hilite this magenta if it would get clobbered on approval, i.e.
 		// if it's not empty, the two cols are different, and the user_an is not gray
-		if (v && v !== rec[n+1] && $A(rec[n+1].split(',')).any(function (t) { return skipped_roots[t]; })) {
+		if (v && v !== rec[n+1] && rec[n+1].split(',').any(function (t) { return skipped_roots[t]; })) {
 			return '<div class="approve-replacing">' + s + '</div>';
 		}
 		return s;
