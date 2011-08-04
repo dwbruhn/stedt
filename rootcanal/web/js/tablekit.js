@@ -354,7 +354,6 @@ TableKit.Raw = {
 		TableKit.tables[t.id].raw = {};
 		TableKit.tables[t.id].raw.data = rawData;
 		TableKit.tables[t.id].raw.cols = rawDataCols;
-		TableKit.tables[t.id].raw.colNames = fields;
 		TableKit.tables[t.id].editAjaxExtraParams = '&tbl=' + tablename;
 		if (edituri) {
 			TableKit.Editable.init(t);
@@ -953,7 +952,9 @@ TableKit.Editable.CellEditor.prototype = {
 							} else {
 								this._submit(event);
 							}
-							if (cell.up('tr').next() && cell.up('tr').next().id) { // only if there's another row..., and the row looks like it's operable...
+							var nextrow = cell.up('tr').next();
+							if (nextrow && (nextrow.id ||  // only if there's another row..., and the row looks like it's operable...
+									(nextrow = nextrow.next()) && nextrow.id)) { // or the one after that...
 								Event.stop(event); // otherwise the return gets typed into the form
 								var table = cell.up('table');
 								var colnum = TableKit.getCellIndex(cell);
@@ -961,7 +962,7 @@ TableKit.Editable.CellEditor.prototype = {
 								var ftype = TableKit.Editable.getCellEditor(null,null,head);
 								
 								// adapted from editCell, above
-								var nextCell = $(cell.up('tr').next().childElements()[colnum]);
+								var nextCell = $(nextrow.childElements()[colnum]);
 								var data = TableKit.getCellData(nextCell);
 								data.htmlContent = nextCell.innerHTML;
 								ftype.edit(nextCell);

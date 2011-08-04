@@ -6,7 +6,6 @@ var horz_dragger = function () {
 			var ettop = $('etyma').offsetTop;
 			$('etyma').setStyle({height:(mytop - ettop) + 'px'});
 			$('lexicon').setStyle({top:(d.offsetTop + d.offsetHeight) + 'px'});
-			console.log($('etyma').style);
 		},
 		snap : function (x, y, d) {
 			var min = $('etyma').offsetTop + 75;
@@ -54,13 +53,16 @@ function stedt_simplesearch_init() {
 	$('simple_search').onsubmit = create_searchfn('simple');
 	my_dragger = horz_dragger();
 	$('tog-img').hide();
+	Ajax.Responders.register({
+		onCreate: function() { $('spinner').show() },
+		onComplete: function() { if (0 == Ajax.activeRequestCount) $('spinner' ).hide() }
+	});
 	$('simple_searchinput').focus();
 };
 
 function vert_tog() {
-	var t = $('etyma_resulttable');
-	var fields = t ? TableKit.tables[t.id].raw.colNames : '';
-	$('etyma').setAttribute('style','');
+	var t = $('etyma_resulttable'), fields = [];
+	$('etyma').setAttribute('style',''); // for some reason removeAttribute doesn't seem to work so well...
 	$('lexicon').setAttribute('style','');
 	$('dragger').setAttribute('style','');
 	my_dragger.destroy();
@@ -70,7 +72,9 @@ function vert_tog() {
 		$('dragger').removeClassName('vert');
 		if (t) {
 			$A(t.tHead.rows[0].cells).each(function (c, i) {
-				if (!setup.etyma[fields[i]].hide) c.style.display = 'table-cell';
+				setup.etyma[c.id].hide = setup.etyma[c.id].old_hide;
+				if (!setup.etyma[c.id].hide) c.style.display = 'table-cell';
+				fields.push(c.id);
 			});
 			$A(t.tBodies[0].rows).each(function (row) {
 				$A(row.cells).each(function (c,i) {
@@ -85,7 +89,10 @@ function vert_tog() {
 		$('dragger').addClassName('vert');
 		if (t) {
 			$A(t.tHead.rows[0].cells).each(function (c, i) {
-				if (!setup.etyma[fields[i]].vert_show) c.style.display = 'none';
+				if (!setup.etyma[c.id].vert_show) c.style.display = 'none';
+				setup.etyma[c.id].old_hide = setup.etyma[c.id].hide;
+				setup.etyma[c.id].hide = !setup.etyma[c.id].vert_show;
+				fields.push(c.id);
 			});
 			$A(t.tBodies[0].rows).each(function (row) {
 				$A(row.cells).each(function (c,i) {

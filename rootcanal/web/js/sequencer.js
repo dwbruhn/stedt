@@ -92,6 +92,7 @@ handle_etymon_move: function (c) {
 			old_a.insert({after:a});
 			if (!old_a.down('.etymon-container').firstChild) { old_a.remove(); } // see note under "else", below
 		} else { $('all_tags').insert({top:a}) }
+		new Effect.Highlight(a, {endcolor:'#EEEEEE',restorecolor:'#EEEEEE'});
 		this.cleanup_new = true;
 		do_cleanup = true;
 	} else if (!c.firstChild) { // if empty container, delete it and reseq

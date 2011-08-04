@@ -21,6 +21,7 @@
 [% user = c.param('user') -%]
 <span class="right">
 [% IF vert_tog -%]
+<img id="spinner" src="img/spinner.gif" style="display:none;">&nbsp;
 <a href="#" onclick="return vert_tog()"><img src="img/toggle.png" alt="toggle" id="tog-img" border="0"></a>&nbsp;
 [% END -%]
 [% IF user -%]

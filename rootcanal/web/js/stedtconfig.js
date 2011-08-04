@@ -45,20 +45,31 @@ makesubroot = function(dragged, destination, e) {
 		},
 		onFailure: function(transport) {
 			alert(transport.responseText);
+		},
+		onComplete: function() {
+			dragged.setAttribute('style',''); // put it back where it came from
 		}
 	});
 };
 var make_draggable_id = function (obj, scrollElement) { // scrollElement is the containing element which should be scrolled, if any
-	var moved = 0;
-	new Draggable(obj, { revert:true, constraint:'vertical', scroll:scrollElement,
-		change: function () { moved = 1; }
+	new Draggable(obj, { revert: 'failure', constraint:'vertical', scroll:scrollElement,
+		onDrag: function (d,e) {
+			if (!make_draggable_id.moved && (Math.abs(e.pointerY()-make_draggable_id.old_y)>3)) {
+				make_draggable_id.moved=1;
+			}
+			// we create an attribute called "moved" in the make_draggable_id object for efficiency
+			// since only one thing can be dragged at a time, we only need one instance of this var.
+			// of course this would have been much more readable if it said
+			// if (!moved && (abs(new_y-old_y)>3)) moved=1;
+		}
 	});
 	Droppables.add(obj,
 	  { hoverclass : 'hoverdrop',
 		accept : 'tagid',
 		onDrop : makesubroot
 	  } );
-	obj.onclick = function (e) { if (moved) { e.stop(); moved = 0; } }; // don't follow the link if it was dragged
+	obj.onmousedown = function (e) { make_draggable_id.moved=0; make_draggable_id.old_y = e.pointerY() };
+	obj.onclick = function (e) { if (make_draggable_id.moved) e.stop() }; // don't follow the link if it was dragged
 };
 
 function show_notes(rn) {
@@ -103,19 +114,18 @@ var make_one_table = function (tablename, tabledata) {
 		if (!setup[tablename][fld]) {
 			setup[tablename][fld] = { noedit:true };
 		}
-		if (!setup[tablename][fld].hide) {
-			var c = $(document.createElement('th'));
-			if (setup[tablename][fld].noedit)
-				c.addClassName('noedit');
-			else
-				c.id = fld;
-			if (setup[tablename][fld].nosort)
-				c.addClassName('nosort');
-			if (setup[tablename][fld].size)
-				c.width = setup[tablename][fld].size;
-			c.innerHTML = setup[tablename][fld].label || fld;
-			row.appendChild(c);
-		}
+		var c = $(document.createElement('th'));
+		c.id = fld;
+		if (setup[tablename][fld].noedit)
+			c.addClassName('noedit');
+		if (setup[tablename][fld].nosort)
+			c.addClassName('nosort');
+		if (setup[tablename][fld].size)
+			c.width = setup[tablename][fld].size;
+		c.innerHTML = setup[tablename][fld].label || fld;
+		row.appendChild(c);
+		if (setup[tablename][fld].hide)
+			c.style.display = 'none';
 		rawDataCols[fld] = i;
 	});
 	
@@ -137,12 +147,10 @@ var make_one_table = function (tablename, tabledata) {
 		rec.each(function (v,i) {
 			var xform = setup[tablename][tabledata.fields[i]].transform;
 			var cell;
-			// add the cell if column is visible
-			if (!setup[tablename][tabledata.fields[i]].hide) {
-				cell = row.insertCell(-1);
-				cell.innerHTML = xform	? xform(v ? v.escapeHTML() : '', rec[k], rec, i)
-										: v ? v.escapeHTML() : '';
-			}
+			cell = row.insertCell(-1);
+			cell.innerHTML = xform	? xform(v ? v.escapeHTML() : '', rec[k], rec, i)
+									: v ? v.escapeHTML() : '';
+			if (setup[tablename][tabledata.fields[i]].hide) cell.style.display = 'none';
 		});
 	});
 	
@@ -154,7 +162,6 @@ var make_one_table = function (tablename, tabledata) {
 	TableKit.tables[t.id].raw = {};
 	TableKit.tables[t.id].raw.data = rawData;
 	TableKit.tables[t.id].raw.cols = rawDataCols;
-	TableKit.tables[t.id].raw.colNames = tabledata.fields;
 	if (stedtuserprivs & 1) {
 		TableKit.Editable.init(t);
 		TableKit.tables[t.id].editAjaxURI = baseRef + 'update';
