@@ -5,18 +5,21 @@
 	div#dragger { display: none; }
 	div#info { display:none; }
 	form, .edit { display:none; }
-/*	form#etyma_search { display:none; }
-	form#lexicon_search { display:none; } */
 }
 
 @media screen { 
 	div#etyma { position:fixed; overflow:auto; top:3em; height:12em; width:100%; left:0px; } 
-	div#lexicon { position:fixed; overflow:auto; top:15.5em; bottom: 0px; width:100%; left:0px; } 
+	div#lexicon { position:fixed; overflow:auto; top:15.5em; bottom: 0px; width:100%; left:0px; }
+	div#etyma.vert { height:auto; bottom:0px; width:18.5em; } 
+	div#lexicon.vert { width:auto; top:3em; right: 0px; left:19em; }
 	div#dragger { cursor:row-resize;
 		position:fixed; top: 15em; height: 0.5em;
 		background-color:teal;
 		width:100%; left: 0px; right: 0px;
 	}
+	div#dragger.vert {  cursor:col-resize; top:3em; bottom:0px;
+		height:auto; width:0.5em; left: 18.5em; right: auto;
+	 }
 }
 
 div#info

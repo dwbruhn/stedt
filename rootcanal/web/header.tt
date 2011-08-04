@@ -20,6 +20,9 @@
 <div id="header" style="display:none;">
 [% user = c.param('user') -%]
 <span class="right">
+[% IF vert_tog -%]
+<a href="#" onclick="return vert_tog()"><img src="img/toggle.png" alt="toggle" id="tog-img" border="0"></a>&nbsp;
+[% END -%]
 [% IF user -%]
 <script>
 var stedtuserprivs = [% c.param('userprivs') %];

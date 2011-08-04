@@ -1,4 +1,4 @@
-[% PROCESS header.tt title="STEDT Database (Beta)" suppress_header=1 %]
+[% PROCESS header.tt title="STEDT Database (Beta)" suppress_header=1 vert_tog=1 %]
 
 <div id="splash">
 <center>
@@ -22,10 +22,11 @@
 <div id="etyma" style="display:none;">
 <div align="center">[% # search div %]
 <form id="etyma_search" method="post">
-Search etyma: <input name="s" type="text" size="50" id="etyma_searchinput" ><input name="lg" type="hidden" id="etyma_searchlg" ><input name="btn" type="submit" value="Search">
-[%- IF c.has_privs(16) %]<a href="#" onclick="return show_advanced_search('etyma')">Advanced Search</a>[% END %]
+Search etyma: <input name="s" type="text" size="30" id="etyma_searchinput" ><input name="lg" type="hidden" id="etyma_searchlg" ><input name="btn" type="submit" value="Search">
+[%- IF 0 && c.has_privs(16) %]<a href="#" onclick="return show_advanced_search('etyma')">Advanced Search</a>[% END %]
 </form>
 </div>
+<div id="etyma_status"></div>
 <div id="etyma_results"></div>
 <div id="addform"></div>
 <div id="debug"></div>
@@ -39,6 +40,7 @@ Search etyma: <input name="s" type="text" size="50" id="etyma_searchinput" ><inp
 Search lexicon:&nbsp;&nbsp;<i>gloss:</i> <input name="s" type="text" size="48" id="lexicon_searchinput"> <i>language: </i><input name="lg" type="text" size="32" id="lexicon_searchlg" ><input name="btn" type="submit" value="Search">
 </form>
 </div>
+<div id="lexicon_status"></div>
 <div id="lexicon_results"></div>
 <div id="info" style="display:none;"></div>
 </div>

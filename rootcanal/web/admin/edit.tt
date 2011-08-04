@@ -1,5 +1,5 @@
-[% PROCESS header.tt title="Edit " _ t.table _ " - STEDT Database" -%]
-<form>
+﻿[% PROCESS header.tt title="Edit " _ t.table _ " - STEDT Database" -%]
+<form id="search_form">
 <table class="[% t.table %]_edit_table" width="100%" style="table-layout:fixed;">
 <tr>
 [% FOREACH col IN t.searchable -%]
@@ -19,7 +19,8 @@
 </tr>
 </table>
 <input name="search" type="submit" value="Search">
-<input type="button" value="Clear" onclick="clear_form(this.form)">
+<input type="button" value="Clear [Esc]" onclick="clear_form(this.form)">
+<input type="reset" value="Reset [Esc]²">
 </form>
 
 [% IF result.data.size -%]
@@ -179,6 +180,16 @@ var clear_form = function (f) {
 		}
 	});
 };
+$('search_form').observe('keydown', function (e) {
+	if (e.keyCode === Event.KEY_ESC) {
+		e.stop();
+		if (this.select('input:not(:button,:submit,:reset),select').any(Form.Element.getValue)) {
+			clear_form(this);
+		} else {
+			this.reset();
+		}
+	}
+});
 </script>
 </body>
 </html>

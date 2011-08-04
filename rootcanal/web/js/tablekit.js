@@ -119,15 +119,24 @@ Object.extend(TableKit, {
 	getRowIndex : function(row) {
 		return $A(row.parentNode.rows).indexOf(row);
 	},
-	getCellText : function(cell, refresh) {
+	// getCellText is called by various sorting routines, and also editing.
+	getCellText : function(cell) {
 		if(!cell) { return ""; }
 		var data = TableKit.getCellData(cell);
-		if(refresh || data.refresh || !data.textContent) {
+		if(data.refresh || !data.textContent) {
 			data.textContent = cell.textContent || cell.innerText;
 			data.refresh = false;
 		}
-		return data.textContent || ''; // *** DY added empty to avoid "undefined" in firefox
+		return data.textContent || ''; // return empty to avoid "undefined" in firefox
 	},
+	// getCellData manages a cache of data for cells that have been accessed.
+	// textContent stores stuff for getCellText, and htmlContent and active
+	// are used for editing. htmlContent is cached so it can be restored
+	// if a user cancels editing; and active keeps tabs on which cells have
+	// open editors so they can be removed if unloadTable (possibly in reloadTable)
+	// is called. With TableKit.Raw, this seems slightly redundant,
+	// and it may be possible to split apart these two functions, but at
+	// least the number of "celldata"s is bounded by the number td's on the page...
 	getCellData : function(cell) {
 	  var t = null;
 		if(!cell.id) {
@@ -148,12 +157,6 @@ Object.extend(TableKit, {
 		if (!TableKit.tables[id]) TableKit.tables[id] =
 			{dom:{head:null,rows:null,cells:{}}, sortable:false,resizable:false,editable:false};
 		if (options) Object.extend(TableKit.tables[id], options);
-	},
-	notify : function(eventName, table, event) {
-		if(TableKit.tables[table.id] &&  TableKit.tables[table.id].observers && TableKit.tables[table.id].observers[eventName]) {
-			TableKit.tables[table.id].observers[eventName](table, event);
-		}
-		TableKit.options.observers[eventName](table, event)();
 	},
 	// convenience method to change global defaults; should be called before dom:loaded
 	setup : function(o) {
@@ -202,19 +205,7 @@ Object.extend(TableKit, {
 		noEditClass : 'noedit',
 		editAjaxURI : '/',
 		editAjaxOptions : {},
-		editAjaxExtraParams : '', // *** DY added
-		editAjaxTransform : false, // *** DY added
-		observers : {
-			'onSortStart' 	: function(){},
-			'onSort' 		: function(){},
-			'onSortEnd' 	: function(){},
-			'onResizeStart' : function(){},
-			'onResize' 		: function(){},
-			'onResizeEnd' 	: function(){},
-			'onEditStart' 	: function(){},
-			'onEdit' 		: function(){},
-			'onEditEnd' 	: function(){}
-		}
+		editAjaxExtraParams : '' // *** DY added
 	},
 	_c : 0,
 	_getc : function() {return TableKit._c += 1;},
@@ -363,11 +354,8 @@ TableKit.Raw = {
 		TableKit.tables[t.id].raw = {};
 		TableKit.tables[t.id].raw.data = rawData;
 		TableKit.tables[t.id].raw.cols = rawDataCols;
+		TableKit.tables[t.id].raw.colNames = fields;
 		TableKit.tables[t.id].editAjaxExtraParams = '&tbl=' + tablename;
-		TableKit.tables[t.id].editAjaxTransform = function (tbl, fld, key, val, rec, n) {
-			var xform = setup[tbl][fld].transform;
-			return xform ? xform(val, key, rec, n) : val;
-		};
 		if (edituri) {
 			TableKit.Editable.init(t);
 			TableKit.tables[t.id].editAjaxURI = edituri;
@@ -381,24 +369,22 @@ TableKit.Raw = {
 
 
 TableKit.Rows = {
-	stripe : function(table) {
-		var rows = TableKit.getBodyRows(table);
-		rows.each(function(r,i) {
-			TableKit.Rows.addStripeClass(table,r,i);
-		});
-	},
-	addStripeClass : function(t,r,i) {
-		t = t || r.up('table');
-		var op = TableKit.option('rowEvenClass rowOddClass', t.id);
-		var css = (i&1 ? op[0] : op[1]); // using "& 1" is faster than "% 2", apparently
-		// using prototype's assClassName/RemoveClassName was not efficient for large tables, hence:
-		var cn = r.className.split(/\s+/);
-		var newCn = [];
-		for(var x = 0, l = cn.length; x < l; x += 1) {
-			if(cn[x] !== op[0] && cn[x] !== op[1]) { newCn.push(cn[x]); }
+	stripe : function(t) {
+		var rows = TableKit.getBodyRows(t);
+		var r1 = TableKit.option1('rowOddClass', t.id);
+		var r2 = TableKit.option1('rowEvenClass', t.id);
+		var css, cn, newCn, i, x, l, l2;
+		for (i = 0, l = rows.length; i < l; ++i) {
+			// copied code from addStripeClass for efficiency
+			css = i&1 ? r1 : r2;
+			cn = rows[i].className.split(/\s+/);
+			newCn = [];
+			for (x = 0, l2 = cn.length; x < l2; ++x) {
+				if (cn[x] !== r1 && cn[x] !== r2) newCn.push(cn[x]);
+			}
+			newCn.push(css);
+			rows[i].className = newCn.join(" ");
 		}
-		newCn.push(css);
-		r.className = newCn.join(" ");
 	}
 };
 
@@ -474,8 +460,7 @@ TableKit.Sortable = {
 		var op = TableKit.option('noSortClass descendingClass ascendingClass defaultSortDirection', table.id);
 		
 		if(cell.hasClassName(op.noSortClass)) {return;}	
-		//TableKit.notify('onSortStart', table);
-		order = order ? order : op.defaultSortDirection;
+		order = order || op.defaultSortDirection;
 		var rows = TableKit.getBodyRows(table);
 
 		if(cell.hasClassName(op.ascendingClass) || cell.hasClassName(op.descendingClass)) {
@@ -489,15 +474,25 @@ TableKit.Sortable = {
 			} else {
 				rows.sort(function(a,b) {
 					return order * tkst[datatype].compare(TableKit.getCellText(a.cells[index]),TableKit.getCellText(b.cells[index]));
-				});
+				}); //\raw
 			}
 		}
 		var tb = table.tBodies[0];
-		var tkr = TableKit.Rows;
-		rows.each(function(r,i) {
-			tb.appendChild(r);
-			tkr.addStripeClass(table,r,i);
-		});
+		var r1 = TableKit.option1('rowOddClass', table.id);
+		var r2 = TableKit.option1('rowEvenClass', table.id);
+		var css, cn, newCn, i, x, l, l2;
+		for (i = 0, l = rows.length; i < l; ++i) {
+			tb.appendChild(rows[i]);
+			// copied code from addStripeClass for efficiency
+			css = i&1 ? r1 : r2;
+			cn = rows[i].className.split(/\s+/);
+			newCn = [];
+			for (x = 0, l2 = cn.length; x < l2; ++x) {
+				if (cn[x] !== r1 && cn[x] !== r2) newCn.push(cn[x]);
+			}
+			newCn.push(css);
+			rows[i].className = newCn.join(" ");
+		}
 		var hcells = TableKit.getHeaderCells(null, cell);
 		$A(hcells).each(function(c,i){
 			c = $(c);
@@ -542,7 +537,7 @@ TableKit.Sortable = {
 				cell = rows[0].cells[index]; // grab same index cell from body row to try and match data type
 				t = TableKit.Sortable.detectors.detect(
 						function(d){
-							return TableKit.Sortable.types[d].detect(TableKit.getCellText(cell));
+							return TableKit.Sortable.types[d].detect(TableKit.getCellText(cell));//\raw
 						});
 			}
 			cache[index] = t;
@@ -1086,16 +1081,6 @@ TableKit.Editable.CellEditor.prototype = {
 					if (setup[tbl]._postprocess) {
 						var fn = setup[tbl]._postprocess;
 						fn('tr#' + row.id);
-					}
-				} else {
-					xform = TableKit.tables[table.id].editAjaxTransform; // dunno why the TableKit.option(...) call doesn't work...
-					// n.b.: the xform here in the "else" clause is a generic fn for the entire table and is likely defined all the time;
-					// this is different from the xform in the "if" directly above, which is per-column and may be undefined.
-					// At some point this confusing "generic" xform mechanism should probably be gotten rid of, since it's superseded by the per-column xforms used by the raw data.
-					if (xform) {
-						cell.innerHTML = xform(tbl, head.id, row.id, text.escapeHTML(), raw ? raw.data[row.id] : null, raw ? raw.cols[head.id] : 0);
-					} else {
-						cell.innerHTML = text.escapeHTML();
 					}
 				}
 				// restore possible hanging ident

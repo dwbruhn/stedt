@@ -1,3 +1,40 @@
+var my_dragger;
+var horz_dragger = function () {
+	return new Draggable('dragger', { constraint: 'vertical', change: function (draggableInstance) {
+			var d = $('dragger');
+			var mytop = d.offsetTop;
+			var ettop = $('etyma').offsetTop;
+			$('etyma').setStyle({height:(mytop - ettop) + 'px'});
+			$('lexicon').setStyle({top:(d.offsetTop + d.offsetHeight) + 'px'});
+			console.log($('etyma').style);
+		},
+		snap : function (x, y, d) {
+			var min = $('etyma').offsetTop + 75;
+			var max = $('lexicon').offsetTop + $('lexicon').offsetHeight - 100;
+			if (y < min) y = min;
+			if (y > max) y = max;
+			return [x, y];
+		}
+	});
+};
+var vert_dragger = function () {
+	return new Draggable('dragger', { constraint: 'horizontal', change: function (draggableInstance) {
+			var d = $('dragger');
+			var mytop = d.offsetLeft;
+			var ettop = $('etyma').offsetLeft;
+			$('etyma').setStyle({width:(mytop - ettop) + 'px'});
+			$('lexicon').setStyle({left:(d.offsetLeft + d.offsetWidth) + 'px'});
+		},
+		snap : function (x, y, d) {
+			var min = 150;
+			var max = $('lexicon').offsetLeft + $('lexicon').offsetWidth - 200;
+			if (x < min) x = min;
+			if (x > max) x = max;
+			return [x, y];
+		}
+	});
+};
+
 // this function will be called when loaded (see last line)
 function stedt_simplesearch_init() {
 	function create_searchfn(divname) { return function (e) {
@@ -7,6 +44,7 @@ function stedt_simplesearch_init() {
 			onFailure: function (transport){ alert('Error: ' + transport.responseText); },
 			onComplete: function (transport){ $(divname + '_search').enable(); }
 		});
+		$(divname + '_search').getElements().invoke('blur');
 		$(divname + '_search').disable(); // prevent accidental multiple submit. reversed by onComplete, above.
 		return false;
 	}};
@@ -14,24 +52,50 @@ function stedt_simplesearch_init() {
 	$('etyma_search').onsubmit = create_searchfn('etyma');
 	$('lexicon_search').onsubmit = create_searchfn('lexicon');
 	$('simple_search').onsubmit = create_searchfn('simple');
-	
-	new Draggable('dragger', { constraint: 'vertical', change: function (draggableInstance) {
-		var d = $('dragger');
-		var mytop = d.offsetTop;
-		var ettop = $('etyma').offsetTop;
-		$('etyma').setStyle({height:(mytop - ettop) + 'px'});
-		$('lexicon').setStyle({top:(d.offsetTop + d.offsetHeight) + 'px'});
-	},
-	snap : function (x, y, d) {
-		var min = $('etyma').offsetTop + 75;
-		var max = $('lexicon').offsetTop + $('lexicon').offsetHeight - 100;
-		if (y < min) y = min;
-		if (y > max) y = max;
-		return [x, y];
-	}
-});
+	my_dragger = horz_dragger();
+	$('tog-img').hide();
+	$('simple_searchinput').focus();
+};
 
-$('simple_searchinput').focus();
+function vert_tog() {
+	var t = $('etyma_resulttable');
+	var fields = t ? TableKit.tables[t.id].raw.colNames : '';
+	$('etyma').setAttribute('style','');
+	$('lexicon').setAttribute('style','');
+	$('dragger').setAttribute('style','');
+	my_dragger.destroy();
+	if ($('etyma').hasClassName('vert')) {
+		$('etyma').removeClassName('vert');
+		$('lexicon').removeClassName('vert');
+		$('dragger').removeClassName('vert');
+		if (t) {
+			$A(t.tHead.rows[0].cells).each(function (c, i) {
+				if (!setup.etyma[fields[i]].hide) c.style.display = 'table-cell';
+			});
+			$A(t.tBodies[0].rows).each(function (row) {
+				$A(row.cells).each(function (c,i) {
+					if (!setup.etyma[fields[i]].hide) c.style.display = 'table-cell';
+				});
+			});
+		}
+		my_dragger = horz_dragger();
+	} else {
+		$('etyma').addClassName('vert');
+		$('lexicon').addClassName('vert');
+		$('dragger').addClassName('vert');
+		if (t) {
+			$A(t.tHead.rows[0].cells).each(function (c, i) {
+				if (!setup.etyma[fields[i]].vert_show) c.style.display = 'none';
+			});
+			$A(t.tBodies[0].rows).each(function (row) {
+				$A(row.cells).each(function (c,i) {
+					if (!setup.etyma[fields[i]].vert_show) c.style.display = 'none';
+				});
+			});
+		}
+		my_dragger = vert_dragger();
+	}
+	return false;
 };
 
 function show_advanced_search(tbl) {

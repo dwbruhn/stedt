@@ -79,12 +79,15 @@ function show_cognates(tag) {
 };
 
 var make_one_table = function (tablename, tabledata) {
+	var n = tabledata.data.length;
+	$(tablename + '_status').update(n ? (n > 4 ? (n + ' records found.') : '') : 'No records found.');
 	// make a table
 	var t = $(tablename + '_resulttable');
 	if (t) {
 		t.remove();
 		TableKit.unloadTable(t);
 	}
+	if (n===0) return; // stop here if no results
 	t = $(document.createElement('table')); // $() extends it into a Prototype Element
 	t.id = tablename + '_resulttable';
 	t.width = '100%';
@@ -151,14 +154,11 @@ var make_one_table = function (tablename, tabledata) {
 	TableKit.tables[t.id].raw = {};
 	TableKit.tables[t.id].raw.data = rawData;
 	TableKit.tables[t.id].raw.cols = rawDataCols;
+	TableKit.tables[t.id].raw.colNames = tabledata.fields;
 	if (stedtuserprivs & 1) {
 		TableKit.Editable.init(t);
 		TableKit.tables[t.id].editAjaxURI = baseRef + 'update';
 		TableKit.tables[t.id].editAjaxExtraParams = '&tbl=' + tablename;
-		TableKit.tables[t.id].editAjaxTransform = function (tbl, fld, key, val, rec, n) {
-			var xform = setup[tbl][fld].transform;
-			return xform ? xform(val, key, rec, n) : val;
-		};
 	}
 	if (setup[tablename]._postprocess) {
 		var fn = setup[tablename]._postprocess;
@@ -175,6 +175,7 @@ var ajax_make_table = function (transport,json){ // function suitable for the on
 		$('etyma').show();
 		$('dragger').show();
 		$('lexicon').show();
+		$('tog-img').show();
 		make_one_table('etyma', response.etyma);
 		make_one_table('lexicon', response.lexicon);
 	} else {
@@ -356,6 +357,7 @@ var setup = { // in the form setup.[tablename].[fieldname]
 		},
 		'etyma.tag' : {
 			label: '#',
+			vert_show: true,
 			noedit: true,
 			size: 40,
 			transform: function (v) {
@@ -399,14 +401,17 @@ var setup = { // in the form setup.[tablename].[fieldname]
 			size: 70
 		},
 		'etyma.protoform' : {
+			vert_show: true,
 			label: 'protoform',
 			size: 120
 		},
 		'etyma.protogloss' : {
+			vert_show: true,
 			label: 'protogloss',
 			size: 200
 		},
 		'etyma.plg' : {
+			vert_show: true,
 			label: 'plg',
 			size: 40
 		},
