@@ -32,7 +32,7 @@ sub extractions : Runmode {
 
 sub splash : StartRunmode {
 	my $self = shift;
-	return $self->tt_process("index.tt");
+	return $self->tt_process("splash.tt");
 }
 
 sub source : Runmode {
@@ -80,7 +80,7 @@ sub group : Runmode {
 
 sub searchresults_from_querystring {
 	my ($self, $s, $tbl, $lg) = @_;
-	my $t = $self->load_table_module($tbl, 0);
+	my $t = $self->load_table_module($tbl);
 	my $query = $self->query->new(''); # for some reason faster than saying "new CGI"? disk was thrashing.
 
 	# figure out the table and the search terms
@@ -128,28 +128,45 @@ sub searchresults_from_querystring {
 	return $t->search($query);
 }
 
-sub blah : Runmode { # this sub wants a nicer name
+sub combo : Runmode {
+	my $self = shift;
+	my $q = $self->query;
+	my $s = decode_utf8($q->param('t')) || '';
+	my $lg = decode_utf8($q->param('lg')) || '';
+	my $result;
+
+	if ($s || $lg || !$q->param) {
+		if ($ENV{HTTP_REFERER} && ($s || $lg)) {
+			$self->dbh->do("INSERT querylog VALUES (?,?,?,NOW())", undef,
+				'simple', $lg ? "$s {$lg}" : $s, $ENV{REMOTE_ADDR});
+		}
+		$result->{etyma} = $self->searchresults_from_querystring($s, 'etyma');
+		$result->{lexicon} = $self->searchresults_from_querystring($s, 'lexicon', $lg);
+	} else {
+		$result->{etyma} = $self->load_table_module('etyma')->search($q);
+		$result->{lexicon} = $self->load_table_module('lexicon')->search($q);
+	}
+	return $self->tt_process("index.tt", $result);
+}
+
+sub ajax : Runmode {
 	my $self = shift;
 	my $s = decode_utf8($self->query->param('s'));
 	my $lg = decode_utf8($self->query->param('lg'));
-	my $tbl = $self->param('tbl');
+	my $tbl = $self->query->param('tbl');
 	my $result; # hash ref for the results
 
 	$self->dbh->do("INSERT querylog VALUES (?,?,?,NOW())", undef,
 		$tbl, $lg ? "$s {$lg}" : $s, $ENV{REMOTE_ADDR}) if $s || $lg;
 
 	if (defined($s)) {
-		if ($tbl eq 'simple') {
-			$result->{table} = 'simple';
-			$result->{etyma} = $self->searchresults_from_querystring($s, 'etyma');
-			$result->{lexicon} = $self->searchresults_from_querystring($s, 'lexicon', $lg);
-		} elsif ($tbl eq 'lexicon' || $tbl eq 'etyma') {
+		if ($tbl eq 'lexicon' || $tbl eq 'etyma') {
 			$result = $self->searchresults_from_querystring($s, $tbl, $lg);
 		} else {
 			die "bad table name!";
 		}
 	} else { # just pass the query on
-		my $t = $self->load_table_module($tbl, 0);
+		my $t = $self->load_table_module($tbl);
 		$result = $t->search($self->query);
 	}
 

@@ -5,7 +5,7 @@ use Encode;
 use utf8;
 use CGI::Application::Plugin::Redirect;
 
-sub chapter_browser : RunMode {
+sub chapter_browser : StartRunMode {
 	my $self = shift;
 	my $public = '';
 	my $blessed = '';
@@ -360,9 +360,9 @@ sub xml2html {
 	return $_;
 }
 
-sub notes_for_rn : StartRunmode {
+sub notes_for_rn : Runmode {
 	my $self = shift;
-	my $rn = $self->param('rn');
+	my $rn = $self->query->param('rn');
 	
 	my $INTERNAL_NOTES = $self->has_privs(1);
 	my $internal_note_search = '';

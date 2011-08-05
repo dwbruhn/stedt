@@ -13,7 +13,7 @@ function findPos(obj) { // based on http://www.quirksmode.org/js/findpos.html
 };
 
 // code to make things draggable and droppable for the subroots
-makesubroot = function(dragged, destination, e) {
+var makesubroot = function (dragged, destination, e) {
 	var data = TableKit.tables['etyma_resulttable'].raw.data;
 	var cols = TableKit.tables['etyma_resulttable'].raw.cols;
 	src = dragged.identify().sub('tag',''); // get just the numbers (id is "tag###")
@@ -51,32 +51,27 @@ makesubroot = function(dragged, destination, e) {
 		}
 	});
 };
-var make_draggable_id = function (obj, scrollElement) { // scrollElement is the containing element which should be scrolled, if any
-	new Draggable(obj, { revert: 'failure', constraint:'vertical', scroll:scrollElement,
-		onDrag: function (d,e) {
-			if (!make_draggable_id.moved && (Math.abs(e.pointerY()-make_draggable_id.old_y)>3)) {
-				make_draggable_id.moved=1;
-			}
-			// we create an attribute called "moved" in the make_draggable_id object for efficiency
-			// since only one thing can be dragged at a time, we only need one instance of this var.
-			// of course this would have been much more readable if it said
-			// if (!moved && (abs(new_y-old_y)>3)) moved=1;
-		}
+var make_draggable_id = function z(obj) {
+	// z.scrollElement should be set to the containing element to be scrolled
+	z.onstart = function(d,e) { z.old_y = e.pointerY() };
+	z.ondrag = function (d,e) {
+		if (!z.moved && (Math.abs(e.pointerY()-z.old_y)>2)) z.moved=1
+	};
+	new Draggable(obj, { revert: 'failure', constraint:'vertical', scroll:z.scrollElement,
+		onStart:z.onstart, onDrag:z.ondrag
 	});
 	Droppables.add(obj,
 	  { hoverclass : 'hoverdrop',
 		accept : 'tagid',
 		onDrop : makesubroot
 	  } );
-	obj.onmousedown = function (e) { make_draggable_id.moved=0; make_draggable_id.old_y = e.pointerY() };
-	obj.onclick = function (e) { if (make_draggable_id.moved) e.stop() }; // don't follow the link if it was dragged
 };
 
-function show_notes(rn) {
-	new Ajax.Updater('notes' + rn, baseRef + 'notes/l/' + rn, {
+function show_notes(rn, container) {
+	new Ajax.Updater(container, baseRef + 'notes/notes_for_rn', {
+		parameters: {rn:rn},
 		onFailure: function (transport){ alert('Error: ' + transport.responseText); }
 	});
-	return false;
 };
 
 
@@ -95,8 +90,9 @@ var make_one_table = function (tablename, tabledata) {
 	// make a table
 	var t = $(tablename + '_resulttable');
 	if (t) {
-		t.remove();
 		TableKit.unloadTable(t);
+		t.purge(); // save memory by removing event handlers
+		t.remove();
 	}
 	if (n===0) return; // stop here if no results
 	t = $(document.createElement('table')); // $() extends it into a Prototype Element
@@ -167,31 +163,17 @@ var make_one_table = function (tablename, tabledata) {
 		TableKit.tables[t.id].editAjaxURI = baseRef + 'update';
 		TableKit.tables[t.id].editAjaxExtraParams = '&tbl=' + tablename;
 	}
-	if (setup[tablename]._postprocess) {
-		var fn = setup[tablename]._postprocess;
-		fn('');
-	}
+	if (setup[tablename]._postprocess) setup[tablename]._postprocess(t);
 };
 var ajax_make_table = function (transport,json){ // function suitable for the onSuccess callback
 	var response = transport.responseText || "ERROR: no response text";
 	response = response.evalJSON();
 	var tablename = response.table;
-	if (tablename === 'simple') {
-		$('splash').hide();
-		$('header').show();
-		$('etyma').show();
-		$('dragger').show();
-		$('lexicon').show();
-		$('tog-img').show();
-		make_one_table('etyma', response.etyma);
-		make_one_table('lexicon', response.lexicon);
-	} else {
-		make_one_table(tablename, response);
-	}
+	make_one_table(tablename, response);
 };
 function show_supporting_forms(tag) {
-	new Ajax.Request(baseRef + 'search/lexicon', {
-		parameters: { 'analysis' : tag },
+	new Ajax.Request(baseRef + 'search/ajax', {
+		parameters: { tbl:'lexicon', analysis:tag },
 		onSuccess: function (transport,json) { ajax_make_table(transport,json); show_cognates(tag); },
 		onFailure: function (transport){ alert('Error: ' + transport.responseText); }
 	});
@@ -219,8 +201,8 @@ function SylStation() {
 		while (m = re.exec(s)) {
 			s = s.substring(m[0].length);
 			if (m[1].indexOf('|')!==-1 && syl_ary.length) { // overriding delim
-				syl_ary[syl_ary.length-1] +=
-					delim_ary.pop() + m[1].replace(/\|/, '');
+				syl_ary[syl_ary.length-1] += delim_ary.pop()
+				syl_ary[syl_ary.length-1] += m[1].replace(/\|/, '');
 			} else {
 				syl_ary.push(m[1]);
 			}
@@ -333,10 +315,17 @@ function show_tag(tag,loc) {
 var setup = { // in the form setup.[tablename].[fieldname]
 	etyma : {
 		_key: 'etyma.tag',   // maybe send it from the server?
-		_postprocess: function (context) {
-			var scrollElem = $('etyma') || window; // if we're not in the combo view, there's no etyma div; if we pass a nonexistent element to Draggable, prototype will crash (in firefox and possibly other browsers)
-			$$(context + ' .tagid').each(function(obj, index) {
-				make_draggable_id(obj, scrollElem);
+		_postprocess: function (tbl) {
+			var z = make_draggable_id;
+			z.scrollElement = $('etyma') || window; // if we're not in the combo view, there's no etyma div; if we pass a nonexistent element to Draggable, prototype will crash (in firefox and possibly other browsers)
+			tbl.select('span.tagid').each(z);
+			tbl.on('click', 'span.tagid', function (e) {
+				if (z.moved) e.stop();  // don't follow the link if it was dragged
+				z.moved=0; // reset
+			});
+			tbl.on('click', 'a.lexlink', function (e) {
+				show_supporting_forms(e.findElement('tr').id);
+				e.stop();
 			});
 			// put in a special sort function for all columns of the table
 			var t = TableKit.tables['etyma_resulttable'];
@@ -387,10 +376,10 @@ var setup = { // in the form setup.[tablename].[fieldname]
 			label: 'reflexes',
 			noedit: true,
 			size: 50,
-			transform: function (v,key) {
-				 return v != 0
-				 	? '<a href="#" onclick="return show_supporting_forms(' + key + ')">' + v + '&nbsp;r\'s</a>'
-				 	: v + '&nbsp;r\'s';
+			transform: function (v) {
+				return v != 0
+					? '<a href="#" class="lexlink">' + v + '&nbsp;r\'s</a>'
+					: v + '&nbsp;r\'s';
 			}
 		},
 		'u_recs' : {
@@ -494,13 +483,14 @@ var setup = { // in the form setup.[tablename].[fieldname]
 	},
 	lexicon : {
 		_key: 'lexicon.rn',
-		_postprocess: function (context) {
-			$$(context + ' .lexadd').each(function (a) {
-				var id = $(a).up('tr').id;
-				a.onclick = function () {
-					showaddform('L',id);
-					return false;
-				};
+		_postprocess: function (t) {
+			t.on('click', 'a.lexadd', function (e) {
+				showaddform('L', e.findElement('tr').id);
+				e.stop();
+			});
+			t.on('click', 'a.note_retriever', function (e) {
+				show_notes(e.findElement('tr').id, e.findElement('td'));
+				e.stop();
 			});
 		},
 		'lexicon.rn' : {
@@ -620,12 +610,11 @@ var setup = { // in the form setup.[tablename].[fieldname]
 			label: 'notes',
 			noedit: true,
 			size: 200,
-			transform: function (v,key) {
+			transform: function (v) {
 				if (v == 0) return '';
-				return '<span id="notes' + key +  '"><a href="#" '
-					+ 'onclick="show_notes(' + key + ')">'
+				return '<a href="#" class="note_retriever">'
 					+ v + '&nbsp;note' + (v == 1 ? '' : 's')
-					+ '</a></span>';
+					+ '</a>';
 			}
 		},
 		'languagegroups.ord' : {

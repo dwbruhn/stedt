@@ -150,10 +150,7 @@ var add_record = function () { new Ajax.Request('[% self_url %]/add/[% t.table %
 		rawData[row.id] = rec;
 		TableKit.reload();
 		scrollEnd();
-		if (setup[tablename]._postprocess) {
-			var fn = setup[tablename]._postprocess;
-			fn('tr#' + row.id);
-		}
+		if (setup[tablename]._postprocess_each) setup[tablename]._postprocess_each($(row));
 		$$('.add_reset').each(function(i) {if (i.name !== 'lexicon.lgid') i.value = ''});
     },
     onFailure: function(transport){ alert('Error: ' + transport.responseText) }
@@ -189,6 +186,10 @@ $('search_form').observe('keydown', function (e) {
 			this.reset();
 		}
 	}
+});
+$('search_form').observe('submit', function (e) {
+	e.stop();
+	document.location = '?' + Form.serializeElements(this.select('input:not(:button,:submit,:reset),select').findAll(Form.Element.getValue));
 });
 </script>
 </body>

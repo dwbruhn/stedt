@@ -28,5 +28,5 @@ user: <select name="uid">
 <div id="preview[% n.noteid %]" class="notepreview footnote">
 [%- n.text -%]
 [% IF n.uid != 8 %] [[% n.username %]][% END %]
- <input type="button" value="Edit" onclick="return show_edit([% n.noteid %]);">
+ <input type="button" value="Edit" class="note_edit_toggle">
 </div><br class="edit" clear="right"></div>

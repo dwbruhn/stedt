@@ -1,58 +1,60 @@
 // note saving and deleting via AJAX
-function init_note_form(f) {
-	var id = f.noteid.value;
-	f.onsubmit = function (e) {
-		new Ajax.Request(baseRef + 'notes/save', {
-			parameters: f.serialize(),
-			onSuccess: function (t,json) {
-				// skip if there were no changes
-				if (f.mod.value === json.lastmod) return;
-				var result = t.responseText.split("\r");
-				var note = result.shift();
-				note = note.replace(/"#foot(\d+)" id="toof\1"><sup>\1/g, function (s, n1) {
-					var n =+n1+footnote_counter;
-					return '"#foot' + n + '" id="toof' + n + '"><sup>' + n;
-				});
-				$('preview' + id).innerHTML = note;
-				f.mod.value = json.lastmod;
-				$('lastmod' + id).innerHTML = json.lastmod;
-				$$('.fnote-' + id).invoke('remove');
-				$A(result).each(function (text) {
-					var n = ++footnote_counter;
-					var elem = new Element('p', {'class':'footnote fnote-' + id,
-						id:'foot' + n});
-					elem.innerHTML = '<a href="#toof' + n + '">^ ' + n + '.</a> '
-						+ text;
-					f.up('body').insert(elem);
-				});
-			},
-			onFailure: function(t) {
-				alert(t.responseText);
+$(document.body).on('submit', 'form.noteform', function (e) {
+	var f = e.findElement(), id = f.noteid.value;
+	new Ajax.Request(baseRef + 'notes/save', {
+		parameters: f.serialize(),
+		onSuccess: function (t,json) {
+			// skip if there were no changes
+			if (f.mod.value === json.lastmod) return;
+			var result = t.responseText.split("\r");
+			var note = result.shift(); // first item is main text; remaining items are footnotes, to be handled below
+			note = note.replace(/"#foot(\d+)" id="toof\1"><sup>\1/g, function (s, n1) {
+				var n =+n1+footnote_counter;
+				return '"#foot' + n + '" id="toof' + n + '"><sup>' + n;
+			});
+			$('preview' + id).innerHTML = note;
+			f.mod.value = json.lastmod;
+			$('lastmod' + id).innerHTML = json.lastmod;
+			$$('.fnote-' + id).invoke('purge');
+			$$('.fnote-' + id).invoke('remove');
+			$A(result).each(function (text) {
+				var n = ++footnote_counter;
+				var elem = new Element('p', {'class':'footnote fnote-' + id,
+					id:'foot' + n});
+				elem.innerHTML = '<a href="#toof' + n + '">^ ' + n + '.</a> '
+					+ text;
+				f.up('body').insert(elem);
+			});
+		},
+		onFailure: function(t) {
+			alert(t.responseText);
+		}
+	});
+	Event.stop(e);
+});
+$(document.body).on('click', 'form.noteform input[name=delete_btn]', function (e) {
+	var f = e.findElement('form'), id = f.noteid.value;
+	if (!confirm('Are you sure you want to delete the selected records?'))
+		return;
+	new Ajax.Request(baseRef + 'notes/delete', {
+		parameters: {noteid:id,mod:f.mod.value},
+		onSuccess: function (t,json) {
+			$$('.fnote-' + id).invoke('purge');
+			$$('.fnote-' + id).invoke('remove');
+			var x = $('reorddiv_' + id);
+			if (x.hasClassName('lexnote')) {// remove the footnotemark if there is one
+				var mark = $(x.down('a').id.replace(/^foot/,'toof'));
+				mark.purge();
+				mark.remove();
 			}
-		});
-		Event.stop(e);
-	};
-	f.delete_btn.onclick = function () {
-		if (!confirm('Are you sure you want to delete the selected records?'))
-			return;
-		new Ajax.Request(baseRef + 'notes/delete', {
-			parameters: {noteid:id,mod:f.mod.value},
-			onSuccess: function (t,json) {
-				$$('.fnote-' + id).invoke('remove');
-				var x = $('reorddiv_' + id);
-				if (x.hasClassName('lexnote')) {// remove the footnotemark if there is one
-					var mark = x.down('a').id.replace(/^foot/,'toof');
-					$(mark).remove();
-				}
-				x.remove();
-			},
-			onFailure: function(t) {
-				alert(t.responseText);
-			}
-		});
-	};
-};
-$$('.noteform').each(init_note_form);
+			x.purge();
+			x.remove();
+		},
+		onFailure: function(t) {
+			alert(t.responseText);
+		}
+	});
+});
 
 // note reordering
 $$('.reordcheckbox').each(function (c) {
@@ -112,7 +114,7 @@ function showaddform (spec, id) { // C, E, L; F for comparanda (special handling
 	menu[0].selected = 'selected'; // select the first item
 	f.show();
 	f.xmlnote.focus();
-	f.onsubmit = function (e) {
+	f.observe('submit', function (e) {
 		new Ajax.Request(baseRef + 'notes/add', {
 			parameters: f.serialize(),
 			onSuccess: function (t,json) {
@@ -145,8 +147,6 @@ function showaddform (spec, id) { // C, E, L; F for comparanda (special handling
 					var celltext = cell.innerHTML;
 					cell.innerHTML = celltext + ' <a href="#foot' + footnote_counter + '" id="toof' + footnote_counter + '">' + footnote_counter + '</a>';
 				}
-				// attach javascript
-				init_note_form($('reorddiv_' + json.id).down('.noteform'));
 				f.xmlnote.value = ''; // reset the textarea
 				f.hide();
 			},
@@ -155,12 +155,12 @@ function showaddform (spec, id) { // C, E, L; F for comparanda (special handling
 			}
 		});
 		Event.stop(e);
-	};
-	return false;
+	});
+	return false; // still need this here because etymon and chapter views have inline onclick
 };
 
 // show/hide the editing form
-function show_edit (n) {
-	$('form' + n).toggle();
-	return false;
-};
+$(document.body).on('click', 'input:button.note_edit_toggle', function (e) {
+	e.findElement().up('.lexnote').down('.noteform').toggle();
+	e.stop();
+});

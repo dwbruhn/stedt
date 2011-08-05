@@ -1,0 +1,28 @@
+[% PROCESS header.tt title="STEDT Database (Beta)" suppress_header=1 -%]
+<div id="splash">
+<center>
+<br>
+<a href="http://stedt.berkeley.edu/" title="STEDT Home Page">
+<img src="[% self_base %]img/stedt_rgb.jpg" alt="STEDT Logo" border="0" width="400" height="128"></a>
+<br><br><br>
+<form id="simple_search" method="get" action="[% self_url %]/gnis">
+<i>(proto)gloss:</i> <input type="text" name="t" id="simple_searchinput" size="48" maxlength="128">
+<i>language:</i> <input type="text" name="lg" size="32" maxlength="96">
+<input type="submit" name="search" value="Search" >
+<a href="[% self_base %]help.html" target="_blank">Help</a>
+</form>
+<div style="height:10ex"></div>
+<hr>
+<a href="http://stedt.berkeley.edu/">STEDT Home Page</a> | 
+<a href="[% self_base %]contact.html" target="_blank">Contact Us</a>
+</center>
+</div>
+<script>
+$('simple_searchinput').focus();
+$('simple_search').observe('submit',function(e){e.stop();
+var s = Form.serializeElements(this.select('input:not(:submit)').findAll(Form.Element.getValue));
+document.location = document.location.pathname + '/gnis' + (s?'?'+s:'')
+});
+</script>
+</body>
+</html>

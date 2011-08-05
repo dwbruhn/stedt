@@ -36,28 +36,30 @@ var vert_dragger = function () {
 
 // this function will be called when loaded (see last line)
 function stedt_simplesearch_init() {
-	function create_searchfn(divname) { return function (e) {
-		new Ajax.Request(baseRef + 'search/' + divname, {
-			parameters: { s : $F(divname + '_searchinput'), lg : $F(divname + '_searchlg')},
+	$w('etyma lexicon').each(function (t) {
+		if ($(t + '_resulttable'))
+			TableKit.Raw.init(t + '_resulttable', t, '[% self_url %]/update');
+	});
+	var do_search = function (e) {
+		var tbl = e.findElement().id.sub('_search', '');
+		new Ajax.Request(baseRef + 'search/ajax', {
+			parameters: { tbl : tbl, s : $F(tbl + '_searchinput'), lg : $F(tbl + '_searchlg')},
 			onSuccess: ajax_make_table,
 			onFailure: function (transport){ alert('Error: ' + transport.responseText); },
-			onComplete: function (transport){ $(divname + '_search').enable(); }
+			onComplete: function (transport){ $(tbl + '_search').enable(); }
 		});
-		$(divname + '_search').getElements().invoke('blur');
-		$(divname + '_search').disable(); // prevent accidental multiple submit. reversed by onComplete, above.
+		$(tbl + '_search').getElements().invoke('blur');
+		$(tbl + '_search').disable(); // prevent accidental multiple submit. reversed by onComplete, above.
 		return false;
-	}};
+	};
 	
-	$('etyma_search').onsubmit = create_searchfn('etyma');
-	$('lexicon_search').onsubmit = create_searchfn('lexicon');
-	$('simple_search').onsubmit = create_searchfn('simple');
+	$('etyma_search').onsubmit = do_search;
+	$('lexicon_search').onsubmit = do_search;
 	my_dragger = horz_dragger();
-	$('tog-img').hide();
 	Ajax.Responders.register({
 		onCreate: function() { $('spinner').show() },
 		onComplete: function() { if (0 == Ajax.activeRequestCount) $('spinner' ).hide() }
 	});
-	$('simple_searchinput').focus();
 };
 
 function vert_tog() {

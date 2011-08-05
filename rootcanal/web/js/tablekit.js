@@ -359,10 +359,7 @@ TableKit.Raw = {
 			TableKit.Editable.init(t);
 			TableKit.tables[t.id].editAjaxURI = edituri;
 		}
-		if (setup[tablename]._postprocess) {
-			var fn = setup[tablename]._postprocess;
-			fn('');
-		}
+		if (setup[tablename]._postprocess) setup[tablename]._postprocess(t);
 	}
 };
 
@@ -1079,10 +1076,7 @@ TableKit.Editable.CellEditor.prototype = {
 						c.innerHTML = xform ? xform(rowdata[i].escapeHTML(), row.id, rowdata, i)
 											: rowdata[i].escapeHTML();
 					});
-					if (setup[tbl]._postprocess) {
-						var fn = setup[tbl]._postprocess;
-						fn('tr#' + row.id);
-					}
+					if (setup[tbl]._postprocess_each) setup[tbl]._postprocess_each(row);
 				}
 				// restore possible hanging ident
 				cell.style.paddingLeft = null;
