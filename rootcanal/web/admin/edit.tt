@@ -134,8 +134,9 @@ var add_record = function () { new Ajax.Request('[% self_url %]/add/[% t.table %
 		var rec = response.evalJSON();
 		var t = $('[% t.table %]_resulttable');
 		var row = t.insertRow(-1);
-		row.id = json.id;
 		var tinfo = TableKit.tables[t.id];
+		var rowid = json.id;
+		row.id = tinfo.rawPrefix + '_' + rowid;
 		var rawData = tinfo.raw.data;
 		var head_cells = TableKit.getHeaderCells(t);
 		rec.each(function (v,i) {
@@ -143,11 +144,11 @@ var add_record = function () { new Ajax.Request('[% self_url %]/add/[% t.table %
 			var cell = row.insertCell(-1);
 			if (setup['[% t.table %]'][head_cells[i].id].hide) cell.style.display = 'none';
 			if (v) {
-				cell.innerHTML = xform	? xform(v.escapeHTML(), row.id, rec, i)
+				cell.innerHTML = xform	? xform(v.escapeHTML(), rowid, rec, i)
 										: v.escapeHTML();
 			}
 		});
-		rawData[row.id] = rec;
+		rawData[rowid] = rec;
 		TableKit.reload();
 		scrollEnd();
 		if (setup[tablename]._postprocess_each) setup[tablename]._postprocess_each($(row));

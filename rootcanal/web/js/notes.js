@@ -77,6 +77,11 @@ $$('.reordcheckbox').each(function (c) {
 
 // adding new notes
 function showaddform (spec, id) { // C, E, L; F for comparanda (special handling of notetype)
+	var full_id;
+	if (spec==='L') {
+		full_id = id;
+		id = id.substring(3); // chop off front of tr id
+	}
 	var labels = {O:'Orig/src-DON\'T MODIFY', T:'Text', I:'Internal',
 					N:'New', G:'Graphic', F:'Final', H:'HPTB'};
 	var f = $('addnoteform');
@@ -143,7 +148,7 @@ function showaddform (spec, id) { // C, E, L; F for comparanda (special handling
 					// if it's a lex note, stick it in at the bottom, and add the footnotemark in the table
 					f.up('body').insert(note);
 					++footnote_counter;
-					var cell = $(id).childElements().last();
+					var cell = $(full_id).childElements().last();
 					var celltext = cell.innerHTML;
 					cell.innerHTML = celltext + ' <a href="#foot' + footnote_counter + '" id="toof' + footnote_counter + '">' + footnote_counter + '</a>';
 				}

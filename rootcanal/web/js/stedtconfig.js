@@ -132,29 +132,39 @@ var make_one_table = function (tablename, tabledata) {
 			break;
 	}
 
+	// make unique prefix
+	var prefix = tablename.substring(0,2);
+	while (TableKit.Raw.prefixes[prefix]) { prefix = prefix.az_succ() }
+	TableKit.Raw.prefixes[prefix] = true;
+	prefix += '_';
+
 	// stick in the data
 	var tbody = $(document.createElement('tbody'));
 	var rawData = {};
 	t.appendChild(tbody);
-	tabledata.data.each(function (rec) {
-		var row = tbody.insertRow(-1);
-		row.id = rec[k];	// set this for TableKit.Editable
-		rawData[row.id] = rec;
-		rec.each(function (v,i) {
-			var xform = setup[tablename][tabledata.fields[i]].transform;
-			var cell;
+	var i, l = tabledata.data.length, rec, key, j, m, cell, xform, v;
+	for (i=0; i<l; ++i) {
+		rec = tabledata.data[i];
+		key = rec[k];
+		row = tbody.insertRow(-1);
+		row.id = prefix + key;	// set this for TableKit.Editable
+		rawData[key] = rec;
+		for (j=0, m=rec.length; j<m; ++j) {
+			v = rec[j];
 			cell = row.insertCell(-1);
-			cell.innerHTML = xform	? xform(v ? v.escapeHTML() : '', rec[k], rec, i)
+			xform = setup[tablename][tabledata.fields[j]].transform;
+			cell.innerHTML = xform	? xform(v ? v.escapeHTML() : '', key, rec, j)
 									: v ? v.escapeHTML() : '';
-			if (setup[tablename][tabledata.fields[i]].hide) cell.style.display = 'none';
-		});
-	});
+			if (setup[tablename][tabledata.fields[j]].hide) cell.style.display = 'none';
+		}
+	}
 	
 	// activate TableKit!
 	// t.addClassName('sortable'); // not needed if manually initing
 	TableKit.Sortable.init(t);
 	TableKit.Resizable.init(t);
 	TableKit.options.defaultSort = 1;
+	TableKit.tables[t.id].rawPrefix = prefix.substring(0,2);
 	TableKit.tables[t.id].raw = {};
 	TableKit.tables[t.id].raw.data = rawData;
 	TableKit.tables[t.id].raw.cols = rawDataCols;
@@ -324,7 +334,7 @@ var setup = { // in the form setup.[tablename].[fieldname]
 				z.moved=0; // reset
 			});
 			tbl.on('click', 'a.lexlink', function (e) {
-				show_supporting_forms(e.findElement('tr').id);
+				show_supporting_forms(e.findElement('tr').id.substring(3));
 				e.stop();
 			});
 			// put in a special sort function for all columns of the table
@@ -489,7 +499,7 @@ var setup = { // in the form setup.[tablename].[fieldname]
 				e.stop();
 			});
 			t.on('click', 'a.note_retriever', function (e) {
-				show_notes(e.findElement('tr').id, e.findElement('td'));
+				show_notes(e.findElement('tr').id.substring(3), e.findElement('td'));
 				e.stop();
 			});
 		},
@@ -567,7 +577,7 @@ var setup = { // in the form setup.[tablename].[fieldname]
 			noedit: true,
 			size: 100,
 			transform : function (v, key, rec, n) {
-				return '<a href="' + baseRef + 'group/' + rec[n+1] + '/' + rec[2] + '" target="stedt_grps">' + v + '</a>';
+				return '<a href="' + baseRef + 'group/' + rec[n+1] + '/' + rec[n-1] + '" target="stedt_grps">' + v + '</a>';
 			}
 		},
 		'languagegroups.grpid' : {

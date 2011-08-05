@@ -363,6 +363,7 @@ sub xml2html {
 sub notes_for_rn : Runmode {
 	my $self = shift;
 	my $rn = $self->query->param('rn');
+	return 'Error: not a number' unless $rn =~ /^\d+$/;
 	
 	my $INTERNAL_NOTES = $self->has_privs(1);
 	my $internal_note_search = '';

@@ -212,6 +212,7 @@ Object.extend(TableKit, {
 	unloadTable : function(table){
 	  table = $(table);
 	  if(!TableKit.tables[table.id]) {return;} //if not an existing registered table return
+		TableKit.Raw.prefixes[TableKit.tables[table.id].rawPrefix] = false;
 		var cells = TableKit.getHeaderCells(table);
 		var op = TableKit.option('sortable resizable editable noSortClass descendingClass ascendingClass columnClass sortFirstAscendingClass sortFirstDecendingClass', table.id);
 		 //unregister all the sorting and resizing events
@@ -293,10 +294,16 @@ Object.extend(TableKit, {
 	}
 });
 
+// to keep row id's unique, we use a two-letter prefix
+// which we generate based on the table name on init.
+// we assume that we will never have more than 676(=26*26) tables on one page.
+String.prototype.az_succ = function(){return this=='zz'?'aa':this.charAt(1)==='z'?(String.fromCharCode(this.charCodeAt(0)+1)+'a'):this.succ()};
 TableKit.Raw = {
+	prefixes : {},
 	// init takes a table (or id for a table) that is already populated with data.
 	// the column (or th's') id's should already be set.
-	// assume the existence of a global "setup" var.
+	// we assume the headers are in the first row of the tHead.
+	// also assume the existence of a global "setup" var.
 	// *** this should be changed to some option within the TableKit namespace
 	// <tablename> is the name of the key for the info in the setup hash.
 	init : function (t, tablename, edituri) {
@@ -332,25 +339,34 @@ TableKit.Raw = {
 			fields.push(fld);
 		});
 		
+		// make unique prefix
+		var prefix = tablename.substring(0,2);
+		while (TableKit.Raw.prefixes[prefix]) { prefix = prefix.az_succ() }
+		TableKit.Raw.prefixes[prefix] = true;
+		prefix += '_';
+
 		var rawData = {};
 		// you must compile rawData first, since the transform functions
 		// might refer to cells after themselves!
-		$A(t.tBodies[0].rows).each(function (row) {
-			row.id = row.cells[k].innerHTML;
-			rawData[row.id] = $A(row.cells).map(function (c,i) {
-				if (setup[tablename][fields[i]].hide) c.style.display = 'none';
-				return c.innerHTML.unescapeHTML();
-			});
-		});
-		$A(t.tBodies[0].rows).each(function (row) {
-			var data = rawData[row.id];
-			$A(row.cells).each(function (c,i) {
-				var xform = setup[tablename][fields[i]].transform;
-				if (xform) c.innerHTML = xform(data[i].escapeHTML(), data[k], data, i);
-			});
-		});
+		var i, rows = t.tBodies[0].rows, l = rows.length;
+		var j, m, data, cells;
+		for (i=0; i<l; ++i) {
+			rows[i].id = prefix + rows[i].cells[k].innerHTML;
+			data = rawData[rows[i].id] = [];
+			cells = rows[i].cells;
+			m=cells.length;
+			for (j=0; j<m; ++j) {
+				data[j] = cells[j].innerHTML.unescapeHTML();
+				if (setup[tablename][fields[j]].hide) cells[j].style.display = 'none';
+			}
+			for (j=0; j<m; ++j) {
+				var xform = setup[tablename][fields[j]].transform;
+				if (xform) cells[j].innerHTML = xform(data[j].escapeHTML(), data[k], data, j);
+			}
+		}
 		
 		TableKit.Resizable.init(t); // you have to init before setting the following
+		TableKit.tables[t.id].rawPrefix = prefix.substring(0,2);
 		TableKit.tables[t.id].raw = {};
 		TableKit.tables[t.id].raw.data = rawData;
 		TableKit.tables[t.id].raw.cols = rawDataCols;
@@ -853,7 +869,7 @@ TableKit.Editable = {
 		} else {
 			cell = $(event ? Event.findElement(event, 'td') : index);
 			table = (table && table.tagName && table.tagName !== "TABLE") ? $(table) : cell.up('table');
-			row = cell.up('tr');
+			row = cell.up('tr'); // *** assigned but never used?
 		}
 		var nec = TableKit.option1('noEditClass', table.id);
 		if(cell.hasClassName(nec)) {return;}
@@ -910,7 +926,7 @@ TableKit.Editable.CellEditor.prototype = {
 		// *** added DY
 		var formwidth = cell.offsetWidth; // getWidth();
 		var formheight = cell.getHeight();
-		var rowid = cell.up('tr').id;
+		var rowid = cell.up('tr').id.substring(3);
 		var colid = $(TableKit.getHeaderCells(table, cell)[TableKit.getCellIndex(cell)]).id;
 		var raw = TableKit.tables[table.id].raw;
 		var rawValue = raw ? raw.data[rowid][raw.cols[colid]] : null;
@@ -1050,10 +1066,11 @@ TableKit.Editable.CellEditor.prototype = {
 		form = form ? form : cell.down('form');
 		var head = $(TableKit.getHeaderCells(null, cell)[TableKit.getCellIndex(cell)]);
 		var row = cell.up('tr');
+		var rowid = row.id.substring(3);
 		var table = cell.up('table');
 		// *** DY added custom params
 		var s_extra = TableKit.option1('editAjaxExtraParams', table.id);
-		var s = s_extra + '&row=' + (TableKit.getRowIndex(row)+1) + '&cell=' + (TableKit.getCellIndex(cell)+1) + '&id=' + row.id + '&field=' + head.id + '&' + Form.serialize(form);
+		var s = s_extra + '&row=' + (TableKit.getRowIndex(row)+1) + '&cell=' + (TableKit.getCellIndex(cell)+1) + '&id=' + rowid + '&field=' + head.id + '&' + Form.serialize(form);
 		// *** DY why is the request saved to this.ajax? it doesn't seem to be used for anything
 		this.ajax = new Ajax.Request(op.ajaxURI || TableKit.option1('editAjaxURI', table.id), Object.extend(op.ajaxOptions || TableKit.option1('editAjaxOptions', table.id), {
 			// *** DY changed Ajax.Update to Request to better handle rawData: escapeHTML on client side, not server side
@@ -1066,14 +1083,14 @@ TableKit.Editable.CellEditor.prototype = {
 				var re = /tbl=([^&]+)/;
 				var tbl = re.exec(s_extra)[1]; // extract the table name (used for looking things up in setup), which is different from table.id!
 				var raw = TableKit.tables[table.id].raw;
-				if (raw) raw.data[row.id][raw.cols[head.id]] = text;
 				var xform;
 				if (raw) {
+					raw.data[rowid][raw.cols[head.id]] = text;
 					var colheads = table.tHead.rows[0].cells;
-					var rowdata = raw.data[row.id];
+					var rowdata = raw.data[rowid];
 					$A(row.cells).each(function (c,i) {
 						xform = setup[tbl][colheads[i].id].transform;
-						c.innerHTML = xform ? xform(rowdata[i].escapeHTML(), row.id, rowdata, i)
+						c.innerHTML = xform ? xform(rowdata[i].escapeHTML(), rowid, rowdata, i)
 											: rowdata[i].escapeHTML();
 					});
 					if (setup[tbl]._postprocess_each) setup[tbl]._postprocess_each(row);
