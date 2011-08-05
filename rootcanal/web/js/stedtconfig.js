@@ -201,7 +201,7 @@ function SylStation() {
 		while (m = re.exec(s)) {
 			s = s.substring(m[0].length);
 			if (m[1].indexOf('|')!==-1 && syl_ary.length) { // overriding delim
-				syl_ary[syl_ary.length-1] += delim_ary.pop()
+				syl_ary[syl_ary.length-1] += delim_ary.pop();
 				syl_ary[syl_ary.length-1] += m[1].replace(/\|/, '');
 			} else {
 				syl_ary.push(m[1]);
