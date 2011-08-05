@@ -1,4 +1,4 @@
-[% PROCESS header.tt title="STEDT Database (Beta)" suppress_header=1 vert_tog=1 %]
+[% PROCESS header.tt title="STEDT Database (Beta)" vert_tog=1 %]
 <div id="etyma">
 <div align="center">[% # search div %]
 <form id="etyma_search" method="post">
