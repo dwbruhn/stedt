@@ -1,7 +1,7 @@
 var baseRef = location.pathname.substring(0,location.pathname.lastIndexOf(".pl") + 3) + '/';
 
 function findPos(obj) { // based on http://www.quirksmode.org/js/findpos.html
-	var curleft = curtop = 0;
+	var curleft = 0, curtop = 0;
 	if (obj.offsetParent) { // if the browser supports offsetParent
 		do {
 			if (obj === $('lexicon')) break;
@@ -16,8 +16,8 @@ function findPos(obj) { // based on http://www.quirksmode.org/js/findpos.html
 var makesubroot = function (dragged, destination, e) {
 	var data = TableKit.tables['etyma_resulttable'].raw.data;
 	var cols = TableKit.tables['etyma_resulttable'].raw.cols;
-	src = dragged.identify().sub('tag',''); // get just the numbers (id is "tag###")
-	dst = destination.identify().sub('tag','');
+	var src = dragged.identify().sub('tag',''); // get just the numbers (id is "tag###")
+	var dst = destination.identify().sub('tag','');
 	var srcsuper = data[src][cols['etyma.supertag']];
 	new Ajax.Request(baseRef + 'update', {
 		parameters: {
@@ -84,102 +84,23 @@ function show_cognates(tag) {
 	current_cog = tag;
 };
 
-var make_one_table = function (tablename, tabledata) {
+var ajax_make_table = function (transport,json){ // function suitable for the onSuccess callback
+	if (!transport.responseText) {
+		alert("ERROR: no response text");
+		return;
+	}
+	var tabledata = transport.responseText.evalJSON();
+	var tablename = tabledata.table;
 	var n = tabledata.data.length;
 	$(tablename + '_status').update(n ? (n > 4 ? (n + ' records found.') : '') : 'No records found.');
-	// make a table
-	var t = $(tablename + '_resulttable');
-	if (t) {
-		TableKit.unloadTable(t);
-		t.purge(); // save memory by removing event handlers
-		t.remove();
-	}
-	if (n===0) return; // stop here if no results
-	t = $(document.createElement('table')); // $() extends it into a Prototype Element
-	t.id = tablename + '_resulttable';
-	t.width = '100%';
-	t.style.tableLayout = 'fixed';
-	$(tablename + '_results').appendChild(t);
-
-	// make the header
-	// this is where we make columns editable (by setting the id) or not
-	var thead = t.createTHead();
-	var row = thead.insertRow(-1); // -1 is the index value for "at the end", and is required for firefox
-	var rawDataCols = {}; // lookup table for column id -> index
-	tabledata.fields.each(function (fld, i) {
-		if (!setup[tablename][fld]) {
-			setup[tablename][fld] = { noedit:true };
-		}
-		var c = $(document.createElement('th'));
-		c.id = fld;
-		if (setup[tablename][fld].noedit)
-			c.addClassName('noedit');
-		if (setup[tablename][fld].nosort)
-			c.addClassName('nosort');
-		if (setup[tablename][fld].size)
-			c.width = setup[tablename][fld].size;
-		c.innerHTML = setup[tablename][fld].label || fld;
-		row.appendChild(c);
-		if (setup[tablename][fld].hide)
-			c.style.display = 'none';
-		rawDataCols[fld] = i;
-	});
-	
-	// find index of key field
-	var k;
-	for (k = 0; k < tabledata.fields.length; ++k) {
-		if (tabledata.fields[k] == setup[tablename]._key)
-			break;
-	}
-
-	// make unique prefix
-	var prefix = tablename.substring(0,2);
-	while (TableKit.Raw.prefixes[prefix]) { prefix = prefix.az_succ() }
-	TableKit.Raw.prefixes[prefix] = true;
-	prefix += '_';
-
-	// stick in the data
-	var tbody = $(document.createElement('tbody'));
-	var rawData = {};
-	t.appendChild(tbody);
-	var i, l = tabledata.data.length, rec, key, j, m, cell, xform, v;
-	for (i=0; i<l; ++i) {
-		rec = tabledata.data[i];
-		key = rec[k];
-		row = tbody.insertRow(-1);
-		row.id = prefix + key;	// set this for TableKit.Editable
-		rawData[key] = rec;
-		for (j=0, m=rec.length; j<m; ++j) {
-			v = rec[j];
-			cell = row.insertCell(-1);
-			xform = setup[tablename][tabledata.fields[j]].transform;
-			cell.innerHTML = xform	? xform(v ? v.escapeHTML() : '', key, rec, j)
-									: v ? v.escapeHTML() : '';
-			if (setup[tablename][tabledata.fields[j]].hide) cell.style.display = 'none';
-		}
-	}
-	
-	// activate TableKit!
-	// t.addClassName('sortable'); // not needed if manually initing
-	TableKit.Sortable.init(t);
-	TableKit.Resizable.init(t);
-	TableKit.options.defaultSort = 1;
-	TableKit.tables[t.id].rawPrefix = prefix.substring(0,2);
-	TableKit.tables[t.id].raw = {};
-	TableKit.tables[t.id].raw.data = rawData;
-	TableKit.tables[t.id].raw.cols = rawDataCols;
-	if (stedtuserprivs & 1) {
-		TableKit.Editable.init(t);
-		TableKit.tables[t.id].editAjaxURI = baseRef + 'update';
-		TableKit.tables[t.id].editAjaxExtraParams = '&tbl=' + tablename;
-	}
-	if (setup[tablename]._postprocess) setup[tablename]._postprocess(t);
-};
-var ajax_make_table = function (transport,json){ // function suitable for the onSuccess callback
-	var response = transport.responseText || "ERROR: no response text";
-	response = response.evalJSON();
-	var tablename = response.table;
-	make_one_table(tablename, response);
+	TableKit.Raw.initByAjax(
+		tablename + '_resulttable',
+		tablename,
+		tabledata,
+		setup[tablename],
+		stedtuserprivs&1 ? baseRef+'update' : 0,
+		tablename + '_results'
+	);
 };
 function show_supporting_forms(tag) {
 	new Ajax.Request(baseRef + 'search/ajax', {
@@ -321,7 +242,7 @@ function show_tag(tag,loc) {
 // 	}
 };
 
-// maybe better to return a fn, not a string, for transforms
+// setup is accessible above because vars are "hoisted" in js
 var setup = { // in the form setup.[tablename].[fieldname]
 	etyma : {
 		_key: 'etyma.tag',   // maybe send it from the server?
@@ -495,7 +416,7 @@ var setup = { // in the form setup.[tablename].[fieldname]
 		_key: 'lexicon.rn',
 		_postprocess: function (t) {
 			t.on('click', 'a.lexadd', function (e) {
-				showaddform('L', e.findElement('tr').id);
+				showaddform('L', e.findElement('tr').id); // not sure why this works, since showaddform is defined in another file!
 				e.stop();
 			});
 			t.on('click', 'a.note_retriever', function (e) {

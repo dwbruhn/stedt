@@ -61,7 +61,7 @@ if (stedt_other_username) {
 	};
 }
 for (var i = 1; i < num_tables; i++) {
-	TableKit.Raw.init('lexicon' + i, 'lexicon', (stedtuserprivs & 1) ? (baseRef+'update') : null);
+	TableKit.Raw.init('lexicon' + i, 'lexicon', setup['lexicon'], stedtuserprivs&1 ? baseRef+'update' : 0);
 	TableKit.Rows.stripe('lexicon' + i);
 	TableKit.tables['lexicon' + i].editAjaxExtraParams += '&uid2=' + uid2;
 }

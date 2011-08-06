@@ -303,10 +303,9 @@ TableKit.Raw = {
 	// init takes a table (or id for a table) that is already populated with data.
 	// the column (or th's') id's should already be set.
 	// we assume the headers are in the first row of the tHead.
-	// also assume the existence of a global "setup" var.
-	// *** this should be changed to some option within the TableKit namespace
-	// <tablename> is the name of the key for the info in the setup hash.
-	init : function (t, tablename, edituri) {
+	// config must be an object
+	// <tablename> is the name of the key for the info in the config hash.
+	init : function (t, tablename, config, edituri) {
 		var fields = [];
 		TableKit.options.defaultSortDirection = 1;
 		var t = $(t);
@@ -315,25 +314,25 @@ TableKit.Raw = {
 		var thead = t.tHead;
 		var row = thead.rows[0];
 		var rawDataCols = {}; // lookup table for column id -> index
-		
-		if (!setup[tablename]) setup[tablename] = {};
-		
+
+		if (!config) config = {};
+
 		var k = -1; // to find index of key field
 		$A(row.cells).each(function (cell, i) {
 			var fld = cell.id;
-			if (!setup[tablename][fld]) {
-				setup[tablename][fld] = { noedit:true };
+			if (!config[fld]) {
+				config[fld] = { noedit:true };
 			}
-			if (setup[tablename][fld].label)
-				cell.innerHTML = setup[tablename][fld].label;
-			if (setup[tablename][fld].hide)
+			if (config[fld].label)
+				cell.innerHTML = config[fld].label;
+			if (config[fld].hide)
 				cell.style.display = 'none';
-			if (setup[tablename][fld].noedit)
+			if (config[fld].noedit)
 				cell.addClassName('noedit');
-			if (setup[tablename][fld].size)
-				cell.width = setup[tablename][fld].size;
+			if (config[fld].size)
+				cell.width = config[fld].size;
 			rawDataCols[fld] = i;
-			if (k < 0 && setup[tablename]['_key'] === fld) {
+			if (k < 0 && config['_key'] === fld) {
 				k = i;
 			}
 			fields.push(fld);
@@ -346,36 +345,132 @@ TableKit.Raw = {
 		prefix += '_';
 
 		var rawData = {};
-		// you must compile rawData first, since the transform functions
-		// might refer to cells after themselves!
-		var i, rows = t.tBodies[0].rows, l = rows.length;
+		var i, rows = t.tBodies[0].rows, l = rows.length, id;
 		var j, m, data, cells;
 		for (i=0; i<l; ++i) {
-			rows[i].id = prefix + rows[i].cells[k].innerHTML;
-			data = rawData[rows[i].id] = [];
+			id = rows[i].cells[k].innerHTML;
+			rows[i].id = prefix + id;
+			data = rawData[id] = [];
 			cells = rows[i].cells;
 			m=cells.length;
+			// you must compile rawData first, since the transform functions
+			// might refer to cells after themselves!
 			for (j=0; j<m; ++j) {
 				data[j] = cells[j].innerHTML.unescapeHTML();
-				if (setup[tablename][fields[j]].hide) cells[j].style.display = 'none';
+				if (config[fields[j]].hide) cells[j].style.display = 'none';
 			}
 			for (j=0; j<m; ++j) {
-				var xform = setup[tablename][fields[j]].transform;
-				if (xform) cells[j].innerHTML = xform(data[j].escapeHTML(), data[k], data, j);
+				var xform = config[fields[j]].transform;
+				if (xform) cells[j].innerHTML = xform(data[j].escapeHTML(), id, data, j);
 			}
 		}
 		
 		TableKit.Resizable.init(t); // you have to init before setting the following
 		TableKit.tables[t.id].rawPrefix = prefix.substring(0,2);
 		TableKit.tables[t.id].raw = {};
+		TableKit.tables[t.id].raw.tblname = tablename;
+		TableKit.tables[t.id].raw.config = config;
 		TableKit.tables[t.id].raw.data = rawData;
 		TableKit.tables[t.id].raw.cols = rawDataCols;
-		TableKit.tables[t.id].editAjaxExtraParams = '&tbl=' + tablename;
 		if (edituri) {
 			TableKit.Editable.init(t);
 			TableKit.tables[t.id].editAjaxURI = edituri;
 		}
-		if (setup[tablename]._postprocess) setup[tablename]._postprocess(t);
+		if (config._postprocess) config._postprocess(t);
+	},
+	// yes, this function is awfully similar to the one above, but there's
+	// enough different about them that it's not really worth trying to factor out stuff
+	initByAjax: function (t_id, tablename, tabledata, config, edituri, container_id) {
+		// make a table
+		var t = $(t_id);
+		if (t) {
+			TableKit.unloadTable(t);
+			t.purge(); // save memory by removing event handlers
+			t.remove();
+		}
+		if (!tabledata.data.length) return; // stop here if no results
+		t = $(document.createElement('table')); // $() extends it into a Prototype Element
+		t.id = t_id;
+		t.width = '100%';
+		t.style.tableLayout = 'fixed';
+		$(container_id).appendChild(t);
+		if (!config) config = {};
+	
+		// make the header
+		// this is where we make columns editable (by setting the id) or not
+		var thead = t.createTHead();
+		var row = thead.insertRow(-1); // -1 is the index value for "at the end", and is required for firefox
+		var rawDataCols = {}; // lookup table for column id -> index
+		tabledata.fields.each(function (fld, i) {
+			if (!config[fld]) {
+				config[fld] = { noedit:true };
+			}
+			var c = $(document.createElement('th'));
+			c.id = fld;
+			if (config[fld].noedit)
+				c.addClassName('noedit');
+			if (config[fld].nosort)
+				c.addClassName('nosort');
+			if (config[fld].size)
+				c.width = config[fld].size;
+			c.innerHTML = config[fld].label || fld;
+			row.appendChild(c);
+			if (config[fld].hide)
+				c.style.display = 'none';
+			rawDataCols[fld] = i;
+		});
+		
+		// find index of key field
+		var k;
+		for (k = 0; k < tabledata.fields.length; ++k) {
+			if (tabledata.fields[k] == config._key)
+				break;
+		}
+	
+		// make unique prefix
+		var prefix = tablename.substring(0,2);
+		while (TableKit.Raw.prefixes[prefix]) { prefix = prefix.az_succ() }
+		TableKit.Raw.prefixes[prefix] = true;
+		prefix += '_';
+	
+		// stick in the data
+		var tbody = $(document.createElement('tbody'));
+		var rawData = {};
+		t.appendChild(tbody);
+		var i, l = tabledata.data.length, rec, id, j, m, cell, xform, v;
+		for (i=0; i<l; ++i) {
+			rec = tabledata.data[i];
+			id = rec[k];
+			row = tbody.insertRow(-1);
+			row.id = prefix + id;	// set this for TableKit.Editable
+			rawData[id] = rec;
+			for (j=0, m=rec.length; j<m; ++j) {
+				v = (rec[j]||'').escapeHTML();
+				// everything we get from the server is a string, so even "0" is truthy
+				// but we might get null values, in which case we change it to ""
+				cell = row.insertCell(-1);
+				xform = config[tabledata.fields[j]].transform;
+				cell.innerHTML = xform	? xform(v, id, rec, j) : v;
+				if (config[tabledata.fields[j]].hide) cell.style.display = 'none';
+			}
+		}
+		
+		// activate TableKit!
+		// t.addClassName('sortable'); // not needed if manually initing
+		TableKit.Sortable.init(t);
+		TableKit.Resizable.init(t);
+		TableKit.options.defaultSort = 1;
+		TableKit.tables[t.id].rawPrefix = prefix.substring(0,2);
+		TableKit.tables[t.id].raw = {};
+		TableKit.tables[t.id].raw.tblname = tablename;
+		TableKit.tables[t.id].raw.config = config;
+		TableKit.tables[t.id].raw.data = rawData;
+		TableKit.tables[t.id].raw.cols = rawDataCols;
+		if (edituri) {
+			TableKit.Editable.init(t);
+			TableKit.tables[t.id].editAjaxURI = edituri;
+		}
+		if (config._postprocess) config._postprocess(t);
 	}
 };
 
@@ -958,7 +1053,6 @@ TableKit.Editable.CellEditor.prototype = {
 							field.onblur = '';
 							if (field.value == oldValue) {
 								this.cancel(cell);
-// 								this.ajax = null;
 // 								var data = TableKit.getCellData(cell);
 // 								cell.innerHTML = data.htmlContent;
 // 								data.htmlContent = '';
@@ -1063,37 +1157,34 @@ TableKit.Editable.CellEditor.prototype = {
 	},
 	submit : function(cell, form) {
 		var op = this.options;
-		form = form ? form : cell.down('form');
+		form = form || cell.down('form');
 		var head = $(TableKit.getHeaderCells(null, cell)[TableKit.getCellIndex(cell)]);
 		var row = cell.up('tr');
 		var rowid = row.id.substring(3);
 		var table = cell.up('table');
 		// *** DY added custom params
-		var s_extra = TableKit.option1('editAjaxExtraParams', table.id);
-		var s = s_extra + '&row=' + (TableKit.getRowIndex(row)+1) + '&cell=' + (TableKit.getCellIndex(cell)+1) + '&id=' + rowid + '&field=' + head.id + '&' + Form.serialize(form);
-		// *** DY why is the request saved to this.ajax? it doesn't seem to be used for anything
-		this.ajax = new Ajax.Request(op.ajaxURI || TableKit.option1('editAjaxURI', table.id), Object.extend(op.ajaxOptions || TableKit.option1('editAjaxOptions', table.id), {
+		var raw = TableKit.tables[table.id].raw, s, tbl;
+		s = 'row=' + (TableKit.getRowIndex(row)+1) + '&cell=' + (TableKit.getCellIndex(cell)+1);
+		s += TableKit.option1('editAjaxExtraParams', table.id)||'';
+		if (raw) {
+			tbl = raw.tblname;
+			s += '&tbl=' + tbl + '&id=' + rowid + '&field=' + head.id + '&' + Form.serialize(form);
+		}
+		new Ajax.Request(op.ajaxURI || TableKit.option1('editAjaxURI', table.id), Object.extend(op.ajaxOptions || TableKit.option1('editAjaxOptions', table.id), {
 			// *** DY changed Ajax.Update to Request to better handle rawData: escapeHTML on client side, not server side
 			postBody : s,
 			onSuccess : function(t) {
-				var data = TableKit.getCellData(cell);
+				var data = TableKit.getCellData(cell), text = t.responseText, xform, colheads, rowdata;
 				data.active = false;
 				data.refresh = true; // mark cell cache for refreshing, in case cell contents has changed and sorting is applied
-				var text = t.responseText;
-				var re = /tbl=([^&]+)/;
-				var tbl = re.exec(s_extra)[1]; // extract the table name (used for looking things up in setup), which is different from table.id!
-				var raw = TableKit.tables[table.id].raw;
-				var xform;
 				if (raw) {
 					raw.data[rowid][raw.cols[head.id]] = text;
-					var colheads = table.tHead.rows[0].cells;
-					var rowdata = raw.data[rowid];
+					colheads = table.tHead.rows[0].cells;
+					rowdata = raw.data[rowid];
 					$A(row.cells).each(function (c,i) {
-						xform = setup[tbl][colheads[i].id].transform;
-						c.innerHTML = xform ? xform(rowdata[i].escapeHTML(), rowid, rowdata, i)
-											: rowdata[i].escapeHTML();
+						c.innerHTML = (raw.config[colheads[i].id].transform||Prototype.K)((rowdata[i]||'').escapeHTML(), rowid, rowdata, i); // see note in initByAjax about null
 					});
-					if (setup[tbl]._postprocess_each) setup[tbl]._postprocess_each(row);
+					if (raw.config._postprocess_each) raw.config._postprocess_each(row);
 				}
 				// restore possible hanging ident
 				cell.style.paddingLeft = null;
@@ -1115,7 +1206,6 @@ TableKit.Editable.CellEditor.prototype = {
 		this.cancel(cell);
 	},
 	cancel : function(cell) {
-		this.ajax = null;
 		var data = TableKit.getCellData(cell);
 		cell.innerHTML = data.htmlContent;
 		data.htmlContent = '';
@@ -1124,8 +1214,7 @@ TableKit.Editable.CellEditor.prototype = {
 		cell.style.paddingLeft = null;
 		cell.style.textIndent = null;
 		// *** DY
-	},
-	ajax : null
+	}
 };
 
 TableKit.Editable.textInput = function(n,attributes) {

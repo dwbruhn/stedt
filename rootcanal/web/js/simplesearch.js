@@ -38,7 +38,7 @@ var vert_dragger = function () {
 function stedt_simplesearch_init() {
 	$w('etyma lexicon').each(function (t) {
 		if ($(t + '_resulttable'))
-			TableKit.Raw.init(t + '_resulttable', t, '[% self_url %]/update');
+			TableKit.Raw.init(t + '_resulttable', t, setup[t], stedtuserprivs&1 ? baseRef+'update' : 0);
 	});
 	var do_search = function (e) {
 		var tbl = e.findElement().id.sub('_search', '');
