@@ -305,6 +305,7 @@ TableKit.Raw = {
 	// we assume the headers are in the first row of the tHead.
 	// config must be an object
 	// <tablename> is the name of the key for the info in the config hash.
+	// config._cols_done is called after the cols have been set up
 	init : function (t, tablename, config, edituri) {
 		var fields = [];
 		TableKit.options.defaultSortDirection = 1;
@@ -337,6 +338,7 @@ TableKit.Raw = {
 			}
 			fields.push(fld);
 		});
+		if (config._cols_done) config._cols_done(rawDataCols);
 		
 		// make unique prefix
 		var prefix = tablename.substring(0,2);
@@ -419,6 +421,7 @@ TableKit.Raw = {
 				c.style.display = 'none';
 			rawDataCols[fld] = i;
 		});
+		if (config._cols_done) config._cols_done(rawDataCols);
 		
 		// find index of key field
 		var k;

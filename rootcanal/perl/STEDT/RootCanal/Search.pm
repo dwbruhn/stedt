@@ -35,6 +35,25 @@ sub splash : StartRunmode {
 	return $self->tt_process("splash.tt");
 }
 
+sub elink : Runmode {
+	my $self = shift;
+	my @etyma;
+	for my $t ($self->query->param('t')) { # array context, so param returns the whole list!
+		next unless $t =~ /^\d+$/;
+		my %e;
+		push @etyma, \%e;
+		$e{tag} = $t;
+		@e{qw/pform pgloss/} = $self->dbh->selectrow_array("SELECT protoform, protogloss FROM etyma WHERE tag=?", undef, $t);
+		$e{pform} =~ s/⪤ +/⪤ */g;
+		$e{pform} =~ s/OR +/OR */g;
+		$e{pform} =~ s/~ +/~ */g;
+		$e{pform} =~ s/ = +/ = */g;
+		$e{pform} = '*' . $e{pform};
+	}
+	return "Error: no valid tag numbers!" unless @etyma;
+	return $self->tt_process("tt/et_info.tt", {etyma=>\@etyma});
+}
+
 sub source : Runmode {
 	my $self = shift;
 	my $srcabbr = $self->param('srcabbr');

@@ -1,16 +1,16 @@
 var baseRef = location.pathname.substring(0,location.pathname.lastIndexOf(".pl") + 3) + '/';
 
-function findPos(obj) { // based on http://www.quirksmode.org/js/findpos.html
-	var curleft = 0, curtop = 0;
-	if (obj.offsetParent) { // if the browser supports offsetParent
-		do {
-			if (obj === $('lexicon')) break;
-			curleft += obj.offsetLeft;
-			curtop += obj.offsetTop;
-		} while (obj = obj.offsetParent);
-		return [curleft,curtop];
-	}
-};
+// function findPos(obj) { // based on http://www.quirksmode.org/js/findpos.html
+// 	var curleft = 0, curtop = 0;
+// 	if (obj.offsetParent) { // if the browser supports offsetParent
+// 		do {
+// 			// if (obj === $('lexicon')) break;
+// 			curleft += obj.offsetLeft;
+// 			curtop += obj.offsetTop;
+// 		} while (obj = obj.offsetParent);
+// 		return [curleft,curtop];
+// 	}
+// };
 
 // code to make things draggable and droppable for the subroots
 var makesubroot = function (dragged, destination, e) {
@@ -104,6 +104,7 @@ var ajax_make_table = function (transport,json){ // function suitable for the on
 };
 function show_supporting_forms(tag) {
 	new Ajax.Request(baseRef + 'search/ajax', {
+		method: 'get',
 		parameters: { tbl:'lexicon', analysis:tag },
 		onSuccess: function (transport,json) { ajax_make_table(transport,json); show_cognates(tag); },
 		onFailure: function (transport){ alert('Error: ' + transport.responseText); }
@@ -221,25 +222,47 @@ var public_roots = {};
 674,1285,518,3584,3585,3586,3587,3588,3589,3590,599,598,4353,4698,5048,3000].each( function (n) {public_roots[n] = true;});
 function show_root(tag) {
 	new Ajax.Request(baseRef + 'search/etyma', {
+		method: 'get',
 		parameters: { 'etyma.tag' : tag },
 		onSuccess: function (transport,json) { ajax_make_table(transport,json); show_cognates(tag); },
 		onFailure: function (transport){ alert('Error: ' + transport.responseText); }
 	});
 };
-function show_tag(tag,loc) {
-// 	new Ajax.Request(baseRef + 'search/etyma', {
-// 		parameters: { 'etyma.tag' : tag },
-// 		onSuccess: ajax_make_table,
-// 		onFailure: function (transport){ alert('Error: ' + transport.responseText); }
-// 	});
-	var x = $('info');
-// 	if (x.visible()) {
-// 		x.hide();
-// 	} else {
-		x.innerHTML = tag;
-		x.setStyle({left:loc[0] + 'px', top:loc[1] + 'px'});
-		x.show();
-// 	}
+$(document.body).insert(new Element('div', {id:'info',style:'display:none'}).update('<div></div>')) ;
+$(document.body).on('click', 'a#hideinfo', function (e) { e.stop(); $('info').hide() });
+$(document.body).on('keydown', function (e) {	if (e.keyCode === Event.KEY_ESC) $('info').hide() });
+var show_tag = function z(e) {
+	var tags, elem = e.findElement(),
+		classnames = $w(elem.className).findAll(function(s){return s.substring(0,2)==='t_'});
+	e.stop();
+	if (elem === z.curr_elem && $('info').visible()) {
+		$('info').hide();
+		z.curr_elem = '';
+		return;
+	}
+	if (classnames.length) tags = classnames.invoke('substring', 2); else return;
+	if (z.cache[tags.join(',')]) {
+		z.show_info(z.cache[tags.join(',')], elem);
+		return;
+	}
+	new Ajax.Request(baseRef + 'search/elink', {
+		method: 'get',
+		parameters: { t : tags },
+		onSuccess: function (t) {
+			t = t.responseText;
+			z.show_info(t, elem);
+			z.cache[tags.join(',')] = t;
+		},
+		onFailure: function (transport){ alert('Error: ' + transport.responseText); }
+	});
+};
+show_tag.cache = {};
+show_tag.show_info = function (t, elem) {
+	var x = $('info'), loc = elem.positionedOffset();
+	elem.getOffsetParent().insert(x);
+	x.down('div').update(t);
+	x.setStyle({left:loc[0] + 'px', top:loc[1] + 'px'}).show();
+	show_tag.curr_elem = elem;
 };
 
 // setup is accessible above because vars are "hoisted" in js
@@ -414,6 +437,9 @@ var setup = { // in the form setup.[tablename].[fieldname]
 	},
 	lexicon : {
 		_key: 'lexicon.rn',
+		_cols_done: function (c) {
+			if (c['user_an']) setup.lexicon._an2 = true;
+		},
 		_postprocess: function (t) {
 			t.on('click', 'a.lexadd', function (e) {
 				showaddform('L', e.findElement('tr').id); // not sure why this works, since showaddform is defined in another file!
@@ -423,6 +449,7 @@ var setup = { // in the form setup.[tablename].[fieldname]
 				show_notes(e.findElement('tr').id.substring(3), e.findElement('td'));
 				e.stop();
 			});
+			t.on('click', 'a.elink', show_tag);
 		},
 		'lexicon.rn' : {
 			label: 'rn',
@@ -458,6 +485,13 @@ var setup = { // in the form setup.[tablename].[fieldname]
 			transform: function (v,key,rec) {
 				if (!v) return '';
 				var analysis = rec[1] || ''; // might be NULL from the SQL query
+				var an2, t2;
+				if (setup.lexicon._an2) {
+					an2 = rec[2] || '';
+					t2 = an2.split(',');
+				} else {
+					t2 = [];
+				}
 				var tags = analysis.split(',');
 				var result = SYLSTATION.syllabify(v.unescapeHTML());
 				// since the transform receives escaped HTML, but SylStation
@@ -465,20 +499,31 @@ var setup = { // in the form setup.[tablename].[fieldname]
 				// things like "&amp;" back to "&") before passing to SylStation
 				// and re-escape below when putting together the HTML string.
 				var a = result[0].map(function (s,i) {
-					var delim = result[1][i] || '&thinsp;';
-					var makelink = !skipped_roots[tags[i]] && (stedttagger || public_roots[tags[i]]);
-					return (parseInt(tags[i], 10) && makelink)
-						? '<a href="' + baseRef + 'etymon/' + tags[i] + '" target="stedt_etymon"'
-							+ ' class="r' + tags[i] + '">'
-							+ s.escapeHTML() + '</a>'  + delim
-// 						? '<a href="' + baseRef + 'etyma/' + tags[i]
-// 							+ '" onclick="'
-// //							+ 'alert(event.element().cumulativeScrollOffset());'
-// 							+ 'show_root(' + tags[i]  // + ', findPos(event.element())
-// 							+ '); return false;"'
-// 							+ '" class="r' + tags[i] + '">'
-// 							+ s.escapeHTML() + '</a>' + delim
-						: '<span class="r' + tags[i] + '">' + s.escapeHTML() + '</span>' + delim;
+					var delim = result[1][i] || '&thinsp;', link_tag, syl_class = '';
+					// figure out what class to assign (so it shows up with the right color)
+					if (tags[i] && t2[i]) {
+						syl_class = 't_' + tags[i]; // put this in for div#info purposes
+						if (tags[i]===t2[i]) {
+							// if stedt and user tags match, use the user's style
+							syl_class += ' u' + t2[i];
+							link_tag = stedttagger ? (skipped_roots[t2[i]] ? '' : t2[i]) : public_roots[t2[i]] ? t2[i] : public_roots[tags[i]] ? tags[i] : '';
+						} else {
+							// otherwise mark this syllable as a conflict
+							syl_class += ' t_' + t2[i] + ' approve-conflict';
+							link_tag = stedttagger ? t2[i] : public_roots[t2[i]] ? t2[i] : public_roots[tags[i]] ? tags[i] : '';
+						}
+					} else if (tags[i]) { // if only one or the other of the columns is defined, then simply mark it as such.
+						syl_class = 't_' + tags[i] + ' r' + tags[i];
+						link_tag = stedttagger ? (skipped_roots[tags[i]] ? '' : tags[i]) : public_roots[tags[i]] ? tags[i] : '';
+					} else if (t2[i]) {
+						syl_class = 't_' + t2[i] + ' u' + t2[i];
+						link_tag = stedttagger ? (skipped_roots[t2[i]] ? '' : t2[i]) : public_roots[t2[i]] ? t2[i] : '';
+					}
+					return parseInt(link_tag,10)
+						? '<a href="' + baseRef + 'etymon/' + link_tag + '" target="stedt_etymon"'
+							+ '" class="elink ' + syl_class + '">'
+							+ s.escapeHTML() + '</a>' + delim
+						: '<span class="' + syl_class + '">' + s.escapeHTML() + '</span>' + delim;
 				});
 				return a.join('');
 			}

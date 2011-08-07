@@ -43,6 +43,7 @@ function stedt_simplesearch_init() {
 	var do_search = function (e) {
 		var tbl = e.findElement().id.sub('_search', '');
 		new Ajax.Request(baseRef + 'search/ajax', {
+			method: 'get',
 			parameters: { tbl : tbl, s : $F(tbl + '_searchinput'), lg : $F(tbl + '_searchlg')},
 			onSuccess: ajax_make_table,
 			onFailure: function (transport){ alert('Error: ' + transport.responseText); },
@@ -67,6 +68,7 @@ function vert_tog() {
 	$('etyma').setAttribute('style',''); // for some reason removeAttribute doesn't seem to work so well...
 	$('lexicon').setAttribute('style','');
 	$('dragger').setAttribute('style','');
+	$('info').hide();
 	my_dragger.destroy();
 	if ($('etyma').hasClassName('vert')) {
 		$('etyma').removeClassName('vert');
@@ -75,12 +77,12 @@ function vert_tog() {
 		if (t) {
 			$A(t.tHead.rows[0].cells).each(function (c, i) {
 				setup.etyma[c.id].hide = setup.etyma[c.id].old_hide;
-				if (!setup.etyma[c.id].hide) c.style.display = 'table-cell';
+				if (!setup.etyma[c.id].hide) c.style.display = '';
 				fields.push(c.id);
 			});
 			$A(t.tBodies[0].rows).each(function (row) {
 				$A(row.cells).each(function (c,i) {
-					if (!setup.etyma[fields[i]].hide) c.style.display = 'table-cell';
+					if (!setup.etyma[fields[i]].hide) c.style.display = '';
 				});
 			});
 		}

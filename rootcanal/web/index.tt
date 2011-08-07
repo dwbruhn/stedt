@@ -58,7 +58,6 @@ Search lexicon:&nbsp;&nbsp;<i>gloss:</i> <input name="s" type="text" size="48" i
 </tbody>
 </table>
 [% END %]
-<div id="info" style="display:none;"></div>
 </div>
 
 <script src="[% self_base %]js/simplesearch.js"></script>

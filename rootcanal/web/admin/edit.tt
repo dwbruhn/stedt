@@ -122,7 +122,7 @@ var footnote_counter = [% footnotes.size %];
 <script src="[% self_base %]js/tbl/[% t.table %].js"></script>
 <script>
 var tablename = '[% t.table %]';
-TableKit.Raw.init(tablename + '_resulttable', tablename, '[% self_url %]/update');
+TableKit.Raw.init(tablename + '_resulttable', tablename, setup[tablename], '[% self_url %]/update');
 var scrollEnd = function() {
 	if (document.body.scrollHeight) { window.scrollTo(0, document.body.scrollHeight); 
 	} else if (screen.height) { window.scrollTo(0, screen.height); } // IE5 

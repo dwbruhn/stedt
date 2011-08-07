@@ -15,33 +15,6 @@ setup['lexicon']['notes.rn'] = {
 };
 if (stedt_other_username) {
 	setup['lexicon']['user_an']['label'] = stedt_other_username + '\'s analysis';
-	setup['lexicon']['lexicon.reflex']['transform'] = function (v,key,rec) {
-			if (!v) return '';
-			var analysis = rec[1] || ''; // might be NULL from the SQL query
-			var an2 = rec[2] || '';
-			var tags = analysis.split(',');
-			var t2 = an2.split(',');
-			var result = SYLSTATION.syllabify(v.unescapeHTML());
-			var a = result[0].map(function (s,i) {
-				var delim = result[1][i] || '&thinsp;';
-				var makelink = !skipped_roots[tags[i]];
-				var syl_class = ''; // figure out what class to assign (so it shows up with the right color)
-				if (tags[i] && t2[i]) {
-					syl_class = tags[i]===t2[i] ? 'u' + t2[i] : 'approve-conflict'; // if stedt and user tags match, use the user's style; otherwise mark this syllable as a conflict
-				} else if (tags[i]) { // if only one of the columns is defined, then simply mark it as such.
-					syl_class = 'r' + tags[i];
-				} else if (t2[i]) {
-					syl_class = 'u' + t2[i];
-				}
-				if (syl_class) { syl_class = ' class="' + syl_class + '"' }
-				return (parseInt(tags[i], 10) && makelink)
-					? '<a href="' + baseRef + 'etymon/' + tags[i] + '" target="stedt_etymon"'
-						+ syl_class + '>'
-						+ s.escapeHTML() + '</a>'  + delim
-					: '<span' + syl_class + '>' + s.escapeHTML() + '</span>' + delim;
-			});
-			return a.join('');
-	};
 	setup['lexicon']['user_an']['transform'] = function (v) {
 		if (!v) return '';
 		var s = v.replace(/, */g,', ');
