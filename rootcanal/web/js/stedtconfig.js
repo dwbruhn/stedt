@@ -230,7 +230,7 @@ function show_root(tag) {
 };
 $(document.body).insert(new Element('div', {id:'info',style:'display:none'}).update('<div></div>')) ;
 $(document.body).on('click', 'a#hideinfo', function (e) { e.stop(); $('info').hide() });
-$(document.body).on('keydown', function (e) {	if (e.keyCode === Event.KEY_ESC) $('info').hide() });
+$(document).on('keydown', function (e) { if (e.keyCode === Event.KEY_ESC) $('info').hide() });
 var show_tag = function z(e) {
 	var tags, elem = e.findElement(),
 		classnames = $w(elem.className).findAll(function(s){return s.substring(0,2)==='t_'});
@@ -263,6 +263,31 @@ show_tag.show_info = function (t, elem) {
 	x.down('div').update(t);
 	x.setStyle({left:loc[0] + 'px', top:loc[1] + 'px'}).show();
 	show_tag.curr_elem = elem;
+};
+
+// How to activate tagging mode? (== box around some syllable somewhere)
+// -> double-click a syllable
+//		OR hit up/down arrow
+//	This should activate a new column of numbers 1-9 in the etyma table.
+// How to end?
+// -> hit Esc when no changes are pending.
+// Esc will (1) hide info (2) cancel changes (3) exit tagging mode.
+function type$less (e) { // yes, $ is allowed in variable names!
+//	right/left: Select next/prev syllable.
+//		Show selection with heavy border around syllable and corresponding tag numbers, if any.
+//	up/down/return: prev/next lex record.
+//		Save the current tagging, if different.
+//		Select an appropriate syllable of the next record. Try to skip morphemes marked as p/s.
+//		Scroll to visible (1/3 from top or bottom) if it's above/below the line.
+//	1-9: tag currently selected syllable with the etymon with that number
+//		highlight (yellow fade) the current syllable, and update the 
+//	Esc: undo changes to current record.
+//		Highlight unsaved changes in yellow.
+//		Put a little gray box with white text underneath it to remind the user.
+
+// 	if (e.keyCode === Event.) {
+// 	
+// 	}
 };
 
 // setup is accessible above because vars are "hoisted" in js

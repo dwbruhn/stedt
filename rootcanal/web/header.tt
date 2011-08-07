@@ -14,7 +14,7 @@
 [%- FOREACH n IN cognates %].u[% n %] { background-color:#6FF; } [% END %]</style>
 [% END # cognates -%]
 	<script src="[% self_base %]scriptaculous/lib/prototype.js"></script>
-	<script src="[% self_base %]scriptaculous/src/scriptaculous.js"></script>
+	<script src="[% self_base %]scriptaculous/src/scriptaculous.js?load=effects,dragdrop,controls"></script>
 	<script src="[% self_base %]js/tablekit.js"></script>
 </head>
 <body>

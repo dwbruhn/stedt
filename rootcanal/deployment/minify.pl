@@ -5,7 +5,7 @@
 
 my $in = shift @ARGV;
 my $out = $in;
-$out =~ s|^.*?/js/|$ENV{HOME}/public_html/js/|;
+$out =~ s|^.*?/web/|$ENV{HOME}/public_html/|;
 # print "$in -> $out\n";
 # exit;
 
