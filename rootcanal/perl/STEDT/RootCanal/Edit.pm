@@ -169,7 +169,7 @@ sub update : Runmode {
 		}
 		if ($oldval ne $value) {
 			$self->dbh->do("INSERT changelog VALUES (?,?,?,?,?,?,NOW())", undef,
-				$self->param('uid'), $tblname, $field =~ /([^.]+)$/, $id, $oldval || '', $value); # $oldval might be undefined (and interpreted as NULL by mysql)
+				$self->param('uid'), $tblname, $field =~ /([^.]+)$/, $id, $oldval || '', $value || ''); # $oldval might be undefined (and interpreted as NULL by mysql)
 		}
 		return $value;
 	} else {
