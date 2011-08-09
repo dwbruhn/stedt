@@ -167,7 +167,7 @@ $t->wheres(
 			return $is_string ? "l_e_h2.tag_str='$v'" : "l_e_h2.tag=$v";
 		}
 	},
-	'lexicon.gloss' => 'word',#sub { my ($k,$v) = @_; "$k RLIKE '[[:<:]]$v'" },
+	'lexicon.gloss' => 'word',
 	'languagegroups.grp' => sub {my ($k,$v) = @_; $v =~ s/(\.0)+$//; "languagegroups.grpno LIKE '$v\%'"},
 		# make it search all subgroups as well
 	'languagenames.language' => sub {
@@ -175,6 +175,10 @@ $t->wheres(
 		if ($v eq '0') {
 			return "lexicon.lgid=0";
 		} else {
+			$v =~ s/\\/\\\\/g;
+			if ($v =~ s/^\*//) {
+				return "$k RLIKE '$v'";
+			}
 			return "$k RLIKE '[[:<:]]$v'";
 		}
 	},

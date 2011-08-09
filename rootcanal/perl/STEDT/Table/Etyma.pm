@@ -92,6 +92,7 @@ $t->wheres(
 		if ($v eq '0') {
 			return "$k=''";
 		} else {
+			$v =~ s/\\/\\\\/g;
 			return "$k RLIKE '[[:<:]]${v}[[:>:]]'";
 		}
 	},

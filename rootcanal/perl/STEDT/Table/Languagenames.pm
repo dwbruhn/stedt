@@ -77,7 +77,7 @@ $t->wheres(
 	'languagenames.srcabbr' => sub {my ($k,$v) = @_; "$k LIKE '$v\%'"},
 	'languagegroups.grp' => sub {my ($k,$v) = @_; $v =~ s/(\.0)+$//; "languagegroups.grpno LIKE '$v\%'"},
 		# make it search all subgroups as well
-	'languagenames.language' => sub { my ($k,$v) = @_; "$k RLIKE '[[:<:]]$v'"; },
+	'languagenames.language' => 'beginword',
 );
 
 

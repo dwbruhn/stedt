@@ -204,14 +204,16 @@ sub get_query {
 }
 
 # helper WHERE bits
-# $v has single quotes and backslashes escaped already, so they should be
+# $v has single quotes escaped already, so they should be
 # safe to use in a single-quote context. Any other use of $v
 # (e.g. used bare as an integer) must be carefully controlled!
 # See where_int for an example where non-digits are stripped.
+# Also, REGEX (aka RLIKE) passes the string to the regex engine,
+# which will need another round of backslash escaping.
 sub where_int { my ($k,$v) = @_; $v =~ s/\D//g; return "'bad int!'='0'" unless $v =~ /\d/; $v =~ /^([<>])(.+)/ ? "$k$1$2" : "$k=$v" }
-sub where_rlike { my ($k,$v) = @_; "$k RLIKE '$v'" }
-sub where_word { my ($k,$v) = @_; "$k RLIKE '[[:<:]]${v}[[:>:]]'" }
-sub where_beginword { my ($k,$v) = @_; "$k RLIKE '[[:<:]]$v'" }
+sub where_rlike {     my ($k,$v) = @_; $v =~ s/\\/\\\\/g; "$k RLIKE '$v'" }
+sub where_word {      my ($k,$v) = @_; $v =~ s/\\/\\\\/g; $v =~ s/^\*// ? "$k RLIKE '$v'" : "$k RLIKE '[[:<:]]${v}[[:>:]]'" }
+sub where_beginword { my ($k,$v) = @_; $v =~ s/\\/\\\\/g; $v =~ s/^\*// ? "$k RLIKE '$v'" : "$k RLIKE '[[:<:]]$v'" }
 
 sub wheres {
 	my $self = shift;
@@ -237,14 +239,20 @@ sub query_where {
 	my $query_ok = 0;
 	
 	for my $key ($cgi->param) {
-		if ($self->{is_field}{$key} || $self->in_searchable($key) # make sure the field name is in one of these lists, just to be safe
-			and (my $value = $cgi->param($key)) ne '') { # might be numeric 0, so must check for empty string
-			$query_ok = 1;
-			$value =~ s/'/''/g;	# security, don't let people put weird sql in here!
-			$value =~ s/\\/\\\\/g;
-
+		 # make sure the field name is in one of these lists, just to be safe
+		if ($self->{is_field}{$key} || $self->in_searchable($key)) {
 			my @restrictions;
-			for my $value (split /, */, $value) {
+			# split by commas that are not preceded by a single backslash (allows searching for commas)
+			for my $value (split /(?<!(?<!\\)\\), */, $cgi->param($key)) {
+				next if $value eq ''; # might be numeric 0, so must check for empty string
+				$query_ok = 1;
+
+				# prevent sql injection -- this is specific to mysql strings
+				# first remove the last of an odd number of backslashes before any single quote
+				# (or end of string), so the backslash can't escape a following char
+				$value =~ s/(?<!\\)((?:\\\\)*)\\('|$)/$1$2/g;
+				$value =~ s/'/''/g; # escape all single quotes
+
 				# get the WHERE phrase for this key, if specified
 				# otherwise, default to an int if it's a calculated field, a string (RLIKE) otherwise.
 				my $sub = $self->wheres($key) || ($self->in_calculated_fields($key) ? \&where_int : \&where_rlike);
