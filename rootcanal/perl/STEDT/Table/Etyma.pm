@@ -92,7 +92,7 @@ $t->wheres(
 		if ($v eq '0') {
 			return "$k=''";
 		} else {
-			$v =~ s/\\/\\\\/g;
+			STEDT::Table::prep_regex $v;
 			return "$k RLIKE '[[:<:]]${v}[[:>:]]'";
 		}
 	},

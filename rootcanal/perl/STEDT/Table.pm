@@ -203,17 +203,31 @@ sub get_query {
 		$where . ($having ? " HAVING $having" : '');
 }
 
+# helper sub to prepare regexes for sql
+# this will modify the value passed in!
+# things to pay attention to:
+# 1. REGEX (aka RLIKE) passes the string to the regex engine,
+#    which will need another round of backslash escaping.
+# 2. substitute \b with ([[:<:]]|[[:>:]]). (\b must be preceded
+#    by an even number of backslashes)
+sub prep_regex ($) {
+	for ($_[0]) {
+		s/(?<!\\)((?:\\\\)*)\\b/$1([[:<:]]|[[:>:]])/g;
+		# s/^([+*?|{])/\\$1/g; # try to escape initial +*?|{; we'll need to switch the order of this with s/^\*(?=.)//
+		s/\\/\\\\/g;
+	}
+}
+
 # helper WHERE bits
 # $v has single quotes escaped already, so they should be
 # safe to use in a single-quote context. Any other use of $v
 # (e.g. used bare as an integer) must be carefully controlled!
 # See where_int for an example where non-digits are stripped.
-# Also, REGEX (aka RLIKE) passes the string to the regex engine,
-# which will need another round of backslash escaping.
+
 sub where_int { my ($k,$v) = @_; $v =~ s/\D//g; return "'bad int!'='0'" unless $v =~ /\d/; $v =~ /^([<>])(.+)/ ? "$k$1$2" : "$k=$v" }
-sub where_rlike {     my ($k,$v) = @_; $v =~ s/\\/\\\\/g; "$k RLIKE '$v'" }
-sub where_word {      my ($k,$v) = @_; $v =~ s/\\/\\\\/g; $v =~ s/^\*// ? "$k RLIKE '$v'" : "$k RLIKE '[[:<:]]${v}[[:>:]]'" }
-sub where_beginword { my ($k,$v) = @_; $v =~ s/\\/\\\\/g; $v =~ s/^\*// ? "$k RLIKE '$v'" : "$k RLIKE '[[:<:]]$v'" }
+sub where_rlike {     my ($k,$v) = @_; prep_regex $v; "$k RLIKE '$v'" }
+sub where_word {      my ($k,$v) = @_; prep_regex $v; $v =~ s/^\*(?=.)// ? "$k RLIKE '$v'" : "$k RLIKE '[[:<:]]${v}[[:>:]]'" }
+sub where_beginword { my ($k,$v) = @_; prep_regex $v; $v =~ s/^\*(?=.)// ? "$k RLIKE '$v'" : "$k RLIKE '[[:<:]]$v'" }
 
 sub wheres {
 	my $self = shift;

@@ -175,8 +175,8 @@ $t->wheres(
 		if ($v eq '0') {
 			return "lexicon.lgid=0";
 		} else {
-			$v =~ s/\\/\\\\/g;
-			if ($v =~ s/^\*//) {
+			STEDT::Table::prep_regex $v;
+			if ($v =~ s/^\*(?=.)//) {
 				return "$k RLIKE '$v'";
 			}
 			return "$k RLIKE '[[:<:]]$v'";
