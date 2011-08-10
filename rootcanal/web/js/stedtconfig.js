@@ -113,7 +113,7 @@ function show_supporting_forms(tag) {
 };
 
 function SylStation() {
-	var tonechars = "⁰¹²³⁴⁵⁶⁷⁸0-9ˊˋ";
+	var tonechars = "⁰¹²³⁴⁵⁶⁷⁸0-9ˊˋ˥-˩";
 	var delimchars = "-=≡≣+.,;/~◦⪤ ";
 	var rebytonepostfix = "([^" + delimchars + tonechars + "]+[" + tonechars + "]+(?:\\|$)?)([" + delimchars + "]*)";
 		// special case "(?:\\|$)?" here to handle trailing overriding delimiter
