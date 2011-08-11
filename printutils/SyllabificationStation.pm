@@ -38,7 +38,7 @@ Constructor class for SyllabificationStation objects.
 
 sub new {
     # character classes for regular expressions
-    my $tonchar = "⁰¹²³⁴⁵⁶⁷⁸0-9ˊˋ";
+    my $tonchar = "⁰¹²³⁴⁵⁶⁷⁸0-9ˊˋ˥-˩";
     my $delim = "-=≡≣+.,;/~◦⪤ "; # '-' hyphen must be at beginning or end
     	# or else it screws up the regex set
     
