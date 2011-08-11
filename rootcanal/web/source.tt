@@ -33,7 +33,7 @@ on [% USE date %][% date.format(date.now, '%F') %].
 	<td><a href="[% self_url %]/group/[% row.3 %]/[% row.7 %]" target="stedt_grps">[% row.1 %]</a></td>
 	<td>[% row.2 %]</td>
 	<td>[% row.4 %] - <a href="[% self_url %]/group/[% row.3 %]" target="stedt_grps">[% row.5 %]</a></td>
-	<td>[% row.6 %]</td>
+	<td><a href="[% self_url %]/gnis?lexicon.lgid=[% row.7 %]" target="_blank">[% row.6 %]</a></td>
 </tr>
 [% END -%]
 </table>
