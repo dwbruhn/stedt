@@ -28,7 +28,10 @@ use strict;
 use utf8;
 use Encode qw/ decode encode from_to /;
 
-=cut
+# character classes for regular expressions
+my $tonchar = "⁰¹²³⁴⁵⁶⁷⁸0-9ˊˋ˥-˩";
+my $delim = "-=≡≣+.,;/~◦⪤↮ ()"; # '-' hyphen must be at beginning or end
+	# or else it screws up the regex set
 
 =head2 new()
 
@@ -37,28 +40,22 @@ Constructor class for SyllabificationStation objects.
 =cut
 
 sub new {
-    # character classes for regular expressions
-    my $tonchar = "⁰¹²³⁴⁵⁶⁷⁸0-9ˊˋ˥-˩";
-    my $delim = "-=≡≣+.,;/~◦⪤ "; # '-' hyphen must be at beginning or end
-    	# or else it screws up the regex set
-    
     # create object and populate it with useful members
     my $self = {
 	'regexes' => {
 	    'bytonepostfix' =>
 		qr<([^$delim$tonchar]+[$tonchar]+(?:\|$)?)([$delim]*)>,
 	    'bytoneprefix' =>
-	        qq<([$tonchar]{1,2}[^$delim$tonchar]+)> .
+	        qr<([$tonchar]{1,2}[^$delim$tonchar]+)([$delim]*)>,
 	        	# remember delim comes first because it starts with hyphen!
-		qq<([$delim]*)>,
 	    'bydelimiters' =>
-	        qq<([^$delim]+)> .
-		qq<([$delim]*)>,
+	        qr<([^$delim]+)([$delim]*)>,
 	    },
 	'debug' => 0,
 	'syls'     => [ ],
 	'num_syls' => 0,
 	'delims'   => [ ],
+	'prefix'   => '',
 	'residue'  => [ ],
 	'tags'     => [ ],
 	'grammar_used' => '',
@@ -81,9 +78,14 @@ sub syllabify_per_regex {
     my ($self, $re, $word) = @_;
     $self->{syls} = [ ];
     $self->{delims} = [ ];
-    my $is_suffix = $word =~ s/^-//;
+    $self->{prefix} = '';
+    if ($word =~ s/^([$delim]+)//o) {
+    	$self->{prefix} = $1; # save beginning delim chars for later
+    }
+    $word =~ s/\(([^$delim$tonchar]+)\)/（$1）/og; # pretend that parens surrounding non-delims are not delimiters
     while ($word =~ s/\A$re//) {
     	my ($ssyl, $sdelim) = ($1, $2);
+    	$ssyl =~ tr/（）/()/; # change the fake parens back
     	if ($ssyl =~ s/\|// && @{$self->{syls}}) {	# make an exception for the overriding delimiter, but ONLY if there's something in the array already
     	    my $olddelim = pop @{$self->{delims}};
     	    $self->{syls}[-1] .= $olddelim;
@@ -95,7 +97,7 @@ sub syllabify_per_regex {
 	print "Match: $ssyl\tResidue: $word\n" 
 	    if ($self->{debug});
     }
-    $self->{syls}[0] = '-' . $self->{syls}[0] if $is_suffix; # special case for beginning hyphen
+    # $self->{syls}[0] = $self->{prefix} . $self->{syls}[0] if $self->{prefix}; # special case for beginning hyphen
     $self->{residue} = $word;
     $self->{num_syls} = scalar(@{$self->{syls}});
     if ($word) {
@@ -154,6 +156,7 @@ sub get_xml_format {
     my @syls = @{$self->{syls}};
     my @delims = @{$self->{delims}};
     my @tags = @{$self->{tags}};
+    $xml = $self->{prefix};
     for $syl (@syls) {
 	$delim = shift(@delims) || '';
 	$tag   = shift(@tags)   || '';
@@ -168,6 +171,7 @@ sub get_xml_mark_cog {
     my @syls = @{$self->{syls}};
     my @delims = @{$self->{delims}};
     my @tags = @{$self->{tags}};
+    $xml = $self->{prefix};
     for $syl (@syls) {
 	$delim = shift(@delims) || '';
 	$tag   = shift(@tags)   || '';
@@ -186,6 +190,7 @@ sub get_brace_mark_cog {
     my @syls = @{$self->{syls}};
     my @delims = @{$self->{delims}};
     my @tags = @{$self->{tags}};
+    $xml = $self->{prefix};
     for $syl (@syls) {
 	$delim = shift(@delims) || '';
 	$tag   = shift(@tags)   || '';
