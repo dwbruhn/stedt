@@ -114,7 +114,9 @@ function show_supporting_forms(tag) {
 
 function SylStation() {
 	var tonechars = "⁰¹²³⁴⁵⁶⁷⁸0-9ˊˋ˥-˩";
-	var delimchars = "-=≡≣+.,;/~◦⪤ ";
+	var delimchars = "-=≡≣+.,;/~◦⪤↮ \\(\\)";
+	var regexp_to_hide_parens = new RegExp('\\(([^' + delimchars + tonechars + ']+)\\)','g');
+	var regexp_for_starting_delims = new RegExp('^([' + delimchars + ']+)');
 	var rebytonepostfix = "([^" + delimchars + tonechars + "]+[" + tonechars + "]+(?:\\|$)?)([" + delimchars + "]*)";
 		// special case "(?:\\|$)?" here to handle trailing overriding delimiter
 		// (non-grouping | at end of string; it's double-escaped since the backslash needs to show up in the regex)
@@ -123,20 +125,29 @@ function SylStation() {
 
 	var syl_ary;   // array of parsed out "syllables"
 	var delim_ary; // array of the delimiters following the "syllables", above
+	var prefix = '';    // string that might precede the first syl
 
 	var syllabify_by_regex = function (s, re) {
-		var m, is_suffix = s.charAt(0) === '-';
-		if (is_suffix) s = s.substring(1);
-		re = new RegExp("^" + re);
-		syl_ary = []; // clear out our arrays
+		// replace parens surrounding "character" chars with temporary full-width equivalents;
+		// all remaining parens are treated as delimchars.
+		s = s.replace(regexp_to_hide_parens, '（$1）');
+		var m, prefix_match, is_suffix = regexp_for_starting_delims.test(s); //s.charAt(0) === '-';
+		syl_ary = []; // clear out our return values
 		delim_ary = [];
+		prefix = '';
+		if (is_suffix) {
+			prefix_match = regexp_for_starting_delims.exec(s);
+			prefix = prefix_match[1];
+			s = s.substring(prefix.length);
+		}
+		re = new RegExp("^" + re);
 		while (m = re.exec(s)) {
 			s = s.substring(m[0].length);
 			if (m[1].indexOf('|')!==-1 && syl_ary.length) { // overriding delim
 				syl_ary[syl_ary.length-1] += delim_ary.pop();
-				syl_ary[syl_ary.length-1] += m[1].replace(/\|/, '');
+				syl_ary[syl_ary.length-1] += m[1].replace('|', '').replace('（','(').replace('）',')');
 			} else {
-				syl_ary.push(m[1]);
+				syl_ary.push(m[1].replace('（','(').replace('）',')'));
 			}
 			delim_ary.push(m[2].replace(/◦/,'&thinsp;')); // STEDT delim -> thin space
 			// if this &thinsp; shows up in the interface, it's because
@@ -146,9 +157,9 @@ function SylStation() {
 			// to an escaped HTML char code if they're overridden!
 		}
 		if (!syl_ary[0]) syl_ary[0] = '';
-		if (is_suffix) {
-			syl_ary[0] = "-" + syl_ary[0];
-		}
+// 		if (is_suffix) {
+// 			syl_ary[0] = prefix + syl_ary[0]; // "-"
+// 		}
 		if (s) { // if it fails, we should append the residue at the end
 			syl_ary[syl_ary.length-1] += s;
 		}
@@ -162,7 +173,7 @@ function SylStation() {
 				}
 			}
 		}
-		return [syl_ary, delim_ary];
+		return [syl_ary, delim_ary, prefix];
 	};
 };
 var SYLSTATION = new SylStation(); // for efficiency, we make this object once
@@ -523,8 +534,12 @@ var setup = { // in the form setup.[tablename].[fieldname]
 				// treats semicolons as delims, we have to unescape (e.g.
 				// things like "&amp;" back to "&") before passing to SylStation
 				// and re-escape below when putting together the HTML string.
-				var a = result[0].map(function (s,i) {
-					var delim = result[1][i] || '&thinsp;', link_tag, syl_class = '';
+				var i, l = result[0].length, a = result[2], s, delim, link_tag, syl_class;
+				for (i=0; i<l; ++i) {
+					s = result[0][i];
+					delim = result[1][i] || '&thinsp;'
+					link_tag = '';
+					syl_class = '';
 					// figure out what class to assign (so it shows up with the right color)
 					if (tags[i] && t2[i]) {
 						syl_class = 't_' + tags[i]; // put this in for div#info purposes
@@ -544,13 +559,13 @@ var setup = { // in the form setup.[tablename].[fieldname]
 						syl_class = 't_' + t2[i] + ' u' + t2[i];
 						link_tag = stedttagger ? (skipped_roots[t2[i]] ? '' : t2[i]) : public_roots[t2[i]] ? t2[i] : '';
 					}
-					return parseInt(link_tag,10)
+					a += parseInt(link_tag,10)
 						? '<a href="' + baseRef + 'etymon/' + link_tag + '" target="stedt_etymon"'
 							+ '" class="elink ' + syl_class + '">'
 							+ s.escapeHTML() + '</a>' + delim
 						: '<span class="' + syl_class + '">' + s.escapeHTML() + '</span>' + delim;
-				});
-				return a.join('');
+				}
+				return a;
 			}
 		},
 		'lexicon.gloss' : {

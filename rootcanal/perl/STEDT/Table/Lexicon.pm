@@ -114,7 +114,7 @@ $t->field_visible_privs(
 	'user_an' => 1,
 );
 $t->field_editable_privs(
-	'analysis' => 16,
+	'analysis' => 8,
 	'user_an' => 1,
 	'lexicon.reflex' => 1,
 	'lexicon.gloss' => 16,
@@ -145,6 +145,8 @@ $t->wheres(
 		my ($k,$v) = @_;
 		if ($v eq '0') { # use special value of 0 to search for empty analysis
 			return "0 = (SELECT COUNT(*) FROM lx_et_hash WHERE rn=lexicon.rn AND uid=8)";
+		} elsif ($v eq '!0') {
+			return "0 < (SELECT COUNT(*) FROM lx_et_hash WHERE rn=lexicon.rn AND uid=8)";
 		} else {
 			my $is_string = ($v !~ /^\d+$/);
 			unless ($t->{query_from} =~ / lx_et_hash ON \(lexicon.rn/) {
@@ -159,6 +161,8 @@ $t->wheres(
 		$v =~ s/\D//g; return "'bad int!'='0'" unless $v =~ /\d/;
 		if ($v eq '0') {
 			return "0 = (SELECT COUNT(*) FROM lx_et_hash WHERE rn=lexicon.rn AND uid=$uid)";
+		} elsif ($v eq '!0') {
+			return "0 < (SELECT COUNT(*) FROM lx_et_hash WHERE rn=lexicon.rn AND uid=$uid)";
 		} else {
 			my $is_string = ($v !~ /^\d+$/);
 			unless ($t->{query_from} =~ / lx_et_hash AS l_e_h2 ON \(lexicon.rn/) {
