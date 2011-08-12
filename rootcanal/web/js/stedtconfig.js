@@ -114,7 +114,7 @@ function show_supporting_forms(tag) {
 
 function SylStation() {
 	var tonechars = "⁰¹²³⁴⁵⁶⁷⁸0-9ˊˋ˥-˩";
-	var delimchars = "-=≡≣+.,;/~◦⪤↮ \\(\\)";
+	var delimchars = "-=≡≣+.,;/~◦⪤()↮ ";
 	var regexp_to_hide_parens = new RegExp('\\(([^' + delimchars + tonechars + ']+)\\)','g');
 	var regexp_for_starting_delims = new RegExp('^([' + delimchars + ']+)');
 	var rebytonepostfix = "([^" + delimchars + tonechars + "]+[" + tonechars + "]+(?:\\|$)?)([" + delimchars + "]*)";
