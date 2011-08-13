@@ -156,25 +156,6 @@ sub query_where {
 # HTML GENERATION
 ######################################################################
 
-sub make_header {
-  my $stylesheet = 'styles/tagger.css';
-  my $cgi = shift;
-  print $cgi->header(-charset => "utf8");
-  print $cgi->start_html(-head =>
-			 $cgi->meta( 
-				    {-http_equiv => 'Content-Type', 
-				     -content => 'text/html; charset=utf8'}),
-			 -encoding => 'utf-8',
-			 -title=>'STEDT Database',
-			 -style => { -src => 'http://localhost/styles/tagger.css', -type=>"text/css" },
-	);
-}
-
-sub make_footer {
-  my $cgi = shift;
-  print $cgi->end_html;
-}
-
 sub make_query_form {
   my $cgi = shift;
   my $dbh = shift;
@@ -190,8 +171,14 @@ sub make_query_form {
 
   print $cgi->start_form(-method => 'GET');
   print $cgi->start_table(-border => '0');
+  my $makePrintButton = "";
+  my $makeSaveButton  = "";
+  if (1) {
+     $makePrintButton = $cgi->submit("submit", "Print");
+     $makeSaveButton  = $cgi->submit("submit",  "Save");
+  }
   print $cgi->Tr(
-		 $cgi->td({-align=>'center', -valign=>'middle'}, $cgi->submit("submit", "Search")),
+		 $cgi->td({-align=>'center', -valign=>'middle', -colspan=>'2'}, $cgi->submit("submit", "Search"),$makePrintButton,$makeSaveButton),
 		 $cgi->td({-colspan=>20}, $cgi->h3("STEDT Lexicon")),
 		);
   print $cgi->param('sortkey') ? $cgi->hidden( {-name => 'sortkey', -default => $cgi->param('sortkey')}) : '';
@@ -338,7 +325,8 @@ sub make_update_form {
 	my $analysis;
 	foreach my $tag (@f) {
 	  if ($tag =~ /^\d+$/) {
-	    $analysis .= $cgi->a({-href=>"etyma.pl?submit=search&etyma.tag=$tag",-target=>'etyma_detail'},
+	    #$analysis .= $cgi->a({-href=>"etyma.pl?submit=search&etyma.tag=$tag",-target=>'etyma_detail'},
+	    $analysis .= $cgi->a({-href=>"etymology.pl?tag=$tag",-target=>'etyma_detail'},
 				 $tag) . "+";
 	  }
 	  else {
@@ -373,12 +361,11 @@ sub make_update_form {
 				 # -label => ''));
     print "</tr>";
   }
-  print $cgi->tfoot(
-		    $cgi->Tr(
-			     #$cgi->td($cgi->submit('submit', 'Save All')),
-			     $cgi->td($cgi->reset)),
+  #print $cgi->tfoot(
+		    #$cgi->Tr(
+		    #$cgi->td($cgi->submit('submit', 'Save All')),
 		    #$cgi->Tr($cgi->td($cgi->submit(-name=>'submit', -value=>'Delete Selected',-onClick=>"if (confirm('Are you sure you want to delete this record?')) return true; else return false;")))
-		   );
+		   #);
   print $cgi->end_table;
   print $cgi->end_form;
   my $url = $cgi->url(-absolute=>1);
@@ -395,11 +382,28 @@ sub print_data {
     my %results;
     $SearchLimit = 2000;	# set this higher for printing
     my $query = get_query($cgi) or return;
-				 
+			 
 	my $sth = $dbh->prepare($query);
 	$sth->execute();
+        my $numrows = $sth->rows;
 	@results{@fields} = ();
 	$sth->bind_columns(map { \$results{$_} } @fields);
+	print $cgi->h2("STEDT database extract");
+        my $time = scalar localtime;
+        print $cgi->p($cgi->i("on: " . $time));  
+	print $cgi->h3("Search terms");
+	print $cgi->start_table;
+	print $cgi->Tr($cgi->th("Field"),$cgi->th("Value"));
+ 	my @query = ();
+        grep { 
+		if (($cgi->param($_) ne "") && ($_ ne 'submit')) {
+			push(@query,"$_: ".$cgi->param($_)); 
+			print $cgi->Tr($cgi->td("$_ "),$cgi->td($cgi->param($_)));
+		}
+	} $cgi->param;
+        #print $cgi->Tr($cgi->td("QUERY_STRING"),$cgi->td($ENV{QUERY_STRING}));
+	print $cgi->end_table;
+	print $cgi->h3("Search results");
 	print $cgi->start_table;
 	print $cgi->Tr({-valign => 'top'}, [$cgi->th(\@labels)] );
 	while ($sth->fetch()) {
@@ -411,7 +415,12 @@ sub print_data {
 		    print $cgi->td($results{$field});
 		} elsif ($field eq 'COUNT(notes.noteid)') {
 			my $n = $results{$field};
-			print $cgi->td("$results{$field} note" . ($n == 1 ? '' : 's'));
+                        if ($cgi->param('submit') eq 'Print') {
+				# format notes for print here...
+                        }
+                        else {
+   				print $cgi->td("$results{$field} note" . ($n == 1 ? '' : 's'));
+                        }
 		} else {
 		    print $cgi->td("$results{$field}");
 	        }
@@ -419,8 +428,27 @@ sub print_data {
 	    print "</tr>";
 	}
 	print $cgi->end_table;
+	if ($cgi->param('submit') eq 'Print') {
+		saveResults($cgi,$time,$numrows,join(';',@query));
+	}
 }
 
+sub saveResults {
+        my ($cgi,$time,$numrows,$query) = @_;
+	my $who = $ENV{REMOTE_ADDR};
+	my $q = $ENV{QUERY_STRING};
+	my $reproduce = $cgi->a({-href=>$ENV{SCRIPT_NAME} . '?' . $q} ,$query);
+	my $logfile = "printfiles/list.html";
+
+	open my $tmp_fh, ">>:utf8", $logfile or die $!;
+	select $tmp_fh; # set default for print
+
+        #print $cgi->start_table;
+	print $cgi->Tr($cgi->td($reproduce),$cgi->td($who),$cgi->td($time),$cgi->td($numrows)) . "\n";
+        #print $cgi->end_table;
+
+	close $tmp_fh or die $!;
+}
 
 my $cgi = new CGI;
 my $dbh = STEDTUtil::connectdb();
@@ -436,7 +464,7 @@ if (0) {
 		print_data($cgi, $dbh);
 	  }
 	  else {
-	    make_update_form($cgi, $dbh) unless $cgi->param('submit') eq 'Print';###
+	    make_update_form($cgi, $dbh);###
 	  }
 	}
 }

@@ -19,18 +19,18 @@ sub connectdb {
 }
 
 sub make_header {
-  my $stylesheet = 'styles/tagger.css';
   my $cgi = shift;
-  my $header = shift;
   print $cgi->header(-charset => "utf8");
   print $cgi->start_html(-head =>
-			 $cgi->meta( 
-				    {-http_equiv => 'Content-Type', 
-				     -content => 'text/html; charset=utf8'}),
-			 -encoding => 'utf-8',
-			 -title=>"$header",
-			 -style => { -src => 'http://localhost/styles/tagger.css', -type=>"text/css" },
-	);
+                         $cgi->meta(
+                                    {-http_equiv => 'Content-Type',
+                                     -content => 'text/html; charset=utf8'}),
+                         -encoding => 'utf-8',
+                         -title=>'STEDT Database',
+                         #-script => { -src =>  'js/tablekit.js' },
+                         -style  => { -src => ['styles/tagger.css',
+                         		       'styles/taggerextra.css'], -type=>"text/css" },
+        );
 }
 
 sub make_footer {

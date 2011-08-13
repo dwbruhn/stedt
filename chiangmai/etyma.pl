@@ -185,6 +185,7 @@ sub make_browse {
       $cgi->Tr($cgi->td({-colspan=>2, -align=>'center'},$cgi->font({-size=>'-2'}, 'v0.9 1 Nov 2009',$cgi->br,'Lowe, Mortensen, Yu'))),
       $cgi->Tr($cgi->td({-colspan=>2},$cgi->a({-href=>"overview.pl", -target=>"reflexes"},'Overview'))),
       $cgi->Tr($cgi->td({-colspan=>2},$cgi->a({-href=>"instructions.html", -target=>"reflexes"},'Instructions'))),
+      $cgi->Tr($cgi->td({-colspan=>2},$cgi->a({-href=>"tagger.pl?format=Print", -target=>"_new"},'Tagging worksheet'))),
       $cgi->Tr($cgi->td({-colspan=>2},'&nbsp;')),
       $cgi->Tr($cgi->td({-colspan=>2},$cgi->i('Searchable elements'))),
 

@@ -1,7 +1,7 @@
 body { background-color: white; }
 
-html { font-family: "Comic Sans", font-size: 10pt;}
-
+html { font-family: Arial, Helvetica; }
+/* font-family: "Comic Sans", font-size: 10pt; */
 
 td, input { font-family: "STEDTU", "Doulos SIL", "Charis SIL", Gentium,
     "TITUS Cyberbit Basic", SILDoulosUnicodeIPA,
@@ -55,7 +55,6 @@ th A:visited   		{ color: white; }
 th A:hover   		{ color: teal; text-decoration: underline; }
 
 h1 {
-     font-family: Helvetica, Arial, sans;
      font-size: 24pt;
      font-weight: bold; }
 
@@ -66,13 +65,11 @@ h2 {
      }
 
 h3 {
-     font-family: Arial, Helvetica, sans;
      font-size: 12pt;
      font-weight: bold;
      margin-left: 16pt; }
 
 h4 {
-     font-family: Arial, Helvetica, sans;
      font-size: 10pt;
      font-weight: normal;
      margin-left: 18pt; }
@@ -127,6 +124,6 @@ div.move-handle {
 	left: 0;
 	background-color: #fc6;
 	cursor: move;
-	filter: alpha(opacity=50);
-	-moz-opacity: 0.5;
+	/* filter: alpha(opacity=50);
+	-moz-opacity: 0.5; */
 }
