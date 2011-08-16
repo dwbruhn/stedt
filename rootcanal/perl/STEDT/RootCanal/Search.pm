@@ -64,9 +64,26 @@ sub source : Runmode {
 	my $lg_list = $self->dbh->selectall_arrayref(
 		"SELECT silcode, language, lgcode, grpid, grpno, grp, COUNT(lexicon.rn), lgid AS num_recs FROM languagenames NATURAL LEFT JOIN languagegroups LEFT JOIN lexicon USING (lgid) WHERE srcabbr=? AND lgcode != 0 GROUP BY lgid HAVING num_recs > 0 ORDER BY lgcode, language", undef, $srcabbr);
 
+	require STEDT::RootCanal::Notes;
+	my $INTERNAL_NOTES = $self->has_privs(1);
+	my $internal_note_search = '';
+	$internal_note_search = "AND notetype != 'I'" unless $INTERNAL_NOTES;
+	my (@notes, @footnotes);
+	my $footnote_index = 1;
+	foreach (@{$self->dbh->selectall_arrayref("SELECT noteid, notetype, datetime, xmlnote, ord, uid, username FROM notes LEFT JOIN users USING (uid)"
+			. "WHERE spec='S' AND id=? $internal_note_search ORDER BY ord", undef, $srcabbr)}) {
+		my $xml = $_->[3];
+		push @notes, { noteid=>$_->[0], type=>$_->[1], lastmod=>$_->[2], 'ord'=>$_->[4],
+			text=>STEDT::RootCanal::Notes::xml2html($xml, $self, \@footnotes, \$footnote_index, $_->[0]),
+			markup=>STEDT::RootCanal::Notes::xml2markup($xml), num_lines=>STEDT::RootCanal::Notes::guess_num_lines($xml),
+			uid=>$_->[5], username=>$_->[6]
+		};
+	}
+
+
 	return $self->tt_process("source.tt", {
 		author=>$author, year=>$year, title=>$title, imprint=>$imprint,
-		lgs  => $lg_list
+		lgs  => $lg_list, srcabbr => $srcabbr, notes => \@notes, footnotes => \@footnotes
 	});
 }
 

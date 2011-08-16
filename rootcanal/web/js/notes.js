@@ -87,7 +87,7 @@ function showaddform (spec, id) { // C, E, L; F for comparanda (special handling
 	var f = $('addnoteform');
 	// constrain notetypes
 	var types = spec === 'L' ? ['N','I','O'] : spec === 'F' ? ['F'] :
-		spec === 'E' ? ['T','I','H','N'] : ['T','I','N','G','F'];
+		spec === 'E' ? ['T','I','H','N'] : spec === 'C' ? ['T','I','N','G','F'] : ['I','N'];
 	// set spec, id
 	f.spec.value = spec;
 	f.id.value = id;
@@ -115,7 +115,7 @@ $('addnoteform').observe('submit', function (e) {
 	} else if (spec === 'F') {
 		container = $('allcomparanda' + id);
 		spec = 'E'; // special case, change spec F -> E
-	} else if (spec === 'C') {
+	} else if (spec === 'C' || spec === 'S') {
 		container = $('allnotes');
 	} else { // lexicon note
 		f.ord.value = 1;

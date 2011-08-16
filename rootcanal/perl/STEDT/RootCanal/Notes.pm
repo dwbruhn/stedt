@@ -97,7 +97,7 @@ sub add : RunMode {
 	$sth->execute($spec, $id, $ord, $type, $xml, $uid);
 
 	my $kind = $spec eq 'L' ? 'lex' : $spec eq 'C' ? 'chapter' : # special handling for comparanda
-		$type eq 'F' ? 'comparanda' : 'etyma';
+		$spec eq 'S' ? 'source' : $type eq 'F' ? 'comparanda' : 'etyma';
 	my $noteid = $dbh->selectrow_array("SELECT LAST_INSERT_ID()");
 	my $lastmod = $dbh->selectrow_array("SELECT datetime FROM notes WHERE noteid=?", undef, $noteid);
 	$self->header_add('-x-json'=>qq|{"id":"$noteid"}|);

@@ -1,14 +1,4 @@
-[% self_url = c.query.url('-absolute',1) -%]
-[% self_base = self_url.replace('[^/]+$' , '') -%]
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
-        "http://www.w3.org/TR/html4/loose.dtd">
-<html lang="en">
-<head>
-	<meta http-equiv="content-type" content="text/html; charset=utf-8">
-	<title>STEDT Source: [% author %] [% year %]</title>
-	<link rel="stylesheet" href="[% self_base %]styles/rootcanal.css">
-</head>
-<body>
+[% PROCESS header.tt title="STEDT Source: " _ author _ " " _ year -%]
 <p>Cite as follows:</p>
 
 <p align="center" style="width:50%">
@@ -16,7 +6,23 @@
 Accessed via STEDT database <tt>&lt;http://stedt.berkeley.edu/search/&gt;</tt>
 on [% USE date %][% date.format(date.now, '%F') %].
 </p>
-<!--<p>Source notes will go here.</p>-->
+
+[% IF c.has_privs(16) -%]
+<div id="allnotes" class="container">
+<p class="edit">
+<label><input type="checkbox" value="off" class="reordcheckbox"[% IF notes.size < 2 %] disabled[% END %]>Drag to reorder</label>
+<a href="#" onclick="return showaddform('S','[% srcabbr %]')">Add a note...</a>
+</p>
+[% FOREACH n IN notes -%]
+[% PROCESS notes_source.tt -%]
+[% END -%]
+</div>
+[% ELSE -%]
+[% FOREACH n IN notes -%]
+<p>[% n.text %]</p>
+[% END # foreach -%]
+[% END # if has_privs(16) -%]
+
 <p>Languages in this source:</p>
 
 <table>
@@ -37,6 +43,19 @@ on [% USE date %][% date.format(date.now, '%F') %].
 </tr>
 [% END -%]
 </table>
+[% FOREACH n IN footnotes -%]
+<div class="footnote[% IF n.super %] fnote-[% n.super %][% END %]" id="foot[% loop.count %]">
+<a href="#toof[% loop.count %]">^ [% loop.count %].</a> [% n.text %]</div>
+[% END -%]
+
+[% IF c.has_privs(16) -%]
+[% PROCESS addnoteform.tt -%]
+[% END -%]
+
+<script>
+var footnote_counter = [% footnotes.size %];
+</script>
+<script src="[% self_base %]js/notes.js"></script>
 
 </body>
 </html>
