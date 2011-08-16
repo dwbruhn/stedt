@@ -335,7 +335,7 @@ sub xml2html {
 	s|<xref ref="(\d+)">#\1(.*?)</xref>|_tag2info($1,$2,$c)|ge;
 	s|<hanform>(.*?)</hanform>|$1|g;
 	s|<latinform>(.*?)</latinform>|"<b>" . _nonbreak_hyphens(_qtd($1)) . "</b>"|ge;
-	s|<plainlatinform>(.*?)</plainlatinform>|_qtd($1)|g;
+	s|<plainlatinform>(.*?)</plainlatinform>|_qtd($1)|ge;
 
 	s/(\S)&apos;/$1’/g; # smart quotes
 	s/&apos;/‘/g;
