@@ -52,5 +52,10 @@ setup.srcbib = {
 	},
 	'srcbib.format': {
 		size:100
+	},
+	'num_notes': {
+		label: '#_notes',
+		noedit: true,
+		size: 55
 	}
 };

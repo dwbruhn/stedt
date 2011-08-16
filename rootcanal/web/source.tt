@@ -16,7 +16,7 @@
 Accessed via STEDT database <tt>&lt;http://stedt.berkeley.edu/search/&gt;</tt>
 on [% USE date %][% date.format(date.now, '%F') %].
 </p>
-
+<!--<p>Source notes will go here.</p>-->
 <p>Languages in this source:</p>
 
 <table>
