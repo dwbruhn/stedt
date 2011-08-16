@@ -76,25 +76,45 @@ $$('.reordcheckbox').each(function (c) {
 });
 
 // adding new notes
+var addform_fullid;
 function showaddform (spec, id) { // C, E, L; F for comparanda (special handling of notetype)
-	var full_id;
 	if (spec==='L') {
-		full_id = id;
+		addform_fullid = id;
 		id = id.substring(3); // chop off front of tr id
 	}
 	var labels = {O:'Orig/src-DON\'T MODIFY', T:'Text', I:'Internal',
 					N:'New', G:'Graphic', F:'Final', H:'HPTB'};
 	var f = $('addnoteform');
-	var container = null; // id of the enclosing div for sorting
-	// constrain notetypes; set ord
+	// constrain notetypes
 	var types = spec === 'L' ? ['N','I','O'] : spec === 'F' ? ['F'] :
 		spec === 'E' ? ['T','I','H','N'] : ['T','I','N','G','F'];
-	// set id (and spec F -> E)
+	// set spec, id
+	f.spec.value = spec;
+	f.id.value = id;
+	f.fn_counter.value = footnote_counter;
+	var menu = f.notetype.options;
+	menu.length = 0; // clear out the menu
+	for (var i=0; i<types.length; i++) {
+		menu[i] = new Option(labels[types[i]],types[i]);
+	}
+	menu[0].selected = 'selected'; // select the first item
+	f.show();
+	f.xmlnote.focus();
+	return false; // still need this here because etymon and chapter views have inline onclick
+};
+
+$('addnoteform').observe('submit', function (e) {
+	e.stop();
+	var f = $('addnoteform');
+	var spec = f.spec.value;
+	var id = f.id.value;
+	var container = null; // id of the enclosing div for sorting
+	// also set ord
 	if (spec === 'E') {
 		container = $('allnotes' + id);
 	} else if (spec === 'F') {
 		container = $('allcomparanda' + id);
-		spec = 'E';
+		spec = 'E'; // special case, change spec F -> E
 	} else if (spec === 'C') {
 		container = $('allnotes');
 	} else { // lexicon note
@@ -108,61 +128,45 @@ function showaddform (spec, id) { // C, E, L; F for comparanda (special handling
 			f.ord.value = 1;
 		}
 	}
-	// set spec, id
-	f.spec.value = spec;
-	f.id.value = id;
-	f.fn_counter.value = footnote_counter;
-	var menu = f.notetype.options;
-	for (var i=0; i<types.length; i++) {
-		menu[i] = new Option(labels[types[i]],types[i]);
-	}
-	menu[0].selected = 'selected'; // select the first item
-	f.show();
-	f.xmlnote.focus();
-	f.observe('submit', function (e) {
-		new Ajax.Request(baseRef + 'notes/add', {
-			parameters: f.serialize(),
-			onSuccess: function (t,json) {
-				var result = t.responseText.split("\r");
-				var note = result.shift();
-				if (container) {
-					// insert the HTML in the right place
-					container.insert(note);
-					// insert footnotes at the end, if necessary
-					// *** the code to adjust the footnote numbers is kind of ugly;
-					// the prettier way would be to send the current footnote number
-					// to the server, then increment footnote_counter by the
-					// number of text blocks in result.
-					$A(result).each(function (text) {
-						var n = ++footnote_counter;
-						var elem = new Element('p', {'class':'footnote fnote-' + id,
-							id:'foot' + n});
-						elem.innerHTML = '<a href="#toof' + n + '">^ ' + n + '.</a> '
-							+ text;
-						f.up('body').insert(elem);
-					});
-					// enable the sort box if there are two or more sortable items
-					if (container.select('.reord').length > 1)
-						container.down('.reordcheckbox').enable();
-				} else {
-					// if it's a lex note, stick it in at the bottom, and add the footnotemark in the table
-					f.up('body').insert(note);
-					++footnote_counter;
-					var cell = $(full_id).childElements().last();
-					var celltext = cell.innerHTML;
-					cell.innerHTML = celltext + ' <a href="#foot' + footnote_counter + '" id="toof' + footnote_counter + '">' + footnote_counter + '</a>';
-				}
-				f.xmlnote.value = ''; // reset the textarea
-				f.hide();
-			},
-			onFailure: function(t) {
-				alert(t.responseText);
+	new Ajax.Request(baseRef + 'notes/add', {
+		parameters: f.serialize(),
+		onSuccess: function (t,json) {
+			var result = t.responseText.split("\r");
+			var note = result.shift();
+			if (container) {
+				// insert the HTML in the right place
+				container.insert(note);
+				// insert footnotes at the end, if necessary
+				// *** the code to adjust the footnote numbers is kind of ugly;
+				// the prettier way would be to send the current footnote number
+				// to the server, then increment footnote_counter by the
+				// number of text blocks in result.
+				$A(result).each(function (text) {
+					var n = ++footnote_counter;
+					var elem = new Element('p', {'class':'footnote fnote-' + id,
+						id:'foot' + n});
+					elem.innerHTML = '<a href="#toof' + n + '">^ ' + n + '.</a> '
+						+ text;
+					f.up('body').insert(elem);
+				});
+				// enable the sort box if there are two or more sortable items
+				if (container.select('.reord').length > 1)
+					container.down('.reordcheckbox').enable();
+			} else {
+				// if it's a lex note, stick it in at the bottom, and add the footnotemark in the table
+				f.up('body').insert(note);
+				++footnote_counter;
+				var cell = $(addform_fullid).childElements().last();
+				cell.innerHTML = cell.innerHTML + ' <a href="#foot' + footnote_counter + '" id="toof' + footnote_counter + '">' + footnote_counter + '</a>';
 			}
-		});
-		Event.stop(e);
+			f.xmlnote.value = ''; // reset the textarea
+			f.hide();
+		},
+		onFailure: function(t) {
+			alert(t.responseText);
+		}
 	});
-	return false; // still need this here because etymon and chapter views have inline onclick
-};
+});
 
 // show/hide the editing form
 $(document.body).on('click', 'input:button.note_edit_toggle', function (e) {
