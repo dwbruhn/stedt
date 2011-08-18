@@ -82,7 +82,7 @@ sub source : Runmode {
 
 
 	return $self->tt_process("source.tt", {
-		author=>$author, year=>$year, title=>$title, imprint=>$imprint,
+		author=>$author, year=>$year, doc_title=>$title, imprint=>$imprint,
 		lgs  => $lg_list, srcabbr => $srcabbr, notes => \@notes, footnotes => \@footnotes
 	});
 }

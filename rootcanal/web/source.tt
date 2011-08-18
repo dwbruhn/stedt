@@ -2,7 +2,7 @@
 <p>Cite as follows:</p>
 
 <p align="center" style="width:50%">
-[% author %] [% year %] <cite>[% title %]</cite> [% imprint %]
+[% author %] [% year %] <cite>[% doc_title %]</cite> [% imprint %]
 Accessed via STEDT database <tt>&lt;http://stedt.berkeley.edu/search/&gt;</tt>
 on [% USE date %][% date.format(date.now, '%F') %].
 </p>
