@@ -206,6 +206,7 @@ sub xml2markup {
 	s|<gloss>(.*?)</gloss>|[[:$1]]|g;
 	s|<reconstruction>\*(.*?)</reconstruction>|[[*$1]]|g;
 	s|<xref ref="(\d+)">#\1(.*?)</xref>|[[#$1$2]]|g;
+	s|<a href="(.*?)">(.*?)</a>|[[!$1 $2]]|g;
 	s|<footnote>(.*?)</footnote>|{{%$1}}|g;
 	s|<hanform>(.*?)</hanform>|[[$1]]|g;
 	s|<latinform>(.*?)</latinform>|[[+$1]]|g;
@@ -265,6 +266,13 @@ sub _markup2xml {
 	if ($code eq '#') {
 		my ($num, $s3) = $s2 =~ /^(\d+)(.*)/;
 		return qq|<xref ref="$num">#$num$s3</xref>|;
+	}
+	if ($code eq '!') {	#if it's a link, pull out the URL and the link text, and make the xml look similar to the <xref> category
+		my ($url, $delim, $ltext) = $s2 =~ /^(.+?)( |$)(.*)/;		#matches url followed by space, space+text, or end of line
+		if (!$ltext) {	#if the user left the link text blank, make it = url
+			$ltext = $url;
+		}
+		return qq|<a href="$url">$ltext</a>|;
 	}
 	my $u = ord decode_utf8($s); ### oops, it hasn't been decoded from utf8 yet
 	if (($u >= 0x3400 && $u <= 0x4dbf) || ($u >= 0x4e00 && $u <= 0x9fff)
