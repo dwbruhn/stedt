@@ -1,16 +1,17 @@
 #!/usr/bin/perl
+# edited by DY to show number of records, 2011.08.02
 # edited by dwbruhn to use STEDTUser module, 2010-May-04
 # edited by dwbruhn, 2009-Dec-15
 # rscook 2009年12月12日
-# by Dominic Yu, 2009.12.09
+# by [<-- really? I don't remember this!] Dominic Yu, 2009.12.09
 # based on HTML and work by Daniel Bruhn
 # based on initial work by Nina Keefer and rscook
-
+use strict;
 use CGI::Carp qw/fatalsToBrowser warningsToBrowser set_message/;
 BEGIN { 
 	$^W = 1; 
 	unshift @INC, "../pm" if -e "../pm";
-	CGI::Carp::set_message("Report bugs/features to rscook\@socrates.berkeley.edu");
+	CGI::Carp::set_message('Report bugs/features to stedt@socrates.berkeley.edu');
 }
 
 use CGI qw/:standard *table/;
@@ -20,13 +21,10 @@ my $dbh = STEDTUser::connectdb();
 
 # open the language lookup table and make our hash
 open F, "<:utf8", "sil2lg.txt" or die $!;
+binmode(STDOUT, ":utf8");
 my %sil2lg;
 while (<F>) {
 	my ($silcode, $lgname) = split /\t/;
-	if ($silcode eq "mwq") {
-	    $lgname = "Mün Chin";  #this is a cheap hack to fix the display of u-umlaut
-	}
-
 	$sil2lg{$silcode} = $lgname;
 }
 close F or die $!;
@@ -59,11 +57,11 @@ my @stats = (
 );
 
 
-print "<table border=\"1\" align=\"center\" cellpadding=\"5\" cellspacing=\"1\">";
-print "<tr bgcolor=\"#99CCFF\"><th align=\"left\">Statistic</th><th align=\"left\">Number</th><th align=\"left\">Notes</th></tr>";
+print '<table border="1" align="center" cellpadding="5" cellspacing="1">';
+print '<tr bgcolor="#99CCFF"><th align="left">Statistic</th><th align="left">Number</th><th align="left">Notes</th></tr>';
 foreach (@stats) {
 	my ($desc, $query, $notes) = @$_;
-	print "<tr><td>$desc</td><td align=\"right\">";
+	print qq|<tr><td>$desc</td><td align="right">|;
 	my $a = $dbh->selectall_arrayref($query);
 	if (1 == @$a) { # if contains one row, print the value
 		print $a->[0][0];
@@ -82,12 +80,13 @@ print <<EOF;
   <th>Ethnologue Name</th>
   <th>STEDT Name(s)</th>
   <th>Sources</th>
+  <th>records</th>
  </tr>
 EOF
 
 
 # look up stuff from the database
-my $a = $dbh->selectall_arrayref("SELECT silcode,language,COUNT(*) FROM `languagenames` WHERE EXISTS (SELECT * FROM `lexicon` WHERE languagenames.lgid=lexicon.lgid) GROUP BY silcode,language ORDER BY silcode");
+my $a = $dbh->selectall_arrayref("SELECT silcode,language,COUNT(*), SUM((SELECT COUNT(*) FROM lexicon WHERE lgid=languagenames.lgid)) FROM `languagenames` WHERE EXISTS (SELECT * FROM `lexicon` WHERE languagenames.lgid=lexicon.lgid) GROUP BY silcode,language ORDER BY silcode");
 
 # first pass: move empty silcodes to end
 while ($a->[0][0] eq '')
@@ -107,7 +106,7 @@ foreach (@$a) {
 # third pass: count number of lines for each sil code
 my $lastsilcode = '';
 foreach (@$a) {
-	my ($silcode, $lgname, $num) = @$_;
+	my ($silcode, $lgname, $num, $num_recs) = @$_;
 	print "<tr>";
 	if ($silcode ne $lastsilcode) {
 		my $n = $sil_count{$silcode};
@@ -119,7 +118,8 @@ foreach (@$a) {
 		}
 		$lastsilcode = $silcode;
 	}
-	print td($lgname), td($num);
+	$num_recs =~ s/(\d)(\d{3})$/$1,$2/; # insert commas to make numbers more readable
+	print td($lgname), td($num), td({-align=>'right'}, $num_recs);
 	print "</tr>\n";
 }
 
