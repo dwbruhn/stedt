@@ -125,6 +125,7 @@ sub xml2tex { # for the notes
 	s|<reconstruction>\*(.*?)</reconstruction>|"\\textbf{*" . _nonbreak_hyphens($1) . "}"|ge;
 #	s|<xref ref="(\d+)">#\1(.*?)</xref>|#$1$2|g;
 	s|<xref ref="(\d+)">#\1(.*?)</xref>|_tag2info($1,$2)|ge;
+	s|<a href="(.*?)">(.*?)</a>|\\href{$1}{$2}|g;	#convert hyperlinks
 	s|<footnote>(.*?)</footnote>|\\footnote{$1}|g;
 	s|<hanform>(.*?)</hanform>|\\TC{$1}|g;
 	s|<latinform>(.*?)</latinform>|"\\textbf{" . _nonbreak_hyphens(_qtd($1)) . "}"|ge; # exception to smart quote
