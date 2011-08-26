@@ -74,6 +74,18 @@ No records found. (WHERE [% result.debug %])
 </table>
 </form>
 
+[%- IF manual -%]
+<form method="post" align="right">
+[% FOREACH col IN t.searchable.merge(['sortkey']) -%]
+[%- IF c.query.param(col) %]<input name="[% col %]" type="hidden" value="[% c.query.param(col) %]">[% END -%]
+[%- END -%]
+<input name="pagenum" type="hidden" value="[% pagenum %]">
+[% UNLESS pagenum == 0 %]<input name="prev" type="submit" value="Previous Page">[% END %]
+Displaying items [% a %]-[% b %] of [% result.data.size %].
+[% UNLESS b == result.data.size %]<input name="next" type="submit" value="Next Page">[% END %]
+</form>
+[%- END -%]
+
 [% IF c.has_privs(t.table == 'etyma' ? 1 : 16) %]
 <a href="#" onclick="$('add_form_span').toggle(); scrollEnd(); return false;">Add a record...</a>
 <span id="add_form_span" style="display:none">
