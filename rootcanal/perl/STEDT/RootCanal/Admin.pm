@@ -30,6 +30,20 @@ sub queries : Runmode {
 	return $self->tt_process("admin/querylog.tt", {queries=>$a});
 }
 
+sub deviants : Runmode {
+	my $self = shift;
+	if (my $err = $self->require_privs(1)) { return $err; }
+
+	# count number of records with deviant glosses
+	my %conditions = ('to VERB','^to .*$','to be VERB','^to be .*$');
+	foreach my $cond (keys %conditions)
+	{
+		$conditions{$cond} = $self->dbh->selectrow_array("SELECT count(*) FROM `lexicon` WHERE `gloss` REGEXP '$conditions{$cond}'");
+	}
+		
+	return $self->tt_process("admin/deviants.tt", {deviants=>\%conditions});
+}
+
 sub users : Runmode {
 	my $self = shift;
 	if (my $err = $self->require_privs(1)) { return $err; }
