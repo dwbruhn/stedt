@@ -35,10 +35,16 @@ sub deviants : Runmode {
 	if (my $err = $self->require_privs(1)) { return $err; }
 
 	# count number of records with deviant glosses
-	my %conditions = ('to VERB','^to .*$','to be VERB','^to be .*$');
+	my %conditions = ('to VERB','^to ',
+			'to be VERB','^to be ',
+			'be VERB','^be [^/]',
+			'a(n) NOUN','^an? ',
+			'the NOUN','^the ',
+			'records with curly quotes','“|”|‘|’');
 	foreach my $cond (keys %conditions)
 	{
-		$conditions{$cond} = $self->dbh->selectrow_array("SELECT count(*) FROM `lexicon` WHERE `gloss` REGEXP '$conditions{$cond}'");
+		$conditions{$cond} = {count=>$self->dbh->selectrow_array("SELECT count(*) FROM `lexicon` WHERE `gloss` REGEXP '$conditions{$cond}'"),
+				     regex=>$conditions{$cond}};
 	}
 		
 	return $self->tt_process("admin/deviants.tt", {deviants=>\%conditions});
