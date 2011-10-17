@@ -45,7 +45,7 @@ print STDERR "Getting and sorting a list of files in $dissemDir\n\n";
 my %Filelist;
 grep {
      if (/pdf/) {
-         my ($volume,$fascicle,$chapter,$date,$version,$filetype) = /^(\d+)\-(\d+)\-(\d+)\-(\d+)\-(\d+)\.(pdf|html)/;
+         my ($volume,$fascicle,$chapter,$date,$version,$draft,$filetype) = /^(\d+)\-(\d+)\-(\d+)\-(\d+)(\-\d+)?(-draft)?\.(pdf|html)/;
          $id = join('.',$fascicle,$chapter);
          $Filelist{$id} = $_ ;
          print STDERR "id: $id file: $_\n";

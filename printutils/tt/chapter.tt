@@ -67,6 +67,7 @@
 
 [% # insert actual content %]
 [% FOREACH etyma -%]
+[%- IF is_main && internal_notes %]\newpage[% END %]
 \vspace{1em}
 {\large \parindent=-1em 
 [%- IF is_main %]([% seq %])[% END -%]
