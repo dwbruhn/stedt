@@ -307,7 +307,7 @@ sub save_value {
 	my $self = shift;
 	my ($field, $value, $id) = @_;
 	
-	die "bad field name or insufficient privileges!"
+	die "bad field name ($field) or insufficient privileges (is $self->{privs}, need $self->{field_editable_privs}{$field}; or not in_editable)!"
 		unless $self->{field_editable_privs}{$field} & $self->{privs}
 			|| $self->in_editable($field); # this will help prevent sql injection attacks
 

@@ -52,7 +52,7 @@ $t->searchable('etyma.tag',
 );
 $t->field_editable_privs(
 	'etyma.supertag' => 1,
-	'etyma.sequence' => 16,
+	'etyma.sequence' => 8,
 	'etyma.chapter' => 1,
 	'etyma.protoform' => 1,
 	'etyma.protogloss' => 1,
