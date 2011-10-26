@@ -110,7 +110,7 @@ Displaying items [% a %]-[% b %] of [% result.data.size %].
 [% IF footnotes -%]
 [% fncounter = 0 -%]
 [% FOREACH n IN footnotes -%]
-[% IF n.super || (n.uid != c.param('uid') && !c.has_privs(16)) %]
+[% IF n.super || (n.uid != c.param('uid') && !c.has_privs(8)) %]
 [% fncounter = fncounter+1 -%]
 <div class="footnote[% IF n.super %] fnote-[% n.super %][% END %]" id="foot[% fncounter %]">
 <a href="#toof[% fncounter %]" class="left">^ [% fncounter %].</a>
