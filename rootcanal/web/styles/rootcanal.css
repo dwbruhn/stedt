@@ -4,7 +4,7 @@
 	div#lexicon { position: static; }
 	div#dragger { display: none; }
 	div#info { display:none; }
-	form, .edit { display:none; }
+	form#search_form, .edit { display:none; }
 }
 
 @media screen { 
