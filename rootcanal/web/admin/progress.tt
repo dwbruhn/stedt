@@ -1,6 +1,7 @@
 ﻿[% PROCESS header.tt title="Progress Log - STEDT Database" %]
 
-<p>Etyma currently in use by user ([% etymaused.size %] users have tagged something):</p>
+<h3>Tagging and Etyma, by user</h3>
+<p>[% etymaused.size %] users have tagged something:</p>
 
 <table class="sortable resizable" style="table-layout:fixed">
 <col style="width:4em">
@@ -12,6 +13,8 @@
 	<th>uid</th>
 	<th>etyma</th>
 	<th>reflexes</th>
+	<th>accepted</th>
+	<th>total</th>
 </tr>
 [% FOREACH row IN etymaused -%]
 <tr>
@@ -22,7 +25,8 @@
 [% END -%]
 </table>
 
-<p>Breakdown: etyma tagged by user ([% tagging.size %] reconstructions):</p>
+<h3>Breakdown: etyma tagged by user</h3>
+<p>[% tagging.size %] reconstructions:</p>
 
 <table class="sortable resizable" style="table-layout:fixed">
 <col style="width:8em">
