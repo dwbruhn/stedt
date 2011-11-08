@@ -25,7 +25,10 @@ setup.languagenames = {
 		size:40
 	},
 	'languagenames.silcode': {
-		size:40
+		size:40,
+		transform : function (v) {
+			return '<a href="http://www.ethnologue.com/show_language.asp?code=' + v + '" target="stedt_ethnologue">' + v + '</a>';
+		}
 	},
 	'languagenames.language': {
 		size:120
