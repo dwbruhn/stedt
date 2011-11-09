@@ -62,29 +62,29 @@ sub progress : Runmode {
 	my $self = shift;
 	if (my $err = $self->require_privs(1)) { return $err; }
 
-	my $a = $self->dbh->selectall_arrayref("SELECT username,users.uid,COUNT(DISTINCT tag),COUNT(DISTINCT rn) FROM users LEFT JOIN lx_et_hash USING (uid) LEFT JOIN etyma USING (tag) WHERE tag != 0 GROUP BY uid;");
-	my $b = $self->dbh->selectall_arrayref("SELECT username,users.uid,tag,protoform,protogloss,COUNT(DISTINCT rn) as num_recs FROM users LEFT JOIN lx_et_hash USING (uid) LEFT JOIN etyma USING (tag) WHERE tag != 0 GROUP BY uid,tag ORDER BY uid, num_recs DESC");
+	my $a = $self->dbh->selectall_arrayref("SELECT username, users.uid,
+			COUNT(DISTINCT tag), COUNT(DISTINCT rn)
+		FROM users LEFT JOIN lx_et_hash USING (uid) LEFT JOIN etyma USING (tag)
+		WHERE tag != 0 GROUP BY uid;");
+	my $b = $self->dbh->selectall_arrayref("SELECT username,users.uid,
+			tag, protoform, protogloss, COUNT(DISTINCT rn) as num_recs
+		FROM users LEFT JOIN lx_et_hash USING (uid) LEFT JOIN etyma USING (tag)
+		WHERE tag != 0 GROUP BY uid,tag ORDER BY uid, num_recs DESC");
 	
 	# pull out "past work" from changelog and count what was done in the past, add these counts into table. Credit where credit is due!
-	my $x = $self->dbh->selectall_arrayref("SELECT id,oldval,newval,time FROM changelog WHERE col = '=accept';");
+	my $x = $self->dbh->selectall_arrayref("SELECT oldval,newval FROM changelog WHERE col = '=accept';");
 	my %c ;
 	foreach my $row (@$x) {
-	  @{$row}[0] =~ m/tag=(\d+)/ && (my $tag = $1);
-	  @{$row}[1] =~ m/uid=(\d+) \((.*)\)$/ && (my $tagger = $1);
-	  my $rns = @{$row}[2];
+	  (my $tagger) = $row->[0] =~ m/^uid=(\d+)/;
+	  my $rns = $row->[1];
 	  my $count = scalar split(',',$rns);
 	  $c{$tagger} += $count;
 	}
-	foreach my $x (@$a){
-	  my $uid = @{$x}[1];
-	  if ($c{$uid}) {
-	    push @$x, $c{$uid};
-	    push @$x, $c{$uid} + @$x[3];
-	  }
-	  else {
-	    push @$x, 0;
-	    push @$x, @$x[3] + 0;
-	  }
+	foreach my $row (@$a){
+	  my $uid = $row->[1];
+	  push @$row, $c{$uid} || 0, @$row[3] + $c{$uid};
+	  # add two columns: number of accepted taggings,
+	  # and the total of the last two columns (reflexes + accepted)
 	}
 	return $self->tt_process("admin/progress.tt", {etymaused=>$a, tagging=>$b});
 }
