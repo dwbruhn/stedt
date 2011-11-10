@@ -24,18 +24,17 @@
 <input type="button" value="Clear [Esc]" onclick="clear_form(this.form)">
 <input type="reset" value="Reset [Esc]²">
 [% IF t.table == "lexicon" %]
-<!-- uid1 = [% uid1 %], uid2 = [% uid2 %]. -->
 View tagging by <select id="uid1" name="uid1" onchange="document.location = '?' + Form.serializeElements(this.up('form').select('input:not(:button,:submit,:reset),select').findAll(Form.Element.getValue));">
-[% FOREACH u IN users %]
-<option value="[% u.uid %]" [% IF uid1 == u.uid %]selected[% END -%] >[% u.username %]</option>
+[% FOREACH u IN users -%]
+<option value="[% u.uid %]"[% IF uid1 == u.uid %] selected[% END %]>[% u.username %]</option>
 [% END -%]
 </select>
 and <select id="uid2" name="uid2" onchange="document.location = '?' + Form.serializeElements(this.up('form').select('input:not(:button,:submit,:reset),select').findAll(Form.Element.getValue));">
-[% FOREACH u IN users %]
-<option value="[% u.uid %]" [% IF uid2 == u.uid %]selected[% END -%] >[% u.username %]</option>
+[% FOREACH u IN users -%]
+<option value="[% u.uid %]"[% IF uid2 == u.uid %] selected[% END %]>[% u.username %]</option>
 [% END -%]
 </select>
-[% END %]
+[% END # if "lexicon" -%]
 </td></tr>
 </table>
 </form>
@@ -148,8 +147,7 @@ var footnote_counter = [% footnotes.size %];
 [% END # if footnotes -%]
 
 <script src="[% self_base %]js/tbl/[% t.table %].js"></script>
-<script>;
-
+<script>
 var tablename = '[% t.table %]';
 TableKit.Raw.init(tablename + '_resulttable', tablename, setup[tablename], '[% self_url %]/update');
 TableKit.tables[tablename + '_resulttable'].editAjaxExtraParams += '&uid1=' + [% uid1 %] + '&uid2=' + [% uid2 %];

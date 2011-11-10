@@ -75,14 +75,14 @@ sub new {
 # STEDT::Table::Lexicon looks for two additional, optional uids, $uid1 and $uid2. 
 # If specified,there will be additional columns returned giving the analyses 
 # belonging to those uids; saving new analyses will also use these uids.
-# In practice, we usually pass 0 just to suppress display of the second column,
-# and non-zero values are just for "authorizers" modifying other people's tags.
+# This is useful for "proofreaders" and "authorizers" modifying/correcting other people's tags.
 
 my ($self, $dbh, $privs, $uid2, $uid1) = @_;
 
 	# note: if $uid1 or $uid2 have non-zero values,
-	# we generate an analysis column for each
-        # and note that $uid1 = 8 by default.
+	# we generate an analysis column for each.
+	# Note that $uid1 = 8 by default; but this is currently set
+	# in Base.pm (i.e. not in this file!) for all Table/Xxx.pm, not just Lexicon.pm.
 
 my $t = $self->SUPER::new($dbh, 'lexicon', 'lexicon.rn', $privs); # dbh, table, key, privs
 

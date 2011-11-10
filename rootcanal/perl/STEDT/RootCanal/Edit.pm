@@ -11,10 +11,10 @@ sub table : StartRunmode {
 	my $q = $self->query;
 	# get 2 uids from edit.tt: the values selected in the two dropdowns.
 	# these will be passed in to the select for the analysis and user_an columns
-	my $uid1 = $q->param('uid1');
-	my $uid2 = $q->param('uid2');
-	$uid1 = ($uid1 ? $uid1 : 8);
-	$uid2 = ($uid2 ? $uid2 : $self->param('uid'));
+	# just in case bad values get passed in, we convert it to a number (by adding 0)
+	# and then switch to default values when 0 (or not a number, which yields 0 when you add 0)
+	my $uid1 = $q->param('uid1')+0 || 8;
+	my $uid2 = $q->param('uid2')+0 || $self->param('uid');
 	my $t = $self->load_table_module($tbl,$uid2,$uid1);
 	$q->param($_, decode_utf8($q->param($_))) foreach $q->param; # the template will expect these all to be utf8, so convert them here
 	
@@ -61,10 +61,12 @@ sub table : StartRunmode {
 
 	#make a list of uids and users to be passed in to make the dropdowns for selecting sets of tags.
 	my @users;
-	my $u = $self->dbh->selectall_arrayref("SELECT username,users.uid,COUNT(DISTINCT tag),COUNT(DISTINCT rn) FROM users LEFT JOIN lx_et_hash USING (uid) LEFT JOIN etyma USING (tag) WHERE tag != 0 GROUP BY uid;");
+	# find the users who have tagged something
+	my $u = $self->dbh->selectall_arrayref("SELECT username, users.uid
+		FROM users LEFT JOIN lx_et_hash USING (uid) LEFT JOIN etyma USING (tag)
+		WHERE tag != 0 GROUP BY uid");
 	foreach (@$u) {
-	  # $self->param('user')
-	  push @users, {uid=>$_->[1], username=>$_->[0], count=>$_->[2]};
+		push @users, {uid=>$_->[1], username=>$_->[0]};
 	}
 
 	# pass to tt: searchable fields, results, addable fields, etc.

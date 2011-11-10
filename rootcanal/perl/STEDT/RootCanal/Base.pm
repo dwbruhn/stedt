@@ -90,7 +90,11 @@ sub unable_to_comply : ErrorRunmode {
 }
 
 # helper method to load the relevant module
-# optionally pass in a specific uid; 0 or 8 both mean STEDT user only (see Table.pm)
+# optionally pass in a specific uid (or two).
+# It is not recommended to select the same user for both columns,
+# since you will be confused when you edit one column and the other
+# column doesn't update with the new value. But nothing stops you
+# from following a course of action that confuses yourself right now.
 sub load_table_module {
 	my ($self, $tbl, $uid2, $uid1) = @_;
 	$tbl or die "no table specified!";

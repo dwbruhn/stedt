@@ -65,7 +65,7 @@ Reflexes <span class="u[% supertag %]">tagged by <select name="DDMenu" onchange=
 </table>
 [% END -%]
 
-[% IF e.comparanda.size -%]
+[% IF e.comparanda.size || c.has_privs(8) -%]
 [% label = 'Chinese comparand' _ (e.comparanda.size == 1 ? 'um' : 'a') -%]
 <h2>[% label %]</h2>
 [% IF c.has_privs(1) -%]
