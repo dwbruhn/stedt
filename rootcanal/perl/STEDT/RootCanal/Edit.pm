@@ -154,11 +154,11 @@ sub update : Runmode {
 
 	# this is a bit complicated. 
 	# we get 2 userids passed in. if this is the lexicon view, then these 2 uids correspond to
-	# the users selected in the dropdown and whose tagging appears in analysis and user_an.
+	# the users selected in the dropdown and whose tagging appears in the analysis and user_an columns.
 	# we test to see which field is being updated, and set $fake_uid accordingly.
 	# the rest of the logic is the same as before.
 	# note that users with sufficient privileges can change other users' and even stedt's tagging
-	# in which case the changelog reflects these actual user as the changer and records
+	# in which case the changelog reflects the actual user as the changer and records
 	# the 'pilfered' tags as "other_an:N" where N is the uid of the original tagger.
 	my ($tblname, $field, $id, $value, $uid1, $uid2) = ($q->param('tbl'), $q->param('field'),
 		$q->param('id'), decode_utf8($q->param('value')), $q->param('uid1'), $q->param('uid2'));
