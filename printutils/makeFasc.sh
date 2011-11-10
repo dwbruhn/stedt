@@ -41,3 +41,4 @@ else
 perl ~stedt-cgi-ssl/rootcanals/makeToC.pl > ~stedt/public_html/dissemination.html       
 echo "done with $texfile" 
 fi
+echo "http://stedt.berkeley.edu/dissemination/$pdffile-$DATETIME-1$DRAFT.pdf"
