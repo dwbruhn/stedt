@@ -637,6 +637,6 @@ var setup = { // in the form setup.[tablename].[fieldname]
 			noedit: true,
 			size: 40,
 			hide: true
-		},
+		}
 	}
 };
