@@ -494,7 +494,7 @@ var setup = { // in the form setup.[tablename].[fieldname]
 			size: 70
 		},
 		'analysis' : {
-			label: 'analysis',
+		        label: 'analysis1',
 			noedit: !(stedtuserprivs & 8),
 			hide: !(stedtuserprivs & 1),
 			size: 80,
@@ -503,7 +503,7 @@ var setup = { // in the form setup.[tablename].[fieldname]
 			}
 		},
 		'user_an' : {
-			label: 'my analysis',
+		        label: 'analysis2',
 			size: 80,
 			transform: function (v) {
 				return v.replace(/, */g,', ');
@@ -637,6 +637,6 @@ var setup = { // in the form setup.[tablename].[fieldname]
 			noedit: true,
 			size: 40,
 			hide: true
-		}
+		},
 	}
 };

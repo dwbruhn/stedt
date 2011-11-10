@@ -92,15 +92,19 @@ sub unable_to_comply : ErrorRunmode {
 # helper method to load the relevant module
 # optionally pass in a specific uid; 0 or 8 both mean STEDT user only (see Table.pm)
 sub load_table_module {
-	my ($self, $tbl, $uid) = @_;
+	my ($self, $tbl, $uid2, $uid1) = @_;
 	$tbl or die "no table specified!";
 	$tbl =~ /\W/ and die "table name contained illegal characters!"; # prevent sneaky injection attacks
 	$tbl =~ s/^(.)/\u$1/; # uppercase the first char
 	my $tbl_class = "STEDT::Table::$tbl";
 	eval "require $tbl_class" or die $@;
 	
-	$uid = $self->param('uid') unless defined($uid);
-	return $tbl_class->new($self->dbh, $self->param('userprivs'), $uid);
+	# a bit turgid, but what is happening is that 2 uids can be optionally passed in
+	# to select which tagging is to be displayed in the analysis and user_an columns in Lexicon.
+	# the initial settings are stedt for analysis and the current user for user_an
+	$uid2 = $self->param('uid') unless defined($uid2);
+	$uid1 = 8 unless defined($uid1);
+	return $tbl_class->new($self->dbh, $self->param('userprivs'), $uid2, $uid1);
 }
 
 # helper methods for authentication

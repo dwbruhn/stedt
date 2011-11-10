@@ -8,8 +8,14 @@ sub table : StartRunmode {
 	my $self = shift;
 	if (my $err = $self->require_privs(1)) { return $err; }
 	my $tbl = $self->param('tbl');
-	my $t = $self->load_table_module($tbl);
 	my $q = $self->query;
+	# get 2 uids from edit.tt: the values selected in the two dropdowns.
+	# these will be passed in to the select for the analysis and user_an columns
+	my $uid1 = $q->param('uid1');
+	my $uid2 = $q->param('uid2');
+	$uid1 = ($uid1 ? $uid1 : 8);
+	$uid2 = ($uid2 ? $uid2 : $self->param('uid'));
+	my $t = $self->load_table_module($tbl,$uid2,$uid1);
 	$q->param($_, decode_utf8($q->param($_))) foreach $q->param; # the template will expect these all to be utf8, so convert them here
 	
 	my $result = $t->search($q);
@@ -53,12 +59,20 @@ sub table : StartRunmode {
 		STEDT::RootCanal::Notes::collect_lex_notes($self, $result->{data}, $self->has_privs(1), \@footnotes, \$footnote_index);
 	}
 
+	#make a list of uids and users to be passed in to make the dropdowns for selecting sets of tags.
+	my @users;
+	my $u = $self->dbh->selectall_arrayref("SELECT username,users.uid,COUNT(DISTINCT tag),COUNT(DISTINCT rn) FROM users LEFT JOIN lx_et_hash USING (uid) LEFT JOIN etyma USING (tag) WHERE tag != 0 GROUP BY uid;");
+	foreach (@$u) {
+	  # $self->param('user')
+	  push @users, {uid=>$_->[1], username=>$_->[0], count=>$_->[2]};
+	}
+
 	# pass to tt: searchable fields, results, addable fields, etc.
 	return $self->tt_process("admin/edit.tt", {
 		t=>$t,
 		result => $result,
 		manual => $manual_paging, sortlinks => \%sortlinks,
-		a => $a, b => $b, pagenum => $pagenum,
+		a => $a, b => $b, users => \@users, uid1 => $uid1, uid2 => $uid2, pagenum => $pagenum,
 		footnotes => (($tbl eq 'lexicon' && $self->has_privs(1)) ? \@footnotes : undef)
 	});
 }
@@ -136,8 +150,19 @@ sub update : Runmode {
 		return "Insufficient privileges.";
 	}
 
-	my ($tblname, $field, $id, $value, $fake_uid) = ($q->param('tbl'), $q->param('field'),
-		$q->param('id'), decode_utf8($q->param('value')), $q->param('uid2'));
+	# this is a bit complicated. 
+	# we get 2 userids passed in. if this is the lexicon view, then these 2 uids correspond to
+	# the users selected in the dropdown and whose tagging appears in analysis and user_an.
+	# we test to see which field is being updated, and set $fake_uid accordingly.
+	# the rest of the logic is the same as before.
+	# note that users with sufficient privileges can change other users' and even stedt's tagging
+	# in which case the changelog reflects these actual user as the changer and records
+	# the 'pilfered' tags as "other_an:N" where N is the uid of the original tagger.
+	my ($tblname, $field, $id, $value, $uid1, $uid2) = ($q->param('tbl'), $q->param('field'),
+		$q->param('id'), decode_utf8($q->param('value')), $q->param('uid1'), $q->param('uid2'));
+	my $fake_uid;
+	if ($tblname eq 'lexicon' && $field eq 'analysis') { $fake_uid = $uid1 };
+	if ($tblname eq 'lexicon' && $field eq 'user_an' ) { $fake_uid = $uid2 };
 	undef $fake_uid if $fake_uid && ($fake_uid == $self->param('uid')); # $fake_uid should be undef for the current user
 	if ($fake_uid && !$self->has_privs(8)) {
 		$self->header_add(-status => 403); # Forbidden
@@ -145,7 +170,7 @@ sub update : Runmode {
 	}
 	my $t;
 	
-	if (($t = $self->load_table_module($tblname, $fake_uid))
+	if (($t = $self->load_table_module($tblname, $uid2, $uid1))
 	   && ($t->{field_editable_privs}{$field} & $self->param('userprivs') || $t->in_editable($field))) {
 		my $oldval = $t->get_value($field, $id);
 

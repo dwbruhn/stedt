@@ -72,16 +72,17 @@ a separate row containing each analysis belonging to a record.
 
 sub new {
 
-# STEDT::Table::Lexicon looks for an additional, optional $uid. If specified,
-# there will be an additional column returned giving the analyses belonging
-# to that uid; saving a new analysis will also use this uid.
+# STEDT::Table::Lexicon looks for two additional, optional uids, $uid1 and $uid2. 
+# If specified,there will be additional columns returned giving the analyses 
+# belonging to those uids; saving new analyses will also use these uids.
 # In practice, we usually pass 0 just to suppress display of the second column,
 # and non-zero values are just for "authorizers" modifying other people's tags.
 
-my ($self, $dbh, $privs, $uid) = @_;
-$uid = 0 if $uid == 8;
-	# set this so that below, if $uid has non-zero value,
-	# we generate a second analysis column
+my ($self, $dbh, $privs, $uid2, $uid1) = @_;
+
+	# note: if $uid1 or $uid2 have non-zero values,
+	# we generate an analysis column for each
+        # and note that $uid1 = 8 by default.
 
 my $t = $self->SUPER::new($dbh, 'lexicon', 'lexicon.rn', $privs); # dbh, table, key, privs
 
@@ -89,8 +90,8 @@ $t->query_from(q|lexicon LEFT JOIN languagenames USING (lgid) LEFT JOIN language
 $t->order_by('languagegroups.ord, languagenames.lgsort, lexicon.reflex, languagenames.srcabbr, lexicon.srcid');
 $t->fields(
 	'lexicon.rn',
-	'(SELECT GROUP_CONCAT(tag_str ORDER BY ind) FROM lx_et_hash WHERE rn=lexicon.rn AND uid=8) AS analysis',
-	($uid ? "(SELECT GROUP_CONCAT(tag_str ORDER BY ind) FROM lx_et_hash WHERE rn=lexicon.rn AND uid=$uid) AS user_an" : () ),
+	($uid1 ? "(SELECT GROUP_CONCAT(tag_str ORDER BY ind) FROM lx_et_hash WHERE rn=lexicon.rn AND uid=$uid1) AS analysis" : () ),
+	($uid2 ? "(SELECT GROUP_CONCAT(tag_str ORDER BY ind) FROM lx_et_hash WHERE rn=lexicon.rn AND uid=$uid2) AS user_an" : () ),
 	'lexicon.reflex',
 	'lexicon.gloss',
 	'lexicon.gfn',
@@ -144,13 +145,13 @@ $t->wheres(
 	'analysis' => sub {
 		my ($k,$v) = @_;
 		if ($v eq '0') { # use special value of 0 to search for empty analysis
-			return "0 = (SELECT COUNT(*) FROM lx_et_hash WHERE rn=lexicon.rn AND uid=8)";
+			return "0 = (SELECT COUNT(*) FROM lx_et_hash WHERE rn=lexicon.rn AND uid=$uid1)";
 		} elsif ($v eq '!0') {
-			return "0 < (SELECT COUNT(*) FROM lx_et_hash WHERE rn=lexicon.rn AND uid=8)";
+			return "0 < (SELECT COUNT(*) FROM lx_et_hash WHERE rn=lexicon.rn AND uid=$uid1)";
 		} else {
 			my $is_string = ($v !~ /^\d+$/);
 			unless ($t->{query_from} =~ / lx_et_hash ON \(lexicon.rn/) {
-				$t->{query_from} .= ' LEFT JOIN lx_et_hash ON (lexicon.rn = lx_et_hash.rn AND lx_et_hash.uid=8)';
+				$t->{query_from} .= " LEFT JOIN lx_et_hash ON (lexicon.rn = lx_et_hash.rn AND lx_et_hash.uid=$uid1)";
 			}
 			$v = '' if $v eq '\\\\'; # hack to find empty tag_str using a backslash
 			return $is_string ? "lx_et_hash.tag_str='$v'" : "lx_et_hash.tag=$v";
@@ -160,13 +161,13 @@ $t->wheres(
 		my ($k,$v) = @_;
 		$v =~ s/\D//g; return "'bad int!'='0'" unless $v =~ /\d/;
 		if ($v eq '0') {
-			return "0 = (SELECT COUNT(*) FROM lx_et_hash WHERE rn=lexicon.rn AND uid=$uid)";
+			return "0 = (SELECT COUNT(*) FROM lx_et_hash WHERE rn=lexicon.rn AND uid=$uid2)";
 		} elsif ($v eq '!0') {
-			return "0 < (SELECT COUNT(*) FROM lx_et_hash WHERE rn=lexicon.rn AND uid=$uid)";
+			return "0 < (SELECT COUNT(*) FROM lx_et_hash WHERE rn=lexicon.rn AND uid=$uid2)";
 		} else {
 			my $is_string = ($v !~ /^\d+$/);
 			unless ($t->{query_from} =~ / lx_et_hash AS l_e_h2 ON \(lexicon.rn/) {
-				$t->{query_from} .= " LEFT JOIN lx_et_hash AS l_e_h2 ON (lexicon.rn = l_e_h2.rn AND l_e_h2.uid=$uid)";
+				$t->{query_from} .= " LEFT JOIN lx_et_hash AS l_e_h2 ON (lexicon.rn = l_e_h2.rn AND l_e_h2.uid=$uid2)";
 			}
 			return $is_string ? "l_e_h2.tag_str='$v'" : "l_e_h2.tag=$v";
 		}
@@ -193,14 +194,14 @@ $t->save_hooks(
 	'analysis' => sub {
 		my ($rn, $s) = @_;
 		# simultaneously update lx_et_hash
-		$dbh->do('DELETE FROM lx_et_hash WHERE rn=? AND uid=?', undef, $rn, 8);
+		$dbh->do('DELETE FROM lx_et_hash WHERE rn=? AND uid=?', undef, $rn, $uid1);
 		my $sth = $dbh->prepare(qq{INSERT INTO lx_et_hash (rn, tag, ind, tag_str, uid) VALUES (?, ?, ?, ?, ?)});
 		my $index = 0;
 		for my $tag (split(/, */, $s)) { # Split the contents of the field on commas
 			# Insert new records into lx_et_hash based on the updated analysis field
 			my $tag_str = $tag;
 			$tag = 0 unless ($tag =~ /^\d+$/);
-			$sth->execute($rn, $tag, $index, $tag_str, 8);
+			$sth->execute($rn, $tag, $index, $tag_str, $uid1);
 			$index++;
 		}
 		# for old time's sake, save this in the analysis field too
@@ -211,13 +212,13 @@ $t->save_hooks(
 	},
 	'user_an' => sub {
 		my ($rn, $s) = @_;
-		$dbh->do('DELETE FROM lx_et_hash WHERE rn=? AND uid=?', undef, $rn, $uid);
+		$dbh->do('DELETE FROM lx_et_hash WHERE rn=? AND uid=?', undef, $rn, $uid2);
 		my $sth = $dbh->prepare(qq{INSERT INTO lx_et_hash (rn, tag, ind, tag_str, uid) VALUES (?, ?, ?, ?, ?)});
 		my $index = 0;
 		for my $tag (split(/, */, $s)) {
 			my $tag_str = $tag;
 			$tag = 0 unless ($tag =~ /^\d+$/);
-			$sth->execute($rn, $tag, $index, $tag_str, $uid);
+			$sth->execute($rn, $tag, $index, $tag_str, $uid2);
 			$index++;
 		}
 		return 0;
