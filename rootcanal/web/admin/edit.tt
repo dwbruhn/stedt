@@ -35,7 +35,9 @@ and <select id="uid2" name="uid2" onchange="document.location = '?' + Form.seria
 [% END -%]
 </select>
 [% END # if "lexicon" -%]
-</td></tr>
+</td>
+[% IF message %]<td>[% message %]</td>[% END -%]
+</tr>
 </table>
 </form>
 

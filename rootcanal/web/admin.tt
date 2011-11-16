@@ -1,7 +1,7 @@
 [% PROCESS header.tt title="STEDT Database: Admin Page" %]
 Edit tables:
 <ul>
-[% FOREACH tbl IN ['etyma', 'lexicon', 'languagenames', 'srcbib', 'hptb'] -%]
+[% FOREACH tbl IN ['etyma', 'lexicon', 'languagenames', 'srcbib', 'hptb', 'projects'] -%]
 	<li><a href="[% self_url %]/edit/[% tbl %]">[% tbl %]</a></li>
 [% END -%]
 </ul>

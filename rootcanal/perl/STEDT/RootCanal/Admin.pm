@@ -69,7 +69,7 @@ sub progress : Runmode {
 	my $b = $self->dbh->selectall_arrayref("SELECT username,users.uid,
 			tag, protoform, protogloss, COUNT(DISTINCT rn) as num_recs
 		FROM users LEFT JOIN lx_et_hash USING (uid) LEFT JOIN etyma USING (tag)
-		WHERE tag != 0 GROUP BY uid,tag ORDER BY uid, num_recs DESC");
+		WHERE users.uid !=8 AND tag != 0 GROUP BY uid,tag ORDER BY uid, num_recs DESC");
 	
 	# pull out "past work" from changelog and count what was done in the past, add these counts into table. Credit where credit is due!
 	my $x = $self->dbh->selectall_arrayref("SELECT oldval,newval FROM changelog WHERE col = '=accept';");

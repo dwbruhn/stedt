@@ -8,6 +8,7 @@ sub table : StartRunmode {
 	my $self = shift;
 	if (my $err = $self->require_privs(1)) { return $err; }
 	my $tbl = $self->param('tbl');
+	my $message = $self->param('message') || '';
 	my $q = $self->query;
 	# get 2 uids from edit.tt: the values selected in the two dropdowns.
 	# these will be passed in to the select for the analysis and user_an columns
@@ -51,6 +52,16 @@ sub table : StartRunmode {
 		}
 	}
 
+	# special case: add a legend for projects
+	if ($tbl eq 'projects') {
+	  my %legend = ('1 * = In progress' => '#fff2b3', '2 $ Done' => '#b3ffb3', '3 # Blocked' => '#ffb3b3', '4 % Other' => '#ccbcff') ;
+	  $message = '<table style="cellpadding : 10px"><tr>';
+	  foreach my $status (sort keys %legend) {
+		$message .= '<td style="text-align : center; width : 150px; background-color : ' . $legend{$status} . ';">' . substr($status,1) . '</td>';
+	      }
+	  $message .= '</tr></table>';
+	}
+
 	# special case: include footnotes for lexicon table
 	my @footnotes;
 	my $footnote_index = 1;
@@ -73,7 +84,7 @@ sub table : StartRunmode {
 	return $self->tt_process("admin/edit.tt", {
 		t=>$t,
 		result => $result,
-		manual => $manual_paging, sortlinks => \%sortlinks,
+		manual => $manual_paging, sortlinks => \%sortlinks, message => $message,
 		a => $a, b => $b, users => \@users, uid1 => $uid1, uid2 => $uid2, pagenum => $pagenum,
 		footnotes => (($tbl eq 'lexicon' && $self->has_privs(1)) ? \@footnotes : undef)
 	});
