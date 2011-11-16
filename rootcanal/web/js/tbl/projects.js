@@ -75,6 +75,7 @@ setup.projects = {
     'projects.create_date' : {
 	label: 'creation date',
 	noedit: true,
+	hide: true,
 	size: 100
     },
     'projects.tag_date' : {
@@ -119,6 +120,7 @@ setup.projects = {
     'projects.status' : {
 	label: 'status',
 	noedit: true,
+	hide: true,
 	size: 50
     },
     'projects.workflow' : {
