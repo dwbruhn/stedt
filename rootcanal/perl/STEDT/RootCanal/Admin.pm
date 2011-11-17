@@ -22,6 +22,44 @@ sub changes : Runmode {
 	return $self->tt_process("admin/changelog.tt", {changes=>$a});
 }
 
+sub where_word { my ($k,$v) = @_; $v =~ s/^\*(?=.)// ? "$k RLIKE '$v'" : "$k RLIKE '[[:<:]]${v}[[:>:]]'" }
+
+sub updateprojects : Runmode {
+	my $self = shift;
+	if (my $err = $self->require_privs(1)) { return $err; }
+
+	my $a = $self->dbh->selectall_arrayref("SELECT id,project,subproject,querylex,100 * tagged_reflexes/count_reflexes as pct,tagged_reflexes,count_reflexes,count_etyma FROM projects ");
+
+	# would be nice to just make a call to Table::search to get the query strings...dunno how to do that yet!
+	my $i = 0;
+	foreach my $row (@$a) {
+	  $i++;
+	  last if ($i > 500);
+	  my $glosses = $row->[3];
+	  my $qstring = $row->[3];
+	  my @restrictions;
+	  # split by commas that are not preceded by a single backslash (allows searching for commas)
+	  for my $value (split /(?<!(?<!\\)\\), */, $qstring) {
+	    next if $value eq ''; # might be numeric 0, so must check for empty string
+	    $value =~ s/(?<!\\)((?:\\\\)*)\\('|$)/$1$2/g;
+	    $value =~ s/'/''/g; # escape all single quotes
+	    push @restrictions, where_word('gloss',$value);
+	  }
+	  $qstring = join(" OR ", @restrictions);
+	
+	  $row->[5] = $self->dbh->selectrow_array("SELECT count(*) FROM lexicon WHERE $qstring AND analysis != ''");
+	  $row->[6] = $self->dbh->selectrow_array("SELECT count(*) FROM lexicon WHERE $qstring");
+	  $row->[4] = $row->[5] > 0 ?  sprintf("%.1f",(100 * $row->[5] / $row->[6])) : "0.0";
+	  
+	  $qstring =~ s/gloss/protogloss/g;
+	  $row->[7] = $self->dbh->selectrow_array("SELECT count(*) FROM etyma   WHERE $qstring");
+	  $self->dbh->do("UPDATE projects SET tagged_reflexes=?,count_reflexes=?,count_etyma=? WHERE id=?", undef, @$row[5,6,7,0]);
+	  shift @$row;
+	}
+	
+	return $self->tt_process("admin/updateprojects.tt", {projects=>$a});
+}
+
 sub queries : Runmode {
 	my $self = shift;
 	if (my $err = $self->require_privs(1)) { return $err; }
