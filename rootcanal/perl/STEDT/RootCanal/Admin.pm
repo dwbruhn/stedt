@@ -45,7 +45,7 @@ sub updateprojects : Runmode {
 	    $value =~ s/'/''/g; # escape all single quotes
 	    push @restrictions, where_word('gloss',$value);
 	  }
-	  $qstring = join(" OR ", @restrictions);
+	  $qstring =  "(" . join(" OR ", @restrictions) .")";
 	
 	  $row->[5] = $self->dbh->selectrow_array("SELECT count(*) FROM lexicon WHERE $qstring AND analysis != ''");
 	  $row->[6] = $self->dbh->selectrow_array("SELECT count(*) FROM lexicon WHERE $qstring");

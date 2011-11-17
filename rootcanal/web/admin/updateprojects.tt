@@ -1,5 +1,5 @@
 [% PROCESS header.tt title="Update Project Status - STEDT Database" %]
-<p>[% projects.size %] most recent projects:</p>
+<p>[% projects.size %] projects:</p>
 
 <table class="sortable resizable" width="100%" style="table-layout:fixed">
 <col style="width:6em">
