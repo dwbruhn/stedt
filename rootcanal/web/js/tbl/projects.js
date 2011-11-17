@@ -103,7 +103,7 @@ setup.projects = {
 	size: 50
     },
     'pct' : {
-	label: 'pct',
+	label: 'pct complete',
 	noedit: true,
 	size: 30
     },
