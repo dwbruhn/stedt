@@ -102,6 +102,11 @@ setup.projects = {
 	hide: true,
 	size: 50
     },
+    'pct' : {
+	label: 'pct',
+	noedit: true,
+	size: 30
+    },
     'projects.count_reflexes' : {
 	label: 'reflexes',
 	noedit: true,

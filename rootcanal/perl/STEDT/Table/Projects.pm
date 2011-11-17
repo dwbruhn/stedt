@@ -25,6 +25,7 @@ $t->fields(
 	   'projects.proofread_date',
 	   'projects.approve_date',
 	   'projects.publish_date',
+	   "ROUND(100 * tagged_reflexes/count_reflexes) AS pct",
 	   'projects.tagged_reflexes',
 	   'projects.count_reflexes',
 	   'projects.count_etyma',
