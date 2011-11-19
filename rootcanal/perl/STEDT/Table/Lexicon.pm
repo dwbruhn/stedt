@@ -159,7 +159,7 @@ $t->wheres(
 	},
 	'user_an' => sub {
 		my ($k,$v) = @_;
-		$v =~ s/\D//g; return "'bad int!'='0'" unless $v =~ /\d/;
+		# $v =~ s/\D//g; return "'bad int!'='0'" unless $v =~ /\d/;
 		if ($v eq '0') {
 			return "0 = (SELECT COUNT(*) FROM lx_et_hash WHERE rn=lexicon.rn AND uid=$uid2)";
 		} elsif ($v eq '!0') {
