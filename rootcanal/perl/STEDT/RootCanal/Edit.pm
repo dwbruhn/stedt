@@ -192,8 +192,8 @@ sub update : Runmode {
 			my $delims_only = delims_only($oldval,$value);
 			# this has the effect of converting spaces to stedt delimiters if the only things added were delimiters
 			
-			if ($self->param('userprivs') == 1 && !$delims_only) {
-				# this prevents taggers from making modifications to the form field
+			if (!$self->has_privs(16) && !$delims_only) {
+				# this prevents non-superusers from making modifications to the form field
 				# other than adding and removing delimiters
 				$self->header_add(-status => 403);
 				return "You are only allowed to add delimiters to the form!";
