@@ -15,6 +15,7 @@ setup['lexicon']['notes.rn'] = {
 };
 if (stedt_other_username) {
 	setup['lexicon']['user_an']['label'] = stedt_other_username + '\'s analysis';
+	setup['lexicon']['user_an']['noedit'] = true;
 	setup['lexicon']['user_an']['transform'] = function (v) {
 		if (!v) return '';
 		var s = v.replace(/, */g,', ');
@@ -23,6 +24,7 @@ if (stedt_other_username) {
 		if (to_be_approved) return s;
 		return '<div class="approve-ignore">' + s + '</div>';
 	};
+	setup['lexicon']['analysis']['noedit'] = true;
 	setup['lexicon']['analysis']['transform'] = function (v,key,rec,n) {
 		var s = v.replace(/, */g,', ');
 		// hilite this magenta if it would get clobbered on approval, i.e.
