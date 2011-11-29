@@ -72,10 +72,10 @@ sub table : StartRunmode {
 
 	#make a list of uids and users to be passed in to make the dropdowns for selecting sets of tags.
 	my @users;
-	# find the users who have tagged something
+	# find the users who have tagged something, plus the current user if no tags
 	my $u = $self->dbh->selectall_arrayref("SELECT username, users.uid
 		FROM users LEFT JOIN lx_et_hash USING (uid) LEFT JOIN etyma USING (tag)
-		WHERE tag != 0 GROUP BY uid");
+		WHERE tag != 0 OR users.uid=? GROUP BY uid", undef, $self->param('uid'));
 	foreach (@$u) {
 		push @users, {uid=>$_->[1], username=>$_->[0]};
 	}
@@ -164,18 +164,33 @@ sub update : Runmode {
 	}
 
 	# this is a bit complicated. 
-	# we get 2 userids passed in. if this is the lexicon view, then these 2 uids correspond to
-	# the users selected in the dropdown and whose tagging appears in the analysis and user_an columns.
+	# If this is the edit/lexicon view, we get 2 userids passed in.
+	# If this is the notes/etymon view, we get one passed in, viz. uid2.
+	# Both are optional, but uid1 is more optional than uid2, since
+	# uid2 is used by both lexicon and etymon views, but uid1 is only used by edit/lexicon.
+	# In the edit/lexicon view, these 2 uids correspond to the users selected
+	# in the dropdown and whose tagging appears in the analysis and user_an columns.
+	# In the etymon view, only uid2 is relevant because the first column is always
+	# the stedt analysis.
+	
+	# NB: because $q->param(X) is evaluated in list context, it will return an empty list
+	# if there is no parameter X. Thus, for something like this:
+	# ($a, $b, $c) = (1, $q->param('nonexistent_parameter_name'), 3);
+	# you will get $a = 1, $b = 3, and $c undefined since the second item in the list
+	# was collapsed away. To avoid such problems we pull the optional params out
+	# and set them in their own statements.
+	
 	# we test to see which field is being updated, and set $fake_uid accordingly.
-	# the rest of the logic is the same as before.
 	# note that users with sufficient privileges can change other users' and even stedt's tagging
 	# in which case the changelog reflects the actual user as the changer and records
 	# the 'pilfered' tags as "other_an:N" where N is the uid of the original tagger.
-	my ($tblname, $field, $id, $value, $uid1, $uid2) = ($q->param('tbl'), $q->param('field'),
-		$q->param('id'), decode_utf8($q->param('value')), $q->param('uid1'), $q->param('uid2'));
+	my ($tblname, $field, $id, $value) = ($q->param('tbl'), $q->param('field'),
+		$q->param('id'), decode_utf8($q->param('value')));
+	my $uid2 = $q->param('uid2');
+	my $uid1 = $q->param('uid1'); # these will be set to undef if there is no such param
 	my $fake_uid;
-	if ($tblname eq 'lexicon' && $field eq 'analysis') { $fake_uid = $uid1 };
-	if ($tblname eq 'lexicon' && $field eq 'user_an' ) { $fake_uid = $uid2 };
+	if ($tblname eq 'lexicon' && $field eq 'analysis') { $fake_uid = $uid1; }
+	elsif ($tblname eq 'lexicon' && $field eq 'user_an' ) { $fake_uid = $uid2; }
 	undef $fake_uid if $fake_uid && ($fake_uid == $self->param('uid')); # $fake_uid should be undef for the current user
 	if ($fake_uid && !$self->has_privs(8)) {
 		$self->header_add(-status => 403); # Forbidden
@@ -203,7 +218,7 @@ sub update : Runmode {
 		$t->save_value($field, $value, $id);
 		$value = $t->get_value($field, $id); # fetch the new value in case it's not quite the same
 		if ($fake_uid) {
-			$field = "other_an:$fake_uid";
+			$field = $fake_uid == 8 ? 'analysis' : "other_an:$fake_uid";
 		}
 		if ($oldval ne $value) {
 			$self->dbh->do("INSERT changelog VALUES (?,?,?,?,?,?,NOW())", undef,

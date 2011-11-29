@@ -1148,8 +1148,8 @@ TableKit.Editable.CellEditor.prototype = {
 			// cell.appendChild(form);
 			// stick it in before instead
 			cell.insert({ top : form });
-			field.focus();
 			field.value = oldValue; //TableKit.getCellText(cell);
+			field.focus(); // reversing these last two lines for now until i can figure out why Safari is showing a blank box otherwise
 			// *** DY
 	},
 	_submit : function(e) { // *** DY comment: this helper fn takes an event arg, and passes on two args to the main submit fn

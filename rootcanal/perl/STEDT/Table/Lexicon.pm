@@ -205,9 +205,11 @@ $t->save_hooks(
 			$index++;
 		}
 		# for old time's sake, save this in the analysis field too
-		my $update = qq{UPDATE lexicon SET analysis=? WHERE rn=?};
-		my $update_sth = $dbh->prepare($update);
-		$update_sth->execute($s, $rn);
+		if ($uid1 == 8) {
+			my $update = qq{UPDATE lexicon SET analysis=? WHERE rn=?};
+			my $update_sth = $dbh->prepare($update);
+			$update_sth->execute($s, $rn);
+		}
 		return 0;
 	},
 	'user_an' => sub {

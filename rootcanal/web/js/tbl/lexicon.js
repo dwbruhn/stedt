@@ -22,10 +22,8 @@ setup['lexicon']['num_notes'] = {
 	}
 };
 
-setup['lexicon']['analysis'] = {
-    label: $("uid1").options[$("uid1").selectedIndex].text + '\'s analysis'
-};
+setup['lexicon']['analysis'].label =
+	$("uid1").options[$("uid1").selectedIndex].text + '\'s analysis';
 
-setup['lexicon']['user_an'] = {
-    label: $("uid2").options[$("uid2").selectedIndex].text  + '\'s analysis'
-}
+setup['lexicon']['user_an'].label =
+	$("uid2").options[$("uid2").selectedIndex].text  + '\'s analysis';
