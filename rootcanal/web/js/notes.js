@@ -115,6 +115,7 @@ $('addnoteform').observe('submit', function (e) {
 	} else if (spec === 'F') {
 		container = $('allcomparanda' + id);
 		spec = 'E'; // special case, change spec F -> E
+		f.spec.value = 'E';
 	} else if (spec === 'C' || spec === 'S') {
 		container = $('allnotes');
 	} else { // lexicon note

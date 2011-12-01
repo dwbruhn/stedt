@@ -646,10 +646,10 @@ EndOfSQL
 			$note =~ s/ Correspondences:/<br>Correspondences:/g;
 #			$note =~ s/(\[ZJH\])/\\hfill $1/g;
 #			$note =~ s/(\[JAM\])/\\hfill $1/g;
-			push @{$e{comparanda}}, { noteid=>$row->[0], lastmod=>$row->[1], 'ord'=>$_->[3],
+			push @{$e{comparanda}}, { noteid=>$row->[0], lastmod=>$row->[1], 'ord'=>$row->[3],
 				text=>xml2html($note, $self, \@footnotes, \$footnote_index, $row->[0]),
 				markup=>xml2markup($note), num_lines=>guess_num_lines($note),
-				uid=>$_->[4], username=>$_->[5]
+				uid=>$row->[4], username=>$row->[5]
 			};
 		}
 	}
