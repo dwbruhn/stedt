@@ -1,18 +1,24 @@
 ﻿[% PROCESS header.tt title="STEDT Chapter Browser" -%]
 
 <h1>Chapters</h1>
-
-<table id="ch" width=100%>
+<p>[% ch.size %] nodes</p>
+<table id="ch" class="sortable resizable" style="table-layout:fixed">
 <tr><th>Ch.</th><th>Title</th><th>[% IF c.has_privs(1) %]public[% ELSE %]num. etyma[% END %]</th>
-[%- IF c.has_privs(1) %]<th>etyma</th>[% END %]<th>notes</th><th>flowchart?</th><td width="80%">[% # dummy to expand the table width %]</td></tr>
+[%- IF c.has_privs(1) %]<th>etyma</th>[% END %]<th>notes</th><th>flowchart?</th>
+<th>SemCat</th><th>Old Chapter</th><th>Old Subchapter</th>
+<td width="80%">[% # dummy to expand the table width %]</td></tr>
 [% FOREACH r IN ch -%]
 <tr><td>[% r.0 %]</td><td>[% r.1 %]</td><td>[% r.2 || '' %]</td>
 [%- IF c.has_privs(1) %]<td>[% IF r.3 %]<a href="[% self_url %]/edit/etyma?etyma.chapter=[% r.0 | uri %]">[% r.3 %][% END %]</td>[% END -%]
-<td><a href="[% self_url %]/chap/1/[% r.0 | uri %]">[% IF r.4 %][% r.4 %] note[% r.4 == 1 ? '' : 's' %][% ELSE %]-[% END %]</a></td><td>[% IF r.5 %]✓[% END %]</td></tr>
+<td><a href="[% self_url %]/chap/1/[% r.0 | uri %]">[% IF r.4 %][% r.4 %] note[% r.4 == 1 ? '' : 's' %][% ELSE %]-[% END %]</a></td><td>[% IF r.5 %]✓[% END %]</td>
+<td>[% r.7 %]</td><td>[% r.8 %]</td><td>[% r.9 %]</td><td>[% r.10 %]</td>
+</tr>
 [% END -%]
 </table>
 
 <h2>Undefined chapters:</h2>
+<p>[% e.size %] nodes</p>
+
 <table id="e">
 <tr><th>Ch.</th><th>[% IF c.has_privs(1) %]public[% ELSE %]num. etyma[% END %]</th>
 [%- IF c.has_privs(1) %]<th>etyma</th>[% END %]<td width="80%"></td></tr>
@@ -24,6 +30,7 @@
 
 [% IF c.has_privs(1) -%]
 <h2>Orphaned notes:</h2>
+<p>[% n.size %] orphans</p>
 [% FOREACH r IN n -%]
 <p>[% r.0 %]: <a href="[% self_url %]/chap/1/[% r.0 | uri %]">[% r.1 %] note(s)</a>;
 [% r.2 %] etyma</p>
