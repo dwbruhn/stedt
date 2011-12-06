@@ -74,5 +74,5 @@ setup.chapters = {
 	noedit: false,
 	hide: false,
 	size: 100
-    },
+    }
 };
