@@ -51,7 +51,7 @@ binmode(STDERR, ":utf8");
 my $hidden_etyma = $dbh->selectall_arrayref(
 	qq#SELECT e.tag, e.protoform, e.protogloss, e.plg
 		FROM `etyma` AS `e` JOIN `etyma` AS `super` ON e.supertag = super.tag
-		WHERE e.uid=8 AND super.chapter = '$fasc.$chap' AND super.sequence < 1#);
+		WHERE e.uid=8 AND super.chapter = '$vol.$fasc.$chap' AND super.sequence < 1#);
 if (@$hidden_etyma) {
 	print STDERR "Warning: The following etyma have a sequence number of 0\nand will not be included:\n";
 	for my $e (@$hidden_etyma) {
@@ -68,9 +68,9 @@ print STDERR "building etyma data...\n";
 my %tag2info; # this is (and should only be) used inside xml2tex, for looking up etyma refs
 for (@{$dbh->selectall_arrayref("SELECT tag,chapter,sequence,protoform,protogloss FROM etyma")}) {
 	my ($tag,$chapter,@info) = map {decode_utf8($_)} @$_;
-	if ($chapter =~ /^9.\d$/) {
+	if ($chapter =~ /^1.9.\d$/) {
 		push @info, 'TBRS'; # "volume" info to print for cross refs in the notes
-	} elsif ($chapter ne "$fasc.$chap") {
+	} elsif ($chapter ne "$vol.$fasc.$chap") {
 		$info[0] = ''; # make sequence empty if not in the current extraction
 	}
 	$info[1] = '*' . $info[1];
@@ -90,24 +90,19 @@ my ($date, $shortdate);
 	$shortdate = sprintf "%04i%02i%02i", @date_items;
 }
 
-if ($vol != 1) {
-	print "Sorry, I don't know how to do anything other than body parts yet.\n";
-	exit;
-}
-
 print STDERR "generating chapter $chap...\n";
-my $title = $dbh->selectrow_array(qq#SELECT chaptertitle FROM `chapters` WHERE `chapter` = '$fasc.$chap'#);
-my $flowchartids = $dbh->selectcol_arrayref("SELECT noteid FROM notes WHERE spec='C' AND id='$fasc.$chap' AND notetype='G'");
+my $title = $dbh->selectrow_array(qq#SELECT chaptertitle FROM `chapters` WHERE `chapter` = '$vol.$fasc.$chap'#);
+my $flowchartids = $dbh->selectcol_arrayref("SELECT noteid FROM notes WHERE spec='C' AND id='$vol.$fasc.$chap' AND notetype='G'");
 print STDERR "title is '$title'...\n";
 my $chapter_notes = [map {xml2tex(decode_utf8($_))} @{$dbh->selectcol_arrayref(
-	"SELECT xmlnote FROM notes WHERE spec='C' AND id='$fasc.$chap' AND notetype = 'T' ORDER BY ord")}
+	"SELECT xmlnote FROM notes WHERE spec='C' AND id='$vol.$fasc.$chap' AND notetype = 'T' ORDER BY ord")}
 	];
 
 my @etyma; # array of infos to be passed on to the template
 my $etyma_in_chapter = $dbh->selectall_arrayref(
 	qq#SELECT e.tag, e.sequence, e.protoform, e.protogloss, e.plg, e.hptbid, e.tag=e.supertag AS is_main
 		FROM `etyma` AS `e` JOIN `etyma` AS `super` ON e.supertag = super.tag
-		WHERE e.uid=8 AND super.chapter = '$fasc.$chap' AND super.sequence >= 1
+		WHERE e.uid=8 AND super.chapter = '$vol.$fasc.$chap' AND super.sequence >= 1
 		ORDER BY super.sequence, is_main, e.plgord#);
 # eventually we should only need to sort by e.plgord
 # (once the marriage between mesoroots and the languagegroups table is complete),
@@ -313,7 +308,7 @@ EndOfSQL
 
 # print rootlets
 # my $chapter_end_notes = $dbh->selectcol_arrayref(
-# 	"SELECT xmlnote FROM notes WHERE spec='C' AND id='$fasc.$chap' AND notetype = 'F' ORDER BY ord");
+# 	"SELECT xmlnote FROM notes WHERE spec='C' AND id='$vol.$fasc.$chap' AND notetype = 'F' ORDER BY ord");
 # if (@$chapter_end_notes) {
 # 	print "\\begin{center} * * * \\end{center}\n\n";
 # }
