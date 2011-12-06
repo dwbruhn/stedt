@@ -108,8 +108,10 @@ my $etyma_in_chapter = $dbh->selectall_arrayref(
 	qq#SELECT e.tag, e.sequence, e.protoform, e.protogloss, e.plg, e.hptbid, e.tag=e.supertag AS is_main
 		FROM `etyma` AS `e` JOIN `etyma` AS `super` ON e.supertag = super.tag
 		WHERE e.uid=8 AND super.chapter = '$fasc.$chap' AND super.sequence >= 1
-		ORDER BY super.sequence, e.plgord#);
-
+		ORDER BY super.sequence, is_main, e.plgord#);
+# eventually we should only need to sort by e.plgord
+# (once the marriage between mesoroots and the languagegroups table is complete),
+# but for now use is_main
 
 print STDERR (scalar @$etyma_in_chapter) . " etyma in this chapter\n";
 foreach (@$etyma_in_chapter) {
