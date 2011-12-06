@@ -3,17 +3,23 @@
 <h1>Chapters</h1>
 <p>[% ch.size %] nodes</p>
 <table id="ch" class="sortable resizable" style="table-layout:fixed">
-<tr><th>Ch.</th><th>Title</th><th>[% IF c.has_privs(1) %]public[% ELSE %]num. etyma[% END %]</th>
-[%- IF c.has_privs(1) %]<th>etyma</th>[% END %]<th>notes</th><th>flowchart?</th>
-<th>SemCat</th><th>Old Chapter</th><th>Old Subchapter</th>
-<td width="80%">[% # dummy to expand the table width %]</td></tr>
+<thead><tr>
+	<th id="chapters.chapter">Ch.</th>
+	<th id="chapters.chaptertitle">Title</th>
+	<th>[% IF c.has_privs(1) %]public[% ELSE %]num. etyma[% END %]</th>
+	[%- IF c.has_privs(1) %]<th>etyma</th>[% END %]<th>notes</th><th>flowchart?</th>
+	<th>SemCat</th><th>Old Chapter</th><th>Old Subchapter</th>
+	<th id="chapters.id">id</td>
+</tr></thead>
+<tbody>
 [% FOREACH r IN ch -%]
 <tr><td>[% r.0 %]</td><td>[% r.1 %]</td><td>[% r.2 || '' %]</td>
 [%- IF c.has_privs(1) %]<td>[% IF r.3 %]<a target="etyma" href="[% self_url %]/edit/etyma?etyma.chapter=[% r.0 | uri %]">[% r.3 %][% END %]</td>[% END -%]
-<td><a a target="notes" href="[% self_url %]/chap/1/[% r.0 | uri %]">[% IF r.4 %][% r.4 %] note[% r.4 == 1 ? '' : 's' %][% ELSE %]-[% END %]</a></td><td>[% IF r.5 %]✓[% END %]</td>
+<td><a target="notes" href="[% self_url %]/chap/1/[% r.0 | uri %]">[% IF r.4 %][% r.4 %] note[% r.4 == 1 ? '' : 's' %][% ELSE %]-[% END %]</a></td><td>[% IF r.5 %]✓[% END %]</td>
 <td>[% r.7 %]</td><td>[% r.8 %]</td><td>[% r.9 %]</td><td>[% r.10 %]</td>
 </tr>
 [% END -%]
+</tbody>
 </table>
 
 <h2>Undefined chapters:</h2>
@@ -37,5 +43,9 @@
 [% END -%]
 [% END -%]
 
+<script src="[% self_base %]js/tbl/chapters.js"></script>
+<script>
+TableKit.Raw.init('ch', 'chapters', setup['chapters'][% IF c.has_privs(8) %], '[% self_url %]/update'[% END %]);
+</script>
 </body>
 </html>

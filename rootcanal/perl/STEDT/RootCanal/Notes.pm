@@ -21,7 +21,7 @@ SELECT chapters.chapter, chapters.chaptertitle,
 	(SELECT COUNT(*) FROM etyma WHERE chapter=chapters.chapter AND public=1 $blessed) AS num_public,
 	(SELECT COUNT(*) FROM etyma WHERE chapter=chapters.chapter $blessed),
 	COUNT(DISTINCT notes.noteid), MAX(notes.notetype = 'G'), MAX(notes.notetype != 'I') as public_notes,
-        chapters.semcat, chapters.old_chapter, chapters.old_subchapter
+        chapters.semcat, chapters.old_chapter, chapters.old_subchapter, chapters.id
 FROM chapters LEFT JOIN notes ON (notes.id=chapters.chapter)
 GROUP BY 1 $public_ch ORDER BY v,f,c,s1,s2,s3
 SQL
