@@ -64,6 +64,7 @@ $t->field_editable_privs(
 	'etyma.possallo' => 16,
 	'etyma.allofams' => 16,
 	'etyma.public' => 16,
+	'etyma.exemplary' => 9,
 );
 
 # Stuff for searching
