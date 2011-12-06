@@ -31,6 +31,9 @@ sub updateprojects : Runmode {
 	my $a = $self->dbh->selectall_arrayref("SELECT id,project,subproject,querylex,100 * tagged_reflexes/count_reflexes as pct,tagged_reflexes,count_reflexes,count_etyma FROM projects ");
 
 	# would be nice to just make a call to Table::search to get the query strings...dunno how to do that yet!
+	# See Notes.pm, 'chapter' runmode for an example of loading a table
+	# module and setting up search terms.
+	# Then calling query_where should do it.
 	my $i = 0;
 	foreach my $row (@$a) {
 	  $i++;
@@ -47,6 +50,12 @@ sub updateprojects : Runmode {
 	  }
 	  $qstring =  "(" . join(" OR ", @restrictions) .")";
 	
+	  # this is very slow primarily because of the following query
+	  # which is essentially run twice. It may be possible to halve
+	  # the time by combining the two queries.
+	  # Also, searching for empty analyses will not do the right thing
+	  # because we should be using the lx_et_hash to compute the analyses.
+	  # Using load_table_module, etc., would probably be better.
 	  $row->[5] = $self->dbh->selectrow_array("SELECT count(*) FROM lexicon WHERE $qstring AND analysis != ''");
 	  $row->[6] = $self->dbh->selectrow_array("SELECT count(*) FROM lexicon WHERE $qstring");
 	  $row->[4] = $row->[5] > 0 ?  sprintf("%.1f",(100 * $row->[5] / $row->[6])) : "0.0";
