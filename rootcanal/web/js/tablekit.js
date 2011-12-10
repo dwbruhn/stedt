@@ -324,8 +324,14 @@ TableKit.Raw = {
 			if (!config[fld]) {
 				config[fld] = { noedit:true };
 			}
-			if (config[fld].label)
-				cell.innerHTML = config[fld].label;
+			if (config[fld].label) {
+				if (cell.down('a')) {
+					// don't clobber a link if there is one
+					cell.down('a').innerHTML = config[fld].label;
+				} else {
+					cell.innerHTML = config[fld].label;
+				}
+			}
 			if (config[fld].hide)
 				cell.style.display = 'none';
 			if (config[fld].noedit)

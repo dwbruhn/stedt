@@ -49,6 +49,7 @@ sub table : StartRunmode {
 		for my $fld (@{$result->{fields}}) {
 			$fakeq->param('sortkey',$fld);
 			$sortlinks{$fld} = $fakeq->self_url;
+			# for each field, generate a clickable URL to re-sort
 		}
 	}
 

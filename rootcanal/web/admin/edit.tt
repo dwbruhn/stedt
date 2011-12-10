@@ -25,13 +25,19 @@
 <input type="reset" value="Reset [Esc]²">
 [% IF t.table == "lexicon" %]
 View tagging by <select id="uid1" name="uid1" onchange="document.location = '?' + Form.serializeElements(this.up('form').select('input:not(:button,:submit,:reset),select').findAll(Form.Element.getValue));">
+<option value=""[% IF uid1 == 8 %] selected[% END %]>stedt</option>
 [% FOREACH u IN users -%]
+[% UNLESS u.uid == 8 -%]
 <option value="[% u.uid %]"[% IF uid1 == u.uid %] selected[% END %]>[% u.username %]</option>
+[% END -%]
 [% END -%]
 </select>
 and <select id="uid2" name="uid2" onchange="document.location = '?' + Form.serializeElements(this.up('form').select('input:not(:button,:submit,:reset),select').findAll(Form.Element.getValue));">
+<option value=""[% IF uid2 == c.param('uid') %] selected[% END %]>[% c.param('user') %]</option>
 [% FOREACH u IN users -%]
+[% UNLESS u.uid == c.param('uid') -%]
 <option value="[% u.uid %]"[% IF uid2 == u.uid %] selected[% END %]>[% u.username %]</option>
+[% END -%]
 [% END -%]
 </select>
 [% END # if "lexicon" -%]
@@ -56,6 +62,8 @@ and <select id="uid2" name="uid2" onchange="document.location = '?' + Form.seria
 [%- IF c.query.param(col) %]<input name="[% col %]" type="hidden" value="[% c.query.param(col) %]">[% END -%]
 [%- END -%]
 <input name="pagenum" type="hidden" value="[% pagenum %]">
+<input name="uid1" type="hidden" value="[% uid1 %]">
+<input name="uid2" type="hidden" value="[% uid2 %]">
 [% UNLESS pagenum == 0 %]<input name="prev" type="submit" value="Previous Page">[% END %]
 Displaying items [% a %]-[% b %] of [% result.data.size %].
 [% UNLESS b == result.data.size %]<input name="next" type="submit" value="Next Page">[% END %]
