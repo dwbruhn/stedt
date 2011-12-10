@@ -347,7 +347,7 @@ var setup = { // in the form setup.[tablename].[fieldname]
 			noedit: true,
 			size: 40,
 			transform: function (v) {
-				var link = '<a href="' + baseRef + 'etymon/' + v
+				var link = '<a href="' + baseRef + 'etymon/' + v + '#' + v
 						+ '" target="stedt_etymon">' + (stedtuserprivs ? '' : '#') + v + '</a>';
 				return '<span id="tag' + v + '" class="tagid">'
 					+ (link || v) + '</span>';
@@ -560,7 +560,7 @@ var setup = { // in the form setup.[tablename].[fieldname]
 						link_tag = stedttagger ? (skipped_roots[t2[i]] ? '' : t2[i]) : public_roots[t2[i]] ? t2[i] : '';
 					}
 					a += parseInt(link_tag,10)
-						? '<a href="' + baseRef + 'etymon/' + link_tag + '" target="stedt_etymon"'
+						? '<a href="' + baseRef + 'etymon/' + link_tag + '#' + link_tag + '" target="stedt_etymon"'
 							+ '" class="elink ' + syl_class + '">'
 							+ s.escapeHTML() + '</a>' + delim
 						: '<span class="' + syl_class + '">' + s.escapeHTML() + '</span>' + delim;
