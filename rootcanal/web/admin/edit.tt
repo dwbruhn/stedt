@@ -217,13 +217,17 @@ var clear_form = function (f) {
 	});
 };
 $('search_form').observe('keydown', function (e) {
+	var currentlySelected;
 	if (e.keyCode === Event.KEY_ESC) {
 		e.stop();
+		currentlySelected = e.findElement();
+		currentlySelected.blur(); // FireFox has problems setting x.value if x is currently selected, so we use this workaround
 		if (this.select('input:not(:button,:submit,:reset),select').any(Form.Element.getValue)) {
 			clear_form(this);
 		} else {
 			this.reset();
 		}
+		currentlySelected.focus();
 	}
 });
 $('search_form').observe('submit', function (e) {
