@@ -2,7 +2,10 @@
 <div id="etyma">
 <div align="center">[% # search div %]
 <form id="etyma_search" method="post">
-Search etyma: <input name="s" type="text" size="30" id="etyma_searchinput" ><input name="lg" type="hidden" id="etyma_searchlg" ><input name="btn" type="submit" value="Search">
+<table><tr><td></td><th>*protoform OR protogloss</th></tr>
+<tr><td>Search <b>etyma</b>:</td>
+<td><input name="s" type="text" size="30" id="etyma_searchinput" ><input name="lg" type="hidden" id="etyma_searchlg" ></td>
+<td><input name="btn" type="submit" value="Search"></td></tr></table>
 [%- IF 0 && c.has_privs(16) %]<a href="#" onclick="return show_advanced_search('etyma')">Advanced Search</a>[% END %]
 </form>
 </div>
@@ -35,7 +38,12 @@ Search etyma: <input name="s" type="text" size="30" id="etyma_searchinput" ><inp
 <div id="lexicon">
 <div align="center">
 <form id="lexicon_search" method="post">
-Search lexicon:&nbsp;&nbsp;<i>gloss:</i> <input name="s" type="text" size="48" id="lexicon_searchinput"> <i>language: </i><input name="lg" type="text" size="32" id="lexicon_searchlg" ><input name="btn" type="submit" value="Search">
+<table>
+<tr><td></td><th>gloss</th><th>language</th></tr>
+<tr><td>Search <b>lexicon</b>:</td><td><input name="s" type="text" size="48" id="lexicon_searchinput"></td>
+<td><input name="lg" type="text" size="32" id="lexicon_searchlg" ></td>
+<td><input name="lggrp" type="hidden" id="lexicon_searchlggrp" maxlength="7"></td>
+<td><input name="btn" type="submit" value="Search"></td></tr></table>
 </form>
 </div>
 <div id="lexicon_status">[% lexicon.data.size ? (lexicon.data.size > 4 ? (lexicon.data.size _ ' records found.') : '') : 'No records found.' %]</div>

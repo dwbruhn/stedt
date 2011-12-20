@@ -6,10 +6,12 @@
 <img src="[% self_base %]img/stedt_rgb.jpg" alt="STEDT Logo" border="0" width="400" height="128"></a>
 <br><br><br>
 <form id="simple_search" method="get" action="[% self_url %]/gnis">
-<i>(proto)gloss:</i> <input type="text" name="t" id="simple_searchinput" size="48" maxlength="128">
-<i>language:</i> <input type="text" name="lg" size="32" maxlength="96">
-<input type="submit" name="search" value="Search" >
-<a href="[% self_base %]help.html" target="_blank">Help</a>
+<table>
+<tr><th>(proto)gloss</th><th>language</th></tr>
+<tr><td><input type="text" name="t" id="simple_searchinput" size="48" maxlength="128"></td>
+<td><input type="text" name="lg" id="simple_searchlg" size="32" maxlength="96"><input name="lggrp" id="simple_searchlggrp" type="hidden" maxlength="7"></td>
+<td><input type="submit" name="search" value="Search" >
+<a href="[% self_base %]help.html" target="_blank">Help</a></td></tr></table>
 </form>
 <div style="height:10ex"></div>
 <hr>

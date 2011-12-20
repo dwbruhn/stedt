@@ -115,7 +115,7 @@ sub group : Runmode {
 }
 
 sub searchresults_from_querystring {
-	my ($self, $s, $tbl, $lg) = @_;
+	my ($self, $s, $tbl, $lg, $lggrp) = @_;
 	my $t = $self->load_table_module($tbl);
 	my $query = $self->query->new(''); # for some reason faster than saying "new CGI"? disk was thrashing.
 
@@ -141,6 +141,11 @@ sub searchresults_from_querystring {
 		}
 	} elsif ($tbl eq 'lexicon') {
 		$query->param('languagenames.language' => $lg) if $lg =~ /\p{Letter}/;
+		
+		# languagegroups param must match start with X or a digit and not go past 4 levels (first two levels are obligatory)
+		$query->param('languagegroups.grp' => $lggrp) if $lggrp =~ /^[\dX]\.\d((\.\d)(\.\d)?)?$/;
+		# print STDERR "Language group param is $lggrp\n";	# debugging
+
 		for my $token (split / /, $s) {
 			if ($token =~ /^\d+$/) {
 				$query->param('analysis' => $token);
@@ -149,7 +154,7 @@ sub searchresults_from_querystring {
 				$query->param('lexicon.gloss' => $token);
 			}
 		}
-		if (!$s && !$lg) {
+		if (!$s && !$lg && !$lggrp) {
 			$query->param('analysis'=>1764);
 		} elsif (!$query->param) {
 			$query->param('analysis'=>5035);
@@ -169,15 +174,16 @@ sub combo : Runmode {
 	my $q = $self->query;
 	my $s = decode_utf8($q->param('t')) || '';
 	my $lg = decode_utf8($q->param('lg')) || '';
+	my $lggrp = decode_utf8($q->param('lggrp')) || '';
 	my $result;
 
-	if ($s || $lg || !$q->param) {
-		if ($ENV{HTTP_REFERER} && ($s || $lg)) {
+	if ($s || $lg || $lggrp || !$q->param) {
+		if ($ENV{HTTP_REFERER} && ($s || $lg || $lggrp)) {
 			$self->dbh->do("INSERT querylog VALUES (?,?,?,NOW())", undef,
-				'simple', $lg ? "$s {$lg}" : $s, $ENV{REMOTE_ADDR});
+				'simple', $lg ? "$s {$lg}" : $s, $ENV{REMOTE_ADDR});	# record search in query log (needs to be cleaned up someday)
 		}
 		$result->{etyma} = $self->searchresults_from_querystring($s, 'etyma');
-		$result->{lexicon} = $self->searchresults_from_querystring($s, 'lexicon', $lg);
+		$result->{lexicon} = $self->searchresults_from_querystring($s, 'lexicon', $lg, $lggrp);
 	} else {
 		$result->{etyma} = $self->load_table_module('etyma')->search($q);
 		$result->{lexicon} = $self->load_table_module('lexicon')->search($q);
@@ -189,6 +195,8 @@ sub ajax : Runmode {
 	my $self = shift;
 	my $s = decode_utf8($self->query->param('s'));
 	my $lg = decode_utf8($self->query->param('lg'));
+	my $lggrp = decode_utf8($self->query->param('lggrp'));
+	# print STDERR "AJAX: Language group param is $lggrp\n";	# debugging
 	my $tbl = $self->query->param('tbl');
 	my $result; # hash ref for the results
 
@@ -197,7 +205,7 @@ sub ajax : Runmode {
 
 	if (defined($s)) {
 		if ($tbl eq 'lexicon' || $tbl eq 'etyma') {
-			$result = $self->searchresults_from_querystring($s, $tbl, $lg);
+			$result = $self->searchresults_from_querystring($s, $tbl, $lg, $lggrp);
 		} else {
 			die "bad table name!";
 		}
