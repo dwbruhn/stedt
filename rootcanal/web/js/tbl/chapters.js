@@ -12,67 +12,73 @@ setup.chapters = {
 	noedit: false,
 	size: 80,
 	transform : function (v) {
-	    return '<a href="' + baseRef + 'edit/chapter?chapters.chapter=' + v + '" target="stedt_chapters">' + v + '</a>';
+	    return '<a target="chapters" href="' + baseRef + 'edit/chapters?chapters.chapter=' + v + '" target="stedt_chapters">' + v + '</a>';
 	}
     },
     'chapters.chaptertitle' : {
-	label: 'chaptertitle',
+	label: 'title',
 	noedit: false,
 	hide: false,
-	size: 150
+	size: 200
+    },
+    'chapters.chapterabbr' : {
+	label: 'other glosses',
+	noedit: false,
+	hide: false,
+	size: 120
     },
     'chapters.v' : {
-	label: 'v',
+	label: 'vol',
 	noedit: false,
 	hide: false,
-	size: 50
+	size: 20
     },
     'chapters.f' : {
-	label: 'f',
+	label: 'fasc',
 	noedit: false,
 	hide: false,
-	size: 50
+	size: 20
     },
     'chapters.c' : {
-	label: 'c',
+	label: 'chap',
 	noedit: false,
 	hide: false,
-	size: 50
+	size: 20
     },
     'chapters.s1' : {
 	label: 's1',
 	noedit: false,
 	hide: false,
-	size: 50
+	size: 20
     },
     'chapters.s2' : {
 	label: 's2',
 	noedit: false,
 	hide: false,
-	size: 50
+	size: 20
     },
     'chapters.s3' : {
 	label: 's3',
 	noedit: false,
 	hide: false,
-	size: 50
+	size: 20
     },
     'chapters.semcat' : {
 	label: 'semcat',
 	noedit: false,
 	hide: false,
-	size: 120
+	size: 80
     },
     'chapters.old_chapter' : {
 	label: 'old chapter',
 	noedit: false,
 	hide: false,
-	size: 100
+	size: 60
     },
     'chapters.old_subchapter' : {
 	label: 'old subchapter',
 	noedit: false,
 	hide: false,
-	size: 100
+	size: 80
     }
 };
