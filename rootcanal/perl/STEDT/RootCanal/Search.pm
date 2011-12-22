@@ -116,6 +116,8 @@ sub group : Runmode {
 
 sub searchresults_from_querystring {
 	my ($self, $s, $tbl, $lg, $lggrp) = @_;
+	# print STDERR "SEARCHRESULTS: Language group param is $lggrp\n";	# debugging
+	# print STDERR "SEARCHRESULTS: Language param is $lg\n";	# debugging
 	my $t = $self->load_table_module($tbl);
 	my $query = $self->query->new(''); # for some reason faster than saying "new CGI"? disk was thrashing.
 
@@ -169,12 +171,14 @@ sub searchresults_from_querystring {
 	return $t->search($query);
 }
 
+# this runs when the user submits a search from the splash page
 sub combo : Runmode {
 	my $self = shift;
 	my $q = $self->query;
 	my $s = decode_utf8($q->param('t')) || '';
 	my $lg = decode_utf8($q->param('lg')) || '';
 	my $lggrp = decode_utf8($q->param('lggrp')) || '';
+	# print STDERR "COMBO: Language group param is $lggrp\n";	# debugging
 	my $result;
 
 	if ($s || $lg || $lggrp || !$q->param) {
@@ -191,17 +195,19 @@ sub combo : Runmode {
 	return $self->tt_process("index.tt", $result);
 }
 
+# this runs when the user submits a search in either the lexicon or etyma section of the simple search interface
 sub ajax : Runmode {
 	my $self = shift;
 	my $s = decode_utf8($self->query->param('s'));
 	my $lg = decode_utf8($self->query->param('lg'));
 	my $lggrp = decode_utf8($self->query->param('lggrp'));
 	# print STDERR "AJAX: Language group param is $lggrp\n";	# debugging
+	# print STDERR "AJAX: Language param is $lg\n";	# debugging
 	my $tbl = $self->query->param('tbl');
 	my $result; # hash ref for the results
 
 	$self->dbh->do("INSERT querylog VALUES (?,?,?,NOW())", undef,
-		$tbl, $lg ? "$s {$lg}" : $s, $ENV{REMOTE_ADDR}) if $s || $lg;
+		$tbl, ($lg || $lggrp) ? "$s {$lg} <$lggrp>" : $s, $ENV{REMOTE_ADDR}) if $s || $lg;	# future: add separate lggrp and lg fields to querylog table
 
 	if (defined($s)) {
 		if ($tbl eq 'lexicon' || $tbl eq 'etyma') {

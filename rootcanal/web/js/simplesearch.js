@@ -44,7 +44,7 @@ function stedt_simplesearch_init() {
 		var tbl = e.findElement().id.sub('_search', '');
 		new Ajax.Request(baseRef + 'search/ajax', {
 			method: 'get',
-			parameters: { tbl : tbl, s : $F(tbl + '_searchinput'), lg : $F(tbl + '_searchlg')},
+			parameters: { tbl : tbl, s : $F(tbl + '_searchinput'), lg : $F(tbl + '_searchlg'), lggrp : $F(tbl + '_searchlggrp')},
 			onSuccess: ajax_make_table,
 			onFailure: function (transport){ alert('Error: ' + transport.responseText); },
 			onComplete: function (transport){ $(tbl + '_search').enable(); }

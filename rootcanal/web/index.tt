@@ -39,10 +39,71 @@
 <div align="center">
 <form id="lexicon_search" method="post">
 <table>
-<tr><td></td><th>gloss</th><th>language</th></tr>
+<tr><td></td><th>gloss</th><th>language</th><th>language group</th></tr>
 <tr><td>Search <b>lexicon</b>:</td><td><input name="s" type="text" size="48" id="lexicon_searchinput"></td>
 <td><input name="lg" type="text" size="32" id="lexicon_searchlg" ></td>
-<td><input name="lggrp" type="hidden" id="lexicon_searchlggrp" maxlength="7"></td>
+<td><select name="lggrp" id="lexicon_searchlggrp">
+<option selected="selected" value=""></option>
+<option value="0.0.0">0.0.0 Sino-Tibetan</option>
+<option value="0.1.0">0.1.0 Tibeto-Burman</option>
+<option value="1.0.0">1.0.0 Kamarupan</option>
+<option value="1.1.0">1.1.0 North Assam</option>
+<option value="1.1.1">1.1.1 Tani</option>
+<option value="1.1.2">1.1.2 Deng</option>
+<option value="1.1.3">1.1.3 Monpa</option>
+<option value="1.2.0">1.2.0 Kuki-Chin</option>
+<option value="1.2.1">1.2.1 Kuki</option>
+<option value="1.2.2">1.2.2 Chin</option>
+<option value="1.3">1.3 Naga</option>
+<option value="1.3.1">1.3.1 Northern Naga</option>
+<option value="1.4">1.4 Meithei</option>
+<option value="1.5">1.5 Mikir</option>
+<option value="1.6">1.6 Mru</option>
+<option value="1.7">1.7 Bodo-Garo = Barish</option>
+<option value="1.8">1.8 Chairel</option>
+<option value="2.0.0">2.0.0 Himalayish</option>
+<option value="2.1.0">2.1.0 Tibeto-Kanauri</option>
+<option value="2.1.1">2.1.1 Western Himalayish</option>
+<option value="2.1.3">2.1.3 Lepcha</option>
+<option value="2.1.2.0">2.1.2.0 Bodic</option>
+<option value="2.1.4">2.1.4 Tamangic</option>
+<option value="2.1.2.1">2.1.2.1 Tibetan</option>
+<option value="2.1.5">2.1.5 Dhimal</option>
+<option value="2.3.0">2.3.0 Mahakiranti</option>
+<option value="2.2.0">2.2.0 Newar</option>
+<option value="2.3.1">2.3.1 Kham-Magar-Chepang-Sunwar</option>
+<option value="2.3.2">2.3.2 Kiranti</option>
+<option value="2.3.2.2">2.3.2.2 Western Kiranti</option>
+<option value="2.3.2.1">2.3.2.1 Eastern Kiranti = Rai</option>
+<option value="3.0.0">3.0.0 Tangut-Qiang</option>
+<option value="3.1.0">3.1.0 Tangut</option>
+<option value="3.2.0">3.2.0 Qiangic</option>
+<option value="3.3">3.3 rGyalrongic</option>
+<option value="4.0.0">4.0.0 Jingpho-Nung-Luish</option>
+<option value="4.1.0">4.1.0 Jingpho</option>
+<option value="4.2.0">4.2.0 Nungic</option>
+<option value="4.2.1">4.2.1 Nung</option>
+<option value="4.3.0">4.3.0 Luish</option>
+<option value="5.0.0">5.0.0 Tujia</option>
+<option value="6.0.0">6.0.0 Lolo-Burmese</option>
+<option value="6.3.0">6.3.0 Naxi</option>
+<option value="6.1.0">6.1.0 Burmish</option>
+<option value="6.2.0">6.2.0 Loloish</option>
+<option value="6.2.1">6.2.1 Northern Loloish</option>
+<option value="6.2.2">6.2.2 Central Loloish</option>
+<option value="6.2.3">6.2.3 Southern Loloish</option>
+<option value="6.4.0">6.4.0 Jinuo</option>
+<option value="7.0.0">7.0.0 Karenic</option>
+<option value="8.0.0">8.0.0 Bai</option>
+<option value="9.0.0">9.0.0 Sinitic</option>
+<option value="9.0.1">9.0.1 Old (Archaic) Chinese</option>
+<option value="9.0.2">9.0.2 Middle (Ancient) Chinese</option>
+<option value="9.0.3">9.0.3 Modern Chinese</option>
+<option value="X.0.0">X.0.0 Non-TB</option>
+<option value="X.1.0">X.1.0 Other Languages</option>
+<option value="X.2.0">X.2.0 Unknown/Unevaluated</option>
+</select>
+</td>
 <td><input name="btn" type="submit" value="Search"></td></tr></table>
 </form>
 </div>
