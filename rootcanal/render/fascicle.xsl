@@ -46,32 +46,38 @@
 	    width: 90%;
 	    }
 
-	  span.seqno {
-	    font-family: Arial, Helvetica, sans;
-	    padding: 0em 2em 0em 0em;
-	    font-size: 12pt;
-	    width: 33%; }
-
 	  span.num,span.title,span.chapternum {
 	    font-family: Arial, Helvetica, sans;
 	    padding: 0em 4px 0em 0em; }
 
-	  span.stedtnum {
-	    font-family: Arial, Helvetica, sans;
-	    padding: 0em 2em 0em 10em;
-	    font-size: 10pt;
-	    text-align: right; }
+	  table.etymon {
+	    padding-left: 0px;
+	    border: 0px;
+	    border-spacing: 0px;
+	    width: 100%; }
 
-	    span.paf {
-	    padding: 0em 2em 0em 0em;
+	  td.seqno {
+	    font-family: Arial, Helvetica, sans;
+	    font-size: 12pt;
+	    width: 15%; }
+
+	  td.plg {
+	    width: 15%; }
+
+	  td.paf {
 	    font-size: 20pt;
 	    /* font-style: italic; */
-	    width: 33%; }
+	    width: 25%; }
 
-	    span.pgloss {
+	  td.pgloss {
 	    font-family: Arial, Helvetica, sans;
-	    padding: 0em 0em 0em 0em;
-	    width: 33%; }
+	    width: 25%; }
+
+	  td.stedtnum {
+	    font-family: Arial, Helvetica, sans;
+	    font-size: 10pt;
+	    width: 10%;
+	    text-align: right; }
 
 	    .lgname {
 	    width: 8% }
@@ -162,10 +168,15 @@
       <xsl:variable name="seqno" select="seqno"/>
       <xsl:variable name="tagnum" select="stedtnum"/>
       <h3>
-	<span class="seqno"><xsl:value-of select="$seqno"/></span>
-	<span class="paf"><xsl:value-of select="paf"/> </span>
-	<span class="pgloss"><xsl:value-of select="pgloss"/> </span>
-	<span class="stedtnum">(<xsl:value-of select="$tagnum"/>)</span>
+	<table class="etymon">
+	  <tr>
+	    <td class="seqno"><xsl:value-of select="$seqno"/></td>
+	    <td class="plg"><xsl:value-of select="plg"/> </td>
+	    <td class="paf"><xsl:value-of select="paf"/> </td>
+	    <td class="pgloss"><xsl:value-of select="pgloss"/> </td>
+	    <td class="stedtnum">(<xsl:value-of select="$tagnum"/>)</td>
+	  </tr>
+	</table>
       </h3>
       <xsl:apply-templates select="desc"/>
       <xsl:for-each select="subgroup">

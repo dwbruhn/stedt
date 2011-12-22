@@ -132,13 +132,13 @@ sub byTag {
   
   # Query for record from Etyma database
   
-  $sql = "SELECT protoform, protogloss, chapters.chapter, chapters.chaptertitle, sequence FROM etyma, chapters WHERE etyma.chapter=chapters.chapter AND tag=?";
+  $sql = "SELECT plg, protoform, protogloss, chapters.chapter, chapters.chaptertitle, sequence FROM etyma, chapters WHERE etyma.chapter=chapters.chapter AND tag=?";
   #print STDERR "$sql\n";
   $sth = $dbh->prepare($sql);
   $sth->execute($etymon);
   
-  my ($protoform, $protogloss, $chapter, $chaptertitle, $sequence);
-  $sth->bind_columns(undef, \$protoform, \$protogloss, \$chapter,
+  my ($plg, $protoform, $protogloss, $chapter, $chaptertitle, $sequence);
+  $sth->bind_columns(undef, \$plg, \$protoform, \$protogloss, \$chapter,
 		     \$chaptertitle, \$sequence); $sth->fetch() or warn "Can't get etyma info\n";
   
   $protoform = format_protoform($protoform);
@@ -149,6 +149,7 @@ sub byTag {
   my $etymology = <<EndXML;
   <etymology>
     <seqno>$sequence</seqno>
+    <plg>$plg</plg>
     <paf>$protoform</paf>
     <pgloss>$protogloss</pgloss>
     <stedtnum>$etymon</stedtnum>
