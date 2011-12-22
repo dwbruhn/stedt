@@ -4,7 +4,7 @@
 <form id="etyma_search" method="post">
 <table><tr><td></td><th>*protoform OR protogloss</th></tr>
 <tr><td>Search <b>etyma</b>:</td>
-<td><input name="s" type="text" size="30" id="etyma_searchinput" ><input name="lg" type="hidden" id="etyma_searchlg" ></td>
+<td><input name="s" type="text" size="30" id="etyma_searchinput" ><input name="lg" type="hidden" id="etyma_searchlg" ><input name="lggrp" type="hidden" id="etyma_searchlggrp" ></td>
 <td><input name="btn" type="submit" value="Search"></td></tr></table>
 [%- IF 0 && c.has_privs(16) %]<a href="#" onclick="return show_advanced_search('etyma')">Advanced Search</a>[% END %]
 </form>

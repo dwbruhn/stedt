@@ -121,8 +121,6 @@ sub group : Runmode {
 
 sub searchresults_from_querystring {
 	my ($self, $s, $tbl, $lg, $lggrp) = @_;
-	# print STDERR "SEARCHRESULTS: Language group param is $lggrp\n";	# debugging
-	# print STDERR "SEARCHRESULTS: Language param is $lg\n";	# debugging
 	my $t = $self->load_table_module($tbl);
 	my $query = $self->query->new(''); # for some reason faster than saying "new CGI"? disk was thrashing.
 
@@ -151,7 +149,6 @@ sub searchresults_from_querystring {
 		
 		# languagegroups param must match start with X or a digit and not go past 4 levels (first two levels are obligatory)
 		$query->param('languagegroups.grp' => $lggrp) if $lggrp =~ /^[\dX]\.\d((\.\d)(\.\d)?)?$/;
-		# print STDERR "Language group param is $lggrp\n";	# debugging
 
 		for my $token (split / /, $s) {
 			if ($token =~ /^\d+$/) {
@@ -189,7 +186,7 @@ sub combo : Runmode {
 	if ($s || $lg || $lggrp || !$q->param) {
 		if ($ENV{HTTP_REFERER} && ($s || $lg || $lggrp)) {
 			$self->dbh->do("INSERT querylog VALUES (?,?,?,NOW())", undef,
-				'simple', $lg ? "$s {$lg}" : $s, $ENV{REMOTE_ADDR});	# record search in query log (needs to be cleaned up someday)
+				'simple', $lg ? ($lggrp ? "$s {$lg} <$lggrp>" : "$s {$lg}") : ($lggrp ? "$s <$lggrp>" : $s), $ENV{REMOTE_ADDR});	# record search in query log (needs to be cleaned up someday)
 		}
 		$result->{etyma} = $self->searchresults_from_querystring($s, 'etyma');
 		$result->{lexicon} = $self->searchresults_from_querystring($s, 'lexicon', $lg, $lggrp);
@@ -210,13 +207,11 @@ sub ajax : Runmode {
 	my $s = decode_utf8($self->query->param('s'));
 	my $lg = decode_utf8($self->query->param('lg'));
 	my $lggrp = decode_utf8($self->query->param('lggrp'));
-	# print STDERR "AJAX: Language group param is $lggrp\n";	# debugging
-	# print STDERR "AJAX: Language param is $lg\n";	# debugging
 	my $tbl = $self->query->param('tbl');
 	my $result; # hash ref for the results
 
 	$self->dbh->do("INSERT querylog VALUES (?,?,?,NOW())", undef,
-		$tbl, ($lg || $lggrp) ? "$s {$lg} <$lggrp>" : $s, $ENV{REMOTE_ADDR}) if $s || $lg;	# future: add separate lggrp and lg fields to querylog table
+		$tbl, $lg ? ($lggrp ? "$s {$lg} <$lggrp>" : "$s {$lg}") : ($lggrp ? "$s <$lggrp>" : $s), $ENV{REMOTE_ADDR}) if $s || $lg;	# future: add separate lggrp and lg fields to querylog table
 
 	if (defined($s)) {
 		if ($tbl eq 'lexicon' || $tbl eq 'etyma') {
