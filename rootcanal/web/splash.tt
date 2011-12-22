@@ -7,9 +7,17 @@
 <br><br><br>
 <form id="simple_search" method="get" action="[% self_url %]/gnis">
 <table>
-<tr><th>(proto)gloss</th><th>language</th></tr>
+<tr><th>(proto)gloss</th><th>language</th><th>language group</th></tr>
 <tr><td><input type="text" name="t" id="simple_searchinput" size="48" maxlength="128"></td>
-<td><input type="text" name="lg" id="simple_searchlg" size="32" maxlength="96"><input name="lggrp" type="hidden" id="simple_searchlggrp" maxlength="7"></td> <!--can't seem to get dropdown menu to work on splash page-->
+<td><input type="text" name="lg" id="simple_searchlg" size="32" maxlength="96"></td>
+<td><select name="lggrp" id="simple_searchlggrp"> 
+<option selected="selected" value=""></option> 
+[% FOREACH row IN grps -%]
+<option value="[% row.0 %]">[% row.0 %] [% row.1 %]</option>
+[% END -%]
+</select>
+</td>
+<!--<input name="lggrp" type="hidden" id="simple_searchlggrp" maxlength="7"></td> <!--can't seem to get dropdown menu to work on splash page-->
 <td><input type="submit" name="search" value="Search" >
 <a href="[% self_base %]help.html" target="_blank">Help</a></td></tr></table>
 </form>
@@ -22,7 +30,7 @@
 <script>
 $('simple_searchinput').focus();
 $('simple_search').observe('submit',function(e){e.stop();
-var s = Form.serializeElements(this.select('input:not(:submit)').findAll(Form.Element.getValue));
+var s = Form.serializeElements(this.select('input:not(:submit)','select').findAll(Form.Element.getValue));
 document.location = document.location.pathname + '/gnis' + (s?'?'+s:'')
 });
 </script>

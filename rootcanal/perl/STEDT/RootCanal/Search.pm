@@ -32,7 +32,12 @@ sub extractions : Runmode {
 
 sub splash : StartRunmode {
 	my $self = shift;
-	return $self->tt_process("splash.tt");
+	my $splash_info;
+	
+	# generate the list of language groups for the dropdown box:
+	$splash_info->{grps} = $self->dbh->selectall_arrayref("SELECT grpno, grp FROM languagegroups ORDER BY ord, grpno");
+	
+	return $self->tt_process("splash.tt", $splash_info);
 }
 
 sub elink : Runmode {
