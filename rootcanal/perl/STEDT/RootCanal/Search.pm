@@ -192,6 +192,10 @@ sub combo : Runmode {
 		$result->{etyma} = $self->load_table_module('etyma')->search($q);
 		$result->{lexicon} = $self->load_table_module('lexicon')->search($q);
 	}
+
+	# generate the list of language groups for the dropdown box:
+	$result->{grps} = $self->dbh->selectall_arrayref("SELECT grpno, grp FROM languagegroups ORDER BY ord, grpno");
+
 	return $self->tt_process("index.tt", $result);
 }
 
