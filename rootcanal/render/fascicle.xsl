@@ -43,7 +43,7 @@
 	  div.etymology {
 	    padding-left: 18pt;
 	    text-align: justify;
-	    width: 90%;
+	    width: 95%;
 	    }
 
 	  span.num,span.title,span.chapternum {
@@ -54,15 +54,15 @@
 	    padding-left: 0px;
 	    border: 0px;
 	    border-spacing: 0px;
-	    width: 100%; }
+	    width: 95%; }
 
 	  td.seqno {
 	    font-family: Arial, Helvetica, sans;
 	    font-size: 12pt;
-	    width: 15%; }
+	    width: 10%; }
 
 	  td.plg {
-	    width: 15%; }
+	    width: 10%; }
 
 	  td.paf {
 	    font-size: 20pt;
@@ -71,7 +71,7 @@
 
 	  td.pgloss {
 	    font-family: Arial, Helvetica, sans;
-	    width: 25%; }
+	    width: 45%; }
 
 	  td.stedtnum {
 	    font-family: Arial, Helvetica, sans;
