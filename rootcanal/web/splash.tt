@@ -17,7 +17,6 @@
 [% END -%]
 </select>
 </td>
-<!--<input name="lggrp" type="hidden" id="simple_searchlggrp" maxlength="7"></td> <!--can't seem to get dropdown menu to work on splash page-->
 <td><input type="submit" name="search" value="Search" >
 <a href="[% self_base %]help.html" target="_blank">Help</a></td></tr></table>
 </form>
