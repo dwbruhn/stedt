@@ -174,7 +174,8 @@ EndXML
   
   $sql = <<EndOfSQL;
 SELECT DISTINCT languagegroups.grpno, grp, language, lexicon.rn, 
-       analysis, reflex, gloss, languagenames.srcabbr, lexicon.srcid 
+       (SELECT GROUP_CONCAT(tag_str ORDER BY ind) FROM lx_et_hash WHERE rn=lexicon.rn) AS analysis, 
+       reflex, gloss, languagenames.srcabbr, lexicon.srcid 
   FROM lexicon, languagenames, languagegroups, lx_et_hash
   WHERE (lx_et_hash.tag = $etymon
     AND lx_et_hash.rn=lexicon.rn
