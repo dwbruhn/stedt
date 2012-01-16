@@ -40,6 +40,8 @@ sub updateprojects : Runmode {
 	  last if ($i > 500);
 	  my $glosses = $row->[3];
 	  my $qstring = $row->[3];
+	  $qstring =~ s/\//,/g;
+	  $row->[3] = $qstring; # change / to , in query string. A hack, yes; consider more robust solution at some point
 	  my @restrictions;
 	  # split by commas that are not preceded by a single backslash (allows searching for commas)
 	  for my $value (split /(?<!(?<!\\)\\), */, $qstring) {
@@ -56,7 +58,8 @@ sub updateprojects : Runmode {
 	  # Also, searching for empty analyses will not do the right thing
 	  # because we should be using the lx_et_hash to compute the analyses.
 	  # Using load_table_module, etc., would probably be better.
-	  $row->[5] = $self->dbh->selectrow_array("SELECT count(*) FROM lexicon WHERE $qstring AND analysis != ''");
+	  $row->[5] = $self->dbh->selectrow_array("SELECT count(*) FROM lexicon WHERE $qstring AND 0 < (SELECT COUNT(*) FROM lx_et_hash WHERE rn=lexicon.rn)");
+	  #$row->[5] = $self->dbh->selectrow_array("SELECT count(*) FROM lexicon WHERE $qstring AND analysis != ''");
 	  $row->[6] = $self->dbh->selectrow_array("SELECT count(*) FROM lexicon WHERE $qstring");
 	  $row->[4] = $row->[5] > 0 ?  sprintf("%.1f",(100 * $row->[5] / $row->[6])) : "0.0";
 	  

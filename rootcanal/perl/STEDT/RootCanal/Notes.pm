@@ -7,6 +7,7 @@ use CGI::Application::Plugin::Redirect;
 
 sub chapter_browser : StartRunMode {
 	my $self = shift;
+	my $tweak = $self->param('tweak');
 	my $public = '';
 	my $blessed = '';
 	my $public_ch = '';
@@ -37,7 +38,15 @@ SELECT notes.id, COUNT(notes.noteid), COUNT(etyma.tag)
 FROM notes LEFT JOIN chapters ON (notes.id=chapters.chapter) LEFT JOIN etyma USING (chapter)
 WHERE notes.spec='C' AND chapters.chaptertitle IS NULL GROUP BY 1 ORDER BY 1
 SQL
-	return $self->tt_process('chapter_browser.tt', {
+
+	my $tt;
+	if ($tweak eq 'tweak') {
+	  $tt = 'chapter_tweaker.tt';
+	}
+	else {
+	  $tt = 'chapter_browser.tt';
+	}
+	return $self->tt_process($tt, {
 		ch=>$chapters, e=>$e_ghost_chaps, n=>$n_ghost_chaps
 	});
 }

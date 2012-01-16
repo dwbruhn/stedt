@@ -18,6 +18,7 @@ $t->fields('etyma.tag',
 	'etyma.sequence',
 	'etyma.protoform', 'etyma.protogloss',
 	'etyma.plg', 'etyma.plgord',
+	'etyma.semkey',
 	'etyma.notes', 'etyma.hptbid',
 	'(SELECT COUNT(*) FROM notes WHERE tag=etyma.tag) AS num_notes',
 	'etyma.xrefs',
@@ -32,6 +33,7 @@ $t->field_visible_privs(
 	'etyma.plg' => 1,
 	'etyma.notes' => 1,
 	'etyma.hptbid' => 1,
+	'etyma.semkey'  => 1,
 	'etyma.xrefs' => 1,
 	'etyma.exemplary' => 1,
 	'etyma.sequence'  => 3,
@@ -47,6 +49,7 @@ $t->searchable('etyma.tag',
 	'etyma.chapter',
 	'etyma.protoform', 'etyma.protogloss',
 	'etyma.plg', 'etyma.notes',
+	'etyma.semkey',
 	'etyma.xrefs',#'etyma.possallo','etyma.allofams'	# search these and tagging note and notes DB before deleting records. Also switch to OR searching below.
 	'num_notes',
 	'etyma.public',
@@ -62,6 +65,7 @@ $t->field_editable_privs(
 	'etyma.hptbid' => 1,
 	'etyma.xrefs' => 16,
 	'etyma.possallo' => 16,
+	'etyma.semkey' => 16,
 	'etyma.allofams' => 16,
 	'etyma.public' => 16,
 	'etyma.exemplary' => 9,
@@ -89,6 +93,7 @@ $t->wheres(
 	'etyma.plg'	=> sub {my ($k,$v) = @_; $v = '' if $v eq '0'; "$k LIKE '$v'"},
 	'etyma.chapter' => sub { my ($k,$v) = @_; $v eq '0' ? "$k=''" : "$k LIKE '$v'" },
 	'etyma.protogloss'	=> 'word',
+	'etyma.semkey' => 'value',
 	'etyma.hptbid' => sub {
 		my ($k,$v) = @_;
 		if ($v eq '0') {
@@ -159,6 +164,7 @@ $t->addable(
 	'etyma.plg',
 	'etyma.notes',
 	'etyma.hptbid',
+	'etyma.semkey',
 );
 $t->add_form_items(
 	'etyma.tag' => sub {

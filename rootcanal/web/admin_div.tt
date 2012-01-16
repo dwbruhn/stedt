@@ -1,0 +1,37 @@
+Edit tables:
+<ul>
+[% FOREACH tbl IN ['chapters', 'etyma', 'lexicon', 'languagenames', 'srcbib', 'hptb', 'projects', 'glosswords'] -%]
+	<li><a target="centerstage" href="[% self_url %]/edit/[% tbl %]">[% tbl %]</a></li>
+[% END -%]
+</ul>
+
+Fun stuff:
+<ul>
+<li><a target="_parent" href="[% self_url %]/chapters/tweak">chapter tweaker</a></li>
+<li><a target="centerstage" href="[% self_url %]/chapters">chapter browser</a></li>
+<li><a target="centerstage" href="https://corpus.linguistics.berkeley.edu/~stedt-cgi/lg_table.cgi">db lg stats</a></li>
+</ul>
+
+Activity:
+<ul>
+<li><a target="centerstage" href="[% self_url %]/admin/queries">recent queries</a></li>
+<li><a target="centerstage" href="[% self_url %]/admin/changes">change log</a></li>
+<li><a target="centerstage" href="[% self_url %]/admin/progress">progress report</a></li>
+<li><a target="centerstage" href="[% self_url %]/admin/game">rainbow game</a></li>
+</ul>
+
+Accounts:
+<ul>
+<li><a target="centerstage" href="[% self_url %]/account/gsarpa">create new account</a></li>
+<li><a target="centerstage" href="[% self_url %]/admin/users">list users</a></li>
+</ul>
+
+Tools:
+<ul>
+<li><a target="centerstage" href="[% self_url %]/admin/deviants">deviant glosses</a></li>
+<li><a target="centerstage" href="[% self_url %]/admin/listpublic">public etyma tag #s</a></li>
+<li><a target="centerstage" href="[% self_url %]/admin/updateprojects">update project stats</a></li>
+[% IF c.has_privs(16) -%]
+<li><a target="centerstage" href="[% self_url %]/admin/expire_sessions">expire sessions</a></li>
+[% END -%]
+</ul>

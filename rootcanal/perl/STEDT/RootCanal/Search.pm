@@ -29,6 +29,27 @@ sub extractions : Runmode {
 	return $self->tt_process("extractions.tt");
 }
 
+sub widget : Runmode {
+	my $self = shift;
+	my $q = $self->query;
+	my $s = decode_utf8($q->param('t')) || '';
+	my $lg = decode_utf8($q->param('lg')) || '';
+	my $lggrp = decode_utf8($q->param('lggrp')) || '';
+	my $result;
+
+	if ($s || $lg || $lggrp || !$q->param) {
+		if ($ENV{HTTP_REFERER} && ($s || $lg || $lggrp)) {
+			$self->dbh->do("INSERT querylog VALUES (?,?,?,NOW())", undef,
+				'simple', $lg ? "$s {$lg}" : $s, $ENV{REMOTE_ADDR});	# record search in query log (needs to be cleaned up someday)
+		}
+		$result->{etyma} = $self->searchresults_from_querystring($s, 'etyma');
+		$result->{lexicon} = $self->searchresults_from_querystring($s, 'lexicon', $lg, $lggrp);
+	} else {
+		$result->{etyma} = $self->load_table_module('etyma')->search($q);
+		$result->{lexicon} = $self->load_table_module('lexicon')->search($q);
+	}
+	return $self->tt_process("widget.tt", $result);
+}
 
 sub splash : StartRunmode {
 	my $self = shift;

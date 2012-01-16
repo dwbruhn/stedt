@@ -65,6 +65,12 @@ $t->search_form_items(
 		# get list of projects
 		my $projects = $dbh->selectall_arrayref("SELECT DISTINCT project FROM projects");
 		return $cgi->popup_menu(-name => 'projects.project', -values=>['', map {@$_} @$projects], -labels=>{'0'=>'(no value)'},  -default=>'');
+	},
+	'projects.subproject' => sub {
+		my $cgi = shift;
+		# get list of subprojects
+		my $subprojects = $dbh->selectall_arrayref("SELECT DISTINCT subproject FROM projects");
+		return $cgi->popup_menu(-name => 'projects.subproject', -values=>['', map {@$_} @$subprojects], -labels=>{'0'=>'(no value)'},  -default=>'');
 	}
 );
 

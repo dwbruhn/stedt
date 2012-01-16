@@ -7,6 +7,7 @@ sub dispatch_args {
 		table  => [
 			''                 => { app => 'Search' },
 			'gnis'		   => { app => 'Search', rm => 'combo' },
+			'widget'       	   => { app => 'Search', rm => 'widget' },
 			'logout'           => { app => 'Account', rm => 'logout' },
 			'update'	   => { app=>'Edit', rm => 'update' },
 			'source/:srcabbr'  => { app=>'Search', rm => 'source' },
@@ -16,7 +17,7 @@ sub dispatch_args {
 			'edit/:tbl/:id'	   => { app=>'Edit', rm => 'single_record' },
 			'add/:tbl'	   => { app=>'Edit', rm => 'add' },
 			'json_lg/:srcabbr' => { app=>'Edit', rm => 'json_lg' },
-			'chapters'	   => { app=>'Notes', rm => 'chapter_browser' },
+			'chapters/:tweak?' => { app=>'Notes', rm => 'chapter_browser' },
 			'chap/:vol/:chap'  => { app=>'Notes', rm => 'chapter' },
 			':app/:rm'         => { },
 			':app'        	   => { },

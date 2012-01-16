@@ -20,11 +20,21 @@ setup.projects = {
 	size: 50
     },
     'projects.querylex' : {
-	label: 'glosses',
+	label: 'search key(s)',
 	noedit: false,
 	size: 180,
 	transform : function (v) {
-	    return '<a href="' + baseRef + 'edit/lexicon?lexicon.gloss=' + v + '" target="stedt_lexicon">' + v + '</a>';
+	    // if search value already has a index (e.g. "semkey:3.1.1") then handle specially.
+	    if (v.indexOf(':')!==-1) {
+		var v2 = v.sub(':','=');
+		if (v2.indexOf('lexicon.')==-1) {
+		    v2 = 'lexicon.' + v2;
+		}
+		return '<a href="' + baseRef + 'edit/lexicon?' + v2 + '" target="stedt_lexicon">' + v + '</a>';
+	    } else {
+		var v2 = v.sub('/',',');
+		return '<a href="' + baseRef + 'edit/lexicon?lexicon.gloss=' + v2 + '" target="stedt_lexicon">' + v + '</a>';
+	    }
 	}
     },
    'projects.creator' : {
@@ -46,7 +56,7 @@ setup.projects = {
        }
     },
     'projects.proofreader' : {
-	label: 'proofrdr',
+	label: 'proof/approve',
 	noedit: false,
 	hide: false,
 	size: 50,
@@ -57,7 +67,7 @@ setup.projects = {
     'projects.approver' : {
 	label: 'approver',
 	noedit: false,
-	hide: false,
+	hide: true,
 	size: 50,
 	transform : function (v) {
 	   return color_workflow_status (v);
@@ -66,7 +76,7 @@ setup.projects = {
     'projects.published' : {
 	label: 'published',
 	noedit: false,
-	hide: false,
+	hide: true,
 	size: 50,
 	transform : function (v) {
 	   return color_workflow_status (v);

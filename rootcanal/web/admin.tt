@@ -1,38 +1,6 @@
 [% PROCESS header.tt title="STEDT Database: Admin Page" %]
-Edit tables:
-<ul>
-[% FOREACH tbl IN ['etyma', 'lexicon', 'languagenames', 'srcbib', 'hptb', 'projects'] -%]
-	<li><a href="[% self_url %]/edit/[% tbl %]">[% tbl %]</a></li>
-[% END -%]
-</ul>
-
-Fun stuff:
-<ul>
-<li><a href="[% self_url %]/chapters">The Chapter Browser</a></li>
-<li><a href="https://corpus.linguistics.berkeley.edu/~stedt-cgi/lg_table.cgi">STEDT Database Language Statistics</a></li>
-</ul>
-
-Activity:
-<ul>
-<li><a href="[% self_url %]/admin/queries">view recent queries</a></li>
-<li><a href="[% self_url %]/admin/changes">view change log</a></li>
-<li><a href="[% self_url %]/admin/progress">view progress report</a></li>
-</ul>
-
-Accounts:
-<ul>
-<li><a href="[% self_url %]/account/gsarpa">create a new account</a></li>
-<li><a href="[% self_url %]/admin/users">list of users</a></li>
-</ul>
-
-Tools:
-<ul>
-<li><a href="[% self_url %]/admin/deviants">view records with deviant glosses (violating gloss conventions)</a></li>
-<li><a href="[% self_url %]/admin/listpublic">list of public etyma tag #s</a></li>
-[% IF c.has_privs(16) -%]
-<li><a href="[% self_url %]/admin/expire_sessions">expire sessions older than 1 month</a> ([% num_sessions %] currently in sessions table)</li>
-[% END -%]
-</ul>
-
+<div id="admin" class="left">
+[% PROCESS admin_div.tt %]
+</div>
 </body>
 </html>

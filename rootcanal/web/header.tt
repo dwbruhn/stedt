@@ -40,6 +40,7 @@ logged in as <b>[% user %]</b>
 <option value="[% self_url %]/edit/srcbib">SrcBib</option>
 <option value="[% self_url %]/edit/hptb">HPTB</option>
 <option value="[% self_url %]/edit/projects">Projects</option>
+<option value="[% self_url %]/edit/glosswords">Glosses</option>
 <option value="[% self_url %]/admin/users">Users</option>
 [% END # has_privs(1) -%]
 <option value="[% self_url %]/account">Account</option>

@@ -453,6 +453,10 @@ var setup = { // in the form setup.[tablename].[fieldname]
 				return v;
 			}
 		},
+		'etyma.semkey' : {
+			label: 'semkey',
+			size: 50
+		},
 		'etyma.possallo'  : {
 			label: '⪤?',
 			size: 40
@@ -622,6 +626,12 @@ var setup = { // in the form setup.[tablename].[fieldname]
 		'lexicon.semcat' : {
 			label: 'semcat'
 		},
+		'lexicon.semkey' : {
+		    label: 'semkey',
+			noedit: false,
+			size: 40,
+			hide: false
+		},
 		'num_notes' : {
 			label: 'notes',
 			noedit: true,
@@ -632,6 +642,12 @@ var setup = { // in the form setup.[tablename].[fieldname]
 					+ v + '&nbsp;note' + (v == 1 ? '' : 's')
 					+ '</a>';
 			}
+		},
+		'lexicon.status' : {
+			label:'status',
+			noedit: false,
+			size: 20,
+			hide: false
 		},
 		'languagegroups.ord' : {
 			noedit: true,
