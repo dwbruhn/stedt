@@ -111,9 +111,9 @@ $t->searchable('lexicon.rn', 'analysis', 'user_an', 'lexicon.reflex',
 	'languagegroups.grpid',
 	'languagenames.srcabbr', 'lexicon.srcid',
 #	'lexicon.semcat', 
-	'lexicon.semkey', 
-#	'lexicon.lgid', 
+	'lexicon.semkey',
 	'lexicon.status',
+	'lexicon.lgid', 
 );
 $t->field_visible_privs(
 	'user_an' => 1,
