@@ -16,6 +16,7 @@ our %ivars = map {$_,1} qw(
 	key
 	query_from
 	order_by
+	group_by
 	search_limit
 	debug
 	allow_delete
@@ -197,8 +198,9 @@ sub get_query {
 	return "SELECT $flds FROM $from GROUP BY $self->{key} LIMIT 1", '[first item]' unless $where;
 	
 	my $order = $self->{order_by} || $self->{key};
+	my $group = $self->{group_by} || $self->{key};
 	return "SELECT $flds FROM $from WHERE $where "
-		. "GROUP BY $self->{key} "
+		. "GROUP BY $group "
 		. ($having ? " HAVING $having " : '')
 		. " ORDER BY $order LIMIT 20000", # a sane limit to prevent sending too much back to the user
 		$where . ($having ? " HAVING $having" : '');

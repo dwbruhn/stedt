@@ -1,12 +1,66 @@
-[% PROCESS header.tt title="STEDT Database (Beta)" suppress_header=1 -%]
-<div id="admin" class="leftpane">
-[% PROCESS admin_div.tt %]
+[% PROCESS header.tt title="STEDT Database (Beta)" vert_tog=1 %]
+<div id="tools">
+<table><tr>
+<td>etyma:   [% etyma.data.size   ? (etyma.data.size   > 0 ? (etyma.data.size   _ ' records found.') : '') : 'No records found.' %]</td>
+<td>lexicon: [% lexicon.data.size ? (lexicon.data.size > 0 ? (lexicon.data.size _ ' records found.') : '') : 'No records found.' %]</td>
+</tr></table>
 </div>
-<div>
-<iframe name="centerstage" class="rightpane"></iframe>
-centerstage
+<div id="etyma" class="vert">
+<div align="center">[% # search div %]
+<form id="etyma_search" method="post"></form>
+Search
 </div>
+<div id="etyma_results"></div>
+[% IF etyma.data.size %]
+<table id="etyma_resulttable" class="sortable resizable[% IF c.has_privs(1) %] editable[% END %]" width="100%" style="table-layout:fixed;">
+<thead><tr>
+<th id="etyma.tag">Etyma</th>
+<th id="etyma.protoform">Etyma</th>
+</tr></thead>
+<tbody>
+[% FOREACH row IN etyma.data -%]
+<tr><td>
+ [% row.0 | html %]
+</td><td>
+ [% row.10 | html %]
+ <b>[% row.8 | html %]</b>
+ <i>[% row.9 | html %]</i>
+</td></tr>
+[% END # FOREACH row -%]
+</tbody>
+</table>
+[% END %]
+<div id="addform"></div>
+<div id="debug"></div>
+</div>
+
+<div id="dragger" class="vert"></div>
+
+<div id="lexicon" class="vert">
+<div align="center">
+<form id="lexicon_search" method="post"></form>
+</div>
+<div id="lexicon_results"></div>
+[% IF lexicon.data.size %]
+<table id="lexicon_resulttable" class="sortable resizable[% IF c.has_privs(1) %] editable[% END %]" width="100%" style="table-layout:fixed;">
+<thead><tr>
+[%- FOREACH col IN lexicon.fields %]
+<th id="[% col %]">[%- col.replace('^.*\.','') %]</th>
+[%- END %]
+</tr></thead>
+<tbody>
+[% FOREACH row IN lexicon.data -%]
+<tr>
+[%- FOREACH s IN row -%]
+<td>[% s | html %]</td>
+[%- END -%]
+</tr>
+[% END # FOREACH row -%]
+</tbody>
+</table>
+[% END %]
+</div>
+
+<script src="[% self_base %]js/simplesearch.js"></script>
 </body>
 </html>
-
-
