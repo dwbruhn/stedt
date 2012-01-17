@@ -228,7 +228,7 @@ sub prep_regex ($) {
 # See where_int for an example where non-digits are stripped.
 
 sub where_value { my ($k,$v) = @_; "$k='$v'" }
-sub where_int { my ($k,$v) = @_; $v =~ s/\D//g; return "'bad int!'='0'" unless $v =~ /\d/; $v =~ /^([<>])(.+)/ ? "$k$1$2" : "$k=$v" }
+sub where_int { my ($k,$v) = @_; $v =~ s/[^\d<>]//g; return "'bad int!'='0'" unless $v =~ /\d/; $v =~ /^([<>])(.+)/ ? "$k$1$2" : "$k=$v" }
 sub where_rlike {     my ($k,$v) = @_; prep_regex $v; "$k RLIKE '$v'" }
 sub where_word {      my ($k,$v) = @_; prep_regex $v; $v =~ s/^\*(?=.)// ? "$k RLIKE '$v'" : "$k RLIKE '[[:<:]]${v}[[:>:]]'" }
 sub where_beginword { my ($k,$v) = @_; prep_regex $v; $v =~ s/^\*(?=.)// ? "$k RLIKE '$v'" : "$k RLIKE '[[:<:]]$v'" }
