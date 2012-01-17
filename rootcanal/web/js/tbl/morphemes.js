@@ -128,7 +128,7 @@ setup.morphemes = {
     'languages' : {
 	label: 'language(s)',
 	noedit: true,
-	size: 180,
+	size: 180
     },
 //    'languagegroups.grpid' : {
 //	label: 'grpid',
@@ -138,7 +138,7 @@ setup.morphemes = {
     'morphemes.grpno' : {
 	label: 'group',
 	noedit: true,
-	size: 120,
+	size: 120
 //	transform : function (v, key, rec, n) {
 //	    return v + ' - ' + rec[n+1];
 //	}
