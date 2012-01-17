@@ -84,7 +84,12 @@ $t->save_hooks(
 $t->wheres(
 	   'chapters.chapter' => sub {my ($k,$v) = @_; "$k LIKE '$v\%'"},
 	   'chapters.chaptertitle' => sub {my ($k,$v) = @_; "$k LIKE '$v\%'"},
-	   'chapters.v'	=> 'int',
+	   'chapters.v'	 => 'int',
+	   'chapters.f'	 => 'int',
+	   'chapters.c'	 => 'int',
+	   'chapters.s1' => 'int',
+	   'chapters.s2' => 'int',
+	   'chapters.s3' => 'int',
 );
 
 
