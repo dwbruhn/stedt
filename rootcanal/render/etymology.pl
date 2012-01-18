@@ -1,4 +1,6 @@
 #!/usr/bin/perl
+use lib '../pm';
+# see printutils for latest SyllabificationStation.pm and STEDTUtil.pm
 
 use strict;
 use utf8;
