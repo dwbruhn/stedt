@@ -173,6 +173,11 @@ EndXML
   }
   
   # Monster query from Lexicon, LanguageNames, LanguageGroups, and Lexicon-Etyma Hash
+
+  ### N.B. this GROUP_CONCAT pulls out tags for *all* users,
+  ### not just uid=8! i.e. you will get more tags than syllables if
+  ### more than one person has tagged a form.
+  ###
   
   $sql = <<EndOfSQL;
 SELECT DISTINCT languagegroups.grpno, grp, language, lexicon.rn, 
