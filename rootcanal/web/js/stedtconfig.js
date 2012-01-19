@@ -499,18 +499,18 @@ var setup = { // in the form setup.[tablename].[fieldname]
 						if (tags[i]===t2[i]) {
 							// if stedt and user tags match, use the user's style
 							syl_class += ' u' + t2[i];
-							link_tag = stedttagger ? (skipped_roots[t2[i]] ? '' : t2[i]) : '';
+							link_tag = stedttagger ? (skipped_roots[t2[i]] ? '' : t2[i]) : t2[i];
 						} else {
 							// otherwise mark this syllable as a conflict
 							syl_class += ' t_' + t2[i] + ' approve-conflict';
-							link_tag = stedttagger ? t2[i] : '';
+							link_tag = stedttagger ? t2[i] : t2[i];
 						}
 					} else if (tags[i]) { // if only one or the other of the columns is defined, then simply mark it as such.
 						syl_class = 't_' + tags[i] + ' r' + tags[i];
-						link_tag = stedttagger ? (skipped_roots[tags[i]] ? '' : tags[i]) : '';
+						link_tag = stedttagger ? (skipped_roots[tags[i]] ? '' : tags[i]) : tags[i];
 					} else if (t2[i]) {
 						syl_class = 't_' + t2[i] + ' u' + t2[i];
-						link_tag = stedttagger ? (skipped_roots[t2[i]] ? '' : t2[i]) : '';
+						link_tag = stedttagger ? (skipped_roots[t2[i]] ? '' : t2[i]) : t2[i];
 					}
 					a += parseInt(link_tag,10)
 						? '<a href="' + baseRef + 'etymon/' + link_tag + '#' + link_tag + '" target="stedt_etymon"'
