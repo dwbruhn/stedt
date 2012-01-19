@@ -56,7 +56,7 @@ function stedt_simplesearch_init() {
 	
 	$('etyma_search').onsubmit = do_search;
 	$('lexicon_search').onsubmit = do_search;
-	my_dragger = vert_dragger();
+	my_dragger = horz_dragger();
 	Ajax.Responders.register({
 		onCreate: function() { $('spinner').show() },
 		onComplete: function() { if (0 == Ajax.activeRequestCount) $('spinner' ).hide() }
