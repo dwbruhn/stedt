@@ -14,6 +14,7 @@ Fun stuff:
 
 Activity:
 <ul>
+<li><a href="[% self_url %]">search public interface</a></li>
 <li><a href="[% self_url %]/admin/queries">recent queries</a></li>
 <li><a href="[% self_url %]/admin/changes">change log</a></li>
 <li><a href="[% self_url %]/admin/progress">progress report</a></li>

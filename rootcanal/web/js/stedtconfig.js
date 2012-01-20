@@ -333,7 +333,13 @@ var setup = { // in the form setup.[tablename].[fieldname]
 		},
 		'etyma.chapter' : {
 			label: 'ch.',
-			size: 70
+			size: 70,
+			transform : function (v) {
+				if (stedtuserprivs & 1) {
+					return '<a href="' + baseRef + 'edit/chapters' + '?chapters.chapter=' + v + '" target="edit_chapters">' + v + '</a>';
+				}
+				else return v;
+			}
 		},
 		'etyma.protoform' : {
 			vert_show: true,
@@ -404,7 +410,10 @@ var setup = { // in the form setup.[tablename].[fieldname]
 		},
 		'etyma.semkey' : {
 			label: 'semkey',
-			size: 50
+			size: 50,
+			transform : function (v) {
+				return '<a href="' + baseRef + 'edit/glosswords' + '?glosswords.semkey=' + v + '" target="edit_glosswords">' + v + '</a>';
+			}
 		},
 		'etyma.possallo'  : {
 			label: '⪤?',
@@ -579,7 +588,10 @@ var setup = { // in the form setup.[tablename].[fieldname]
 		    label: 'semkey',
 			noedit: false,
 			size: 40,
-			hide: false
+			hide: !(stedtuserprivs & 1),
+			transform : function (v) {
+				return '<a href="' + baseRef + 'edit/glosswords' + '?glosswords.semkey=' + v + '" target="edit_glosswords">' + v + '</a>';
+			}
 		},
 		'num_notes' : {
 			label: 'notes',
@@ -596,7 +608,7 @@ var setup = { // in the form setup.[tablename].[fieldname]
 			label:'status',
 			noedit: false,
 			size: 20,
-			hide: false
+			hide: !(stedtuserprivs & 1)
 		},
 		'languagegroups.ord' : {
 			noedit: true,
