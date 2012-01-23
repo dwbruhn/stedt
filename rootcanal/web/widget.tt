@@ -2,14 +2,18 @@
 <div id="tools">
 <table><tr>
 <td>etyma:   [% etyma.data.size   ? (etyma.data.size   > 0 ? (etyma.data.size   _ ' records found.') : '') : 'No records found.' %]</td>
-<td>lexicon: [% lexicon.data.size ? (lexicon.data.size > 0 ? (lexicon.data.size _ ' records found.') : '') : 'No records found.' %]</td>
+<td>morphemes: [% morphemes.data.size ? (morphemes.data.size > 0 ? (morphemes.data.size _ ' records found.') : '') : 'No records found.' %]</td>
 </tr></table>
 </div>
 <div id="etyma" class="vert">
 <div align="center">[% # search div %]
-<form id="etyma_search" method="post"></form>
-Search
-</div>
+<form id="etyma_search" method="post">
+<table>
+<tr><td>protogloss:</td>
+<td><input name="s" type="text" size="30" id="etyma_searchinput" ><input name="lg" type="hidden" id="etyma_searchlg" ><input name="lggrp" type="hidden" id="etyma_searchlggrp" ></td>
+<td><input name="btn" type="submit" value="Search"></td></tr>
+</table>
+</form>
 <div id="etyma_results"></div>
 [% IF etyma.data.size %]
 <table id="etyma_resulttable" class="sortable resizable[% IF c.has_privs(1) %] editable[% END %]" width="100%" style="table-layout:fixed;">
@@ -36,20 +40,25 @@ Search
 
 <div id="dragger" class="vert"></div>
 
-<div id="lexicon" class="vert">
+<div id="morphemes" class="vert">
 <div align="center">
-<form id="lexicon_search" method="post"></form>
+<form id="morphemes_search" method="post">
+<table>
+<tr><td>Search:</td><td><input name="s" type="text" size="48" id="morphemes_searchinput"></td>
+<td><input name="lg" type="text" size="32" id="morphemes_searchlg" ></td>
+<td><input name="btn" type="submit" value="Search"></td></tr></table>
+</form>
 </div>
-<div id="lexicon_results"></div>
-[% IF lexicon.data.size %]
-<table id="lexicon_resulttable" class="sortable resizable[% IF c.has_privs(1) %] editable[% END %]" width="100%" style="table-layout:fixed;">
+<div id="morphemes_results"></div>
+[% IF morphemes.data.size %]
+<table id="morphemes_resulttable" class="sortable resizable[% IF c.has_privs(1) %] editable[% END %]" width="100%" style="table-layout:fixed;">
 <thead><tr>
-[%- FOREACH col IN lexicon.fields %]
+[%- FOREACH col IN morphemes.fields %]
 <th id="[% col %]">[%- col.replace('^.*\.','') %]</th>
 [%- END %]
 </tr></thead>
 <tbody>
-[% FOREACH row IN lexicon.data -%]
+[% FOREACH row IN morphemes.data -%]
 <tr>
 [%- FOREACH s IN row -%]
 <td>[% s | html %]</td>

@@ -29,6 +29,12 @@ setup.glosswords = {
 	hide: false,
 	size: 120
     },
+    'chapters.chaptertitle' : {
+	label: 'vfc heading',
+	noedit: false,
+	hide: false,
+	size: 120
+    },
     'num_recs' : {
 	label: 'words w this semkey',
 	noedit: false,

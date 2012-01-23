@@ -412,7 +412,7 @@ var setup = { // in the form setup.[tablename].[fieldname]
 			label: 'semkey',
 			size: 50,
 			transform : function (v) {
-				return '<a href="' + baseRef + 'edit/glosswords' + '?glosswords.semkey=' + v + '" target="edit_glosswords">' + v + '</a>';
+				return '<a href="' + baseRef + 'edit/etyma' + '?etyma.semkey=' + v + '" target="edit_glosswords">' + v + '</a>';
 			}
 		},
 		'etyma.possallo'  : {

@@ -12,7 +12,7 @@ setup.chapters = {
 	noedit: false,
 	size: 80,
 	transform : function (v) {
-	    return '<a target="chapters" href="' + baseRef + 'edit/chapters?chapters.chapter=' + v + '" target="stedt_chapters">' + v + '</a>';
+	    return '<a target="chapters" href="' + baseRef + 'edit/glosswords?glosswords.semkey=' + v + '" target="stedt_chapters">' + v + '</a>';
 	}
     },
     'chapters.chaptertitle' : {

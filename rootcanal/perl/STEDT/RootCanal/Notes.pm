@@ -17,15 +17,27 @@ sub chapter_browser : StartRunMode {
 		$public_ch = 'HAVING num_public OR public_notes';
 	}
 	# from the chapters table
-	my $chapters = $self->dbh->selectall_arrayref(<<SQL);
+	my $chapterquery = <<SQL;
 SELECT chapters.chapter, chapters.chaptertitle, 
 	(SELECT COUNT(*) FROM etyma WHERE chapter=chapters.chapter AND public=1 $blessed) AS num_public,
 	(SELECT COUNT(*) FROM etyma WHERE chapter=chapters.chapter $blessed),
 	COUNT(DISTINCT notes.noteid), MAX(notes.notetype = 'G'), MAX(notes.notetype != 'I') as public_notes,
         chapters.semcat, chapters.old_chapter, chapters.old_subchapter, chapters.id
-FROM chapters LEFT JOIN notes ON (notes.id=chapters.chapter)
+        XXXX
+FROM chapters LEFT JOIN notes ON (notes.id=chapters.chapter) LEFT JOIN glosswords ON (chapters.chapter=glosswords.semkey)
 GROUP BY 1 $public_ch ORDER BY v,f,c,s1,s2,s3
 SQL
+	# this query is extremely slow in "tweak mode" (i.e. when the glosswords for each VFC are looked up)
+	# the hack below 'reverts' the query to its faster version.
+	if ($tweak eq 'tweak') {
+	  my $clause = ",\nGROUP_CONCAT(DISTINCT glosswords.word SEPARATOR ', ') AS words,\n(SELECT COUNT(*) FROM lexicon WHERE lexicon.semkey=chapters.chapter)";
+	  $chapterquery =~ s/XXXX/$clause/m;
+	}
+	else {
+	  $chapterquery =~ s/XXXX//m;
+	  $chapterquery =~ s/ LEFT JOIN glosswords ON \(chapters.chapter=glosswords.semkey\)//m;
+	}
+	my $chapters = $self->dbh->selectall_arrayref($chapterquery);
 	# chapters that appear in etyma but not in chapters table
 	my $e_ghost_chaps = $self->dbh->selectall_arrayref(<<SQL);
 SELECT etyma.chapter, SUM(etyma.public), COUNT(*)

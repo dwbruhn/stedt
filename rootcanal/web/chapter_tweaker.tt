@@ -7,13 +7,16 @@
 	<th id="chapters.chapter">Ch.</th>
 	<th id="chapters.chaptertitle">Title</th>
 	[%- IF c.has_privs(1) %]<th>etyma</th>[% END %]
+	<th >forms<br/>assigned</td>
+	<th id="words">words</td>
 	<th id="chapters.id">id</td>
 </tr></thead>
 <tbody>
 [% FOREACH r IN ch -%]
 <tr><td>[% r.0 %]</td><td>[% r.1 %]</td>
-[%- IF c.has_privs(1) %]<td>[% IF r.3 %]<a target="etyma" href="[% self_url %]/edit/etyma?etyma.chapter=[% r.0 | uri %]">[% r.3 %][% END %]</td>[% END -%]
-
+[%- IF c.has_privs(1) %]<td>[% IF r.3 %]<a target="centerstage" href="[% self_url %]/edit/etyma?etyma.chapter=[% r.0 | uri %]">[% r.3 %][% END %]</td>[% END -%]
+[%- IF c.has_privs(1) %]<td>[% IF r.3 %]<a target="centerstage" href="[% self_url %]/edit/lexicon?lexicon.semkey=[% r.0 | uri %]">[% r.12 %][% END %]</td>[% END -%]
+<td>[% r.11 %]</td>
 <td>[% r.10 %]</td>
 </tr>
 [% END -%]
@@ -28,7 +31,7 @@
 [%- IF c.has_privs(1) %]<th>etyma</th>[% END %]<td width="80%"></td></tr>
 [% FOREACH r IN e -%]
 <tr><td>[% r.0 %]</td><td>[% r.1 %]</td>
-[%- IF c.has_privs(1) %]<td><a target="etyma" href="[% self_url %]/edit/etyma?etyma.chapter=[% r.0 | uri %]">[% r.2 %] etym[% r.2 == 1 ? 'on' : 'a' %]</a></td>[% END %]</tr>
+[%- IF c.has_privs(1) %]<td><a target="centerstage" href="[% self_url %]/edit/etyma?etyma.chapter=[% r.0 | uri %]">[% r.2 %] etym[% r.2 == 1 ? 'on' : 'a' %]</a></td>[% END %]</tr>
 [% END -%]
 </table>
 

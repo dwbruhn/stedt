@@ -40,13 +40,13 @@ sub widget : Runmode {
 	if ($s || $lg || $lggrp || !$q->param) {
 		if ($ENV{HTTP_REFERER} && ($s || $lg || $lggrp)) {
 			$self->dbh->do("INSERT querylog VALUES (?,?,?,NOW())", undef,
-				'simple', $lg ? "$s {$lg}" : $s, $ENV{REMOTE_ADDR});	# record search in query log (needs to be cleaned up someday)
+				'smart', $lg ? "$s {$lg}" : $s, $ENV{REMOTE_ADDR});	# record search in query log (needs to be cleaned up someday)
 		}
 		$result->{etyma} = $self->searchresults_from_querystring($s, 'etyma');
-		$result->{lexicon} = $self->searchresults_from_querystring($s, 'lexicon', $lg, $lggrp);
+		$result->{morphemes} = $self->searchresults_from_querystring($s, 'morphemes', $lg, $lggrp);
 	} else {
 		$result->{etyma} = $self->load_table_module('etyma')->search($q);
-		$result->{lexicon} = $self->load_table_module('lexicon')->search($q);
+		$result->{morphemes} = $self->load_table_module('morphemes')->search($q);
 	}
 	return $self->tt_process("widget.tt", $result);
 }
@@ -177,6 +177,25 @@ sub searchresults_from_querystring {
 			}
 			elsif ($token =~ /\p{Letter}/) {
 				$query->param('lexicon.gloss' => $token);
+			}
+		}
+		if (!$s && !$lg && !$lggrp) {
+			$query->param('analysis'=>1764);
+		} elsif (!$query->param) {
+			$query->param('analysis'=>5035);
+		}
+	} elsif ($tbl eq 'morphemes') {
+		$query->param('languagenames.language' => $lg) if $lg =~ /\p{Letter}/;
+		
+		# languagegroups param must match start with X or a digit and not go past 4 levels (first two levels are obligatory)
+		$query->param('languagegroups.grp' => $lggrp) if $lggrp =~ /^[\dX]\.\d((\.\d)(\.\d)?)?$/;
+
+		for my $token (split / /, $s) {
+			if ($token =~ /^\d+$/) {
+				$query->param('analysis' => $token);
+			}
+			elsif ($token =~ /\p{Letter}/) {
+				$query->param('morphemes.gloss' => $token);
 			}
 		}
 		if (!$s && !$lg && !$lggrp) {
