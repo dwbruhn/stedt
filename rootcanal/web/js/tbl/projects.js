@@ -148,7 +148,7 @@ setup.projects = {
 	label: 'subproject',
 	size: 80,
 	transform : function (v) {
-	    return '<a href="' + baseRef + 'edit/etyma?etyma.protogloss=' + v + '" target="stedt_lexicon">' + v + '</a>';
+	    return '<a href="' + baseRef + 'edit/etyma?etyma.protogloss=' + v + '" target="edit_etyma">' + v + '</a>';
 	}
     },
     'projects.project' : {

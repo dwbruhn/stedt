@@ -11,7 +11,7 @@ setup.glosswords = {
 	noedit: false,
 	size: 80,
 	transform : function (v) {
-	    return '<a target="lexicon" href="' + baseRef + 'edit/lexicon?lexicon.gloss=' + v + '" target="stedt_lexicon">' + v + '</a>';
+	    return '<a href="' + baseRef + 'edit/lexicon?lexicon.gloss=' + v + '" target="stedt_lexicon">' + v + '</a>';
 	}
     },
     'glosswords.semkey' : {
@@ -20,7 +20,7 @@ setup.glosswords = {
 	hide: false,
 	size: 200,
 	transform : function (v) {
-	    return '<a target="lexicon" href="' + baseRef + 'edit/glosswords?glosswords.semkey=' + v + '" target="stedt_lexicon">' + v + '</a>';
+	    return '<a href="' + baseRef + 'edit/glosswords?glosswords.semkey=' + v + '" target="edit_glosswords">' + v + '</a>';
 	}
     },
     'glosswords.subcat' : {
