@@ -15,7 +15,7 @@
 [% FOREACH r IN ch -%]
 <tr><td>[% r.0 %]</td><td>[% r.1 %]</td>
 [%- IF c.has_privs(1) %]<td>[% IF r.3 %]<a target="centerstage" href="[% self_url %]/edit/etyma?etyma.chapter=[% r.0 | uri %]">[% r.3 %][% END %]</td>[% END -%]
-[%- IF c.has_privs(1) %]<td>[% IF r.3 %]<a target="centerstage" href="[% self_url %]/edit/lexicon?lexicon.semkey=[% r.0 | uri %]">[% r.12 %][% END %]</td>[% END -%]
+[%- IF c.has_privs(1) %]<td>[% IF r.12 %]<a target="centerstage" href="[% self_url %]/edit/lexicon?lexicon.semkey=[% r.0 | uri %]">[% r.12 %][% END %]</td>[% END -%]
 <td>[% r.11 %]</td>
 <td>[% r.10 %]</td>
 </tr>

@@ -30,7 +30,7 @@ SQL
 	# this query is extremely slow in "tweak mode" (i.e. when the glosswords for each VFC are looked up)
 	# the hack below 'reverts' the query to its faster version.
 	if ($tweak eq 'tweak') {
-	  my $clause = ",\nGROUP_CONCAT(DISTINCT glosswords.word SEPARATOR ', ') AS words,\n(SELECT COUNT(*) FROM lexicon WHERE lexicon.semkey=chapters.chapter)";
+	  my $clause = ",\nGROUP_CONCAT(DISTINCT glosswords.word SEPARATOR ', ') AS words,\n(SELECT COUNT(*) FROM lexicon WHERE lexicon.semkey=chapters.chapter) AS wcount";
 	  $chapterquery =~ s/XXXX/$clause/m;
 	}
 	else {
