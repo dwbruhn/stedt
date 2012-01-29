@@ -1,0 +1,22 @@
+﻿[% PROCESS header.tt title="Progress Detail - STEDT Database" %]
+
+<h3>Tagging and Etyma, by user, over time</h3>
+<p>[% tagging.size %] users have tagged something:
+<a href="[% self_url %]/admin/detail">[Details]</a>
+</p>
+
+<table class="sortable resizable" style="table-layout:fixed">
+<col style="width:15em">
+<col style="width:6em">
+<col style="width:4em">
+<tr>
+	<th>date / uid / username </th>
+	<th>accepted</th>
+</tr>
+[% FOREACH k IN stats.keys -%]
+<tr><td>[% k %]</td><td>[% stats.$k %]</td></tr>
+[% END -%]
+</table>
+
+</body>
+</html>

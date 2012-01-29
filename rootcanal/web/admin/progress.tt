@@ -1,7 +1,9 @@
 ﻿[% PROCESS header.tt title="Progress Log - STEDT Database" %]
 
 <h3>Tagging and Etyma, by user</h3>
-<p>[% etymaused.size %] users have tagged something:</p>
+<p>[% etymaused.size %] users have tagged something:
+<a href="[% self_url %]/admin/detail">[Details]</a>
+</p>
 
 <table class="sortable resizable" style="table-layout:fixed">
 <col style="width:4em">

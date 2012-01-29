@@ -139,6 +139,24 @@ sub progress : Runmode {
 	return $self->tt_process("admin/progress.tt", {etymaused=>$a, tagging=>$b});
 }
 
+sub detail : Runmode {
+	my $self = shift;
+	if (my $err = $self->require_privs(1)) { return $err; }
+
+	# pull out "past work" from changelog and count what was done in the past, add these counts into table. Credit where credit is due!
+	my $a = $self->dbh->selectall_arrayref("SELECT time,time,oldval,newval FROM changelog WHERE col = '=accept'
+                   ORDER BY time DESC");
+	my %c ;
+	foreach my $row (@$a) {
+	  (my $uid) = $row->[2] =~ m/^uid=(\d+)/;
+	  my $username = $self->dbh->selectrow_array("SELECT username FROM users WHERE uid=$uid");
+	  my $rns = $row->[3];
+	  my $count = scalar split(',',$rns);
+	  my $key = substr(@$row[0],0,7) . " / " . $uid . " / " . $username ;
+	  $c{$key} += $count;
+	}
+	return $self->tt_process("admin/detail.tt", {stats=>\%c});
+}
 
 sub listpublic : Runmode {
 	my $self = shift;
