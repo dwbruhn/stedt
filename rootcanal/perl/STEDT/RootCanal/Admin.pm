@@ -147,15 +147,20 @@ sub detail : Runmode {
 	my $a = $self->dbh->selectall_arrayref("SELECT time,time,oldval,newval FROM changelog WHERE col = '=accept'
                    ORDER BY time DESC");
 	my %c ;
+	my %u ;
 	foreach my $row (@$a) {
 	  (my $uid) = $row->[2] =~ m/^uid=(\d+)/;
 	  my $username = $self->dbh->selectrow_array("SELECT username FROM users WHERE uid=$uid");
 	  my $rns = $row->[3];
 	  my $count = scalar split(',',$rns);
-	  my $key = substr(@$row[0],0,7) . " / " . $uid . " / " . $username ;
-	  $c{$key} += $count;
+	  my $yyyymm = substr(@$row[0],0,7);
+	  warn $username,$yyyymm,$count;
+	  $c{$yyyymm}{$username} += $count;
+	  #$c{$yyyymm}{'key'} = join " ",keys %x;
+	  #$c{$yyyymm . " " . $username . " " . $count} += $count;
+	  $u{$username} += $count;
 	}
-	return $self->tt_process("admin/detail.tt", {stats=>\%c});
+	return $self->tt_process("admin/detail.tt", {stats=>\%c, users=> \%u});
 }
 
 sub listpublic : Runmode {

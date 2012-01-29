@@ -2,20 +2,22 @@
 
 <h3>Tagging and Etyma, by user, over time</h3>
 <p>[% tagging.size %] users have tagged something:
-<a href="[% self_url %]/admin/detail">[Details]</a>
+<a href="[% self_url %]/admin/detail">[Reload]</a>
 </p>
-
 <table class="sortable resizable" style="table-layout:fixed">
-<col style="width:15em">
-<col style="width:6em">
-<col style="width:4em">
+<col style="width:10em">
 <tr>
-	<th>date / uid / username </th>
-	<th>accepted</th>
+<th>date </th>
+[% FOREACH u IN users.keys -%]<th>[% u %]</th>[% END -%]
 </tr>
-[% FOREACH k IN stats.keys -%]
-<tr><td>[% k %]</td><td>[% stats.$k %]</td></tr>
+[% FOREACH d IN stats.keys -%]
+<tr><td>[% d %]</td>
+[% FOREACH u IN users.keys -%]<td>[% stats.$d.$u || 0 %]</td>[% END -%]
+</tr>
 [% END -%]
+<tr><td>Total</td>
+[% FOREACH u IN users.keys -%]<td>[% users.$u || 0 %]</td>[% END -%]
+</tr>
 </table>
 
 </body>
