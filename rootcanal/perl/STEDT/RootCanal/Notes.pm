@@ -33,8 +33,8 @@ SQL
 	  my $clause = ",\nGROUP_CONCAT(DISTINCT glosswords.word SEPARATOR ', ') AS words,\n(SELECT COUNT(*) FROM lexicon WHERE lexicon.semkey=chapters.chapter) AS wcount";
 	  $chapterquery =~ s/XXXX/$clause/m;
 	}
-	elsif ($tweak eq 'synopsis') {
-	  # synopsis will need v, f, and c ... but not the expensive join on keywords
+	elsif ($tweak eq 'grid') {
+	  # grid will need v, f, and c ... but not the expensive join on keywords
 	  $chapterquery =~ s/XXXX/,v,f,c/m;
 	  $chapterquery =~ s/ LEFT JOIN glosswords ON \(chapters.chapter=glosswords.semkey\)//m;
 	  # order by fascicle 1st, so we can output a table easily.
