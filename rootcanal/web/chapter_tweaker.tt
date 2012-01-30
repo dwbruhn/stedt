@@ -7,7 +7,7 @@
 	<th id="chapters.chapter">Ch.</th>
 	<th id="chapters.chaptertitle">Title</th>
 	[%- IF c.has_privs(1) %]<th>etyma</th>[% END %]
-	<th >forms<br/>assigned</td>
+	<th id="wcount">forms<br/>assigned</td>
 	<th id="words">words</td>
 	<th id="chapters.id">id</td>
 </tr></thead>

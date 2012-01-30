@@ -8,7 +8,6 @@
 }
 
 @media screen { 
-	div#tools { position:fixed; overflow:auto; top:3em; height:2em; width:100%; left:0px; } 
 	div#etyma { position:fixed; overflow:auto; top:3em; height:12em; width:100%; left:0px; } 
 	div#lexicon { position:fixed; overflow:auto; top:15.5em; bottom: 0px; width:100%; left:0px; }
 	div#etyma.vert { height:auto; bottom:0px; width:18.5em; } 
@@ -19,6 +18,20 @@
 		width:100%; left: 0px; right: 0px;
 	}
 	div#dragger.vert {  cursor:col-resize; top:3em; bottom:0px;
+		height:auto; width:0.5em; left: 18.5em; right: auto;
+	 }
+
+	div#tools { position:fixed; overflow:auto; top:3em; height:2.5em; width:100%; left:0px; } 
+	div#etymawidget { position:fixed; overflow:auto; top:6em; height:12em; width:100%; left:0px; } 
+	div#moprhemeswidget { position:fixed; overflow:auto; top:18.5em; bottom: 0px; width:100%; left:0px; }
+	div#etymawidget.vert { height:auto; bottom:0px; width:18.5em; } 
+	div#moprhemeswidget.vert { width:auto; top:3em; right: 0px; left:19em; }
+	div#draggerwidget { cursor:row-resize;
+		position:fixed; top: 15em; height: 0.5em;
+		background-color:teal;
+		width:100%; left: 0px; right: 0px;
+	}
+	div#draggerwidget.vert {  cursor:col-resize; top:6em; bottom:0px;
 		height:auto; width:0.5em; left: 18.5em; right: auto;
 	 }
 }
@@ -47,6 +60,43 @@ div#lginfo { position:fixed; overflow:auto; top:3em; bottom:0px; right:0px; left
 
 tr { vertical-align: top; }
 td { text-indent: -1em; padding-left: 1em; }
+
+td.grid { text-indent: 0; padding: 2px;}
+
+div.outer { 
+    position: relative;
+    background-color: lightgray;
+    height: 4em; 
+    line-height:100%;
+    padding: 2px;
+}
+
+div.chapterlabel { 
+    position: relative;
+    text-align: center;
+    color: navy;
+    font-weight: normal;
+    overflow: hidden;
+}
+
+div.lowerleft {   
+    font-size: smaller; 
+    position: absolute; bottom: 1px;
+    text-align: left; 
+    bottom:2px;
+    left:2px;
+    width: 40px;
+}
+
+div.lowerright {   
+    font-size: smaller; 
+    position: absolute; bottom: 1px;
+    text-align: right; 
+    bottom:2px;
+    right:2px;
+    width: 40px;
+}
+
 td, .editable-cell-form textarea
 /* table cells and their editable versions should look the same */
 /* (looks like we're only using textareas, not text inputs) */

@@ -33,6 +33,13 @@ SQL
 	  my $clause = ",\nGROUP_CONCAT(DISTINCT glosswords.word SEPARATOR ', ') AS words,\n(SELECT COUNT(*) FROM lexicon WHERE lexicon.semkey=chapters.chapter) AS wcount";
 	  $chapterquery =~ s/XXXX/$clause/m;
 	}
+	elsif ($tweak eq 'synopsis') {
+	  # synopsis will need v, f, and c ... but not the expensive join on keywords
+	  $chapterquery =~ s/XXXX/,v,f,c/m;
+	  $chapterquery =~ s/ LEFT JOIN glosswords ON \(chapters.chapter=glosswords.semkey\)//m;
+	  # order by fascicle 1st, so we can output a table easily.
+	  $chapterquery =~ s/ORDER BY v,f,c,s1,s2,s3/ORDER BY f,v,c,s1,s2,s3/m;
+	}
 	else {
 	  $chapterquery =~ s/XXXX//m;
 	  $chapterquery =~ s/ LEFT JOIN glosswords ON \(chapters.chapter=glosswords.semkey\)//m;
@@ -54,6 +61,9 @@ SQL
 	my $tt;
 	if ($tweak eq 'tweak') {
 	  $tt = 'chapter_tweaker.tt';
+	}
+	elsif ($tweak eq 'grid') {
+	  $tt = 'semantic_grid.tt';
 	}
 	else {
 	  $tt = 'chapter_browser.tt';

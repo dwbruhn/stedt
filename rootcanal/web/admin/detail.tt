@@ -1,6 +1,6 @@
 ﻿[% PROCESS header.tt title="Progress Detail - STEDT Database" %]
 
-<h3>Tagging and Etyma, by user, over time</h3>
+<h3>Tagging accepted, by user, over time</h3>
 <p>[% tagging.size %] users have tagged something:
 <a href="[% self_url %]/admin/detail">[Reload]</a>
 </p>

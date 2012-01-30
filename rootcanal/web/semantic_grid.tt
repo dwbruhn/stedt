@@ -1,0 +1,46 @@
+﻿[% PROCESS header.tt title="STEDT Semantic Grid" -%]
+
+<h1>STEDT Semantic Grid</h1>
+<p>[% ch.size %] nodes</p>
+<table id="ch" class="resizable" style="table-layout:fixed">
+<col style="width:7em">
+<thead><tr><th>Fascicle</th>
+[% FOREACH r IN ch -%]
+[% IF r.12 == 0 && r.11 < 11 %]<th>[% r.11 %]<br/>[% r.1 %]</th>[% END -%]
+[% END -%]
+</tr></thead>
+<tbody>
+<tr>
+[% FOREACH fascicle IN [1..23] -%]
+<th>[% fascicle %]</th>
+[% FOREACH volume IN [1..10] -%]
+<td class="grid"><div class="outer">
+<div class="chapterlabel">
+[% etyma = 0 %]
+[% chapters = 0 %]
+[% FOREACH r IN ch -%]
+[% IF r.12 == fascicle %][% IF r.11  == volume %]
+[% etyma = etyma + r.3 %]
+[% chapters = chapters + 1 %]
+[% IF r.13  == 0 %]
+  [% r.0 %]<br/>[% r.1 %]<br/>
+[% END -%]
+[% END -%][% END -%]
+[% END -%]
+</div>
+[% IF chapters != 0 %]<div class="lowerright" title="chapters"><a target="etyma" href="[% self_url %]/edit/chapters?chapters.chapter=[% volume _ '.' _ fascicle _ '%' %]">[% chapters %]</a></div>[% END -%]
+[% IF etyma    != 0 %]<div class="lowerleft" title="etyma"><a target="etyma" href="[% self_url %]/edit/etyma?etyma.chapter=[% volume _ '.' _ fascicle  _ '%' %]">[% etyma %]</a></div>[% END -%]
+</div>
+</td>
+[% END -%]
+</tr>
+[% END -%]
+</tbody>
+</table>
+
+<script src="[% self_base %]js/tbl/chapters.js"></script>
+<script>
+TableKit.Raw.init('ch', 'chapters', setup['chapters'][% IF c.has_privs(8) %], '[% self_url %]/update'[% END %]);
+</script>
+</body>
+</html>

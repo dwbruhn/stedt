@@ -27,6 +27,24 @@ setup.chapters = {
 	hide: false,
 	size: 120
     },
+    'words' : {
+	label: 'gloss words with this semkey',
+	noedit: false,
+	hide: false,
+	size: 250
+    },
+    'wcount' : {
+	label: 'other glosses',
+	noedit: false,
+	hide: false,
+	size: 60
+    },
+    'etyma' : {
+	label: 'etyma',
+	noedit: false,
+	hide: false,
+	size: 60
+    },
     'chapters.v' : {
 	label: 'vol',
 	noedit: false,

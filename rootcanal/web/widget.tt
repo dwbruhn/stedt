@@ -5,7 +5,7 @@
 <td>morphemes: [% morphemes.data.size ? (morphemes.data.size > 0 ? (morphemes.data.size _ ' records found.') : '') : 'No records found.' %]</td>
 </tr></table>
 </div>
-<div id="etyma" class="vert">
+<div id="etymawidget" class="vert">
 <div align="center">[% # search div %]
 <form id="etyma_search" method="post">
 <table>
@@ -38,9 +38,9 @@
 <div id="debug"></div>
 </div>
 
-<div id="dragger" class="vert"></div>
+<div id="draggerwidget" class="vert"></div>
 
-<div id="morphemes" class="vert">
+<div id="morphemeswidget" class="vert">
 <div align="center">
 <form id="morphemes_search" method="post">
 <table>
@@ -70,6 +70,6 @@
 [% END %]
 </div>
 
-<script src="[% self_base %]js/simplesearch.js"></script>
+<script src="[% self_base %]js/widget.js"></script>
 </body>
 </html>
