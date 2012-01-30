@@ -28,7 +28,7 @@
 [% END -%][% END -%]
 [% END -%]
 </div>
-[% IF chapters != 0 %]<div class="lowerright" title="chapters"><a target="etyma" href="[% self_url %]/edit/chapters?chapters.chapter=[% volume _ '.' _ fascicle _ '%' %]">[% chapters %]</a></div>[% END -%]
+[% IF chapters != 0 %]<div class="lowerright" title="chapters"><a target="etyma" href="[% self_url %]/edit/chapters?chapters.v=[% volume %]&chapters.f=[% fascicle %]">[% chapters %]</a></div>[% END -%]
 [% IF etyma    != 0 %]<div class="lowerleft" title="etyma"><a target="etyma" href="[% self_url %]/edit/etyma?etyma.chapter=[% volume _ '.' _ fascicle  _ '%' %]">[% etyma %]</a></div>[% END -%]
 </div>
 </td>

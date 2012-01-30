@@ -154,10 +154,7 @@ sub detail : Runmode {
 	  my $rns = $row->[3];
 	  my $count = scalar split(',',$rns);
 	  my $yyyymm = substr(@$row[0],0,7);
-	  warn $username,$yyyymm,$count;
 	  $c{$yyyymm}{$username} += $count;
-	  #$c{$yyyymm}{'key'} = join " ",keys %x;
-	  #$c{$yyyymm . " " . $username . " " . $count} += $count;
 	  $u{$username} += $count;
 	}
 	return $self->tt_process("admin/detail.tt", {stats=>\%c, users=> \%u});
