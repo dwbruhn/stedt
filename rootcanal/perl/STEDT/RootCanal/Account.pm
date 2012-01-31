@@ -276,6 +276,57 @@ sub logout : Runmode {
 	return $self->redirect($self->query->url(-absolute=>1));
 }
 
+# code for examining and updating users en masse
+# eventually we should leverage the validation code, but for now it's OK.
+
+sub users : Runmode {
+	my $self = shift;
+	if (my $err = $self->require_privs(1)) { return $err; }
+	
+	my $a = $self->dbh->selectall_arrayref("SELECT username,uid,email,
+privs&2,privs&1,privs&8,privs&16
+FROM users
+ORDER BY username");
+	return $self->tt_process("admin/users.tt", {users=>$a});
+}
+
+sub update_all : Runmode {
+	my $self = shift;
+	if (my $err = $self->require_privs(16)) { return $err; }
+	my $q = $self->query;
+	my $uids = $self->dbh->selectcol_arrayref("SELECT uid FROM users");
+	for my $uid (@$uids) {
+		my ($password) = ($q->param("password_$uid"));
+		my $privs = 0;
+		$privs += 2 if $q->param("priv2_$uid");
+		$privs += 1 if $q->param("priv1_$uid");
+		$privs += 8 if $q->param("priv8_$uid");
+		$privs += 16 if $q->param("priv16_$uid");
+		$self->dbh->do("UPDATE users SET privs=? WHERE uid=?", undef, $privs, $uid);
+		if ($password) {
+			$self->dbh->do("UPDATE users SET password=SHA1(?) WHERE uid=?", undef, $password, $uid);
+		}
+	}
+	if ($q->param("username_00") && $q->param("email_00") && $q->param("password_00")) {
+		my $sth = $self->dbh->prepare("INSERT users ("
+			. join(',', qw|username password email privs|)
+			. ") VALUES (?, SHA1(?), ?, ?)");
+		my $privs = 0;
+		$privs += 2 if $q->param("priv2_00");
+		$privs += 1 if $q->param("priv1_00");
+		$privs += 8 if $q->param("priv8_00");
+		$privs += 16 if $q->param("priv16_00");
+		eval { $sth->execute($q->param('username_00'), $q->param('password_00'), $q->param('email_00'), $privs)	};
+		if ($@) {
+			my $err = "Can't create new account: $@";
+			die $err; # give unexpected error page!
+		}
+	}
+	
+	return $self->redirect($q->url(-absolute=>1) . "/users");
+}
+
+
 # helper functions
 sub ValidEmailAddr { #check if e-mail address format is valid
   my $mail = shift;                                                  #in form name@host

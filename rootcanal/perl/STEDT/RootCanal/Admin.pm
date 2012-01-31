@@ -100,14 +100,6 @@ sub deviants : Runmode {
 	return $self->tt_process("admin/deviants.tt", {deviants=>\%conditions});
 }
 
-sub users : Runmode {
-	my $self = shift;
-	if (my $err = $self->require_privs(1)) { return $err; }
-
-	my $a = $self->dbh->selectall_arrayref("SELECT username,uid,email,privs,COUNT(DISTINCT rn) FROM users LEFT JOIN lx_et_hash USING (uid) GROUP BY uid");
-	return $self->tt_process("admin/users.tt", {users=>$a});
-}
-
 sub progress : Runmode {
 	my $self = shift;
 	if (my $err = $self->require_privs(1)) { return $err; }

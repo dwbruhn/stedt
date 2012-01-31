@@ -1,22 +1,67 @@
-[% PROCESS header.tt title="STEDT Database: Users" %]
+[% PROCESS header.tt title="Users on STEDT Database" %]
 <p>[% users.size %] users:</p>
 
+[% IF c.has_privs(16) -%]
+<form action="[% self_url %]/account/update_all" method="POST">
+[% END -%]
 <table>
 <tr>
 	<th>username</th>
 	<th>uid</th>
 	<th>email</th>
-	<th>privs</th>
-	<th>tagged forms</th>
+	<th>user (2)</th>
+	<th>tagger (1)</th>
+	<th>approver (8)</th>
+	<th>superuser (16)</th>
+[% IF c.has_privs(16) -%]
+	<th>NEW password</th>
+[% END -%]
 </tr>
 [% FOREACH row IN users -%]
+[% SET uid = row.1 %]
 <tr>
-[% FOREACH col IN row -%]
-<td>[% col %]</td>
+<td>[% row.0 %]</td>
+<td>[% uid %]</td>
+<td>[% row.2 %]</td>
+<td><input name="priv2_[% uid %]" type="checkbox"[% row.3 ? ' checked' : '' %]></td>
+<td><input name="priv1_[% uid %]" type="checkbox"[% row.4 ? ' checked' : '' %]></td>
+<td><input name="priv8_[% uid %]" type="checkbox"[% row.5 ? ' checked' : '' %]></td>
+<td><input name="priv16_[% uid %]" type="checkbox"[% row.6 ? ' checked' : '' %]></td>
+[% IF c.has_privs(16) -%]
+<td><input name="password_[% uid %]" type="text" size="31" maxlength="63"></td>
 [% END -%]
 </tr>
 [% END -%]
+[% IF c.has_privs(16) -%]
+<tr>
+<td><input name="username_00" type="text" size="15" maxlength="15"></td>
+<td>ADD</td>
+<td><input name="email_00" type="text" size="31" maxlength="63"></td>
+<td><input name="priv2_00" type="checkbox" checked></td>
+<td><input name="priv1_00" type="checkbox"></td>
+<td><input name="priv8_00" type="checkbox"></td>
+<td><input name="priv16_00" type="checkbox"></td>
+<td><input name="password_00" type="text" size="31" maxlength="63"></td>
+</tr>
 </table>
+<input name="button" type="submit" value="Save changes">
+</form>
+
+<p>If adding a user, make sure username, email and password are non-empty!
+Otherwise the whole row will be ignored.</p>
+
+[% ELSE -%]
+</table>
+[% END -%]
+
+<h3>Privileges cheat sheet</h3>
+
+<dl>
+<dt>2</dt><dd>all users should have priv 2 'user' set to true</dd>
+<dt>1</dt><dd>can tag forms</dd>
+<dt>8</dt><dd>approve tags, edit others' tags</dd>
+<dt>16</dt><dd>mere mortals cannot understand this privilege level</dd>
+</dl>
 
 </body>
 </html>
