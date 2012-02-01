@@ -281,7 +281,7 @@ sub logout : Runmode {
 
 sub users : Runmode {
 	my $self = shift;
-	if (my $err = $self->require_privs(1)) { return $err; }
+	$self->require_privs(1);
 	
 	my $a = $self->dbh->selectall_arrayref("SELECT username,uid,email,
 privs&2,privs&1,privs&8,privs&16
@@ -292,7 +292,7 @@ ORDER BY username");
 
 sub update_all : Runmode {
 	my $self = shift;
-	if (my $err = $self->require_privs(16)) { return $err; }
+	$self->require_privs(16);
 	my $q = $self->query;
 	my $uids = $self->dbh->selectcol_arrayref("SELECT uid FROM users");
 	for my $uid (@$uids) {

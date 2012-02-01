@@ -151,7 +151,7 @@ sub add : RunMode {
 
 sub delete : RunMode {
 	my $self = shift;
-	if (my $err = $self->require_privs(1)) { return $err; }
+	$self->require_privs(1);
 	my $dbh = $self->dbh;
 	my $q = $self->query;
 	my $noteid = $q->param('noteid');
@@ -178,7 +178,7 @@ sub delete : RunMode {
 
 sub save : RunMode {
 	my $self = shift;
-	if (my $err = $self->require_privs(1)) { return $err; }
+	$self->require_privs(1);
 	my $dbh = $self->dbh;
 	my $q = $self->query;
 	my $noteid = $q->param('noteid');
@@ -221,7 +221,7 @@ sub save : RunMode {
 
 sub reorder : RunMode {
 	my $self = shift;
-	if (my $err = $self->require_privs(8)) { return $err; }
+	$self->require_privs(8);
 	my @ids = map {/(\d+)$/} split /\&/, $self->query->param('ids');
 	# change the order, but don't update the modification time for something so minor.
 	my $sth = $self->dbh->prepare("UPDATE notes SET ord=?, datetime=datetime WHERE noteid=?");

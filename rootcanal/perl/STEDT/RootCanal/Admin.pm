@@ -5,7 +5,7 @@ use utf8;
 
 sub main : StartRunmode {
 	my $self = shift;
-	if (my $err = $self->require_privs(1)) { return $err; }
+	$self->require_privs(1);
 	
 	my %h;
 	if ($self->has_privs(16)) {
@@ -16,7 +16,7 @@ sub main : StartRunmode {
 
 sub changes : Runmode {
 	my $self = shift;
-	if (my $err = $self->require_privs(1)) { return $err; }
+	$self->require_privs(1);
 
 	my $a = $self->dbh->selectall_arrayref("SELECT username,`table`,col,id,oldval,newval,time FROM changelog LEFT JOIN users USING (uid) ORDER BY time DESC LIMIT 500");
 	return $self->tt_process("admin/changelog.tt", {changes=>$a});
@@ -26,7 +26,7 @@ sub where_word { my ($k,$v) = @_; $v =~ s/^\*(?=.)// ? "$k RLIKE '$v'" : "$k RLI
 
 sub updateprojects : Runmode {
 	my $self = shift;
-	if (my $err = $self->require_privs(1)) { return $err; }
+	$self->require_privs(1);
 
 	my $a = $self->dbh->selectall_arrayref("SELECT id,project,subproject,querylex,100 * tagged_reflexes/count_reflexes as pct,tagged_reflexes,count_reflexes,count_etyma FROM projects ");
 
@@ -74,7 +74,7 @@ sub updateprojects : Runmode {
 
 sub queries : Runmode {
 	my $self = shift;
-	if (my $err = $self->require_privs(1)) { return $err; }
+	$self->require_privs(1);
 
 	my $a = $self->dbh->selectall_arrayref("SELECT `table`,query,lg,lggroup,ip,time FROM querylog ORDER BY time DESC LIMIT 500");
 	return $self->tt_process("admin/querylog.tt", {queries=>$a});
@@ -82,7 +82,7 @@ sub queries : Runmode {
 
 sub deviants : Runmode {
 	my $self = shift;
-	if (my $err = $self->require_privs(1)) { return $err; }
+	$self->require_privs(1);
 
 	# count number of records with deviant glosses
 	my %conditions = ('to VERB','^to ',
@@ -102,7 +102,7 @@ sub deviants : Runmode {
 
 sub progress : Runmode {
 	my $self = shift;
-	if (my $err = $self->require_privs(1)) { return $err; }
+	$self->require_privs(1);
 
 	my $a = $self->dbh->selectall_arrayref("SELECT username, users.uid,
 			COUNT(DISTINCT tag), COUNT(DISTINCT rn)
@@ -133,7 +133,7 @@ sub progress : Runmode {
 
 sub detail : Runmode {
 	my $self = shift;
-	if (my $err = $self->require_privs(1)) { return $err; }
+	$self->require_privs(1);
 
 	# pull out "past work" from changelog and count what was done in the past, add these counts into table. Credit where credit is due!
 	my $a = $self->dbh->selectall_arrayref("SELECT time,time,oldval,newval FROM changelog WHERE col = '=accept'
@@ -154,7 +154,7 @@ sub detail : Runmode {
 
 sub listpublic : Runmode {
 	my $self = shift;
-	if (my $err = $self->require_privs(16)) { return $err; }
+	$self->require_privs(16);
 
 	my $a = $self->dbh->selectcol_arrayref("SELECT tag FROM etyma WHERE public=1");
 	return "[" . join(',', @$a) . "]";
@@ -162,7 +162,7 @@ sub listpublic : Runmode {
 
 sub expire_sessions : Runmode {
 	my $self = shift;
-	if (my $err = $self->require_privs(16)) { return $err; }
+	$self->require_privs(16);
 	local *STDOUT; # override STDOUT since ExpireSessions stupidly prints to it
 	open(STDOUT, ">", \my $tmp) or die "couldn't open memory file: $!";
 	require CGI::Session::ExpireSessions;
@@ -213,7 +213,7 @@ sub save_seq {
 
 sub seq : Runmode {
 	my $self = shift;
-	if (my $err = $self->require_privs(8)) { return $err; }
+	$self->require_privs(8);
 	my $chap = $self->query->param('c');
 	return "no chapter specified!" unless $chap;
 

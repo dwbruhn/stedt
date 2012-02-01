@@ -6,7 +6,7 @@ use utf8;
 
 sub table : StartRunmode {
 	my $self = shift;
-	if (my $err = $self->require_privs(1)) { return $err; }
+	$self->require_privs(1);
 	my $tbl = $self->param('tbl');
 	my $message = $self->param('message') || '';
 	my $q = $self->query;
@@ -95,9 +95,8 @@ sub table : StartRunmode {
 sub add : Runmode {
 	my $self = shift;
 	my $tblname = $self->param('tbl');
-	my $privs = $tblname eq 'etyma' ? 1 : 16;
 	# taggers can only add etyma, not lexicon/languagename/etc. records
-	if (my $err = $self->require_privs($privs)) { return $err; }
+	$self->require_privs($tblname eq 'etyma' ? 1 : 16);
 
 	my $t = $self->load_table_module($tblname);
 	my $q = $self->query;
@@ -243,7 +242,7 @@ sub json_lg : Runmode {
 
 sub single_record : Runmode {
 	my $self = shift;
-	if (my $err = $self->require_privs(16)) { return $err; }
+	$self->require_privs(16);
 	my $tbl = $self->param('tbl');
 	my $id = $self->param('id');
 	my $t = $self->load_table_module($tbl);

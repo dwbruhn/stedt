@@ -85,7 +85,7 @@ sub user_session_init {
 # using C::A::P::AutoRunmode, we set this to be called in the event of an error
 sub unable_to_comply : ErrorRunmode {
 	my ($self, $err) = @_;
-	$self->header_add(-status => 500); # server error
+	$self->header_add(-status => 500) unless {$self->header_props()}->{'-status'}; # 500 server error
 	return $err; # just the text, ma'am (it might show up in a javascript alert)
 }
 
@@ -119,9 +119,11 @@ sub require_privs {
 	no warnings 'uninitialized';
 	my ($self, $privs) = @_;
 	return if ($self->param('userprivs') & $privs);
-	return $self->tt_process("admin/https_warning.tt") unless $self->param('user');
+	die $self->tt_process("admin/https_warning.tt") unless $self->param('user');
 	$self->header_add(-status => 403);
-	return 'You do not have sufficient privileges to perform that operation.';
+	die 'You do not have sufficient privileges to perform that operation, required by '
+		. caller() . '::' . $self->get_current_runmode() . ".\n";
+		# trailing newline suppresses the file and line number in die's $@ error message
 }
 
 sub has_privs {
