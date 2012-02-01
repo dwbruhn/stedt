@@ -76,7 +76,7 @@ sub queries : Runmode {
 	my $self = shift;
 	if (my $err = $self->require_privs(1)) { return $err; }
 
-	my $a = $self->dbh->selectall_arrayref("SELECT `table`,query,ip,time FROM querylog ORDER BY time DESC LIMIT 500");
+	my $a = $self->dbh->selectall_arrayref("SELECT `table`,query,lg,lggroup,ip,time FROM querylog ORDER BY time DESC LIMIT 500");
 	return $self->tt_process("admin/querylog.tt", {queries=>$a});
 }
 
