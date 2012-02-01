@@ -1,4 +1,4 @@
-﻿[% PROCESS header.tt title="STEDT Semtree Tweaker" -%]
+[% PROCESS header.tt title="STEDT Semtree Tweaker" -%]
 
 <h1>Semtree Tweaker</h1>
 <p>[% ch.size %] nodes (took [% time_elapsed %] seconds to retrieve)</p>
@@ -7,7 +7,7 @@
 	<th id="chapters.semkey">Ch.</th>
 	<th id="chapters.chaptertitle">Title</th>
 [%- IF c.has_privs(1) %]
-	<th id="etyma">etyma</th>
+	<th id="etyma">etyma ('chapter' field)</th>
 	<th id="wcount">forms</th>
 [%- END %]
 	<th id="num_glosswords">#</th>
