@@ -7,47 +7,39 @@ my ($self, $dbh, $privs, $uid) = @_;
 my $t = $self->SUPER::new($dbh, 'chapters', 'chapters.id', $privs); # dbh, table, key, privs
 
 $t->query_from(q|chapters|);
-$t->order_by('chapters.v, chapters.f, chapters.c, chapters.s1, chapters.s2, chapters.s3, chapters.chaptertitle'); # default is the key
+$t->order_by('chapters.v, chapters.f, chapters.c, chapters.s1, chapters.s2, chapters.s3'); # semkey must be unique
 
 $t->fields(
-	   'chapters.id',
-	   'chapters.chapter',
-	   'chapters.chaptertitle',
-	   'chapters.chapterabbr',
-	   'chapters.v',
-	   'chapters.f',
-	   'chapters.c',
-	   'chapters.s1',
-	   'chapters.s2',
-	   'chapters.s3',
-	   'chapters.semcat',
-	   'chapters.old_chapter',
-	   'chapters.old_subchapter'
+	'chapters.semkey',
+	'chapters.chaptertitle',
+	'chapters.v',
+	'chapters.f',
+	'chapters.c',
+	'chapters.s1',
+	'chapters.s2',
+	'chapters.s3',
+	'chapters.semcat',
+	'chapters.old_chapter',
+	'chapters.old_subchapter',
+	'chapters.id',
+	'(SELECT COUNT(*) FROM glosswords WHERE semkey=chapters.semkey) AS gloss_link'
 );
 $t->searchable(
-	   'chapters.chapter',
-	   'chapters.chaptertitle',
-	   'chapters.v',
-	   'chapters.f',
-	   'chapters.c',
-	   'chapters.s1',
-	   'chapters.s2',
-	   'chapters.s3',
-	   'chapters.semcat',
-	   'chapters.old_chapter',
-	   'chapters.old_subchapter'
+	'chapters.semkey',
+	'chapters.chaptertitle',
+	'chapters.v',
+	'chapters.f',
+	'chapters.c',
+	'chapters.s1',
+	'chapters.s2',
+	'chapters.s3',
+	'chapters.semcat',
+	'chapters.old_chapter',
+	'chapters.old_subchapter'
 );
 $t->editable(
-	   'chapters.chapter',
-	   'chapters.chaptertitle',
-	   'chapters.v',
-	   'chapters.f',
-	   'chapters.c',
-	   'chapters.s1',
-	   'chapters.s2',
-	   'chapters.s3',
-	   'chapters.semcat',
-	   'chapters.old_chapter'
+	'chapters.semkey',
+	'chapters.chaptertitle',
 );
 
 # Stuff for searching
@@ -73,16 +65,36 @@ $t->search_form_items(
 );
 
 $t->save_hooks(
-	       'chapter.semcat' => sub {
-		 my ($id, $value) = @_;
-		 my $sth = $dbh->prepare(qq{UPDATE chapters SET semcat=? WHERE id=?});
-		 $sth->execute($uid, $id);
-	       },
+	'chapters.semkey' => sub {
+		my ($id, $semkey) = @_;
+		my ($old_semkey) = $dbh->selectrow_array('SELECT semkey FROM chapters WHERE id=?', undef, $id);
+
+		# split by periods and convert to numbers
+		my @vfcsss = map { $_ + 0 } split /\./, $semkey;
+		my ($v,$f,$c,$s1,$s2,$s3) = @vfcsss;
+
+		# convert it back now that it's all digits; make sure no zeroes creep in
+		$semkey = shift @vfcsss or die("Volume must be non-zero!");
+		for my $n (@vfcsss) {
+			last unless $n > 0;
+			$semkey .= ".$n";
+		}
+		my $sth = $dbh->prepare(q{UPDATE chapters SET semkey=?, v=?, f=?, c=?, s1=?, s2=?, s3=? WHERE id=?});
+		$sth->execute($semkey,$v,$f,$c,$s1,$s2,$s3,$id);
+		# if it fails at this point it will be because there is a UNIQUE constraint
+		# on the semkey field in the database. Otherwise it is safe to go on.
+		
+		# update the corresponding field in etyma, lexicon, and glosswords
+		$dbh->do('UPDATE etyma SET semkey=? WHERE semkey=?', undef, $semkey, $old_semkey);
+		$dbh->do('UPDATE lexicon SET semkey=? WHERE semkey=?', undef, $semkey, $old_semkey);
+		$dbh->do('UPDATE glosswords SET semkey=? WHERE semkey=?', undef, $semkey, $old_semkey);
+		return 0;
+	},
 );
 
 
 $t->wheres(
-	   'chapters.chapter' => sub {my ($k,$v) = @_; "$k LIKE '$v\%'"},
+	   'chapters.semkey' => sub {my ($k,$v) = @_; "$k LIKE '$v\%'"},
 	   'chapters.chaptertitle' => sub {my ($k,$v) = @_; "$k LIKE '$v\%'"},
 	   'chapters.v'	 => 'int',
 	   'chapters.f'	 => 'int',
@@ -94,21 +106,15 @@ $t->wheres(
 
 
 $t->addable(
-	   'chapters.chapter',
-	   'chapters.chaptertitle',
-	   'chapters.v',
-	   'chapters.f',
-	   'chapters.c',
-	   'chapters.s1',
-	   'chapters.s2',
-	   'chapters.s3'
+	   'chapters.semkey',
+	   'chapters.chaptertitle'
 );
 
 $t->add_check(sub {
 	my $cgi = shift;
 	my $err = '';
-	$err .= "Chapter name not specified!\n" unless $cgi->param('chapters.chapter');
-	$err .= "Chaptertitle name not specified!\n" unless $cgi->param('chapters.chaptertitle');
+	$err .= "Semkey (v.f.c....) not specified!\n" unless $cgi->param('chapters.semkey');
+	$err .= "Chaptertitle not specified!\n" unless $cgi->param('chapters.chaptertitle');
 	return $err;
 });
 

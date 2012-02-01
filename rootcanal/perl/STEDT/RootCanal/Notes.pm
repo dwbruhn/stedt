@@ -4,9 +4,11 @@ use base 'STEDT::RootCanal::Base';
 use Encode;
 use utf8;
 use CGI::Application::Plugin::Redirect;
+use Time::HiRes qw(time);
 
 sub chapter_browser : StartRunMode {
 	my $self = shift;
+	my $t0 = time();
 	my $tweak = $self->param('tweak');
 	my $public = '';
 	my $blessed = '';
@@ -18,31 +20,34 @@ sub chapter_browser : StartRunMode {
 	}
 	# from the chapters table
 	my $chapterquery = <<SQL;
-SELECT chapters.chapter, chapters.chaptertitle, 
-	(SELECT COUNT(*) FROM etyma WHERE chapter=chapters.chapter AND public=1 $blessed) AS num_public,
-	(SELECT COUNT(*) FROM etyma WHERE chapter=chapters.chapter $blessed),
+SELECT chapters.semkey, chapters.chaptertitle, 
+	(SELECT COUNT(*) FROM etyma WHERE chapter=chapters.semkey AND public=1 $blessed) AS num_public,
+	(SELECT COUNT(*) FROM etyma WHERE chapter=chapters.semkey $blessed),
 	COUNT(DISTINCT notes.noteid), MAX(notes.notetype = 'G'), MAX(notes.notetype != 'I') as public_notes,
         chapters.semcat, chapters.old_chapter, chapters.old_subchapter, chapters.id
         XXXX
-FROM chapters LEFT JOIN notes ON (notes.id=chapters.chapter) LEFT JOIN glosswords ON (chapters.chapter=glosswords.semkey)
+FROM chapters LEFT JOIN notes ON (notes.id=chapters.semkey) LEFT JOIN glosswords ON (chapters.semkey=glosswords.semkey)
 GROUP BY 1 $public_ch ORDER BY v,f,c,s1,s2,s3
 SQL
 	# this query is extremely slow in "tweak mode" (i.e. when the glosswords for each VFC are looked up)
 	# the hack below 'reverts' the query to its faster version.
 	if ($tweak eq 'tweak') {
-	  my $clause = ",\nGROUP_CONCAT(DISTINCT glosswords.word SEPARATOR ', ') AS words,\n(SELECT COUNT(*) FROM lexicon WHERE lexicon.semkey=chapters.chapter) AS wcount";
+	  my $clause = ",
+COUNT(DISTINCT glosswords.word),
+GROUP_CONCAT(DISTINCT glosswords.word SEPARATOR ', ') AS some_glosswords,
+(SELECT COUNT(*) FROM lexicon WHERE lexicon.semkey=chapters.semkey) AS wcount";
 	  $chapterquery =~ s/XXXX/$clause/m;
 	}
 	elsif ($tweak eq 'grid') {
 	  # grid will need v, f, and c ... but not the expensive join on keywords
 	  $chapterquery =~ s/XXXX/,v,f,c/m;
-	  $chapterquery =~ s/ LEFT JOIN glosswords ON \(chapters.chapter=glosswords.semkey\)//m;
+	  $chapterquery =~ s/ LEFT JOIN glosswords ON \(chapters.semkey=glosswords.semkey\)//m;
 	  # order by fascicle 1st, so we can output a table easily.
 	  $chapterquery =~ s/ORDER BY v,f,c,s1,s2,s3/ORDER BY f,v,c,s1,s2,s3/m;
 	}
 	else {
 	  $chapterquery =~ s/XXXX//m;
-	  $chapterquery =~ s/ LEFT JOIN glosswords ON \(chapters.chapter=glosswords.semkey\)//m;
+	  $chapterquery =~ s/ LEFT JOIN glosswords ON \(chapters.semkey=glosswords.semkey\)//m;
 	}
 	my $chapters = $self->dbh->selectall_arrayref($chapterquery);
 	# chapters that appear in etyma but not in chapters table
@@ -54,7 +59,7 @@ SQL
 	# chapters that appear in notes but not in chapters table
 	my $n_ghost_chaps = $self->dbh->selectall_arrayref(<<SQL);
 SELECT notes.id, COUNT(notes.noteid), COUNT(etyma.tag)
-FROM notes LEFT JOIN chapters ON (notes.id=chapters.chapter) LEFT JOIN etyma USING (chapter)
+FROM notes LEFT JOIN chapters ON (notes.id=chapters.semkey) LEFT JOIN etyma ON (etyma.chapter=chapters.semkey)
 WHERE notes.spec='C' AND chapters.chaptertitle IS NULL GROUP BY 1 ORDER BY 1
 SQL
 
@@ -69,7 +74,7 @@ SQL
 	  $tt = 'chapter_browser.tt';
 	}
 	return $self->tt_process($tt, {
-		ch=>$chapters, e=>$e_ghost_chaps, n=>$n_ghost_chaps
+		ch=>$chapters, e=>$e_ghost_chaps, n=>$n_ghost_chaps, time_elapsed=>sprintf("%0.3g", time()-$t0)
 	});
 }
 

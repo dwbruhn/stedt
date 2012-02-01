@@ -6,7 +6,7 @@ sub new {
 my ($self, $dbh, $privs, $uid) = @_;
 my $t = $self->SUPER::new($dbh, 'glosswords', 'glosswords.id', $privs); # dbh, table, key, privs
 
-$t->query_from(q|glosswords LEFT JOIN chapters on (glosswords.semkey=chapters.chapter)|);
+$t->query_from(q|glosswords LEFT JOIN chapters on (glosswords.semkey=chapters.semkey)|);
 $t->order_by('glosswords.word, glosswords.semkey');
 $t->fields(
 	'glosswords.id',

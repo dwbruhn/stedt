@@ -1,22 +1,26 @@
-﻿[% PROCESS header.tt title="STEDT Chapter Tweaker" -%]
+﻿[% PROCESS header.tt title="STEDT Semtree Tweaker" -%]
 
-<h1>Chapters</h1>
-<p>[% ch.size %] nodes</p>
+<h1>Semtree Tweaker</h1>
+<p>[% ch.size %] nodes (took [% time_elapsed %] seconds to retrieve)</p>
 <table id="ch" class="sortable resizable" style="table-layout:fixed">
 <thead><tr>
-	<th id="chapters.chapter">Ch.</th>
+	<th id="chapters.semkey">Ch.</th>
 	<th id="chapters.chaptertitle">Title</th>
-	[%- IF c.has_privs(1) %]<th>etyma</th>[% END %]
-	<th id="wcount">forms<br/>assigned</td>
-	<th id="words">words</td>
-	<th id="chapters.id">id</td>
+[%- IF c.has_privs(1) %]
+	<th id="etyma">etyma</th>
+	<th id="wcount">forms</th>
+[%- END %]
+	<th id="num_glosswords">#</th>
+	<th id="some_glosswords">list of words</th>
+	<th id="chapters.id">id</th>
 </tr></thead>
 <tbody>
 [% FOREACH r IN ch -%]
 <tr><td>[% r.0 %]</td><td>[% r.1 %]</td>
 [%- IF c.has_privs(1) %]<td>[% IF r.3 %]<a target="centerstage" href="[% self_url %]/edit/etyma?etyma.chapter=[% r.0 | uri %]">[% r.3 %][% END %]</td>[% END -%]
-[%- IF c.has_privs(1) %]<td>[% IF r.12 %]<a target="centerstage" href="[% self_url %]/edit/lexicon?lexicon.semkey=[% r.0 | uri %]">[% r.12 %][% END %]</td>[% END -%]
+[%- IF c.has_privs(1) %]<td>[% IF r.13 %]<a target="centerstage" href="[% self_url %]/edit/lexicon?lexicon.semkey=[% r.0 | uri %]">[% r.13 %][% END %]</td>[% END -%]
 <td>[% r.11 %]</td>
+<td>[% r.12 %]</td>
 <td>[% r.10 %]</td>
 </tr>
 [% END -%]

@@ -1,15 +1,15 @@
 ﻿[% PROCESS header.tt title="STEDT Chapter Browser" -%]
 
 <h1>Chapters</h1>
-<p>[% ch.size %] nodes</p>
+<p>[% ch.size %] nodes (took [% time_elapsed %] seconds to retrieve)</p>
 <table id="ch" class="sortable resizable" style="table-layout:fixed">
 <thead><tr>
-	<th id="chapters.chapter">Ch.</th>
+	<th id="chapters.semkey">Ch.</th>
 	<th id="chapters.chaptertitle">Title</th>
 	<th>[% IF c.has_privs(1) %]public[% ELSE %]num. etyma[% END %]</th>
 	[%- IF c.has_privs(1) %]<th>etyma</th>[% END %]<th>notes</th><th>flowchart?</th>
 	<th>SemCat</th><th>Old Chapter</th><th>Old Subchapter</th>
-	<th id="chapters.id">id</td>
+	<th id="chapters.id">id</th>
 </tr></thead>
 <tbody>
 [% FOREACH r IN ch -%]

@@ -1,5 +1,3 @@
-var baseRef = location.pathname.substring(0,location.pathname.lastIndexOf(".pl") + 3) + '/';
-
 // function findPos(obj) { // based on http://www.quirksmode.org/js/findpos.html
 // 	var curleft = 0, curtop = 0;
 // 	if (obj.offsetParent) { // if the browser supports offsetParent
@@ -336,7 +334,7 @@ var setup = { // in the form setup.[tablename].[fieldname]
 			size: 70,
 			transform : function (v) {
 				if (stedtuserprivs & 1) {
-					return '<a href="' + baseRef + 'edit/chapters' + '?chapters.chapter=' + v + '" target="edit_chapters">' + v + '</a>';
+					return '<a href="' + baseRef + 'edit/chapters' + '?chapters.semkey=' + v + '" target="edit_chapters">' + v + '</a>';
 				}
 				else return v;
 			}

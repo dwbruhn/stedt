@@ -24,6 +24,9 @@
 <img id="spinner" src="[% self_base %]img/spinner.gif" style="display:none;">&nbsp;
 <a href="#" onclick="return vert_tog()"><img src="[% self_base %]img/toggle.png" alt="toggle" id="tog-img" border="0"></a>&nbsp;
 [% END -%]
+<script>
+var baseRef = '[% self_url %]/';
+</script>
 [% IF user -%]
 <script>
 var stedtuserprivs = [% c.param('userprivs') %];

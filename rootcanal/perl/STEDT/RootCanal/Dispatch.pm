@@ -22,7 +22,8 @@ sub dispatch_args {
 			':app/:rm'         => { },
 			':app'        	   => { },
 		],
-		error_document => '"Oops... Dispatcher gave HTTP Error #%s',
+		error_document => 'Opps... Dispatcher gave HTTP Error #%s',
+		# this error message ironically (and intentionally) misspelled
 	};
 }
 
