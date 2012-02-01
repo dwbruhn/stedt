@@ -38,10 +38,10 @@ sub widget : Runmode {
 	my $result;
 
 	if ($s || $lg || $lggrp || !$q->param) {
-#		if ($ENV{HTTP_REFERER} && ($s || $lg || $lggrp)) {
-#			$self->dbh->do("INSERT querylog VALUES (?,?,?,NOW())", undef,
-#				'smart', $lg ? "$s {$lg}" : $s, $ENV{REMOTE_ADDR});	# record search in query log (needs to be cleaned up someday)
-#		}
+		if ($ENV{HTTP_REFERER} && ($s || $lg || $lggrp)) {
+			$self->dbh->do("INSERT querylog VALUES (?,?,?,?,?,NOW())", undef,
+				'smart', $s, $lg, $lggrp, $ENV{REMOTE_ADDR});	# record search in query log (put table name, query, lg, lggroup, ip in separate fields)
+		}
 		$result->{etyma} = $self->searchresults_from_querystring($s, 'etyma');
 		$result->{morphemes} = $self->searchresults_from_querystring($s, 'morphemes', $lg, $lggrp);
 	} else {
@@ -226,7 +226,7 @@ sub combo : Runmode {
 	if ($s || $lg || $lggrp || !$q->param) {
 		if ($ENV{HTTP_REFERER} && ($s || $lg || $lggrp)) {
 			$self->dbh->do("INSERT querylog VALUES (?,?,?,?,?,NOW())", undef,
-				'simple', $s, $lg ? $lg : '', $lggrp ? $lggrp : '', $ENV{REMOTE_ADDR});	# record search in query log (put table name, query, lg, lggroup, ip in separate fields)
+				'simple', $s, $lg, $lggrp, $ENV{REMOTE_ADDR});	# record search in query log (put table name, query, lg, lggroup, ip in separate fields)
 		}
 		$result->{etyma} = $self->searchresults_from_querystring($s, 'etyma');
 		$result->{lexicon} = $self->searchresults_from_querystring($s, 'lexicon', $lg, $lggrp);
@@ -251,7 +251,7 @@ sub ajax : Runmode {
 	my $result; # hash ref for the results
 
 	$self->dbh->do("INSERT querylog VALUES (?,?,?,?,?,NOW())", undef,
-		$tbl, $s, $lg ? $lg : '', $lggrp ? $lggrp : '', $ENV{REMOTE_ADDR}) if $s || $lg || $lggrp;	# record search in query log (put table name, query, lg, lggroup, ip in separate fields)
+		$tbl, $s, $lg, $lggrp, $ENV{REMOTE_ADDR}) if $s || $lg || $lggrp;	# record search in query log (put table name, query, lg, lggroup, ip in separate fields)
 
 	if (defined($s)) {
 		if ($tbl eq 'lexicon' || $tbl eq 'etyma') {
