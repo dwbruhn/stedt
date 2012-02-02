@@ -132,6 +132,9 @@ sub detail : Runmode {
 	my $self = shift;
 	$self->require_privs(1);
 
+# This query seems to work with the new changelog setup:
+# SELECT YEAR(time),MONTH(time),MONTHNAME(time),username,COUNT(*) FROM changelog LEFT JOIN users ON (changelog.owner_uid=users.uid) WHERE change_type='approval' GROUP BY 1,2,4 ORDER BY 4,1 DESC, 2 DESC
+
 	# pull out "past work" from changelog and count what was done in the past, add these counts into table. Credit where credit is due!
 	my $a = $self->dbh->selectall_arrayref("SELECT time,time,oldval,newval FROM changelog WHERE col = '=accept'
                    ORDER BY time DESC");
