@@ -448,8 +448,8 @@ sub accept : Runmode {
 	# update the etyma record
 	$self->dbh->do("UPDATE etyma SET uid=8 WHERE tag=?", undef, $tag);
 	my ($old_uid) = $self->dbh->selectrow_array("SELECT uid FROM etyma WHERE tag=$tag");
-	$self->dbh->do("INSERT changelog VALUES (?,?,?,?,?,?,NOW())", undef,
-			   $self->param('uid'), 'etyma', 'uid', $tag, $old_uid, 8) unless $old_uid == 8;
+	$self->dbh->do("INSERT changelog (uid, `table`, id, col, oldval, newval, owner_uid, time) VALUES (?,?,?,?,?,?,NOW())", undef,
+			   $self->param('uid'), 'etyma', $tag, 'uid', $old_uid, 8) unless $old_uid == 8;
 
 	# GROUP_CONCAT has an upper limit (default 1024 bytes) which can be increased to the server max.
 	# Since we are expecting a long list here, and since the value of the
@@ -457,15 +457,28 @@ sub accept : Runmode {
 	my (undef, $max_len) = $self->dbh->selectrow_array("SHOW VARIABLES WHERE Variable_name='max_allowed_packet'");
 	die "oops couldn't get max_allowed_packet from mysql" unless $max_len;
 	$self->dbh->do("SET SESSION group_concat_max_len = $max_len");
+
+	# We assume that the list of rn's will not be longer than the server max.
+	# In the unfortunate event that this happens, the last rn in the list
+	# may be truncated and thus refer to an unrelated root; this rn's tags
+	# will get deleted (see DELETE below). Meanwhile, there will be a bunch
+	# of rn's whose tags still need approving.
+	# It is unlikely that this will happen, but the reader should be aware
+	# that the reason we did this is because putting a SELECT inside the
+	# IN (...) was prohibitively slow.
+	# The alternative is to move the DELETE and UPDATE lines inside the loop
+	# and do them for each iteration. This may not be much a performance hit
+	# and is guaranteed to not fail.
 	my ($rns) = $self->dbh->selectrow_array("SELECT GROUP_CONCAT(DISTINCT rn) FROM lx_et_hash WHERE uid=? AND tag=?", undef, $uid, $tag);
 	if ($rns) {
 		# figure out changes for the changelog
+		# you have to do a LEFT JOIN for the stedt tags in case it's empty
 		my $changed_recs = $self->dbh->selectall_arrayref(<<END);
 SELECT lexicon.rn,
 	(SELECT GROUP_CONCAT(tag_str ORDER BY ind) FROM lx_et_hash WHERE rn=lexicon.rn AND uid=8) AS analysis,
 	(SELECT GROUP_CONCAT(tag_str ORDER BY ind) FROM lx_et_hash WHERE rn=lexicon.rn AND uid=$uid) AS user_an
 FROM lexicon
-	JOIN lx_et_hash AS leh1 ON (lexicon.rn=leh1.rn AND leh1.uid=8)
+	LEFT JOIN lx_et_hash AS leh1 ON (lexicon.rn=leh1.rn AND leh1.uid=8)
 	JOIN lx_et_hash AS leh2 ON (lexicon.rn=leh2.rn AND leh2.uid=$uid)
 WHERE leh2.tag=$tag
 GROUP BY lexicon.rn
@@ -476,14 +489,10 @@ END
 		# add these changes to the changelog
 		foreach (@$changed_recs) {
 			my ($rn, $old, $new) = @$_;
-			$self->dbh->do("INSERT changelog VALUES (?,?,?,?,?,?,NOW())", undef,
-					   $self->param('uid'), 'lexicon', 'analysis', $rn, $old, $new) unless $old eq $new;
+			$old ||= ''; # in case NULL
+			$self->dbh->do("INSERT changelog (uid, change_type, accepted_tag, `table`, id, col, oldval, newval, owner_uid, time) VALUES (?,?,?,?,?,?,?,?,?,NOW())", undef,
+					   $self->param('uid'), 'approval', $tag, 'lexicon', $rn, 'analysis', $old, $new, $uid) unless $old eq $new;
 		}
-		my ($username) = $self->dbh->selectrow_array("SELECT username FROM users WHERE uid=?", undef, $uid);
-		my $oldvals = "uid=$uid ($username)";
-		$rns =~ s/,/, /g;
-		$self->dbh->do("INSERT changelog VALUES (?,?,?,?,?,?,NOW())", undef,
-			       $self->param('uid'), 'lx_et_hash', '=accept', "tag=$tag", $oldvals, $rns);
 	}
 	return $self->redirect($q->url(-absolute=>1) . "/etymon/$tag/$uid");
 }

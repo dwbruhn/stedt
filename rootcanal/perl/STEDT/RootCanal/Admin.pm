@@ -18,7 +18,10 @@ sub changes : Runmode {
 	my $self = shift;
 	$self->require_privs(1);
 
-	my $a = $self->dbh->selectall_arrayref("SELECT username,`table`,col,id,oldval,newval,time FROM changelog LEFT JOIN users USING (uid) ORDER BY time DESC LIMIT 500");
+	my $a = $self->dbh->selectall_arrayref("SELECT users.username,change_type,accepted_tag,`table`,id,col,oldval,newval,
+		owners.username,time FROM changelog LEFT JOIN users USING (uid)
+		LEFT JOIN users AS owners ON (owner_uid=owners.uid)
+		ORDER BY time DESC LIMIT 500");
 	return $self->tt_process("admin/changelog.tt", {changes=>$a});
 }
 
@@ -114,14 +117,8 @@ sub progress : Runmode {
 		WHERE users.uid !=8 AND tag != 0 GROUP BY uid,tag ORDER BY uid, num_recs DESC");
 	
 	# pull out "past work" from changelog and count what was done in the past, add these counts into table. Credit where credit is due!
-	my $x = $self->dbh->selectall_arrayref("SELECT oldval,newval FROM changelog WHERE col = '=accept';");
-	my %c ;
-	foreach my $row (@$x) {
-	  (my $tagger) = $row->[0] =~ m/^uid=(\d+)/;
-	  my $rns = $row->[1];
-	  my $count = scalar split(',',$rns);
-	  $c{$tagger} += $count;
-	}
+	my %c = @{$self->dbh->selectcol_arrayref("SELECT owner_uid, COUNT(*) FROM changelog WHERE change_type='approval' GROUP BY owner_uid",
+		{Columns=>[1,2]})};
 	foreach my $row (@$a){
 	  my $uid = $row->[1];
 	  push @$row, $c{$uid} || 0, @$row[3] + $c{$uid};

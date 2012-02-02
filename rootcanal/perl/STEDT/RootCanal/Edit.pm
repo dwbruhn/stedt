@@ -106,8 +106,9 @@ sub add : Runmode {
 		$self->header_add(-status => 400);
 		return $err;
 	}
-	$self->dbh->do("INSERT changelog VALUES (?,?,?,?,?,?,NOW())", undef,
-		       $self->param('uid'), $tblname, '+added', $id, '', '');
+	$self->dbh->do("INSERT changelog (uid, change_type, `table`, id, time)
+					VALUES (?,?,?,?,NOW())", undef,
+		       $self->param('uid'), 'new_rec', $tblname, $id);
 	
 	# now retrieve it and send back some html
 	$id =~ s/"/\\"/g;
@@ -181,9 +182,10 @@ sub update : Runmode {
 	# and set them in their own statements.
 	
 	# we test to see which field is being updated, and set $fake_uid accordingly.
-	# note that users with sufficient privileges can change other users' and even stedt's tagging
+	# note that users with sufficient privileges can change other users' (and even stedt's) tagging
 	# in which case the changelog reflects the actual user as the changer and records
-	# the 'pilfered' tags as "other_an:N" where N is the uid of the original tagger.
+	# the 'pilfered' tags by storing the uid of the original tagger under owner_uid
+	# and recording the field as "user_an" (or "analysis" if changing the stedt tags).
 	my ($tblname, $field, $id, $value) = ($q->param('tbl'), $q->param('field'),
 		$q->param('id'), decode_utf8($q->param('value')));
 	my $uid2 = $q->param('uid2');
@@ -218,11 +220,14 @@ sub update : Runmode {
 		$t->save_value($field, $value, $id);
 		$value = $t->get_value($field, $id); # fetch the new value in case it's not quite the same
 		if ($fake_uid) {
-			$field = $fake_uid == 8 ? 'analysis' : "other_an:$fake_uid";
+			$field = $fake_uid == 8 ? 'analysis' : "user_an";
 		}
 		if ($oldval ne $value) {
-			$self->dbh->do("INSERT changelog VALUES (?,?,?,?,?,?,NOW())", undef,
-				$self->param('uid'), $tblname, $field =~ /([^.]+)$/, $id, $oldval || '', $value || ''); # $oldval might be undefined (and interpreted as NULL by mysql)
+			$self->dbh->do("INSERT changelog (uid, `table`, id, col, oldval, newval, owner_uid, time)
+							VALUES (?,?,?,?,?,?,?,NOW())", undef,
+				$self->param('uid'), $tblname, $id, $field =~ /([^.]+)$/,
+				$oldval || '', $value || '',  # $oldval might be undefined (and interpreted as NULL by mysql)
+				$fake_uid || 0);
 		}
 		return $value;
 	} else {
@@ -272,8 +277,8 @@ sub single_record : Runmode {
 		$self->dbh->do("UPDATE $tbl SET $update_str WHERE `" . $key . "`=?", undef, @updated{@keys}, $id);
 		# update successful! now update the "changes" table
 		for my $col (@keys) {
-			$self->dbh->do("INSERT changelog VALUES (?,?,?,?,?,?,NOW())", undef,
-				$self->param('uid'), $tbl, $col, $id, $result->[$colname2num{$col}], $updated{$col});
+			$self->dbh->do("INSERT changelog (uid, `table`, id, col, oldval, newval, time) VALUES (?,?,?,?,?,?,NOW())", undef,
+				$self->param('uid'), $tbl, $id, $col, $result->[$colname2num{$col}], $updated{$col});
 		}
 		$sth->execute($id);
 		$result = $sth->fetchrow_arrayref;

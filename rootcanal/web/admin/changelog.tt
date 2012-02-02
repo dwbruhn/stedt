@@ -3,19 +3,25 @@
 
 <table class="sortable resizable" width="100%" style="table-layout:fixed">
 <col style="width:6em">
-<col style="width:8em">
+<col style="width:4em">
+<col style="width:3em">
 <col style="width:6em">
+<col style="width:5em">
 <col style="width:7em">
 <col style="width:auto">
 <col style="width:auto">
+<col style="width:6em">
 <col style="width:10em">
 <tr>
 	<th>username</th>
+	<th>type</th>
+	<th>#</th>
 	<th>table</th>
-	<th>field</th>
 	<th>id</th>
+	<th>field</th>
 	<th>old value</th>
 	<th>new value</th>
+	<th>owner</th>
 	<th>time</th>
 </tr>
 [% FOREACH row IN changes -%]
