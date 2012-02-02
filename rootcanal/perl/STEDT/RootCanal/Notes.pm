@@ -53,7 +53,7 @@ GROUP_CONCAT(DISTINCT glosswords.word SEPARATOR ', ') AS some_glosswords,
 	# chapters that appear in etyma but not in chapters table
 	my $e_ghost_chaps = $self->dbh->selectall_arrayref(<<SQL);
 SELECT etyma.chapter, SUM(etyma.public), COUNT(*)
-FROM etyma NATURAL LEFT JOIN chapters
+FROM etyma LEFT JOIN chapters ON (etyma.chapter=chapters.semkey)
 WHERE chapter != ''  $public $blessed AND chapters.chaptertitle IS NULL GROUP BY 1 ORDER BY 1
 SQL
 	# chapters that appear in notes but not in chapters table
