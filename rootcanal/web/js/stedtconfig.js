@@ -510,7 +510,7 @@ var setup = { // in the form setup.[tablename].[fieldname]
 						} else {
 							// otherwise mark this syllable as a conflict
 							syl_class += ' t_' + t2[i] + ' approve-conflict';
-							link_tag = stedttagger ? t2[i] : t2[i];
+							link_tag = parseInt(t2[i],10) || tags[i];	// make sure syllable gets a link even if user tag is non-number (such as 'm')
 						}
 					} else if (tags[i]) { // if only one or the other of the columns is defined, then simply mark it as such.
 						syl_class = 't_' + tags[i] + ' r' + tags[i];
