@@ -32,6 +32,11 @@ SQL
 	# this query is extremely slow in "tweak mode" (i.e. when the glosswords for each VFC are looked up)
 	# the hack below 'reverts' the query to its faster version.
 	if ($tweak eq 'tweak') {
+	  # allow long GROUP_CONCAT's.
+	  # see comment below under &accept.
+	  my (undef, $max_len) = $self->dbh->selectrow_array("SHOW VARIABLES WHERE Variable_name='max_allowed_packet'");
+	  die "oops couldn't get max_allowed_packet from mysql" unless $max_len;
+	  $self->dbh->do("SET SESSION group_concat_max_len = $max_len");
 	  my $clause = ",
 COUNT(DISTINCT glosswords.word),
 GROUP_CONCAT(DISTINCT glosswords.word SEPARATOR ', ') AS some_glosswords,
