@@ -21,6 +21,7 @@ $t->fields('etyma.tag',
 	'etyma.semkey',
 	'etyma.notes', 'etyma.hptbid',
 	'(SELECT COUNT(*) FROM notes WHERE tag=etyma.tag) AS num_notes',
+	'(SELECT COUNT(*) FROM notes WHERE tag=etyma.tag AND notetype="F") AS num_comparanda',
 	'etyma.xrefs',
 	'etyma.allofams' ,
 	'etyma.possallo' ,
@@ -47,6 +48,7 @@ $t->field_visible_privs(
 $t->searchable('etyma.tag',
 	'num_recs',
 	'etyma.chapter',
+	'etyma.sequence',
 	'etyma.protoform', 'etyma.protogloss',
 	'etyma.plg', 'etyma.notes',
 	'etyma.semkey',
@@ -93,6 +95,17 @@ $t->wheres(
 	'etyma.plg'	=> sub {my ($k,$v) = @_; $v = '' if $v eq '0'; "$k LIKE '$v'"},
 	'etyma.chapter' => sub { my ($k,$v) = @_; $v eq '0' ? "$k=''" : "$k LIKE '$v'" },
 	'etyma.protogloss'	=> 'word',
+	'etyma.sequence'  => sub {
+		my ($k,$v) = @_;
+		if ($v =~ /^(\d+)([a-i])?$/) {
+			my ($num, $letter) = ($1, $2);
+			if ($letter) {
+				return "$k = $num." . (ord($letter) - ord('a') + 1);
+			}
+			return "FLOOR($k) = $num";
+		}
+		return "$k > 0";
+	},
 	'etyma.semkey' => 'value',
 	'etyma.hptbid' => sub {
 		my ($k,$v) = @_;

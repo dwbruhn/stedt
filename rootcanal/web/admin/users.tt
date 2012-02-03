@@ -23,10 +23,10 @@
 <td>[% row.0 %]</td>
 <td>[% uid %]</td>
 <td>[% row.2 %]</td>
-<td><input name="priv2_[% uid %]" type="checkbox"[% row.3 ? ' checked' : '' %]></td>
-<td><input name="priv1_[% uid %]" type="checkbox"[% row.4 ? ' checked' : '' %]></td>
-<td><input name="priv8_[% uid %]" type="checkbox"[% row.5 ? ' checked' : '' %]></td>
-<td><input name="priv16_[% uid %]" type="checkbox"[% row.6 ? ' checked' : '' %]></td>
+<td><input name="priv2_[% uid %]" type="checkbox"[% row.3 ? ' checked disabled' : '' %][% row.3 || !c.has_privs(16) ? ' disabled' : '' %]></td>
+<td><input name="priv1_[% uid %]" type="checkbox"[% row.4 ? ' checked' : '' %][% c.has_privs(16) ? '' : ' disabled' %]></td>
+<td><input name="priv8_[% uid %]" type="checkbox"[% row.5 ? ' checked' : '' %][% c.has_privs(16) ? '' : ' disabled' %]></td>
+<td><input name="priv16_[% uid %]" type="checkbox"[% row.6 ? ' checked' : '' %][% c.has_privs(16) ? '' : ' disabled' %]></td>
 [% IF c.has_privs(16) -%]
 <td><input name="password_[% uid %]" type="text" size="31" maxlength="63"></td>
 [% END -%]
@@ -54,14 +54,55 @@ Otherwise the whole row will be ignored.</p>
 </table>
 [% END -%]
 
-<h3>Privileges cheat sheet</h3>
+<h2>Privileges cheat sheet</h2>
 
-<dl>
-<dt>2</dt><dd>all users should have priv 2 'user' set to true</dd>
-<dt>1</dt><dd>can tag forms</dd>
-<dt>8</dt><dd>approve tags, edit others' tags</dd>
-<dt>16</dt><dd>mere mortals cannot understand this privilege level</dd>
-</dl>
+<h3>2 - registered</h3>
+<ul>
+	<li>all users should have priv 2 'user' set to true</li>
+</ul>
+
+<h3>1 - tagger</h3>
+<ul>
+	<li>see list of users</li>
+	<li>see admin page</li>
+	<li>see changelog</li>
+	<li>see querylog</li>
+	<li>see deviant glosses</li>
+	<li>see progress/detail pages</li>
+	<li>update projects</li>
+	<li>see non-"public" etyma</li>
+	<li>see/use the edit/&lt;TABLE&gt; interface</li>
+	<li>add new etyma</li>
+	<li>add, modify, and delete your own notes</li>
+	<li>see internal notes</li>
+	<li>add/delete delimiters to lexicon.reflex</li>
+	<li>see other people's tags</li>
+</ul>
+
+<h3>8 - authorizer</h3>
+<ul>
+	<li>edit other people's tags</li>
+	<li>approve tags</li>
+	<li>modify and delete any notes</li>
+	<li>reorder notes</li>
+	<li>run the sequencer (on etyma in a "chapter")</li>
+	<li>edit "chapters" table</li>
+</ul>
+
+<h3>16 - superuser</h3>
+<ul>
+	<li>modify users</li>
+	<li>expire sessions</li>
+	<li>list "public" etyma</li>
+	<li>add new records to any table</li>
+	<li>use "single record" mode</li>
+	<li>arbitrarily modify lexicon.reflex</li>
+	<li>edit source notes</li>
+	<li>[disabled/unimplemented: show "advanced search"]</li>
+</ul>
+
+<p>See also <tt>field_visible_privs</tt>, <tt>field_editable_privs</tt> in the Table.pm subclasses
+and <tt>stedtuserprivs<tt> in the javascripts.</p>
 
 </body>
 </html>

@@ -87,7 +87,7 @@ sub chapter : RunMode {
 	my $self = shift;
 	my $tag = $self->param('tag');
 	my $chap = $self->param('chap');
-	my $title = $self->dbh->selectrow_array("SELECT chaptertitle FROM chapters WHERE chapter=?", undef, $chap);
+	my $title = $self->dbh->selectrow_array("SELECT chaptertitle FROM chapters WHERE semkey=?", undef, $chap);
 	$title ||= '[chapter does not exist in chapters table!]';
 	
 	my $INTERNAL_NOTES = $self->has_privs(1);
@@ -108,6 +108,7 @@ sub chapter : RunMode {
 	my $t = $self->load_table_module('etyma');
 	my $q = $self->query->new('');
 	$q->param('etyma.chapter'=>$chap);
+	$q->param('etyma.sequence'=>'>0'); # hide non-sequenced items from the chapter view
 	$q->param('etyma.public'=>1) unless $self->has_privs(1);
 	my $result = $t->search($q);
 	

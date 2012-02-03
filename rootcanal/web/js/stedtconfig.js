@@ -377,7 +377,16 @@ var setup = { // in the form setup.[tablename].[fieldname]
 			label: 'notes',
 			noedit: true,
 			hide: !(stedtuserprivs & 1),
-			size: 70
+			size: 70,
+			transform: function (v,k,rec,n) {
+				if (rec[n+1] === '0') return v;
+				return v + ' (' + rec[n+1] + ' Ch.)';
+			}
+		},
+		'num_comparanda' : {
+			label: 'comparanda',
+			noedit: true,
+			hide: true
 		},
 		'etyma.xrefs' : {
 			label: 'xrefs',
