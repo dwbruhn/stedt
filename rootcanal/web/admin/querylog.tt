@@ -7,6 +7,7 @@
 	<th>query</th>
 	<th>language</th>
 	<th>language group</th>
+	<th>results</th>
 	<th>ip</th>
 	<th>time</th>
 </tr>
@@ -14,8 +15,9 @@
 <tr>
 <td>[% row.0 %]</td>
 <td>[% row.1 | html %]</td>
-<td>[% row.2 %]</td>
+<td>[% row.2 | html %]</td>
 <td>[% row.3 %]</td>
+<td><a href="[% self_url %]/gnis?t=[% row.1 %]&lg=[% row.2 %]&lggrp=[% row.3 %]" target="stedt_sss">(results)</td>
 <td><a href="http://whatismyipaddress.com/ip/[% row.4 | url %]" target="stedt_iptrace">[% row.4 %]</a></td>
 <td>[% row.5 %]</td>
 </tr>
