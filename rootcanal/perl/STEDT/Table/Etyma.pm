@@ -100,11 +100,11 @@ $t->wheres(
 		if ($v =~ /^(\d+)([a-i])?$/) {
 			my ($num, $letter) = ($1, $2);
 			if ($letter) {
-				return "$k = $num." . (ord($letter) - ord('a') + 1);
+				return "super.sequence = $num." . (ord($letter) - ord('a') + 1);
 			}
-			return "FLOOR($k) = $num";
+			return "FLOOR(super.sequence) = $num";
 		}
-		return "$k > 0";
+		return "super.sequence > 0";
 	},
 	'etyma.semkey' => 'value',
 	'etyma.hptbid' => sub {
