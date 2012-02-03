@@ -27,7 +27,7 @@ undef $/; # 'slurp' mode to read in a whole file
 open F, "<$in" or die $!;
 open G, "<$out" or die $!;
 if ($google_compiler) {
-	print STDERR "analyzing $out... ";
+	print STDERR "analyzing $in... ";
 }
 my $minified = $google_compiler
 	? `java -jar $ENV{HOME}/lib/bin/compiler.jar --js $in`
