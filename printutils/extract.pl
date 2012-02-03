@@ -91,7 +91,7 @@ my ($date, $shortdate);
 }
 
 print STDERR "generating chapter $chap...\n";
-my $title = $dbh->selectrow_array(qq#SELECT chaptertitle FROM `chapters` WHERE `chapter` = '$vol.$fasc.$chap'#);
+my $title = $dbh->selectrow_array(qq#SELECT chaptertitle FROM `chapters` WHERE `semkey` = '$vol.$fasc.$chap'#);
 my $flowchartids = $dbh->selectcol_arrayref("SELECT noteid FROM notes WHERE spec='C' AND id='$vol.$fasc.$chap' AND notetype='G'");
 print STDERR "title is '$title'...\n";
 my $chapter_notes = [map {xml2tex(decode_utf8($_))} @{$dbh->selectcol_arrayref(

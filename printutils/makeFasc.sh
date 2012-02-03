@@ -25,9 +25,9 @@ perl extract.pl $1 $2 $3 $4
 cd tex/
 texfile=`ls $1-$2-$3.tex` 
 # TeX it!     
-xelatex $texfile > /dev/null
-xelatex $texfile > /dev/null
-xelatex $texfile > /dev/null
+xelatex $texfile # > /dev/null
+xelatex $texfile # > /dev/null
+xelatex $texfile # > /dev/null
 pdffile=`ls $1-$2-$3.pdf`
 pdffile=${pdffile%.*}
 DATETIME=`date '+%Y%m%d'`

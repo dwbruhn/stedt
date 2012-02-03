@@ -25,14 +25,14 @@ my $cgi = new CGI;
 
 sub get_toc {
 
-my $sql = "select * from chapters order by chapter;";
+my $sql = "select semkey,chaptertitle from chapters order by v,f,c,s1,s2,s3";
 my $sth = $dbh->prepare($sql);
 
 $sth->execute();
 
-my ($Chapter,$ChapterTitle,$ChapterAbbr);
+my ($Chapter,$ChapterTitle);
 
-$sth->bind_columns(\$Chapter,\$ChapterTitle,\$ChapterAbbr);
+$sth->bind_columns(\$Chapter,\$ChapterTitle);
 
 # get the files in the dissemination directory, hash the filenames on "chapter" key.
 $dissemDir = "/home/stedt/public_html/dissemination";

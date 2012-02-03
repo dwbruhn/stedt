@@ -116,7 +116,7 @@ sub xml2tex { # for the notes
 	s|^<par>||;
 	s|</par>$||;
 	s|</par><par>|\n\n|g;
-	s|<br />|\\\\\n|g;
+	s|<br />|\\\\{}\n|g;
 	s|<sup>(.*?)</sup>|\$^\\mathrm{$1}\$|g;
 	s|<sub>(.*?)</sub>|\$_\\mathrm{$1}\$|g;
 	s|<emph>(.*?)</emph>|\\textit{$1}|g;
