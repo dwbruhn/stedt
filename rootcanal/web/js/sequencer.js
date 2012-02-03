@@ -77,7 +77,8 @@ handle_etymon_move: function (c) {
 		etymon = c.down('.etymon');
 
 		// create a new allofam div
-		a = $('all_tags').firstDescendant().clone(true);
+		// $('all_tags').firstDescendant().clone(true); doesn't work when there are initially no sequenced etyma
+		a = new Element('div', {'class':'allofam'}).insert('<div class="tag-handle">(<span class="seq-num"></span>)</div><div class="etymon-container"></div><div class="uncontainer"></div>');
 		a.id = 'fam_' + (++last_fam_seq);
 		a.down('.uncontainer').id = 'deallofam_' + last_fam_seq;
 		a.down('.uncontainer').update(); // clear this out since it might still have a copy of the moved item
