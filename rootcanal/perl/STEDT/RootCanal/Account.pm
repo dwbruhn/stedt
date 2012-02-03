@@ -323,7 +323,7 @@ sub update_all : Runmode {
 		}
 	}
 	
-	return $self->redirect($q->url(-absolute=>1) . "/users");
+	return $self->redirect($q->url(-absolute=>1) . "/account/users");
 }
 
 

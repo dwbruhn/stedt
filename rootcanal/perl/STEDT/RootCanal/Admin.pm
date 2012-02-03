@@ -121,7 +121,8 @@ sub progress : Runmode {
 		{Columns=>[1,2]})};
 	foreach my $row (@$a){
 	  my $uid = $row->[1];
-	  push @$row, $c{$uid} || 0, @$row[3] + $c{$uid};
+	  $c{$uid} ||= 0;
+	  push @$row, $c{$uid}, @$row[3] + $c{$uid};
 	  # add two columns: number of accepted taggings,
 	  # and the total of the last two columns (reflexes + accepted)
 	}
@@ -144,7 +145,7 @@ sub detail : Runmode {
 	  (my $uid) = $row->[2] =~ m/^uid=(\d+)/;
 	  my $username = $self->dbh->selectrow_array("SELECT username FROM users WHERE uid=$uid");
 	  my $rns = $row->[3];
-	  my $count = scalar split(',',$rns);
+	  my $count = $rns =~ tr/,// + 1;
 	  my $yyyymm = substr(@$row[0],0,7);
 	  $c{$yyyymm}{$username} += $count;
 	  $u{$username} += $count;

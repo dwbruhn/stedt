@@ -14,8 +14,12 @@ sub table : StartRunmode {
 	# these will be passed in to the select for the analysis and user_an columns
 	# just in case bad values get passed in, we convert it to a number (by adding 0)
 	# and then switch to default values when 0 (or not a number, which yields 0 when you add 0)
-	my $uid1 = $q->param('uid1')+0 || 8;
-	my $uid2 = $q->param('uid2')+0 || $self->param('uid');
+	my ($uid1, $uid2);
+	{
+		no warnings 'uninitialized';
+		$uid1 = $q->param('uid1')+0 || 8;
+		$uid2 = $q->param('uid2')+0 || $self->param('uid');
+	}
 	my $t = $self->load_table_module($tbl,$uid2,$uid1);
 	$q->param($_, decode_utf8($q->param($_))) foreach $q->param; # the template will expect these all to be utf8, so convert them here
 	
