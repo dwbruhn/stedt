@@ -265,23 +265,36 @@ var setup = { // in the form setup.[tablename].[fieldname]
 				e.stop();
 			});
 			// put in a special sort function for all columns of the table
+			// this makes etyma sort by the superroot's value for a given column
 			var t = TableKit.tables['etyma_resulttable'];
 			t.customSortFn = function (rows, index, tkstdt) {
 				var sindex = t.raw.cols['etyma.supertag'];
-				var pindex = t.raw.cols['etyma.plgord'];
+				var chapindex = t.raw.cols['etyma.chapter'];
+				var seqindex = t.raw.cols['etyma.sequence'];
+				var pindex = t.raw.cols['etyma.is_mesoroot']; // t.raw.cols['etyma.plgord'];
 				rows.sort(function (a,b) {
-					var asid = t.raw.data[a.id][sindex];
-					var bsid = t.raw.data[b.id][sindex];
+					var a_id = a.id.substring(3); // strip off the "et_" part of the tr's id.
+					var b_id = b.id.substring(3);
+					var asid = t.raw.data[a_id][sindex];
+					var bsid = t.raw.data[b_id][sindex];
 					var super_a_val = t.raw.data[asid][index];
 					var super_b_val = t.raw.data[bsid][index];
 					// sort by superroot's values
 					var result = tkstdt.compare(super_a_val, super_b_val);
 					if (result === 0) {
-						// fall back to the supertag
-						result = t.raw.data[a.id][sindex] - t.raw.data[b.id][sindex];
+						// fall back to super's chapter
+						result = t.raw.data[asid][chapindex] - t.raw.data[bsid][chapindex];
 						if (result === 0) {
-							// fall back to plgord
-							result = t.raw.data[a.id][pindex] - t.raw.data[b.id][pindex];
+							// fall back to super's sequence
+							result = t.raw.data[asid][seqindex] - t.raw.data[bsid][seqindex];
+							if (result === 0) {
+								// fall back to the supertag
+								result = t.raw.data[a_id][sindex] - t.raw.data[b_id][sindex];
+								if (result === 0) {
+									// fall back to plgord
+									result = t.raw.data[a_id][pindex] - t.raw.data[b_id][pindex];
+								}
+							}
 						}
 					}
 					return result;
@@ -293,8 +306,10 @@ var setup = { // in the form setup.[tablename].[fieldname]
 			vert_show: true,
 			noedit: true,
 			size: 40,
-			transform: function (v) {
-				var link = '<a href="' + baseRef + 'etymon/' + v + '#' + v
+			transform: function (v,key,rec,n) {
+				// rec[n+1] is the supertag
+				// having #TAG automatically jumps to the mesoroot
+				var link = '<a href="' + baseRef + 'etymon/' + rec[n+1] + (rec[n+1] === v ? '' : '#' + v)
 						+ '" target="stedt_etymon">' + (stedtuserprivs ? '' : '#') + v + '</a>';
 				return '<span id="tag' + v + '" class="tagid">'
 					+ (link || v) + '</span>';
@@ -358,6 +373,9 @@ var setup = { // in the form setup.[tablename].[fieldname]
 			label: 'plgord',
 			hide: true,
 			size: 40
+		},
+		'is_mesoroot' : {
+			hide: true
 		},
 		'etyma.notes' : {
 			label: 'tagging note',

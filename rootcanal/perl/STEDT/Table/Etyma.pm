@@ -7,7 +7,7 @@ my ($self, $dbh, $privs, $uid) = @_;
 my $t = $self->SUPER::new($dbh, 'etyma', 'etyma.tag', $privs); # dbh, table, key, privs
 
 $t->query_from(q|etyma JOIN `etyma` AS `super` ON etyma.supertag = super.tag LEFT JOIN `users` ON etyma.uid = users.uid|);
-$t->order_by('super.chapter, super.sequence, etyma.plgord');
+$t->order_by('super.chapter, super.sequence, is_mesoroot'); # etyma.plgord');
 $t->fields('etyma.tag',
 	'etyma.supertag',
 	'etyma.exemplary',
@@ -17,7 +17,7 @@ $t->fields('etyma.tag',
 	'etyma.chapter',
 	'etyma.sequence',
 	'etyma.protoform', 'etyma.protogloss',
-	'etyma.plg', 'etyma.plgord',
+	'etyma.plg', 'etyma.tag!=etyma.supertag AS is_mesoroot', # 'etyma.plgord',
 	'etyma.semkey',
 	'etyma.notes', 'etyma.hptbid',
 	'(SELECT COUNT(*) FROM notes WHERE tag=etyma.tag) AS num_notes',
@@ -159,11 +159,17 @@ $t->save_hooks(
 	'etyma.supertag' => sub {
 		my ($id, $value) = @_;
 		# make sure supertag is a valid value
-		unless ($dbh->selectrow_array("SELECT COUNT(*) FROM etyma WHERE tag=?", undef, $value)) {
+		my $chapter;
+		unless (defined($chapter = $dbh->selectrow_array("SELECT chapter FROM etyma WHERE tag=?", undef, $value))) {
 			$value = $id; # otherwise set supertag = tag
 		}
-		my $sth = $dbh->prepare(qq{UPDATE etyma SET supertag=? WHERE tag=?});
-		$sth->execute($value, $id);
+		# move to end if un-mesoing.
+		my $seq = 0;
+		if ($value == $id && $chapter) {
+			$seq = 1 + $dbh->selectrow_array('SELECT FLOOR(MAX(sequence)) FROM etyma WHERE chapter=?', undef, $chapter);
+		}
+		my $sth = $dbh->prepare(qq{UPDATE etyma SET supertag=?, chapter=?, sequence=? WHERE tag=?});
+		$sth->execute($value, $chapter, $seq, $id);
 		return 0;
 	},
 );
