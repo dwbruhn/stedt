@@ -72,7 +72,10 @@ sub table : StartRunmode {
 	my $footnote_index = 1;
 	if ($tbl eq 'lexicon') {
 		require STEDT::RootCanal::Notes;
-		STEDT::RootCanal::Notes::collect_lex_notes($self, $result->{data}, $self->has_privs(1), \@footnotes, \$footnote_index);
+		STEDT::RootCanal::Notes::collect_lex_notes($self,
+			# only collect notes for the records on this page
+			[@{$result->{data}}[($a-1)..($b-1)]], $self->has_privs(1),
+			\@footnotes, \$footnote_index);
 	}
 
 	#make a list of uids and users to be passed in to make the dropdowns for selecting sets of tags.
