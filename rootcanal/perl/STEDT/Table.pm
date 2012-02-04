@@ -261,20 +261,30 @@ sub query_where {
 		if ($self->{is_field}{$key} || $self->in_searchable($key)) {
 			my @restrictions;
 			# split by commas that are not preceded by a single backslash (allows searching for commas)
-			for my $value (split /(?<!(?<!\\)\\), */, $cgi->param($key)) {
-				next if $value eq ''; # might be numeric 0, so must check for empty string
-				$query_ok = 1;
+			foreach (split /(?<!(?<!\\)\\), */, $cgi->param($key)) {
+				next if $_ eq ''; # might be numeric 0, so must check for empty string
 
-				# prevent sql injection -- this is specific to mysql strings
-				# first remove the last of an odd number of backslashes before any single quote
-				# (or end of string), so the backslash can't escape a following char
-				$value =~ s/(?<!\\)((?:\\\\)*)\\('|$)/$1$2/g;
-				$value =~ s/'/''/g; # escape all single quotes
+				# inner loop for AND searches within a field
+				my @restrictions2;
+				for my $value (split /(?<!(?<!\\)\\) *\& */) {
+					next if $value eq '';
+					$query_ok = 1;
 
-				# get the WHERE phrase for this key, if specified
-				# otherwise, default to an int if it's a calculated field, a string (RLIKE) otherwise.
-				my $sub = $self->wheres($key) || ($self->in_calculated_fields($key) ? \&where_int : \&where_rlike);
-				push @restrictions, $sub->($key,$value);
+					# prevent sql injection -- this is specific to mysql strings
+					# first remove the last of an odd number of backslashes before any single quote
+					# (or end of string), so the backslash can't escape a following char
+					$value =~ s/(?<!\\)((?:\\\\)*)\\('|$)/$1$2/g;
+					$value =~ s/'/''/g; # escape all single quotes
+
+					# get the WHERE phrase for this key, if specified
+					# otherwise, default to an int if it's a calculated field, a string (RLIKE) otherwise.
+					my $sub = $self->wheres($key) || ($self->in_calculated_fields($key) ? \&where_int : \&where_rlike);
+					push @restrictions2, $sub->($key,$value);
+				}
+
+				my $rstring = join(" AND ", @restrictions2);
+				$rstring = "($rstring)" if @restrictions2 > 1;
+				push @restrictions, $rstring;
 			}
 			# calculated fields should be searched for using a HAVING clause,
 			# but make an exception for pseudo-fields - right now this means the former
