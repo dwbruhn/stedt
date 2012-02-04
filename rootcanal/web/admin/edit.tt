@@ -49,7 +49,7 @@ and <select id="uid2" name="uid2" onchange="document.location = '?' + Form.seria
 
 [% IF result.data.size -%]
 <form target="tableedit_print" method="post">
-[% result.data.size %] found. (WHERE [% result.debug %])
+[% result.data.size %] found. (WHERE [% result.debug %]; [% time_elapsed %]s.)
 [%- FOREACH col IN t.searchable -%]
 [%- IF c.query.param(col) %]<input name="[% col %]" type="hidden" value="[% c.query.param(col) %]">[% END -%]
 [%- END -%]
@@ -189,7 +189,7 @@ var add_record = function () { new Ajax.Request('[% self_url %]/add/[% t.table %
 		rawData[rowid] = rec;
 		TableKit.reload();
 		scrollEnd();
-		if (setup[tablename]._postprocess_each) setup[tablename]._postprocess_each($(row));
+		if (setup[tablename]._postprocess_onadd) setup[tablename]._postprocess_onadd($(row));
 		$$('.add_reset').each(function(i) {if (i.name !== 'lexicon.lgid') i.value = ''});
     },
     onFailure: function(transport){ alert('Error: ' + transport.responseText) }

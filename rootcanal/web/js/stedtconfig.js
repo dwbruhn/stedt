@@ -252,6 +252,11 @@ function type$less (e) { // yes, $ is allowed in variable names!
 var setup = { // in the form setup.[tablename].[fieldname]
 	etyma : {
 		_key: 'etyma.tag',   // maybe send it from the server?
+		_postprocess_onadd: function (row) {
+			make_draggable_id(row.down('span.tagid'));
+			console.log(row);
+			console.log(row.down('span.tagid'));
+		},
 		_postprocess: function (tbl) {
 			var z = make_draggable_id;
 			z.scrollElement = $('etyma') || window; // if we're not in the combo view, there's no etyma div; if we pass a nonexistent element to Draggable, prototype will crash (in firefox and possibly other browsers)

@@ -3,9 +3,11 @@ use strict;
 use base 'STEDT::RootCanal::Base';
 use Encode;
 use utf8;
+use Time::HiRes qw(time);
 
 sub table : StartRunmode {
 	my $self = shift;
+	my $t0 = time();
 	$self->require_privs(1);
 	my $tbl = $self->param('tbl');
 	my $message = $self->param('message') || '';
@@ -91,7 +93,7 @@ sub table : StartRunmode {
 	# pass to tt: searchable fields, results, addable fields, etc.
 	return $self->tt_process("admin/edit.tt", {
 		t=>$t,
-		result => $result,
+		result => $result, time_elapsed => sprintf("%0.3g", time()-$t0),
 		manual => $manual_paging, sortlinks => \%sortlinks, message => $message,
 		a => $a, b => $b, users => \@users, uid1 => $uid1, uid2 => $uid2, pagenum => $pagenum,
 		footnotes => (($tbl eq 'lexicon' && $self->has_privs(1)) ? \@footnotes : undef)

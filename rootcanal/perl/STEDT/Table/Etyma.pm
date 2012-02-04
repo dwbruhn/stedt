@@ -7,7 +7,7 @@ my ($self, $dbh, $privs, $uid) = @_;
 my $t = $self->SUPER::new($dbh, 'etyma', 'etyma.tag', $privs); # dbh, table, key, privs
 
 $t->query_from(q|etyma JOIN `etyma` AS `super` ON etyma.supertag = super.tag LEFT JOIN `users` ON etyma.uid = users.uid|);
-$t->order_by('super.chapter, super.sequence, is_mesoroot'); # etyma.plgord');
+$t->order_by('super.chapter, super.sequence, IF(super.sequence,0,super.tag), is_mesoroot'); # etyma.plgord');
 $t->fields('etyma.tag',
 	'etyma.supertag',
 	'etyma.exemplary',
