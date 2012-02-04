@@ -144,7 +144,7 @@ $('addnoteform').observe('submit', function (e) {
 				// number of text blocks in result.
 				$A(result).each(function (text) {
 					var n = ++footnote_counter;
-					var elem = new Element('p', {'class':'footnote fnote-' + id,
+					var elem = new Element('p', {'class':'footnote fnote-' + $F(container.childElements().last().down('form')['noteid']), // the noteid is the value of the form's input named 'noteid'
 						id:'foot' + n});
 					elem.innerHTML = '<a href="#toof' + n + '">^ ' + n + '.</a> '
 						+ text;
