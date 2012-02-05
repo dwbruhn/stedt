@@ -322,7 +322,10 @@ TableKit.Raw = {
 		$A(row.cells).each(function (cell, i) {
 			var fld = cell.id;
 			if (!config[fld]) {
-				config[fld] = { noedit:true };
+				config[fld] = { noedit:true, nostore:true };
+				// "unexpected" columns should not be editable or sortable,
+				// and we don't store copies of their contents in rawData (to save memory)
+				cell.addClassName('nosort');
 			}
 			if (config[fld].label) {
 				if (cell.down('a')) {
@@ -364,6 +367,7 @@ TableKit.Raw = {
 			// you must compile rawData first, since the transform functions
 			// might refer to cells after themselves!
 			for (j=0; j<m; ++j) {
+				if (config[fields[j]].nostore) continue;
 				data[j] = cells[j].innerHTML.unescapeHTML();
 				if (config[fields[j]].hide) cells[j].style.display = 'none';
 			}
@@ -411,7 +415,7 @@ TableKit.Raw = {
 		var rawDataCols = {}; // lookup table for column id -> index
 		tabledata.fields.each(function (fld, i) {
 			if (!config[fld]) {
-				config[fld] = { noedit:true };
+				config[fld] = { noedit:true, nosort:true };
 			}
 			var c = $(document.createElement('th'));
 			c.id = fld;

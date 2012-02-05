@@ -92,7 +92,7 @@ sub table : StartRunmode {
 
 	# pass to tt: searchable fields, results, addable fields, etc.
 	return $self->tt_process("admin/edit.tt", {
-		t=>$t,
+		t=>$t, key_index=>$t->index_of_key(),
 		result => $result, time_elapsed => sprintf("%0.3g", time()-$t0),
 		manual => $manual_paging, sortlinks => \%sortlinks, message => $message,
 		a => $a, b => $b, users => \@users, uid1 => $uid1, uid2 => $uid2, pagenum => $pagenum,

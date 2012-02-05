@@ -17,11 +17,22 @@ sub main : StartRunmode {
 sub changes : Runmode {
 	my $self = shift;
 	$self->require_privs(1);
-
-	my $a = $self->dbh->selectall_arrayref("SELECT users.username,change_type,accepted_tag,`table`,id,col,oldval,newval,
+	my ($tbl, $id) = ($self->query->param('t'), $self->query->param('id'));
+	my $where = '';
+	if ($tbl && $id) {
+		$where = "WHERE `table`=? AND id=?";
+	}
+	my $sth = $self->dbh->prepare("SELECT users.username,change_type,accepted_tag,`table`,id,col,oldval,newval,
 		owners.username,time FROM changelog LEFT JOIN users USING (uid)
 		LEFT JOIN users AS owners ON (owner_uid=owners.uid)
+		$where
 		ORDER BY time DESC LIMIT 500");
+	if ($tbl && $id) {
+		$sth->bind_param(1, $tbl);
+		$sth->bind_param(2, $id);
+	}
+	$sth->execute;
+	my $a = $sth->fetchall_arrayref;
 	return $self->tt_process("admin/changelog.tt", {changes=>$a});
 }
 

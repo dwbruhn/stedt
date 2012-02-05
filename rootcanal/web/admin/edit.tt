@@ -49,7 +49,7 @@ and <select id="uid2" name="uid2" onchange="document.location = '?' + Form.seria
 
 [% IF result.data.size -%]
 <form target="tableedit_print" method="post">
-[% result.data.size %] found. (WHERE [% result.debug %]; [% time_elapsed %]s.)
+[% result.data.size %] found. (WHERE [% result.debug %]; [% time_elapsed %]s[% IF c.has_privs(16) %]; js:<span id="time_elapsed_js"></span>s[% END %].)
 [%- FOREACH col IN t.searchable -%]
 [%- IF c.query.param(col) %]<input name="[% col %]" type="hidden" value="[% c.query.param(col) %]">[% END -%]
 [%- END -%]
@@ -85,6 +85,12 @@ No records found. (WHERE [% result.debug %])
 [%- END -%]
 </th>
 [%- END %]
+[% IF c.has_privs(1) -%]
+<th>HIST.</th>
+[% END -%]
+[% IF c.has_privs(16) -%]
+<th>EDIT</th>
+[% END -%]
 </tr></thead>
 <tbody>
 [% IF result.data.size -%]
@@ -93,6 +99,12 @@ No records found. (WHERE [% result.debug %])
 [%- FOREACH s IN row -%]
 <td>[% s | html %]</td>
 [%- END -%]
+[% IF c.has_privs(1) -%]
+<td><a href="[% self_url %]/admin/changes?t=[% t.table %]&id=[% row.$key_index %]"><img src="[% self_base %]img/clock.png" width="16" height="16"></a></td>
+[% END -%]
+[% IF c.has_privs(16) -%]
+<td><a href="[% self_url %]/edit/[% t.table %]/[% row.$key_index %]"><img src="[% self_base %]img/b_edit.png" width="16" height="16"></a></td>
+[% END -%]
 </tr>
 [% END # FOREACH row -%]
 [% END # IF -%]
@@ -161,6 +173,9 @@ var footnote_counter = [% footnotes.size %];
 var tablename = '[% t.table %]';
 TableKit.Raw.init(tablename + '_resulttable', tablename, setup[tablename], '[% self_url %]/update');
 TableKit.tables[tablename + '_resulttable'].editAjaxExtraParams += '&uid1=' + [% uid1 %] + '&uid2=' + [% uid2 %];
+[%- IF c.has_privs(16) %]
+$('time_elapsed_js').insert((Date.now()-rootcanal_t0)/1000);
+[%- END %]
 var scrollEnd = function() {
 	if (document.body.scrollHeight) { window.scrollTo(0, document.body.scrollHeight); 
 	} else if (screen.height) { window.scrollTo(0, screen.height); } // IE5 

@@ -74,6 +74,14 @@ sub new {
 	return bless $self, $class;
 }
 
+sub index_of_key {
+	my $self = shift;
+	my $i = 0;
+	foreach ($self->fields()) {
+		return $i if $_ eq $self->{key};
+	}
+}
+
 # the list of fields is *ordered*, and this order is used by other
 # subroutines (see e.g. AUTOLOAD).
 sub fields {

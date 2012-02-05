@@ -30,6 +30,9 @@ var baseRef = '[% self_url %]/';
 [% IF user -%]
 <script>
 var stedtuserprivs = [% c.param('userprivs') %];
+[% IF c.has_privs(16) -%]
+var rootcanal_t0 = Date.now();
+[% END -%]
 </script>
 logged in as <b>[% user %]</b>
 [%- IF c.has_privs(1) %]. &nbsp; <a href="[% self_url %]/admin">tools</a>&nbsp;[% END %]
