@@ -134,7 +134,7 @@ $t->field_editable_privs(
 $t->search_form_items(
 	'languagegroups.grp' => sub {
 		my $cgi = shift;
-		my $grps = $dbh->selectall_arrayref("SELECT grpno, CONCAT(grpno,' ',LEFT(grp,15),' (id:',grpid,')') FROM languagegroups");
+		my $grps = $dbh->selectall_arrayref("SELECT grpno, CONCAT(grpno,' ',LEFT(grp,15),' (id:',grpid,')') FROM languagegroups ORDER BY grpno");
 		my @grp_nos = map {$_->[0]} @$grps;
 		my %grp_labels;
 		@grp_labels{@grp_nos} = map {$_->[1]} @$grps;
