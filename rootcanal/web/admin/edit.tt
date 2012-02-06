@@ -1,4 +1,4 @@
-﻿[% PROCESS header.tt title="Edit " _ t.table _ " - STEDT Database" -%]
+[% PROCESS header.tt title="Edit " _ t.table _ " - STEDT Database" -%]
 <form id="search_form">
 <table class="[% t.table %]_edit_table" width="100%" style="table-layout:fixed;">
 <tr>
@@ -86,10 +86,10 @@ No records found. (WHERE [% result.debug %])
 </th>
 [%- END %]
 [% IF c.has_privs(1) -%]
-<th>HIST.</th>
+<th width="3%">HIST.</th>
 [% END -%]
 [% IF c.has_privs(16) -%]
-<th>EDIT</th>
+<th width="3%">EDIT</th>
 [% END -%]
 </tr></thead>
 <tbody>
