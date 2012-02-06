@@ -290,7 +290,10 @@ sub query_where {
 					# get the WHERE phrase for this key, if specified
 					# otherwise, default to an int if it's a calculated field, a string (RLIKE) otherwise.
 					my $sub = $self->wheres($key) || ($self->in_calculated_fields($key) ? \&where_int : \&where_rlike);
-					push @restrictions2, $sub->($key,$value);
+					my $not = $value =~ s/^!//;
+					my $rstring = $sub->($key,$value);
+					$rstring = "NOT($rstring)" if $not;
+					push @restrictions2, $rstring;
 				}
 
 				my $rstring = join(" AND ", @restrictions2);
