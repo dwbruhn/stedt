@@ -144,24 +144,22 @@ sub detail : Runmode {
 	my $self = shift;
 	$self->require_privs(1);
 
-# This query seems to work with the new changelog setup:
-# SELECT YEAR(time),MONTH(time),MONTHNAME(time),username,COUNT(*) FROM changelog LEFT JOIN users ON (changelog.owner_uid=users.uid) WHERE change_type='approval' GROUP BY 1,2,4 ORDER BY 4,1 DESC, 2 DESC
-
-	# pull out "past work" from changelog and count what was done in the past, add these counts into table. Credit where credit is due!
-	my $a = $self->dbh->selectall_arrayref("SELECT time,time,oldval,newval FROM changelog WHERE col = '=accept'
-                   ORDER BY time DESC");
+	# pull out "past work" from changelog and count what was done in the past. Credit where credit is due!
+	my $a = $self->dbh->selectall_arrayref("SELECT YEAR(time),MONTH(time),MONTHNAME(time),username,COUNT(*) FROM changelog LEFT JOIN users ON (changelog.owner_uid=users.uid) WHERE change_type='approval' GROUP BY 1,2,4 ORDER BY 4,1 DESC, 2 DESC");
 	my %c ;
 	my %u ;
+	my %t ;
+	my $total;
 	foreach my $row (@$a) {
-	  (my $uid) = $row->[2] =~ m/^uid=(\d+)/;
-	  my $username = $self->dbh->selectrow_array("SELECT username FROM users WHERE uid=$uid");
-	  my $rns = $row->[3];
-	  my $count = $rns =~ tr/,// + 1;
-	  my $yyyymm = substr(@$row[0],0,7);
+	  my $username = $row->[3];
+	  my $count = $row->[4];
+	  my $yyyymm = sprintf("%4d-%02d", $row->[0],$row->[1]);
 	  $c{$yyyymm}{$username} += $count;
 	  $u{$username} += $count;
+	  $t{$yyyymm} += $count;
+	  $total += $count;
 	}
-	return $self->tt_process("admin/detail.tt", {stats=>\%c, users=> \%u});
+	return $self->tt_process("admin/detail.tt", {stats=>\%c, users=> \%u, time=> \%t, total => $total});
 }
 
 sub listpublic : Runmode {

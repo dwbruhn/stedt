@@ -9,14 +9,17 @@
 <tr>
 <th>date </th>
 [% FOREACH u IN users.keys -%]<th>[% u %]</th>[% END -%]
+<th>Subtotal</th>
 </tr>
 [% FOREACH d IN stats.keys -%]
 <tr><td>[% d %]</td>
 [% FOREACH u IN users.keys -%]<td>[% stats.$d.$u || 0 %]</td>[% END -%]
+<td>[% time.$d %]</td>
 </tr>
 [% END -%]
-<tr><td>Total</td>
+<tr><td>Subtotal</td>
 [% FOREACH u IN users.keys -%]<td>[% users.$u || 0 %]</td>[% END -%]
+<td>[% total %]</td>
 </tr>
 </table>
 
