@@ -40,14 +40,7 @@ for (var i = 1; i < num_tables; i++) {
 }
 
 // put in section headings for language groups
-var lgord2grp = {0:'0. Sino-Tibetan', 10:'1. Kamarupan', 11:'1.1 North Assam', 12:'1.2 Kuki-Chin',
-14:'1.3 Naga', 15:'1.4 Meithei', 16:'1.5 Mikir', 17:'1.6 Mru', 18:'1.7 Bodo-Garo = Barish',
-19:'1.8 Chairel', 20:'2. Himalayish', 21:'2.1 Tibeto-Kanauri', 22:'2.1.1 Western Himalayish',
-23:'2.1.2 Bodic', 24:'2.1.3 Lepcha', 25:'2.1.4 Tamangic', 26:'2.1.5 Dhimal', 27:'2.2 Newar',
-28:'2.3. Mahakiranti', 29:'2.3.1 Kham-Magar-Chepang-Sunwar', 30:'2.3.2 Kiranti', 35:'3. Tangut-Qiang',
-36:'3.1 Tangut', 37:'3.2 Qiangic', 38:'3.3 rGyalrongic', 40:'4. Jingpho-Nung-Luish', 41:'4.1 Jingpho',
-42:'4.2 Nungic', 43:'4.3 Luish', 50:'5. Tujia', 60:'6. Lolo-Burmese', 61:'6.1 Burmish', 62:'6.2 Loloish',
-63:'6.3 Naxi', 64:'6.4 Jinuo', 70:'7. Karenic', 80:'8. Bai', 90:'9. Sinitic', 100:'X. Non-TB'};
+var lgord2grp = {"90":"9. Sinitic","63":"6.3. Naxi","21":"2.1. Tibeto-Kanauri","70":"7. Karenic","80":"8. Bai","26":"2.1.5. Dhimal","17":"1.7 Mru","18":"1.8 Bodo-Garo = Barish","30":"2.3.2. Kiranti","16":"1.6 Mikir","100":"X. Non-TB","25":"2.1.4. Tamangic","27":"2.2. Newar","28":"2.3. Mahakiranti","40":"4. Jingpho-Nung-Luish","61":"6.1. Burmish","14":"1.4 \"Naga\"","20":"2. Himalayish","24":"2.1.3. Lepcha","10":"1. Kamarupan","35":"3. Tangut-Qiang","11":"1.1. North Assam","22":"2.1.1. Western Himalayish","42":"4.2. Nungic","0":"0. Sino-Tibetan","13":"1.3 Northern Naga","23":"2.1.2. Bodic","29":"2.3.1. Kham-Magar-Chepang-Sunwar","50":"5. Tujia","64":"6.4. Jinuo","36":"3.1. Tangut","12":"1.2. Kuki-Chin","41":"4.1. Jingpho","15":"1.5 Meithei","38":"3.3. rGyalrongic","60":"6. Lolo-Burmese","37":"3.2. Qiangic","19":"1.9 Chairel","43":"4.3. Luish","62":"6.2. Loloish"};
 for (var i = 1; i < num_tables; i++) {
 	var tbody = $('lexicon' + i).tBodies[0];
 	var lastord = -1;

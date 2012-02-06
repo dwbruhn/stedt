@@ -173,6 +173,19 @@ sub listpublic : Runmode {
 	return "[" . join(',', @$a) . "]";
 }
 
+# generate hard-coded javascript group numbers
+sub listgrpnos : Runmode {
+	my $self = shift;
+	my %o2s;
+	for (@{$self->dbh->selectall_arrayref("SELECT ord, grpno, grp from languagegroups ORDER BY grpno")}) {
+		my ($ord,$grpno,$grp) = @$_;
+		$grpno =~ s/(\.0)+$//;
+		$o2s{$ord} = "$grpno. $grp" unless $o2s{$ord}; # only do this if it's the first one
+	}
+	require JSON;
+	return JSON::to_json(\%o2s);
+}
+
 sub expire_sessions : Runmode {
 	my $self = shift;
 	$self->require_privs(16);

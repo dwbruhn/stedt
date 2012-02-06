@@ -31,6 +31,7 @@ Tools:
 <ul>
 <li><a href="[% self_url %]/admin/deviants">view records with deviant glosses (violating gloss conventions)</a></li>
 <li><a href="[% self_url %]/admin/listpublic">list of public etyma tag #s</a></li>
+<li><a href="[% self_url %]/admin/listgrpnos">js list of language groups</a></li>
 <li><a href="[% self_url %]/admin/updateprojects">update project stats</a></li>
 [% IF c.has_privs(16) -%]
 <li><a href="[% self_url %]/admin/expire_sessions">expire sessions older than 1 month</a> ([% num_sessions %] currently in sessions table)</li>
