@@ -2,7 +2,7 @@
 
 <h3>Tagging and Etyma, by user</h3>
 <p>[% etymaused.size %] users have tagged something:
-<a href="[% self_url %]/admin/detail">[Details]</a>
+<a href="[% self_url %]/admin/progress_detail">[Details]</a>
 </p>
 
 <table class="sortable resizable" style="table-layout:fixed">

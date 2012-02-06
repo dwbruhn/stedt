@@ -140,26 +140,29 @@ sub progress : Runmode {
 	return $self->tt_process("admin/progress.tt", {etymaused=>$a, tagging=>$b});
 }
 
-sub detail : Runmode {
+sub progress_detail : Runmode {
 	my $self = shift;
 	$self->require_privs(1);
 
-	# pull out "past work" from changelog and count what was done in the past. Credit where credit is due!
-	my $a = $self->dbh->selectall_arrayref("SELECT YEAR(time),MONTH(time),MONTHNAME(time),username,COUNT(*) FROM changelog LEFT JOIN users ON (changelog.owner_uid=users.uid) WHERE change_type='approval' GROUP BY 1,2,4 ORDER BY 4,1 DESC, 2 DESC");
-	my %c ;
-	my %u ;
-	my %t ;
-	my $total;
-	foreach my $row (@$a) {
-	  my $username = $row->[3];
-	  my $count = $row->[4];
-	  my $yyyymm = sprintf("%4d-%02d", $row->[0],$row->[1]);
-	  $c{$yyyymm}{$username} += $count;
-	  $u{$username} += $count;
-	  $t{$yyyymm} += $count;
-	  $total += $count;
+	my $months = $self->dbh->selectcol_arrayref("SELECT CONCAT(YEAR(time), ' ', MONTHNAME(time)) FROM changelog WHERE change_type='approval' GROUP BY 1 ORDER BY YEAR(time) DESC, MONTH(time) DESC");
+	my $a = $self->dbh->selectall_arrayref("SELECT CONCAT(YEAR(time), ' ', MONTHNAME(time)), username ,COUNT(*) FROM changelog LEFT JOIN users ON (changelog.owner_uid=users.uid) WHERE change_type='approval' GROUP BY 1,2");
+	my (%u_totals, %m_totals, $grand_total);
+	my %stats; # hash of month/user -> count
+	foreach (@$a) {
+		my ($y_m, $u, $count) = @$_;
+		$stats{"$y_m"}{$u} = $count;
+		$u_totals{$u} += $count;
+		$m_totals{$y_m} += $count;
+		$grand_total += $count;
 	}
-	return $self->tt_process("admin/detail.tt", {stats=>\%c, users=> \%u, time=> \%t, total => $total});
+	return $self->tt_process("admin/progress_detail.tt", {
+		stats=>\%stats,
+		months=>$months,
+		users=>[sort keys %u_totals],
+		u_totals=>\%u_totals,
+		m_totals=>\%m_totals,
+		total => $grand_total
+	});
 }
 
 sub listpublic : Runmode {
