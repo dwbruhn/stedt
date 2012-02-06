@@ -265,12 +265,15 @@ sub query_where {
 	my $query_ok = 0;
 	
 	for my $key ($cgi->param) {
+		my $val = $cgi->param($key);
+		next if $val eq ''; # might be numeric 0, so must check for empty string
+		
 		 # make sure the field name is in one of these lists, just to be safe
 		if ($self->{is_field}{$key} || $self->in_searchable($key)) {
 			my @restrictions;
 			# split by commas that are not preceded by a single backslash (allows searching for commas)
-			foreach (split /(?<!(?<!\\)\\), */, $cgi->param($key)) {
-				next if $_ eq ''; # might be numeric 0, so must check for empty string
+			foreach (split /(?<!(?<!\\)\\), */, $val) {
+				next if $_ eq '';
 
 				# inner loop for AND searches within a field
 				my @restrictions2;
