@@ -80,7 +80,7 @@ $t->save_hooks(
 			$semkey .= ".$n";
 		}
 		my $sth = $dbh->prepare(q{UPDATE chapters SET semkey=?, v=?, f=?, c=?, s1=?, s2=?, s3=? WHERE id=?});
-		$sth->execute($semkey,$v,$f,$c,$s1,$s2,$s3,$id);
+		$sth->execute($semkey,$v,$f || 0,$c || 0,$s1 || 0,$s2 || 0,$s3 || 0,$id);	# replace lower levels with zero if undef
 		# if it fails at this point it will be because there is a UNIQUE constraint
 		# on the semkey field in the database. Otherwise it is safe to go on.
 		
