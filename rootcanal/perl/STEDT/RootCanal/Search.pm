@@ -144,6 +144,14 @@ sub searchresults_from_querystring {
 	my ($self, $s, $tbl, $lg, $lggrp) = @_;
 	my $t = $self->load_table_module($tbl);
 	my $query = $self->query->new(''); # for some reason faster than saying "new CGI"? disk was thrashing.
+	
+	# collapse all spaces around commas and ampersands so that boolean
+	# search items remain single terms after being split by spaces below.
+	# this is provided as a convenience to the searcher, and is in no way
+	# meant to imply that users should attempt to do boolean searches
+	# across fields (e.g. dog & *kwi will now be interpreted as an AND search
+	# in the lexicon.gloss field).
+	$s =~ s/\s*([,\&])\s*/$1/g;
 
 	# figure out the table and the search terms
 	# and make sure there's a (unicode) letter in there somewhere
