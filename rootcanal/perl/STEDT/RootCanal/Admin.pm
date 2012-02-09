@@ -230,8 +230,9 @@ sub save_seq {
 			
 			if ($oldval != $s) {
 				$t->save_value('etyma.sequence', $s, $tag);
-				$self->dbh->do("INSERT changelog VALUES (?,?,?,?,?,?,NOW())", undef,
-					$self->param('uid'), 'etyma', 'sequence', $tag, $oldval || '', $s);
+				$self->dbh->do("INSERT changelog (uid, `table`, id, col, oldval, newval, time)
+								VALUES (?,?,?,?,?,?,NOW())", undef,
+					$self->param('uid'), 'etyma', $tag, 'sequence', $oldval || '', $s);
 			}
 		}
 	}
