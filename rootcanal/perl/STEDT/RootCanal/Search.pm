@@ -169,7 +169,7 @@ sub searchresults_from_querystring {
 			}
 		}
 		if (!$s) {
-			$query->param('etyma.chapter'=>'9.' . (int(rand 9) + 1));
+			$query->param('etyma.chapter'=>('1.9.1', '1.9.2', '1.6.5', '1.9.3', '1.5.1' )[int(rand 5)]);
 		} elsif (!$query->param) {
 			$query->param('etyma.tag' => 2436);
 		}

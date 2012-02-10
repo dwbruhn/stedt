@@ -29,7 +29,7 @@ $t->fields('etyma.tag',
 	'users.username',
 );
 $t->field_visible_privs(
-	'etyma.supertag' => 1,
+	# 'etyma.supertag' => 1,
 	'etyma.chapter' => 3,
 	'etyma.plg' => 1,
 	'etyma.notes' => 1,
