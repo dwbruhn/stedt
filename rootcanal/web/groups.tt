@@ -16,7 +16,7 @@
 <p>Language information for <b>[% row.1 %]</b>
 from source <a href="[% self_url %]/source/[% row.3 %]" target="stedt_src">[% row.3 %]</a>:</p>
 <table>
-<tr><th>ISO 639-3</th><td>[% IF row.0 %]<a href="http://www.ethnologue.com/show_language.asp?code=[% row.0 %]" target="_blank">[% row.0 %]</a>[% ELSE %]n/a[% END %]</td></tr>
+<tr><th>ISO 639-3</th><td>[% IF row.0 %]<a href="http://www.ethnologue.com/show_language.asp?code=[% row.0 %]" target="stedt_ethnologue">[% row.0 %]</a>[% ELSE %]n/a[% END %]</td></tr>
 <tr><th>Language Code</th><td>[% row.2 %]</td></tr>
 <tr><th>num. of records</th><td><a href="[% self_url %]/gnis?lexicon.lgid=[% row.4 %]" target="stedt_sss">[% row.5 %]</a></td></tr>
 </table>
@@ -59,7 +59,7 @@ from source <a href="[% self_url %]/source/[% row.3 %]" target="stedt_src">[% ro
 [% FOREACH row IN lgs -%]
 [% NEXT IF row.2 == lg_code -%]
 <tr>
-	<td>[% IF row.0 %]<a href="http://www.ethnologue.com/show_language.asp?code=[% row.0 %]" target="_blank">[% row.0 %]</a>[% ELSE %]n/a[% END %]</td>
+	<td>[% IF row.0 %]<a href="http://www.ethnologue.com/show_language.asp?code=[% row.0 %]" target="stedt_ethnologue">[% row.0 %]</a>[% ELSE %]n/a[% END %]</td>
 	<td>[% row.1 %]</td>
 	<td>[% row.2 %]</td>
 	<td><a href="[% self_url %]/source/[% row.3 %]" target="stedt_src">[% row.3 %]</a></td>

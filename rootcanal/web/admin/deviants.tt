@@ -3,7 +3,7 @@
 <table>
 <tr><th>Deviant Type</th><th>Num of records</th></tr>
 [% FOREACH k IN deviants.keys -%]
-<tr><td>[% k %]</td><td><a href="[% self_url %]/edit/lexicon?lexicon.gloss=[% "*" _ deviants.$k.regex | url %]" target="lexicon_deviants">[% deviants.$k.count %]</a></td></tr>
+<tr><td>[% k %]</td><td><a href="[% self_url %]/edit/lexicon?lexicon.gloss=[% "*" _ deviants.$k.regex | url %]" target="stedt_lexicon">[% deviants.$k.count %]</a></td></tr>
 [% END %]
 </table>
 
