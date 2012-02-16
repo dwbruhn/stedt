@@ -101,7 +101,7 @@ $t->fields(
 	'languagegroups.grpno',
 	'languagegroups.grp',
 	'languagenames.srcabbr', 'lexicon.srcid',
-	'lexicon.status',
+#	'lexicon.status',
 #	'lexicon.semcat',
 	'lexicon.semkey',
 	'(SELECT COUNT(*) FROM notes WHERE rn=lexicon.rn) AS num_notes'
@@ -112,7 +112,7 @@ $t->searchable('lexicon.rn', 'analysis', 'user_an', 'lexicon.reflex',
 	'languagenames.srcabbr', 'lexicon.srcid',
 #	'lexicon.semcat', 
 	'lexicon.semkey',
-	'lexicon.status',
+#	'lexicon.status',
 	'lexicon.lgid', 
 );
 $t->field_visible_privs(
@@ -126,7 +126,7 @@ $t->field_editable_privs(
 	'lexicon.gfn' => 16,
 	'lexicon.srcid' => 16,
 	'lexicon.semcat' => 16, 
-	'lexicon.status' => 16,
+#	'lexicon.status' => 16,
 	'lexicon.semkey' => 16,
 );
 
@@ -143,12 +143,12 @@ $t->search_form_items(
   								-default=>'', # -override=>1,
   								-labels=>\%grp_labels);
 	},
-	'lexicon.status' => sub {
-		my $cgi = shift;
-		# get list of statuses
-		my $statuses = $dbh->selectall_arrayref("SELECT DISTINCT status FROM lexicon");
-		return $cgi->popup_menu(-name => 'lexicon.status', -values=>['', map {@$_} @$statuses], -labels=>{'0'=>'(no value)'},  -default=>'');
-	},
+#	'lexicon.status' => sub {
+#		my $cgi = shift;
+#		# get list of statuses
+#		my $statuses = $dbh->selectall_arrayref("SELECT DISTINCT status FROM lexicon");
+#		return $cgi->popup_menu(-name => 'lexicon.status', -values=>['', map {@$_} @$statuses], -labels=>{'0'=>'(no value)'},  -default=>'');
+#	},
 );
 
 $t->wheres(
