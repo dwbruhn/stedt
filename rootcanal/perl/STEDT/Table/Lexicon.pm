@@ -97,6 +97,7 @@ $t->fields(
 	'lexicon.gfn',
 	'languagenames.lgid',
 	'languagenames.language',
+#	'languagenames.lgcode',
 	'languagegroups.grpid',
 	'languagegroups.grpno',
 	'languagegroups.grp',
@@ -113,7 +114,8 @@ $t->searchable('lexicon.rn', 'analysis', 'user_an', 'lexicon.reflex',
 #	'lexicon.semcat', 
 	'lexicon.semkey',
 #	'lexicon.status',
-	'lexicon.lgid', 
+	'lexicon.lgid',
+	'languagenames.lgcode',
 );
 $t->field_visible_privs(
 	'user_an' => 1,
@@ -154,6 +156,7 @@ $t->search_form_items(
 $t->wheres(
 	'languagegroups.grpid' => 'int',
 	'lexicon.lgid' => 'int',
+	'languagenames.lgcode' => 'int',
 	'lexicon.semkey' => 'value',
 	'analysis' => sub {
 		my ($k,$v) = @_;
@@ -263,7 +266,7 @@ EOF
 $t->addable(
 	'lexicon.lgid',
 	'lexicon.srcid',
-	'analysis',
+#	'analysis',	# analysis field should not be editable when adding a record, because it doesn't update lx_et_hash (AFAIK)
 	'lexicon.reflex',
 	'lexicon.gloss',
 	'lexicon.gfn',
