@@ -154,6 +154,7 @@ $t->search_form_items(
 
 $t->wheres(
 	'languagegroups.grpid' => 'int',
+	'languagenames.srcabbr' => 'beginvalue',
 	'lexicon.lgid' => 'int',
 	'languagenames.lgcode' => 'int',
 	'lexicon.semkey' => 'value',
@@ -218,12 +219,6 @@ $t->save_hooks(
 			$tag = 0 unless ($tag =~ /^\d+$/);
 			$sth->execute($rn, $tag, $index, $tag_str, $uid1);
 			$index++;
-		}
-		# for old time's sake, save this in the analysis field too
-		if ($uid1 == 8) {
-			my $update = qq{UPDATE lexicon SET analysis=? WHERE rn=?};
-			my $update_sth = $dbh->prepare($update);
-			$update_sth->execute($s, $rn);
 		}
 		return 0;
 	},

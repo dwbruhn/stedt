@@ -55,6 +55,7 @@ my %preset_wheres = (
 	'int' => \&where_int,
 	'word' => \&where_word,
 	'value' => \&where_value,
+	'beginvalue' => \&where_beginvalue,
 	'beginword' => \&where_beginword,
 	'rlike' => \&where_rlike,
 );
@@ -236,6 +237,7 @@ sub prep_regex ($) {
 # See where_int for an example where non-digits are stripped.
 
 sub where_value { my ($k,$v) = @_; "$k='$v'" }
+sub where_beginvalue { my ($k,$v) = @_; prep_regex $v; $v =~ s/^\*(?=.)// ? "$k RLIKE '$v'" : "$k RLIKE '^$v'" }
 sub where_int { my ($k,$v) = @_; $v =~ s/[^\d<>]//g; return "'bad int!'='0'" unless $v =~ /\d/; $v =~ /^([<>])(.+)/ ? "$k$1$2" : "$k=$v" }
 sub where_rlike {     my ($k,$v) = @_; prep_regex $v; "$k RLIKE '$v'" }
 sub where_word {      my ($k,$v) = @_; prep_regex $v; $v =~ s/^\*(?=.)// ? "$k RLIKE '$v'" : "$k RLIKE '[[:<:]]${v}[[:>:]]'" }
@@ -365,18 +367,23 @@ sub add_record {
 	}
 	
 	# make list of fields to be populated
-	my @fields;
+	my (@fields, @insertable_fields);
 	for my $param ($q->param) {
-		push @fields, $param if $self->in_addable($param);
+		if ($self->in_addable($param)) {
+			push @fields, $param;
+			if (!$self->in_calculated_fields($param)) {
+				push @insertable_fields, $param; # make a separate list to avoid pseudo-fields
+			}
+		}
 	}
 
 	# add a new record
 	my $sth = $self->{dbh}->prepare("INSERT $self->{table} ("
-		. join(',', @fields)
+		. join(',', @insertable_fields)
 		. ") VALUES ("
-		. join(',', (('?') x @fields))
+		. join(',', (('?') x @insertable_fields))
 		. ")");
-	eval { $sth->execute(map {$q->param($_)} @fields)	};
+	eval { $sth->execute(map {$q->param($_)} @insertable_fields)	};
 	if ($@) {
 		return 0, 0, $sth->errstr;
 	}
