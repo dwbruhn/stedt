@@ -519,7 +519,8 @@ sub etymon : Runmode {
 	my $INTERNAL_NOTES = $self->has_privs(1);
 	my (@etyma, @footnotes, @users);
 	my $footnote_index = 1;
-	my $sql = qq#SELECT e.tag, e.sequence, e.protoform, e.protogloss, e.plg, e.hptbid, e.tag=e.supertag AS is_main, e.uid, users.username
+	my $sql = qq#SELECT e.tag, e.chapter, e.sequence, e.protoform, e.protogloss, e.plg,
+						e.hptbid, e.tag=e.supertag AS is_main, e.uid, users.username
 FROM `etyma` AS `e` JOIN `etyma` AS `super` ON e.supertag = super.tag LEFT JOIN users ON (e.uid=users.uid)
 WHERE e.supertag=?
 ORDER BY is_main DESC, e.plgord#;
@@ -598,6 +599,14 @@ ORDER BY is_main DESC, e.plgord#;
 	my $no_meso = '';
 	my $supertag = $etyma_for_tag->[0][0] if @$etyma_for_tag;
 	my $supertag_done = 0;
+	my $breadcrumbs;
+	{
+		my ($v, $f, $c, $s1, $s2) = split /\./, $etyma_for_tag->[0][1];
+		$breadcrumbs = $self->dbh->selectall_arrayref("SELECT semkey, chaptertitle FROM chapters
+			WHERE v=? AND (f=? OR f=0) AND (c=? OR c=0) AND (s1=? OR s1=0) AND (s2=? OR s2=0) ORDER BY v,f,c,s1,s2,s3", undef,
+			$v, $f||0, $c||0, $s1||0, $s2||0);
+	}
+	
 	if ($selected_uid && @$etyma_for_tag) {
 		# OK to concatenate the uid into the query since we've made sure it's just digits
 		$user_analysis_col = "(SELECT GROUP_CONCAT(tag_str ORDER BY ind) FROM lx_et_hash WHERE rn=lexicon.rn AND uid=$selected_uid) AS user_an,";
@@ -617,7 +626,7 @@ ORDER BY is_main DESC, e.plgord#;
 		push @etyma, \%e;
 	
 		# heading stuff
-		@e{qw/tag sequence protoform protogloss plg hptbid is_main uid username/} = @$_;
+		@e{qw/tag chap sequence protoform protogloss plg hptbid is_main uid username/} = @$_;
 		$e{plg} = $e{plg} eq 'PTB' ? '' : "$e{plg}";
 	
 		$e{protoform} =~ s/⪤ +/⪤ */g;
@@ -716,7 +725,8 @@ EndOfSQL
 			'languagenames.lgid', 'lexicon.reflex', 'lexicon.gloss', 'lexicon.gfn',
 			'languagenames.language', 'languagegroups.grpid', 'languagegroups.grpno', 'languagegroups.grp',
 			'languagenames.srcabbr', 'lexicon.srcid', 'languagegroups.ord', 'notes.rn'],
-		footnotes => \@footnotes
+		footnotes => \@footnotes,
+		breadcrumbs=>$breadcrumbs
 	});
 	# @etyma : [
 	# 	{

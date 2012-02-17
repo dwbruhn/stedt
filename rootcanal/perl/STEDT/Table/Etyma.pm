@@ -10,7 +10,7 @@ $t->query_from(q|etyma JOIN `etyma` AS `super` ON etyma.supertag = super.tag LEF
 $t->order_by('super.chapter, super.sequence, IF(super.sequence,0,super.tag), is_mesoroot'); # etyma.plgord');
 $t->fields('etyma.tag',
 	'etyma.supertag',
-	'etyma.exemplary',
+#	'etyma.exemplary',
 	'(SELECT COUNT(DISTINCT rn) FROM lx_et_hash WHERE tag=etyma.tag AND uid=8) AS num_recs',
 	($uid ? "(SELECT COUNT(DISTINCT rn) FROM lx_et_hash WHERE tag=etyma.tag AND uid=$uid) AS u_recs" : ()),
 	($uid ? "(SELECT COUNT(DISTINCT rn) FROM lx_et_hash WHERE tag=etyma.tag AND uid !=8 AND uid != $uid) AS o_recs" : ()),

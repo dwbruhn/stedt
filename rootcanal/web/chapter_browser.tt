@@ -15,7 +15,7 @@
 [% FOREACH r IN ch -%]
 <tr><td>[% r.0 %]</td><td>[% r.1 | html %]</td><td>[% r.2 || '' %]</td>
 [%- IF c.has_privs(1) %]<td>[% IF r.3 %]<a target="edit_etyma" href="[% self_url %]/edit/etyma?etyma.chapter=[% r.0 | uri %]">[% r.3 %][% END %]</td>[% END -%]
-<td><a target="notes" href="[% self_url %]/chap/1/[% r.0 | uri %]">[% IF r.4 %][% r.4 %] note[% r.4 == 1 ? '' : 's' %][% ELSE %]-[% END %]</a></td><td>[% IF r.5 %]✓[% END %]</td>
+<td><a target="notes" href="[% self_url %]/chap/[% r.0 | uri %]">[% IF r.4 %][% r.4 %] note[% r.4 == 1 ? '' : 's' %][% ELSE %]-[% END %]</a></td><td>[% IF r.5 %]✓[% END %]</td>
 <td>[% r.7 %]</td><td>[% r.8 %]</td><td>[% r.9 %]</td><td>[% r.10 %]</td>
 </tr>
 [% END -%]
@@ -38,7 +38,7 @@
 <h2>Orphaned notes:</h2>
 <p>[% n.size %] orphans</p>
 [% FOREACH r IN n -%]
-<p>[% r.0 %]: <a target="notes" href="[% self_url %]/chap/1/[% r.0 | uri %]">[% r.1 %] note(s)</a>;
+<p>[% r.0 %]: <a target="notes" href="[% self_url %]/chap/[% r.0 | uri %]">[% r.1 %] note(s)</a>;
 [% r.2 %] etyma</p>
 [% END -%]
 [% END -%]

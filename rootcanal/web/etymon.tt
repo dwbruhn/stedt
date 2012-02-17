@@ -3,6 +3,9 @@
 <a name="[% etyma.0.tag %]"></a>
 [% lexicon_id = 1 %]
 
+<p>[% FOREACH b IN breadcrumbs %][% IF loop.last %]<a href=[% self_url %]/chap/[% b.0 %]>[% b.0 %] <b>[% b.1 %]</b></a>
+[%- ELSE %][% b.0 %] <b>[% b.1 %]</b> &gt; [% END #IF %][% END #FOREACH %]</p>
+
 [% IF c.has_privs(1) %]
 [% stedt_count %] records <span class="r[% supertag %]">tagged by <b>stedt</b></span> under this etymon.
 [% IF selected_uid %]
@@ -23,6 +26,16 @@ Reflexes <span class="u[% supertag %]">tagged by <select name="DDMenu" onchange=
 #[% e.tag %] [% e.plg %] [% e.protoform %] [% e.protogloss %]
 [%- IF e.uid != 8 %] <span class="u[% supertag %]">(proposed by [% e.username %])</span>[% END -%]
 [%- IF e.is_main %]</h1>[% ELSE %]</h2></a>[% END %]
+[%- IF e.is_main && etyma.size > 1 %]
+
+Reconstructed mesoroots below:
+<ul>
+[% FOREACH e2 IN etyma -%]
+[% NEXT IF e2.is_main -%]
+<li><a href="#[% e2.tag %]">[% e2.plg %] [% e2.protoform %] [% e2.protogloss %]</a> (#[% e2.tag %])</li>
+[% END -%]
+</ul>
+[%- END %]
 
 [% IF c.has_privs(1) -%]
 <div id="allnotes[% e.tag %]" class="container">

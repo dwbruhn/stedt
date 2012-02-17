@@ -43,7 +43,7 @@
 <h2>Orphaned notes:</h2>
 <p>[% n.size %] orphans</p>
 [% FOREACH r IN n -%]
-<p>[% r.0 %]: <a target="notes" href="[% self_url %]/chap/1/[% r.0 | uri %]">[% r.1 %] note(s)</a>;
+<p>[% r.0 %]: <a target="notes" href="[% self_url %]/chap/[% r.0 | uri %]">[% r.1 %] note(s)</a>;
 [% r.2 %] etyma</p>
 [% END -%]
 [% END -%]
