@@ -66,14 +66,14 @@ Reflexes <span class="u[% supertag %]">tagged by <select name="DDMenu" onchange=
 </table>
 [% END -%]
 
-[% IF e.comparanda.size || c.has_privs(1) -%]
+[% IF e.comparanda.size || (c.has_privs(1) && e.is_main) -%]
 [% label = 'Chinese comparand' _ (e.comparanda.size == 1 ? 'um' : 'a') -%]
 <h2>[% label %]</h2>
 [% IF c.has_privs(1) -%]
 <div id="allcomparanda[% e.tag %]" class="container">
 <p class="edit">
 <label><input type="checkbox" value="off" class="reordcheckbox"[% IF e.comparanda.size < 2 %] disabled[% END %]>Drag to reorder</label>
-<a href="#" onclick="return showaddform('F',[% e.tag %])">Add a note...</a>
+<a href="#" onclick="return showaddform('F',[% e.tag %])">Add a Chinese comparandum...</a>
 </p>
 [% FOREACH n IN e.comparanda -%]
 [% PROCESS notes_comparanda.tt -%]

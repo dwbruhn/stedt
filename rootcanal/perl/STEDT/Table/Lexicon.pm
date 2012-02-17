@@ -97,7 +97,6 @@ $t->fields(
 	'lexicon.gfn',
 	'languagenames.lgid',
 	'languagenames.language',
-#	'languagenames.lgcode',
 	'languagegroups.grpid',
 	'languagegroups.grpno',
 	'languagegroups.grp',
@@ -266,7 +265,7 @@ EOF
 $t->addable(
 	'lexicon.lgid',
 	'lexicon.srcid',
-#	'analysis',	# analysis field should not be editable when adding a record, because it doesn't update lx_et_hash (AFAIK)
+	'analysis', # N.B. "save_hook"s get called when adding records, so no worries about lx_et_hash
 	'lexicon.reflex',
 	'lexicon.gloss',
 	'lexicon.gfn',

@@ -33,7 +33,7 @@ from source <a href="[% self_url %]/source/[% row.3 %]" target="stedt_src">[% ro
 <tr><th>Language Name</th><th>Source</th><th>num. of records</th></tr>
 [% FOREACH row IN other_lgs -%]
 <tr>
-	<td><a href="[% self_url %]/group/[% grpid %]/[% row.4 %]" target="_self">[% row.1 %]</a></td>
+	<td>[% row.1 %]</td>
 	<td><a href="[% self_url %]/source/[% row.3 %]" target="stedt_src">[% row.3 %]</a></td>
 	<td><a href="[% self_url %]/gnis?lexicon.lgid=[% row.4 %]" target="stedt_sss">[% row.5 %]</a></td>
 </tr>
