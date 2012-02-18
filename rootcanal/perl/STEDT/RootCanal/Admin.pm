@@ -60,7 +60,7 @@ sub updateprojects : Runmode {
 		$fulltext_words = join ' ', @$fulltext_words;
 		$other_words = join '|', @$other_words;
 		if ($other_words) {
-			$other_words = "($other_words)" unless $other_words =~ /\|/;
+			$other_words = "($other_words)" if $other_words =~ /\|/;
 			$other_words = qq#OR gloss RLIKE "[[:<:]]${other_words}[[:>:]]"#;
 		} # otherwise it's empty and doesn't affect the search
 		# $row->[3] = $other_words; # debugging - see how many "left over" glosses there are
