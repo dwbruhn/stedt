@@ -2,6 +2,7 @@ package STEDT::RootCanal::Admin;
 use strict;
 use base 'STEDT::RootCanal::Base';
 use utf8;
+use Time::HiRes qw(time);
 
 sub main : StartRunmode {
 	my $self = shift;
@@ -41,49 +42,44 @@ sub where_word { my ($k,$v) = @_; $v =~ s/^\*(?=.)// ? "$k RLIKE '$v'" : "$k RLI
 sub updateprojects : Runmode {
 	my $self = shift;
 	$self->require_privs(1);
+	my $t0 = time();
 
-	my $a = $self->dbh->selectall_arrayref("SELECT id,project,subproject,querylex,100 * tagged_reflexes/count_reflexes as pct,tagged_reflexes,count_reflexes,count_etyma FROM projects ");
+	my $a = $self->dbh->selectall_arrayref("SELECT id,project,subproject,querylex FROM projects LIMIT 500");
+	# the loop below will add values for percent_done, tagged_reflexes, count_reflexes, and count_etyma
 
-	# would be nice to just make a call to Table::search to get the query strings...dunno how to do that yet!
-	# See Notes.pm, 'chapter' runmode for an example of loading a table
-	# module and setting up search terms.
-	# Then calling query_where should do it.
-	my $i = 0;
-	foreach my $row (@$a) {
-	  $i++;
-	  last if ($i > 500);
-	  my $glosses = $row->[3];
-	  my $qstring = $row->[3];
-	  $qstring =~ s/\//,/g;
-	  $row->[3] = $qstring; # change / to , in query string. A hack, yes; consider more robust solution at some point
-	  my @restrictions;
-	  # split by commas that are not preceded by a single backslash (allows searching for commas)
-	  for my $value (split /(?<!(?<!\\)\\), */, $qstring) {
-	    next if $value eq ''; # might be numeric 0, so must check for empty string
-	    $value =~ s/(?<!\\)((?:\\\\)*)\\('|$)/$1$2/g;
-	    $value =~ s/'/''/g; # escape all single quotes
-	    push @restrictions, where_word('gloss',$value);
-	  }
-	  $qstring =  "(" . join(" OR ", @restrictions) .")";
-	
-	  # this is very slow primarily because of the following query
-	  # which is essentially run twice. It may be possible to halve
-	  # the time by combining the two queries.
-	  # Also, searching for empty analyses will not do the right thing
-	  # because we should be using the lx_et_hash to compute the analyses.
-	  # Using load_table_module, etc., would probably be better.
-	  $row->[5] = $self->dbh->selectrow_array("SELECT count(*) FROM lexicon WHERE $qstring AND 0 < (SELECT COUNT(*) FROM lx_et_hash WHERE rn=lexicon.rn)");
-	  #$row->[5] = $self->dbh->selectrow_array("SELECT count(*) FROM lexicon WHERE $qstring AND analysis != ''");
-	  $row->[6] = $self->dbh->selectrow_array("SELECT count(*) FROM lexicon WHERE $qstring");
-	  $row->[4] = $row->[5] > 0 ?  sprintf("%.1f",(100 * $row->[5] / $row->[6])) : "0.0";
-	  
-	  $qstring =~ s/gloss/protogloss/g;
-	  $row->[7] = $self->dbh->selectrow_array("SELECT count(*) FROM etyma   WHERE $qstring");
-	  $self->dbh->do("UPDATE projects SET tagged_reflexes=?,count_reflexes=?,count_etyma=? WHERE id=?", undef, @$row[5,6,7,0]);
-	  shift @$row;
+	# no need to use load_table_module and query_where to build the query string
+	# because the query is so simple and it's better to optimize the regex
+	# instead of using multiple OR's in the WHERE clause
+	for my $row (@$a) {
+		my $words = $row->[3];
+		$words =~ tr/\\()//d; # remove backslashes and parens
+		$words =~ s/'/''/g; # escape quotes
+		$words = join '|', split m|[,/] *|, $words; # split by commas and slashes, then rejoin with pipes
+		my $counts = $self->dbh->selectall_arrayref(
+			"SELECT COUNT(DISTINCT rn), lx_et_hash.rn IS NULL FROM lexicon LEFT JOIN lx_et_hash USING (rn)
+			WHERE gloss RLIKE '[[:<:]]($words)[[:>:]]'
+			GROUP BY 2");
+		my ($tagged, $not_tagged) = (0,0);
+		foreach (@$counts) {
+			my ($count, $is_null) = @$_;
+			if ($is_null) { $not_tagged = $count; }
+			else { $tagged = $count; }
+		}
+		my $total_found = $tagged + $not_tagged;
+		
+		$row->[5] = $tagged;
+		$row->[6] = $total_found;
+		$row->[4] = $total_found ? sprintf("%.1f", 100 * $tagged/$total_found) : "0.0";
+		
+		$row->[7] = $self->dbh->selectrow_array("SELECT count(*) FROM etyma   WHERE protogloss RLIKE '[[:<:]]($words)[[:>:]]'");
+		$self->dbh->do("UPDATE projects SET tagged_reflexes=?,count_reflexes=?,count_etyma=? WHERE id=?", undef, @$row[5,6,7,0]);
+		shift @$row;
 	}
 	
-	return $self->tt_process("admin/updateprojects.tt", {projects=>$a});
+	return $self->tt_process("admin/updateprojects.tt", {
+		projects=>$a,
+		time_elapsed=>time()-$t0,
+	});
 }
 
 sub queries : Runmode {
