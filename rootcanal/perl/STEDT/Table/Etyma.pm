@@ -174,7 +174,7 @@ $t->save_hooks(
 			unless ($super_is_main) {
 				die "The super-root cannot be a mesoroot!\n";
 			}
-			my $has_subroots = 1 != $dbh->selectrow_array("SELECT COUNT(*) FROM etyma WHERE supertag=?", undef, $id);
+			my $has_subroots = 1 < $dbh->selectrow_array("SELECT COUNT(*) FROM etyma WHERE supertag=?", undef, $id);
 			if ($has_subroots) {
 				die "Can't make into a mesoroot because it has mesoroots under itself!\n";
 			}
