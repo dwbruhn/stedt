@@ -25,9 +25,8 @@ var makesubroot = function (dragged, destination, e) {
 			value: srcsuper == dst ? src : dst
 		},
 		onSuccess: function(transport) {
-			if (srcsuper == dst || src == transport.responseText) {
+			if (srcsuper == dst) {
 				// if it's already the subroot of the destination,
-				// (or if the call failed for whatever reason, in which case we should get the "src" number back)
 				// make it a main root, and resort.
 				data[src][cols['etyma.supertag']] = src;
 				destination.up('tbody').insert(dragged.up('tr'));

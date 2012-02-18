@@ -158,15 +158,26 @@ $t->save_hooks(
 	},
 	'etyma.supertag' => sub {
 		my ($id, $value) = @_;
+		$value ||= $id; # default to undoing mesoroot if value not specified
 		# make sure supertag is a valid value
+		# and while we're at it, retrieve the supertag's chapter.
 		my $chapter;
 		unless (defined($chapter = $dbh->selectrow_array("SELECT chapter FROM etyma WHERE tag=?", undef, $value))) {
-			$value = $id; # otherwise set supertag = tag
+			die "Invalid supertag number.\n";
 		}
 		# move to end if un-mesoing.
 		my $seq = 0;
 		if ($value == $id && $chapter) {
 			$seq = 1 + $dbh->selectrow_array('SELECT FLOOR(MAX(sequence)) FROM etyma WHERE chapter=?', undef, $chapter);
+		} else {
+			my $super_is_main = $dbh->selectrow_array("SELECT tag=supertag FROM etyma WHERE tag=?", undef, $value);
+			unless ($super_is_main) {
+				die "The super-root cannot be a mesoroot!\n";
+			}
+			my $has_subroots = 1 != $dbh->selectrow_array("SELECT COUNT(*) FROM etyma WHERE supertag=?", undef, $id);
+			if ($has_subroots) {
+				die "Can't make into a mesoroot because it has mesoroots under itself!\n";
+			}
 		}
 		my $sth = $dbh->prepare(qq{UPDATE etyma SET supertag=?, chapter=?, sequence=? WHERE tag=?});
 		$sth->execute($value, $chapter, $seq, $id);
