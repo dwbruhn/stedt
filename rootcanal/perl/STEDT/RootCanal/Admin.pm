@@ -43,6 +43,8 @@ sub updateprojects : Runmode {
 	my $self = shift;
 	$self->require_privs(1);
 	my $t0 = time();
+	require STEDT::RootCanal::stopwords;
+	import STEDT::RootCanal::stopwords;
 
 	my $a = $self->dbh->selectall_arrayref("SELECT id,project,subproject,querylex FROM projects LIMIT 500");
 	# the loop below will add values for percent_done, tagged_reflexes, count_reflexes, and count_etyma
@@ -53,12 +55,20 @@ sub updateprojects : Runmode {
 	for my $row (@$a) {
 		my $words = $row->[3];
 		$words =~ tr/\\()//d; # remove backslashes and parens
-		$words =~ s/'/''/g; # escape quotes
 		$words = join '|', split m|[,/] *|, $words; # split by commas and slashes, then rejoin with pipes
+		my ($fulltext_words, $other_words) = mysql_fulltext_filter(split /\|/, $words);
+		$fulltext_words = join ' ', @$fulltext_words;
+		$other_words = join '|', @$other_words;
+		if ($other_words) {
+			$other_words = "($other_words)" unless $other_words =~ /\|/;
+			$other_words = qq#OR gloss RLIKE "[[:<:]]${other_words}[[:>:]]"#;
+		} # otherwise it's empty and doesn't affect the search
+		# $row->[3] = $other_words; # debugging - see how many "left over" glosses there are
 		my $counts = $self->dbh->selectall_arrayref(
-			"SELECT COUNT(DISTINCT rn), lx_et_hash.rn IS NULL FROM lexicon LEFT JOIN lx_et_hash USING (rn)
-			WHERE gloss RLIKE '[[:<:]]($words)[[:>:]]'
-			GROUP BY 2");
+			qq#SELECT COUNT(DISTINCT rn), lx_et_hash.rn IS NULL FROM lexicon LEFT JOIN lx_et_hash USING (rn)
+			WHERE MATCH(gloss) AGAINST ("$fulltext_words" IN BOOLEAN MODE)
+			$other_words
+			GROUP BY 2#);
 		my ($tagged, $not_tagged) = (0,0);
 		foreach (@$counts) {
 			my ($count, $is_null) = @$_;
@@ -71,7 +81,7 @@ sub updateprojects : Runmode {
 		$row->[6] = $total_found;
 		$row->[4] = $total_found ? sprintf("%.1f", 100 * $tagged/$total_found) : "0.0";
 		
-		$row->[7] = $self->dbh->selectrow_array("SELECT count(*) FROM etyma   WHERE protogloss RLIKE '[[:<:]]($words)[[:>:]]'");
+		$row->[7] = $self->dbh->selectrow_array(qq#SELECT count(*) FROM etyma   WHERE protogloss RLIKE "[[:<:]]($words)[[:>:]]"#);
 		$self->dbh->do("UPDATE projects SET tagged_reflexes=?,count_reflexes=?,count_etyma=? WHERE id=?", undef, @$row[5,6,7,0]);
 		shift @$row;
 	}
