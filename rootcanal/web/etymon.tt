@@ -66,12 +66,18 @@ Reconstructed mesoroots below:
 [%- FOREACH fld IN fields -%]
 <th id="[% fld %]">[% fld.replace('^.*?\.','') %]</th>
 [%- END -%]
+[%- IF c.has_privs(1) -%]
+<th width="16">HIST.</th>
+[%- END -%]
 </tr></thead>
 <tbody>
 [% FOREACH row IN e.records -%]
 <tr>
 [%- FOREACH col IN row -%]
 <td>[% col | html %]</td>
+[%- END -%]
+[%- IF c.has_privs(1) -%]
+<td><a href="[% self_url %]/admin/changes?t=lexicon&id=[% row.0 %]"><img src="[% self_base %]img/clock.png" width="16" height="16"></a></td>
 [%- END -%]
 </tr>
 [% END -%]

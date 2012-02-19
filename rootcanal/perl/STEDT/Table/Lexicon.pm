@@ -92,6 +92,7 @@ $t->fields(
 	'lexicon.rn',
 	($uid1 ? "(SELECT GROUP_CONCAT(tag_str ORDER BY ind) FROM lx_et_hash WHERE rn=lexicon.rn AND uid=$uid1) AS analysis" : () ),
 	($uid2 ? "(SELECT GROUP_CONCAT(tag_str ORDER BY ind) FROM lx_et_hash WHERE rn=lexicon.rn AND uid=$uid2) AS user_an" : () ),
+	($uid2 ? "(SELECT GROUP_CONCAT(CONCAT(uid, ':', tag_str) ORDER BY uid,ind) FROM lx_et_hash WHERE rn=lexicon.rn AND uid!=$uid1 AND uid!=$uid2) AS other_an" : () ),
 	'lexicon.reflex',
 	'lexicon.gloss',
 	'lexicon.gfn',

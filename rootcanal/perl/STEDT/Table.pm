@@ -92,7 +92,7 @@ sub fields {
 		my @full_fields = @a;	# save the full fields for queries
 		foreach (@a) {					# for all other purposes, use the "AS" aliases, if there is one
 			if (/ AS /) {
-				$_ =~ s/^.+ AS //;
+				$_ =~ s/^.+ AS //s; # single-line mode in case there are newlines in the string
 				$self->calculated_fields($_); # add this to the set
 			}
 		}

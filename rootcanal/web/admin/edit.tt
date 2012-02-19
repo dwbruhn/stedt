@@ -28,7 +28,7 @@ View tagging by <select id="uid1" name="uid1" onchange="document.location = '?' 
 <option value=""[% IF uid1 == 8 %] selected[% END %]>stedt</option>
 [% FOREACH u IN users -%]
 [% UNLESS u.uid == 8 -%]
-<option value="[% u.uid %]"[% IF uid1 == u.uid %] selected[% END %]>[% u.username %]</option>
+<option value="[% u.uid %]"[% IF uid1 == u.uid %] selected[% END %]>[% u.username %] (id:[% u.uid %])</option>
 [% END -%]
 [% END -%]
 </select>
@@ -36,7 +36,7 @@ and <select id="uid2" name="uid2" onchange="document.location = '?' + Form.seria
 <option value=""[% IF uid2 == c.param('uid') %] selected[% END %]>[% c.param('user') %]</option>
 [% FOREACH u IN users -%]
 [% UNLESS u.uid == c.param('uid') -%]
-<option value="[% u.uid %]"[% IF uid2 == u.uid %] selected[% END %]>[% u.username %]</option>
+<option value="[% u.uid %]"[% IF uid2 == u.uid %] selected[% END %]>[% u.username %] (id:[% u.uid %])</option>
 [% END -%]
 [% END -%]
 </select>

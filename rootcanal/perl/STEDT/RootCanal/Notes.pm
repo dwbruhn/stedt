@@ -609,7 +609,8 @@ ORDER BY is_main DESC, e.plgord#;
 	
 	if ($selected_uid && @$etyma_for_tag) {
 		# OK to concatenate the uid into the query since we've made sure it's just digits
-		$user_analysis_col = "(SELECT GROUP_CONCAT(tag_str ORDER BY ind) FROM lx_et_hash WHERE rn=lexicon.rn AND uid=$selected_uid) AS user_an,";
+		$user_analysis_col = "(SELECT GROUP_CONCAT(tag_str ORDER BY ind) FROM lx_et_hash WHERE rn=lexicon.rn AND uid=$selected_uid) AS user_an,
+			(SELECT GROUP_CONCAT(CONCAT(uid, ':', tag_str) ORDER BY uid,ind) FROM lx_et_hash WHERE rn=lexicon.rn AND uid!=8 AND uid!=$selected_uid) AS other_an,";
 		$user_analysis_where = "OR lx_et_hash.uid=$selected_uid";
 
 		# if there's two columns, we need to make sure the first column
@@ -721,7 +722,7 @@ EndOfSQL
 		selected_username => $selected_username, selected_uid => $selected_uid,
 		stedt_count => $stedt_count, supertag => $tag,
 		fields => ['lexicon.rn', 'analysis',
-			($selected_uid ? 'user_an' : ()),
+			($selected_uid ? ('user_an', 'other_an') : ()),
 			'languagenames.lgid', 'lexicon.reflex', 'lexicon.gloss', 'lexicon.gfn',
 			'languagenames.language', 'languagegroups.grpid', 'languagegroups.grpno', 'languagegroups.grp',
 			'languagenames.srcabbr', 'lexicon.srcid', 'languagegroups.ord', 'notes.rn'],

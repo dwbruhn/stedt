@@ -197,7 +197,7 @@ var show_tag = function z(e) {
 		z.curr_elem = '';
 		return;
 	}
-	if (classnames.length) tags = classnames.invoke('substring', 2); else return;
+	if (classnames.length) tags = classnames.invoke('substring', 2).map(function(n){return parseInt(n,10)}); else return;
 	if (z.cache[tags.join(',')]) {
 		z.show_info(z.cache[tags.join(',')], elem);
 		return;
@@ -485,7 +485,7 @@ var setup = { // in the form setup.[tablename].[fieldname]
 			size: 70
 		},
 		'analysis' : {
-		        label: 'analysis1',
+			label: 'analysis',
 			noedit: !(stedtuserprivs & 8),
 			hide: !(stedtuserprivs & 1),
 			size: 80,
@@ -498,6 +498,33 @@ var setup = { // in the form setup.[tablename].[fieldname]
 			size: 80,
 			transform: function (v) {
 				return v.replace(/, */g,', ');
+			}
+		},
+		'other_an' : {
+			label: 'others\' analyses',
+			noedit: true,
+			size: 80,
+			transform: function (v) {
+				if (v==='') return '';
+				var a, i, l, m, last_user = 0;
+				a = v.split(',');
+				l = a.length;
+				v = '';
+				for (i=0; i<l; ++i) {
+					m = a[i].match(/^(\d+):(.+)/);
+					if (m[1] !== last_user) {
+						if (last_user !== 0)
+							v += '<p>';
+						v += m[1] + ':';
+						last_user = m[1];
+					} else {
+						v += ', ';
+					}
+					if (parseInt(m[2],10))
+					{ v += '<a href="#" class="elink t_' + m[2] + '">' + m[2] + '</a>'; }
+					else v += m[2];
+				}
+				return v;
 			}
 		},
 		'languagenames.lgid' : {
@@ -616,7 +643,7 @@ var setup = { // in the form setup.[tablename].[fieldname]
 		'lexicon.semkey' : {
 		    label: 'semkey',
 			noedit: false,
-			size: 40,
+			size: 50,
 			hide: !(stedtuserprivs & 1),
 			transform : function (v) {
 				return '<a href="' + baseRef + 'edit/glosswords' + '?glosswords.semkey=' + v + '" target="edit_glosswords">' + v + '</a>';

@@ -44,7 +44,7 @@ var lgord2grp = {"90":"9. Sinitic","63":"6.1.2. Loloish","21":"2.1. Tibeto-Kanau
 for (var i = 1; i < num_tables; i++) {
 	var tbody = $('lexicon' + i).tBodies[0];
 	var lastord = -1;
-	var ord_index = tbody.rows[0].cells.length - 2;
+	var ord_index = $('languagegroups.ord').previousSiblings().length; // counting backwards, i.e., "tbody.rows[0].cells.length - 3", doesn't work because there may or may not be a HIST column depending on if the user is logged in
 	var visiblecols = $A(tbody.rows[0].cells).findAll(function (c) {return $(c).visible();}).length;
 	$A(tbody.rows).each(function (row, j) {
 		var ord = row.cells[ord_index].innerHTML;
