@@ -159,16 +159,17 @@ $t->wheres(
 	'lexicon.lgid' => 'int',
 	'languagenames.lgcode' => 'int',
 	'lexicon.semkey' => 'value',
+	# search for all tags regardless of tagger
 	'analysis' => sub {
 		my ($k,$v) = @_;
-		if ($v eq '0') { # use special value of 0 to search for empty analysis
-			return "0 = (SELECT COUNT(*) FROM lx_et_hash WHERE rn=lexicon.rn AND uid=$uid1)";
+		if ($v eq '0') { # use special value of 0 to search for empty analysis (i.e., nobody's tagged it anywhere)
+			return "0 = (SELECT COUNT(*) FROM lx_et_hash WHERE rn=lexicon.rn)";
 		} elsif ($v eq '!0') {
-			return "0 < (SELECT COUNT(*) FROM lx_et_hash WHERE rn=lexicon.rn AND uid=$uid1)";
+			return "0 < (SELECT COUNT(*) FROM lx_et_hash WHERE rn=lexicon.rn)";
 		} else {
 			my $is_string = ($v !~ /^\d+$/);
 			unless ($t->{query_from} =~ / lx_et_hash ON \(lexicon.rn/) {
-				$t->{query_from} .= " LEFT JOIN lx_et_hash ON (lexicon.rn = lx_et_hash.rn AND lx_et_hash.uid=$uid1)";
+				$t->{query_from} .= " LEFT JOIN lx_et_hash ON (lexicon.rn = lx_et_hash.rn)";
 			}
 			$v = '' if $v eq '\\\\'; # hack to find empty tag_str using a backslash
 			return $is_string ? "lx_et_hash.tag_str='$v'" : "lx_et_hash.tag=$v";

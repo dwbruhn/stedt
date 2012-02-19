@@ -333,7 +333,7 @@ var setup = { // in the form setup.[tablename].[fieldname]
 			noedit: true,
 			size: 50,
 			transform: function (v) {
-				return v != 0
+				return v !== '0'
 					? '<a href="#" class="lexlink">' + v + '&nbsp;r\'s</a>'
 					: v + '&nbsp;r\'s';
 			}
