@@ -155,7 +155,7 @@ $t->search_form_items(
 
 $t->wheres(
 	'languagegroups.grpid' => 'int',
-	'languagenames.srcabbr' => 'beginvalue',
+	'languagenames.srcabbr' => 'beginword',
 	'lexicon.lgid' => 'int',
 	'languagenames.lgcode' => 'int',
 	'lexicon.semkey' => 'value',

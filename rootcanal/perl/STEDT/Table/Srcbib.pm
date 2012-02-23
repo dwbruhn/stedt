@@ -61,7 +61,7 @@ $t->editable(
 );
 
 $t->wheres(
-	'srcbib.srcabbr' => sub {my ($k,$v) = @_; "$k LIKE '$v\%'"},
+	'srcbib.srcabbr' => 'beginword',
 	protogloss	=> 'word',
 	tags		=> 'word',
 	pages		=> 'word',
