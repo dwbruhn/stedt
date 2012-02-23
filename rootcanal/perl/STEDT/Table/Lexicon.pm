@@ -232,6 +232,7 @@ $t->wheres(
 $t->save_hooks(
 	'analysis' => sub {
 		my ($rn, $s) = @_;
+		$s =~ s/\s//g;
 		# simultaneously update lx_et_hash
 		$dbh->do('DELETE FROM lx_et_hash WHERE rn=? AND uid=?', undef, $rn, $uid1);
 		my $sth = $dbh->prepare(qq{INSERT INTO lx_et_hash (rn, tag, ind, tag_str, uid) VALUES (?, ?, ?, ?, ?)});
@@ -247,6 +248,7 @@ $t->save_hooks(
 	},
 	'user_an' => sub {
 		my ($rn, $s) = @_;
+		$s =~ s/\s//g;
 		$dbh->do('DELETE FROM lx_et_hash WHERE rn=? AND uid=?', undef, $rn, $uid2);
 		my $sth = $dbh->prepare(qq{INSERT INTO lx_et_hash (rn, tag, ind, tag_str, uid) VALUES (?, ?, ?, ?, ?)});
 		my $index = 0;
