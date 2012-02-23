@@ -247,6 +247,7 @@ $t->save_hooks(
 			# Insert new records into lx_et_hash based on the updated analysis field
 			my $tag_str = $tag;
 			$tag = 0 unless ($tag =~ s/^(\d+)/$1/); # allow tag numbers followed by any non-numeric string
+			die "$tag is too big of a tag number\n" unless $tag <= 65535;
 			$sth->execute($rn, $tag, $index, $tag_str, $uid1);
 			$index++;
 		}
@@ -261,6 +262,7 @@ $t->save_hooks(
 		for my $tag (split(/, */, $s)) {
 			my $tag_str = $tag;
 			$tag = 0 unless ($tag =~ s/^(\d+)/$1/);
+			die "$tag is too big of a tag number\n" unless $tag <= 65535;
 			$sth->execute($rn, $tag, $index, $tag_str, $uid2);
 			$index++;
 		}
