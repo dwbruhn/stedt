@@ -171,8 +171,18 @@ $t->wheres(
 			unless ($t->{query_from} =~ / lx_et_hash ON \(lexicon.rn/) {
 				$t->{query_from} .= " LEFT JOIN lx_et_hash ON (lexicon.rn = lx_et_hash.rn)";
 			}
-			$v = '' if $v eq '\\\\'; # hack to find empty tag_str using a backslash
-			return $is_string ? "lx_et_hash.tag_str='$v'" : "lx_et_hash.tag=$v";
+			if ($is_string) {
+				# use * to search for tag_str's that end with a particular string
+				if ($v =~ s/^\*//) {
+					# special case for * by itself to mean empty tag_str
+					# otherwise make sure there's a numeric char before it
+					if ($v eq '') { $v = '^'; }
+					else { $v = "[[:digit:]]$v"; }
+					return "lx_et_hash.tag_str RLIKE '$v\$'";
+				}
+				return "lx_et_hash.tag_str='$v'";
+			}
+			return "lx_et_hash.tag=$v";
 		}
 	},
 	'user_an' => sub {
@@ -187,7 +197,18 @@ $t->wheres(
 			unless ($t->{query_from} =~ / lx_et_hash AS l_e_h2 ON \(lexicon.rn/) {
 				$t->{query_from} .= " LEFT JOIN lx_et_hash AS l_e_h2 ON (lexicon.rn = l_e_h2.rn AND l_e_h2.uid=$uid2)";
 			}
-			return $is_string ? "l_e_h2.tag_str='$v'" : "l_e_h2.tag=$v";
+			if ($is_string) {
+				# use * to search for tag_str's that end with a particular string
+				if ($v =~ s/^\*//) {
+					# special case for * by itself to mean empty tag_str
+					# otherwise make sure there's a numeric char before it
+					if ($v eq '') { $v = '^'; }
+					else { $v = "[[:digit:]]$v"; }
+					return "l_e_h2.tag_str RLIKE '$v\$'";
+				}
+				return "l_e_h2.tag_str='$v'";
+			}
+			return "l_e_h2.tag=$v";
 		}
 	},
 	'lexicon.gloss' => 'word',
@@ -218,7 +239,7 @@ $t->save_hooks(
 		for my $tag (split(/, */, $s)) { # Split the contents of the field on commas
 			# Insert new records into lx_et_hash based on the updated analysis field
 			my $tag_str = $tag;
-			$tag = 0 unless ($tag =~ /^\d+$/);
+			$tag = 0 unless ($tag =~ s/^(\d+)/$1/); # allow tag numbers followed by any non-numeric string
 			$sth->execute($rn, $tag, $index, $tag_str, $uid1);
 			$index++;
 		}
@@ -231,7 +252,7 @@ $t->save_hooks(
 		my $index = 0;
 		for my $tag (split(/, */, $s)) {
 			my $tag_str = $tag;
-			$tag = 0 unless ($tag =~ /^\d+$/);
+			$tag = 0 unless ($tag =~ s/^(\d+)/$1/);
 			$sth->execute($rn, $tag, $index, $tag_str, $uid2);
 			$index++;
 		}
