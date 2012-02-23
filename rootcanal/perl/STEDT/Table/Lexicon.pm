@@ -175,8 +175,12 @@ $t->wheres(
 				# use * to search for tag_str's that end with a particular string
 				if ($v =~ s/^\*//) {
 					# special case for * by itself to mean empty tag_str
+					# ** for all numeric + non-numeric combinations
+					# *** for aberrant combinations
 					# otherwise make sure there's a numeric char before it
 					if ($v eq '') { $v = '^'; }
+					elsif ($v eq '*') { return "lx_et_hash.tag_str NOT LIKE lx_et_hash.tag AND lx_et_hash.tag_str RLIKE '[[:digit:]]'"; }
+					elsif ($v eq '**') { return "lx_et_hash.tag_str NOT LIKE lx_et_hash.tag AND lx_et_hash.tag_str RLIKE '[[:digit:]]' AND lx_et_hash.tag_str NOT RLIKE '^[[:digit:]]+[^[:digit:]]+\$'"; }
 					else { $v = "[[:digit:]]$v"; }
 					return "lx_et_hash.tag_str RLIKE '$v\$'";
 				}
@@ -203,6 +207,8 @@ $t->wheres(
 					# special case for * by itself to mean empty tag_str
 					# otherwise make sure there's a numeric char before it
 					if ($v eq '') { $v = '^'; }
+					elsif ($v eq '*') { return "l_e_h2.tag_str NOT LIKE l_e_h2.tag AND l_e_h2.tag_str RLIKE '[[:digit:]]'"; }
+					elsif ($v eq '**') { return "l_e_h2.tag_str NOT LIKE l_e_h2.tag AND l_e_h2.tag_str RLIKE '[[:digit:]]' AND l_e_h2.tag_str NOT RLIKE '^[[:digit:]]+[^[:digit:]]+\$'"; }
 					else { $v = "[[:digit:]]$v"; }
 					return "l_e_h2.tag_str RLIKE '$v\$'";
 				}
