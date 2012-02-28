@@ -44,7 +44,7 @@ $t->searchable(	'srcbib.srcabbr',
 	'srcbib.title',
 );
 $t->editable(
-#	     'srcbib.citation',
+	     'srcbib.citation',
 	     'srcbib.author',
 	     'srcbib.year',
 	     'srcbib.title',
