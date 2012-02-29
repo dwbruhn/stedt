@@ -82,7 +82,8 @@ my %is_stopword;
 sub mysql_fulltext_filter {
 	my (@ok, @not_ok);
 	for (@_) {
-		if ($is_stopword{$_} || 4 > length) { push @not_ok, $_ }
+		# lowercase words before checking the list!
+		if ($is_stopword{lc($_)} || 4 > length) { push @not_ok, $_ }
 		else { push @ok, $_ }
 	}
 	return \@ok, \@not_ok;
