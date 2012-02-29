@@ -64,10 +64,11 @@ sub updateprojects : Runmode {
 			$other_words = qq#OR gloss RLIKE "[[:<:]]${other_words}[[:>:]]"#;
 		} # otherwise it's empty and doesn't affect the search
 		# $row->[3] = $other_words; # debugging - see how many "left over" glosses there are
+		# count a lx_et_hash record as "ambiguous" below if it's '', 'm', or if any other lx_et_hash entries with the same rn are '' or 'm'
 		my $counts = $self->dbh->selectall_arrayref(
 			qq#SELECT COUNT(DISTINCT rn),
 				lx_et_hash.rn IS NOT NULL AS has_tags,
-				tag_str='' OR tag_str='m' AS is_ambiguous
+				tag_str='' OR tag_str='m' OR 0<(SELECT COUNT(*) FROM lx_et_hash WHERE rn=lexicon.rn AND (tag_str='' OR tag_str='m')) AS is_ambiguous
 			FROM lexicon LEFT JOIN lx_et_hash USING (rn)
 			WHERE MATCH(gloss) AGAINST ("$fulltext_words" IN BOOLEAN MODE)
 			$other_words
