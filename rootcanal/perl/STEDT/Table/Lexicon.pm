@@ -172,6 +172,7 @@ $t->wheres(
 				$t->{query_from} .= " LEFT JOIN lx_et_hash ON (lexicon.rn = lx_et_hash.rn)";
 			}
 			if ($is_string) {
+				STEDT::Table::prep_regex $v;
 				# use * to search for tag_str's that end with a particular string
 				if ($v =~ s/^\*//) {
 					# special case for * by itself to mean empty tag_str
@@ -191,7 +192,6 @@ $t->wheres(
 	},
 	'user_an' => sub {
 		my ($k,$v) = @_;
-		# $v =~ s/\D//g; return "'bad int!'='0'" unless $v =~ /\d/;
 		if ($v eq '0') {
 			return "0 = (SELECT COUNT(*) FROM lx_et_hash WHERE rn=lexicon.rn AND uid=$uid2)";
 		} elsif ($v eq '!0') {
@@ -202,10 +202,8 @@ $t->wheres(
 				$t->{query_from} .= " LEFT JOIN lx_et_hash AS l_e_h2 ON (lexicon.rn = l_e_h2.rn AND l_e_h2.uid=$uid2)";
 			}
 			if ($is_string) {
-				# use * to search for tag_str's that end with a particular string
+				STEDT::Table::prep_regex $v;
 				if ($v =~ s/^\*//) {
-					# special case for * by itself to mean empty tag_str
-					# otherwise make sure there's a numeric char before it
 					if ($v eq '') { $v = '^'; }
 					elsif ($v eq '*') { return "l_e_h2.tag_str NOT LIKE l_e_h2.tag AND l_e_h2.tag_str RLIKE '[[:digit:]]'"; }
 					elsif ($v eq '**') { return "l_e_h2.tag_str NOT LIKE l_e_h2.tag AND l_e_h2.tag_str RLIKE '[[:digit:]]' AND l_e_h2.tag_str NOT RLIKE '^[[:digit:]]+[^[:digit:]]+\$'"; }
@@ -238,12 +236,13 @@ $t->wheres(
 $t->save_hooks(
 	'analysis' => sub {
 		my ($rn, $s) = @_;
-		$s =~ s/\s//g;
 		# simultaneously update lx_et_hash
 		$dbh->do('DELETE FROM lx_et_hash WHERE rn=? AND uid=?', undef, $rn, $uid1);
 		my $sth = $dbh->prepare(qq{INSERT INTO lx_et_hash (rn, tag, ind, tag_str, uid) VALUES (?, ?, ?, ?, ?)});
 		my $index = 0;
-		for my $tag (split(/, */, $s)) { # Split the contents of the field on commas
+		$s =~ s/^\s+//; # strip starting and trailing whitespace
+		$s =~ s/\s+$//;
+		for my $tag (split(/\s*,\s*/, $s)) { # Split the contents of the field on commas (whitespace surrounding commas will be stripped)
 			# Insert new records into lx_et_hash based on the updated analysis field
 			my $tag_str = $tag;
 			$tag = 0 unless ($tag =~ s/^(\d+)/$1/); # allow tag numbers followed by any non-numeric string
@@ -259,7 +258,9 @@ $t->save_hooks(
 		$dbh->do('DELETE FROM lx_et_hash WHERE rn=? AND uid=?', undef, $rn, $uid2);
 		my $sth = $dbh->prepare(qq{INSERT INTO lx_et_hash (rn, tag, ind, tag_str, uid) VALUES (?, ?, ?, ?, ?)});
 		my $index = 0;
-		for my $tag (split(/, */, $s)) {
+		$s =~ s/^\s+//;
+		$s =~ s/\s+$//;
+		for my $tag (split(/\s*,\s*/, $s)) {
 			my $tag_str = $tag;
 			$tag = 0 unless ($tag =~ s/^(\d+)/$1/);
 			die "$tag is too big of a tag number\n" unless $tag <= 65535;

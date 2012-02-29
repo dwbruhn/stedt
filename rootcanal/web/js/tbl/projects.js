@@ -115,7 +115,7 @@ setup.projects = {
     'pct' : {
 	label: 'pct complete',
 	noedit: true,
-	size: 30
+	size: 50
     },
     'projects.count_reflexes' : {
 	label: 'reflexes',
@@ -129,6 +129,11 @@ setup.projects = {
     },
     'projects.tagged_reflexes' : {
 	label: 'tagged',
+	noedit: true,
+	size: 30
+    },
+    'projects.ambig_reflexes' : {
+	label: "'m'?",
 	noedit: true,
 	size: 30
     },

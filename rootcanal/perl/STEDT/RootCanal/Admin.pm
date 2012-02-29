@@ -65,24 +65,34 @@ sub updateprojects : Runmode {
 		} # otherwise it's empty and doesn't affect the search
 		# $row->[3] = $other_words; # debugging - see how many "left over" glosses there are
 		my $counts = $self->dbh->selectall_arrayref(
-			qq#SELECT COUNT(DISTINCT rn), lx_et_hash.rn IS NULL FROM lexicon LEFT JOIN lx_et_hash USING (rn)
+			qq#SELECT COUNT(DISTINCT rn),
+				lx_et_hash.rn IS NOT NULL AS has_tags,
+				tag_str='' OR tag_str='m' AS is_ambiguous
+			FROM lexicon LEFT JOIN lx_et_hash USING (rn)
 			WHERE MATCH(gloss) AGAINST ("$fulltext_words" IN BOOLEAN MODE)
 			$other_words
-			GROUP BY 2#);
-		my ($tagged, $not_tagged) = (0,0);
+			GROUP BY 2,3#);
+		my ($tagged, $not_tagged, $sorta_tagged) = (0,0,0);
 		foreach (@$counts) {
-			my ($count, $is_null) = @$_;
-			if ($is_null) { $not_tagged = $count; }
+			my ($count, $has_tags, $is_ambiguous) = @$_;
+			if (!$has_tags) { $not_tagged = $count; }
+			elsif ($is_ambiguous) { $sorta_tagged = $count; }
 			else { $tagged = $count; }
 		}
-		my $total_found = $tagged + $not_tagged;
+		my $total_found = $tagged + $sorta_tagged + $not_tagged;
 		
-		$row->[5] = $tagged;
+		$row->[5] = $tagged . ($sorta_tagged ? "(+$sorta_tagged)" : '');
 		$row->[6] = $total_found;
-		$row->[4] = $total_found ? sprintf("%.1f", 100 * $tagged/$total_found) : "0.0";
+		$row->[4] = $total_found
+			? sprintf("%.1f", 100 * $tagged/$total_found)
+				. ($sorta_tagged
+						? ' - ' . sprintf("%.1f", 100 * ($tagged+$sorta_tagged)/$total_found)
+						: '')
+			: "0.0"; # no dividing by zero!
 		
 		$row->[7] = $self->dbh->selectrow_array(qq#SELECT count(*) FROM etyma   WHERE protogloss RLIKE "[[:<:]]($words)[[:>:]]"#);
-		$self->dbh->do("UPDATE projects SET tagged_reflexes=?,count_reflexes=?,count_etyma=? WHERE id=?", undef, @$row[5,6,7,0]);
+		$self->dbh->do("UPDATE projects SET tagged_reflexes=?,ambig_reflexes=?,count_reflexes=?,count_etyma=? WHERE id=?", undef,
+			$tagged, $sorta_tagged, $total_found, $row->[7], $row->[0]);
 		shift @$row;
 	}
 	
