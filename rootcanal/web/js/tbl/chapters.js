@@ -6,6 +6,7 @@ setup.chapters = {
     },
     'chapters.semkey' : {
 	label: 'semkey',
+	noedit: true,
 	size: 80
     },
     'chapters.chaptertitle' : {
