@@ -85,7 +85,8 @@ $t->save_hooks(
 		# on the semkey field in the database. Otherwise it is safe to go on.
 		
 		# update the corresponding field in etyma, lexicon, and glosswords
-		$dbh->do('UPDATE etyma SET semkey=? WHERE semkey=?', undef, $semkey, $old_semkey);
+		$dbh->do('UPDATE etyma SET semkey=? WHERE semkey=?', undef, $semkey, $old_semkey);	# update semkey field, but glosswords program will overwrite this anyway
+		$dbh->do('UPDATE etyma SET chapter=? WHERE chapter=?', undef, $semkey, $old_semkey);	# update chapter field
 		$dbh->do('UPDATE lexicon SET semkey=? WHERE semkey=?', undef, $semkey, $old_semkey);
 		$dbh->do('UPDATE glosswords SET semkey=? WHERE semkey=?', undef, $semkey, $old_semkey);
 		return 0;
