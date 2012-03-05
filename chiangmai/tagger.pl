@@ -13,7 +13,7 @@ use STEDTUtil;
 # Both @fields and $names must be edited when the set of fields in the
 # interface changes.
 
-my $SearchLimit = 500;
+my $SearchLimit = 3000;
 my $SubgroupWidth = 23;
 
 # A list of database fields ordered by their sequence in the UI
@@ -21,7 +21,6 @@ my @fields = ('lexicon.reflex',
 	      'lexicon.gloss', 
 	      'languagenames.language', 'languagegroups.grp',
 	      'languagenames.srcabbr', 'lexicon.srcid',
-	      'lexicon.analysis',
 	      'lexicon.semcat', 
 	      'lexicon.rn',
 	      'COUNT(notes.noteid)'
@@ -34,7 +33,6 @@ my $names = {
 	     'languagenames.language' => 'Language',
 	     'languagegroups.grp' => 'Subgroup',
 	     'languagenames.srcabbr' => 'Source',
-	     'lexicon.analysis' => 'Analysis',
 	     'lexicon.semcat' => 'SemCat',
 	     'COUNT(notes.noteid)' => 'Notes',
 	     'lexicon.srcid' => 'SourceID',
@@ -48,7 +46,6 @@ my @labels = map {$names->{$_}} @fields;
 
 # A hash-reference designating the fields which are editable.
 my $editable = {
-		 'lexicon.analysis' => 1,
 #		 'lexicon.reflex' => 1,
 #		 'lexicon.gloss' => 1,
 		 };
@@ -117,14 +114,6 @@ sub query_where {
 				my $restriction;
 				if ($key eq 'lexicon.rn') {
 					$restriction = $key . '=' . $value;
-				} elsif ($key eq 'lexicon.analysis') {
-					if ($value eq '0') {
-						$restriction = "$key=''";
-					} else {
-						#$restriction = $key . " RLIKE '[[:<:]]" . $value . "[[:>:]]'";
-						$restriction = "lx_et_hash.tag = $value";
-						$need_hash = 1;
-					}
 				} elsif ($key eq 'lexicon.gloss') {
 					if ($value eq '0') {
 						$restriction = "$key=''";
@@ -229,19 +218,7 @@ sub make_update_form {
   # special utility to replace etyma tags
   
 #  print $cgi->start_form(-onsubmit=><<EOF); # escape \\ once for perl, once for js
-#var x = document.forms[2].elements;
-#var r = new RegExp('\\\\b' + document.getElementById('oldtag').value + '\\\\b', 'g');
-#for (i=0; i< x.length; i++) {
-#	if (x[i].name.match(/^lexicon.analysis/)) {
-#		x[i].value = x[i].value.replace(r,document.getElementById('newtag').value)
-#	}
-#}
-#return false;
-#EOF
   
-#print $cgi->textfield(-id=>'oldtag',-name =>'oldtag', -size =>4 ),
-#    $cgi->textfield(-id=>'newtag', -name =>'newtag', -size =>4 ),
-#      $cgi->submit(-name=>'Replace Tags');
   print $cgi->end_form;
   
   # now for the results/update table
