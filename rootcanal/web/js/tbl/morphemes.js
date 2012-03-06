@@ -12,6 +12,30 @@ setup.morphemes = {
 	hide: true,
 	size: 70
     },
+    'morphemes.prefx' : {
+	label: 'pfx',
+	noedit: true,
+	hide: false,
+	size: 30
+    },
+    'morphemes.initial' : {
+	label: 'I',
+	noedit: true,
+	hide: false,
+	size: 30
+    },
+    'morphemes.rhyme' : {
+	label: 'R',
+	noedit: true,
+	hide: false,
+	size: 30
+    },
+    'morphemes.tone' : {
+	label: 'T',
+	noedit: true,
+	hide: false,
+	size: 30
+    },
     'analysis' : {
 	label: 'analysis1',
 	noedit: !(stedtuserprivs & 8),
@@ -35,11 +59,13 @@ setup.morphemes = {
 //    },
     'morphemes.reflex' : {
 	label: 'form',
+	noedit: true,
 	noedit: !(stedtuserprivs & 1),
 	size: 160
     },
     'morphemes.morpheme' : {
 	label: 'morpheme',
+	noedit: true,
 	noedit: !(stedtuserprivs & 16),
 	size: 80
     },

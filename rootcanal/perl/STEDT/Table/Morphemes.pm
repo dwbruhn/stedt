@@ -50,6 +50,10 @@ $t->fields(
 #	'morphemes.status',
 #	'morphemes.semcat',
 	'morphemes.semkey',
+	'morphemes.prefx',
+	'morphemes.initial',
+	'morphemes.rhyme',
+	'morphemes.tone',
 	'(SELECT COUNT(*) FROM notes WHERE rn=morphemes.rn) AS num_notes'
 );
 $t->searchable('morphemes.rn', 'analysis', 'user_an', 'morphemes.reflex',
@@ -59,7 +63,11 @@ $t->searchable('morphemes.rn', 'analysis', 'user_an', 'morphemes.reflex',
 	'morphemes.srcabbr', 'morphemes.srcid',
 #	'morphemes.semcat', 
 	'morphemes.semkey', 
-#	'morphemes.lgid', 
+	'morphemes.prefx',
+	'morphemes.initial',
+	'morphemes.rhyme',
+	'morphemes.tone',
+	'morphemes.lgid', 
 #	'morphemes.status',
 );
 $t->field_visible_privs(
@@ -80,23 +88,41 @@ $t->field_editable_privs(
 
 # Stuff for searching
 $t->search_form_items(
-#	'languagegroups.grp' => sub {
-#		my $cgi = shift;
-#		my $grps = $dbh->selectall_arrayref("SELECT grpno, CONCAT(grpno,' ',LEFT(grp,15),' (id:',grpid,')') FROM languagegroups");
-#		my @grp_nos = map {$_->[0]} @$grps;
-#		my %grp_labels;
-#		@grp_labels{@grp_nos} = map {$_->[1]} @$grps;
+	'languagegroups.grp' => sub {
+		my $cgi = shift;
+		my $grps = $dbh->selectall_arrayref("SELECT grpno, CONCAT(grpno,' ',LEFT(grp,15),' (id:',grpid,')') FROM languagegroups");
+		my @grp_nos = map {$_->[0]} @$grps;
+		my %grp_labels;
+		@grp_labels{@grp_nos} = map {$_->[1]} @$grps;
 		
-#		return $cgi->popup_menu(-name => 'languagegroups.grp', -values=>['',@grp_nos],
-# 								-default=>'', # -override=>1,
-#  								-labels=>\%grp_labels);
-#	},
-#	'morphemes.status' => sub {
-#		my $cgi = shift;
-#		# get list of statuses
-#		my $statuses = $dbh->selectall_arrayref("SELECT DISTINCT status FROM morphemes");
-#		return $cgi->popup_menu(-name => 'morphemes.status', -values=>['', map {@$_} @$statuses], -labels=>{'0'=>'(no value)'},  -default=>'');
-#	},
+		return $cgi->popup_menu(-name => 'languagegroups.grp', -values=>['',@grp_nos],
+ 								-default=>'', # -override=>1,
+  								-labels=>\%grp_labels);
+	},
+	'morphemes.protolg' => sub {
+		my $cgi = shift;
+		# get list of protolgs
+		my $protolg = $dbh->selectall_arrayref("SELECT DISTINCT protolg FROM morphemes");
+		return $cgi->popup_menu(-name => 'morphemes.protolg', -values=>['', map {@$_} @$protolg], -labels=>{'0'=>'(no value)'},  -default=>'');
+	},
+	'morphemes.initial' => sub {
+		my $cgi = shift;
+		# get list of initials
+		my $initial = $dbh->selectall_arrayref("SELECT DISTINCT initial FROM morphemes ORDER by initial");
+		return $cgi->popup_menu(-name => 'morphemes.initial', -values=>['', map {@$_} @$initial], -labels=>{'0'=>'(no value)'},  -default=>'');
+	},
+	'morphemes.rhyme' => sub {
+		my $cgi = shift;
+		# get list of rhymes
+		my $rhyme = $dbh->selectall_arrayref("SELECT DISTINCT rhyme FROM morphemes ORDER BY rhyme");
+		return $cgi->popup_menu(-name => 'morphemes.rhyme', -values=>['', map {@$_} @$rhyme], -labels=>{'0'=>'(no value)'},  -default=>'');
+	},
+	'morphemes.tone' => sub {
+		my $cgi = shift;
+		# get list of tones
+		my $tone = $dbh->selectall_arrayref("SELECT DISTINCT tone FROM morphemes ORDER by tone");
+		return $cgi->popup_menu(-name => 'morphemes.tone', -values=>['', map {@$_} @$tone], -labels=>{'0'=>'(no value)'},  -default=>'');
+	}
 );
 
 $t->wheres(
@@ -134,6 +160,12 @@ $t->wheres(
 		}
 	},
 	'morphemes.gloss' => 'word',
+	'morphemes.morpheme' => 'value',
+	'morphemes.prefx' => 'value',
+	'morphemes.initial' => 'value',
+	'morphemes.rhyme' => 'value',
+	'morphemes.tone' => 'value',
+	'morphemes.lgid' => 'value',
 	'morphemes.grp' => sub {my ($k,$v) = @_; $v =~ s/(\.0)+$//; "morphemes.grpno LIKE '$v\%'"},
 		# make it search all subgroups as well
 	'morphemes.language' => sub {

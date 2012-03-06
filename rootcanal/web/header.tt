@@ -46,6 +46,9 @@ logged in as <b>[% user %]</b>
 <option value="[% self_url %]/edit/srcbib">SrcBib</option>
 <option value="[% self_url %]/edit/hptb">HPTB</option>
 <option value="[% self_url %]/edit/projects">Projects</option>
+<option value="[% self_url %]/edit/chapters">Chapters</option>
+<option value="[% self_url %]/edit/morphemes">Morphemes</option>
+<option value="[% self_url %]/edit/soundlaws">Sound Laws</option>
 <option value="[% self_url %]/edit/glosswords">Glosses</option>
 <option value="[% self_url %]/admin/progress">Progress</option>
 [% END # has_privs(1) -%]
