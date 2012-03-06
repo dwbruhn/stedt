@@ -38,7 +38,8 @@ setup.morphemes = {
     },
     'analysis' : {
 	label: 'analysis1',
-	noedit: !(stedtuserprivs & 8),
+//	noedit: !(stedtuserprivs & 8),
+	noedit: true,
 	hide: !(stedtuserprivs & 1),
 	size: 80,
 	transform: function (v) {
@@ -48,6 +49,7 @@ setup.morphemes = {
     'user_an' : {
 	label: 'analysis2',
 	size: 80,
+	noedit: true,
 	transform: function (v) {
 	    return v.replace(/, */g,', ');
 	}
