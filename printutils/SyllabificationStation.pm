@@ -138,6 +138,28 @@ sub fit_word_to_analysis {
     return $satisfied;
 }
 
+
+=head2 split_form($self, $word)
+
+
+=cut
+
+sub split_form {
+    my ($self, $word) = @_;
+    print "Word: $word\n"
+        if ($self->{debug});
+    my $num_tags = scalar(@{$self->{tags}});
+    for my $re_name (@{$self->{re_order}}) {
+        $self->{grammar_used} = $re_name;
+        my $re = $self->{regexes}{$re_name};
+        print "RE Name: $re_name\n" #"RE: $re\n\n" 
+            if ($self->{debug});
+        $self->syllabify_per_regex($re, $word);
+        last if ($self->{num_syls} > 1);
+    }
+}
+
+
 =cut
 
 =head2 get_xml_format($self, $element, $attribute)
