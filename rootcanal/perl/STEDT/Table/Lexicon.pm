@@ -222,13 +222,17 @@ $t->wheres(
 		my ($k,$v) = @_;
 		if ($v eq '0') {
 			return "lexicon.lgid=0";
-		} else {
-			STEDT::Table::prep_regex $v;
-			if ($v =~ s/^\*(?=.)//) {
-				return "$k RLIKE '$v'";
-			}
-			return "$k RLIKE '[[:<:]]$v'";
 		}
+		# see STEDT::Table::Languagenames.pm for comments
+		if ($v =~ s/^\*/\\\*/) { # escape initial *
+			STEDT::Table::prep_regex $v;
+			return "$k RLIKE '^$v'";
+		}
+		$v =~ s/\(/\\\(/g;
+		$v =~ s/\)/\\\)/g;
+		STEDT::Table::prep_regex $v;
+		$v =~ s/(\w)/[[:<:]]$1/;
+		return "$k RLIKE '$v'";
 	},
 );
 
