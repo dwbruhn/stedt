@@ -131,7 +131,7 @@ setup.morphemes = {
 	label: 'source(s)',
 	noedit: true,
 	size: 80,
-	hide: true
+	hide: false
     },
     'morphemes.srcid' : {
 	label: 'source',
@@ -144,7 +144,7 @@ setup.morphemes = {
     },
     'morphemes.semkey' : {
 	label: 'semkey',
-	noedit: false,
+	noedit: true,
 	size: 40,
 	hide: false
     },

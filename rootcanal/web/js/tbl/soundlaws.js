@@ -11,7 +11,8 @@ setup.soundlaws = {
        noedit: false,
        hide: false,
        transform : function (v, key, rec, n) {
-	    return '<a href="' + baseRef + 'edit/morphemes?morphemes.initial=' + rec[5] +'&morphemes.lgid=' + rec[9] + '" target="edit_etyma">' + v + '</a>';
+	   var slot = {'I': 'initial', 'R' : 'rhyme', 'T': 'tone'}[rec[2]];
+	   return '<a href="' + baseRef + 'edit/morphemes?morphemes.' + slot + '=' + rec[5] +'&morphemes.lgid=' + rec[9] + '" target="edit_etyma">' + v + '</a>';
        },
        size: 40
     },
