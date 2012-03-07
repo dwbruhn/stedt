@@ -444,6 +444,30 @@ var setup = { // in the form setup.[tablename].[fieldname]
 				return '<a href="' + baseRef + 'edit/etyma' + '?etyma.semkey=' + v + '" target="edit_etyma">' + v + '</a>';
 			}
 		},
+	    'etyma.prefix' : {
+		label: 'pfx',
+		noedit: true,
+		hide: false,
+		size: 30
+	    },
+	    'etyma.initial' : {
+		label: 'I',
+		noedit: true,
+		hide: false,
+		size: 30
+	    },
+	    'etyma.rhyme' : {
+		label: 'R',
+		noedit: true,
+		hide: false,
+		size: 30
+	    },
+	    'etyma.tone' : {
+		label: 'T',
+		noedit: true,
+		hide: false,
+		size: 30
+	    },
 		'etyma.possallo'  : {
 			label: '⪤?',
 			size: 40

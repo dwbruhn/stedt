@@ -33,8 +33,8 @@ $t->group_by('morphemes.handle, morphemes.grpno');
 $t->fields(
 	'morphemes.id',
 	'morphemes.rn',
-	'morphemes.tag AS analysis',
-	"(SELECT GROUP_CONCAT(DISTINCT tag_str SEPARATOR ', ') FROM lx_et_hash WHERE rn=morphemes.rn AND mseq = ind+1) AS user_an",
+	'morphemes.tag AS tag',
+	"(SELECT GROUP_CONCAT(DISTINCT tag_str SEPARATOR ', ') FROM lx_et_hash WHERE rn=morphemes.rn AND mseq = ind) AS user_tag",
 	"GROUP_CONCAT(DISTINCT morpheme SEPARATOR ', ') AS morphemes",
 	"GROUP_CONCAT(DISTINCT reflex SEPARATOR ', ')   AS reflexes",
 	"GROUP_CONCAT(DISTINCT gloss SEPARATOR ', ')    AS glosses",
@@ -56,7 +56,7 @@ $t->fields(
 	'morphemes.tone',
 	'(SELECT COUNT(*) FROM notes WHERE rn=morphemes.rn) AS num_notes'
 );
-$t->searchable('morphemes.rn', 'analysis', 'user_an', 'morphemes.reflex',
+$t->searchable('morphemes.rn', 'tag', 'user_tag', 'morphemes.reflex',
 	'morphemes.morpheme',
 	'morphemes.gloss', 'morphemes.language', 'morphemes.grp',
 #	'languagegroups.grpid',
@@ -71,11 +71,11 @@ $t->searchable('morphemes.rn', 'analysis', 'user_an', 'morphemes.reflex',
 #	'morphemes.status',
 );
 $t->field_visible_privs(
-	'user_an' => 1,
+	'user_tag' => 1,
 );
 $t->field_editable_privs(
-	'analysis' => 8,
-	'user_an' => 1,
+	'tag' => 8,
+	'user_tag' => 1,
 	'morphemes.reflex' => 1,
 	'morphemes.morpheme' => 1,
 	'morphemes.gloss' => 16,
@@ -129,9 +129,9 @@ $t->wheres(
 #	'languagegroups.grpid' => 'int',
 	'morphemes.lgid' => 'int',
 	'morphemes.semkey' => 'value',
-	'analysis' => sub {
+	'tag' => sub {
 		my ($k,$v) = @_;
-		if ($v eq '0') { # use special value of 0 to search for empty analysis
+		if ($v eq '0') { # use special value of 0 to search for empty tag
 			return "0 = (SELECT COUNT(*) FROM lx_et_hash WHERE rn=morphemes.rn AND uid=$uid1)";
 		} elsif ($v eq '!0') {
 			return "0 < (SELECT COUNT(*) FROM lx_et_hash WHERE rn=morphemes.rn AND uid=$uid1)";
@@ -144,7 +144,7 @@ $t->wheres(
 			return $is_string ? "lx_et_hash.tag_str='$v'" : "lx_et_hash.tag=$v";
 		}
 	},
-	'user_an' => sub {
+	'user_tag' => sub {
 		my ($k,$v) = @_;
 		# $v =~ s/\D//g; return "'bad int!'='0'" unless $v =~ /\d/;
 		if ($v eq '0') {
@@ -184,28 +184,28 @@ $t->wheres(
 
 
 $t->save_hooks(
-	'analysis' => sub {
+	'tag' => sub {
 		my ($rn, $s) = @_;
 		# simultaneously update lx_et_hash
 		$dbh->do('DELETE FROM lx_et_hash WHERE rn=? AND uid=?', undef, $rn, $uid1);
 		my $sth = $dbh->prepare(qq{INSERT INTO lx_et_hash (rn, tag, ind, tag_str, uid) VALUES (?, ?, ?, ?, ?)});
 		my $index = 0;
 		for my $tag (split(/, */, $s)) { # Split the contents of the field on commas
-			# Insert new records into lx_et_hash based on the updated analysis field
+			# Insert new records into lx_et_hash based on the updated tag field
 			my $tag_str = $tag;
 			$tag = 0 unless ($tag =~ /^\d+$/);
 			$sth->execute($rn, $tag, $index, $tag_str, $uid1);
 			$index++;
 		}
-		# for old time's sake, save this in the analysis field too
+		# for old time's sake, save this in the tag field too
 		if ($uid1 == 8) {
-			my $update = qq{UPDATE morphemes SET analysis=? WHERE rn=?};
+			my $update = qq{UPDATE morphemes SET tag=? WHERE rn=?};
 			my $update_sth = $dbh->prepare($update);
 			$update_sth->execute($s, $rn);
 		}
 		return 0;
 	},
-	'user_an' => sub {
+	'user_tag' => sub {
 		my ($rn, $s) = @_;
 		$dbh->do('DELETE FROM lx_et_hash WHERE rn=? AND uid=?', undef, $rn, $uid2);
 		my $sth = $dbh->prepare(qq{INSERT INTO lx_et_hash (rn, tag, ind, tag_str, uid) VALUES (?, ?, ?, ?, ?)});
@@ -227,7 +227,7 @@ $t->footer_extra(sub {
 var x = document.getElementById('update_form').elements;
 var r = new RegExp('\\\\b' + document.getElementById('oldtag').value + '\\\\b', 'g');
 for (i=0; i< x.length; i++) {
-	if (x[i].name.match(/^analysis/)) {
+	if (x[i].name.match(/^tag/)) {
 		x[i].value = x[i].value.replace(r,document.getElementById('newtag').value)
 	}
 }
@@ -243,7 +243,7 @@ EOF
 $t->addable(
 	'morphemes.lgid',
 	'morphemes.srcid',
-	'analysis',
+	'tag',
 	'morphemes.reflex',
 	'morphemes.gloss',
 	'morphemes.gfn',

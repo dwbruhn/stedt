@@ -23,6 +23,10 @@ $t->fields('etyma.tag',
 	'(SELECT COUNT(*) FROM notes WHERE tag=etyma.tag) AS num_notes',
 	'(SELECT COUNT(*) FROM notes WHERE tag=etyma.tag AND notetype="F") AS num_comparanda',
 	'etyma.xrefs',
+	'etyma.prefix',
+	'etyma.initial',
+	'etyma.rhyme',
+	'etyma.tone',
 	'etyma.allofams' ,
 	'etyma.possallo' ,
 	'etyma.public',
@@ -36,6 +40,10 @@ $t->field_visible_privs(
 	'etyma.hptbid' => 1,
 	'etyma.semkey'  => 1,
 	'etyma.xrefs' => 1,
+	'etyma.prefix' => 1,
+	'etyma.initial' => 1,
+	'etyma.rhyme' => 1,
+	'etyma.tone' => 1,
 	'etyma.exemplary' => 1,
 	'etyma.sequence'  => 3,
 	'etyma.possallo'  => 1,
@@ -54,6 +62,10 @@ $t->searchable('etyma.tag',
 	'etyma.semkey',
 	'etyma.xrefs',#'etyma.possallo','etyma.allofams'	# search these and tagging note and notes DB before deleting records. Also switch to OR searching below.
 	'num_notes',
+	'etyma.prefix',
+	'etyma.initial',
+	'etyma.rhyme',
+	'etyma.tone',
 	'etyma.public',
 );
 $t->field_editable_privs(
@@ -65,6 +77,10 @@ $t->field_editable_privs(
 	'etyma.plg' => 1,
 	'etyma.notes' => 1,
 	'etyma.hptbid' => 1,
+	'etyma.prefix' => 1,
+	'etyma.initial' => 1,
+	'etyma.rhyme' => 1,
+	'etyma.tone' => 1,
 	'etyma.xrefs' => 16,
 	'etyma.possallo' => 16,
 	'etyma.semkey' => 16,
@@ -75,6 +91,30 @@ $t->field_editable_privs(
 
 # Stuff for searching
 $t->search_form_items(
+	'etyma.prefix' => sub {
+		my $cgi = shift;
+		# get list of prefixs
+		my $prefix = $dbh->selectall_arrayref("SELECT DISTINCT prefix FROM etyma ORDER by prefix");
+		return $cgi->popup_menu(-name => 'etyma.prefix', -values=>['', map {@$_} @$prefix], -labels=>{'0'=>'(no value)'},  -default=>'');
+	},
+	'etyma.initial' => sub {
+		my $cgi = shift;
+		# get list of initials
+		my $initial = $dbh->selectall_arrayref("SELECT DISTINCT initial FROM etyma ORDER by initial");
+		return $cgi->popup_menu(-name => 'etyma.initial', -values=>['', map {@$_} @$initial], -labels=>{'0'=>'(no value)'},  -default=>'');
+	},
+	'etyma.rhyme' => sub {
+		my $cgi = shift;
+		# get list of rhymes
+		my $rhyme = $dbh->selectall_arrayref("SELECT DISTINCT rhyme FROM etyma ORDER BY rhyme");
+		return $cgi->popup_menu(-name => 'etyma.rhyme', -values=>['', map {@$_} @$rhyme], -labels=>{'0'=>'(no value)'},  -default=>'');
+	},
+	'etyma.tone' => sub {
+		my $cgi = shift;
+		# get list of tones
+		my $tone = $dbh->selectall_arrayref("SELECT DISTINCT tone FROM etyma ORDER by tone");
+		return $cgi->popup_menu(-name => 'etyma.tone', -values=>['', map {@$_} @$tone], -labels=>{'0'=>'(no value)'},  -default=>'');
+	},
 	'etyma.plg' => sub {
 		my $cgi = shift;
 		# get list of proto-lgs
@@ -85,7 +125,6 @@ $t->search_form_items(
 			# see 'wheres' sub, below
 			$plgs->[0][0] = '0';
 		}
-		
 		return $cgi->popup_menu(-name => 'etyma.plg', -values=>['', map {@$_} @$plgs], -labels=>{'0'=>'(no value)'},  -default=>'');
 	}
 );
@@ -94,7 +133,11 @@ $t->wheres(
 	'etyma.tag' => sub {my ($k,$v) = @_; '(' . STEDT::Table::where_int($k,$v) . ' OR ' . STEDT::Table::where_int('etyma.supertag',$v) . ')'},
 	'etyma.plg'	=> sub {my ($k,$v) = @_; $v = '' if $v eq '0'; "$k LIKE '$v'"},
 	'etyma.chapter' => sub { my ($k,$v) = @_; $v eq '0' ? "$k=''" : "$k LIKE '$v'" },
-	'etyma.protogloss'	=> 'word',
+	'etyma.protogloss' => 'word',
+	'etyma.prefix' => 'value',
+	'etyma.initial' => 'value',
+	'etyma.rhyme' => 'value',
+	'etyma.tone' => 'value',
 	'etyma.sequence'  => sub {
 		my ($k,$v) = @_;
 		if ($v =~ /^(\d+)([a-i])?$/) {

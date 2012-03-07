@@ -8,7 +8,7 @@ setup.soundlaws = {
     },
    'soundlaws.corrid' : {
        label: 'corrid',
-       noedit: false,
+       noedit: true,
        hide: false,
        transform : function (v, key, rec, n) {
 	   var slot = {'I': 'initial', 'R' : 'rhyme', 'T': 'tone'}[rec[2]];
@@ -18,37 +18,37 @@ setup.soundlaws = {
     },
     'soundlaws.slot' : {
 	label: 'slot',
-	noedit: false,
+	noedit: true,
 	hide: false,
 	size: 40
     },
     'soundlaws.protolg' : {
 	label: 'protolg',
-	noedit: false,
+	noedit: true,
 	hide: false,
 	size: 60
     },
     'soundlaws.ancestor' : {
 	label: 'ancestor',
-	noedit: false,
+	noedit: true,
 	hide: false,
 	size: 50
     },
     'soundlaws.outcome' : {
 	label: 'outcome',
-	noedit: false,
+	noedit: true,
 	hide: false,
 	size: 50
     },
     'soundlaws.language' : {
 	label: 'language',
-	noedit: false,
+	noedit: true,
 	hide: false,
 	size: 100
     },
     'soundlaws.context' : {
 	label: 'context',
-	noedit: false,
+	noedit: true,
 	hide: false,
 	size: 50
     },

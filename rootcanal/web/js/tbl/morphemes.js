@@ -36,8 +36,8 @@ setup.morphemes = {
 	hide: false,
 	size: 30
     },
-    'analysis' : {
-	label: 'analysis1',
+    'tag' : {
+	label: 'stedt',
 //	noedit: !(stedtuserprivs & 8),
 	noedit: true,
 	hide: !(stedtuserprivs & 1),
@@ -46,12 +46,16 @@ setup.morphemes = {
 	    return v.replace(/, */g,', ');
 	}
     },
-    'user_an' : {
-	label: 'analysis2',
-	size: 80,
+    'user_tag' : {
+	label: 'user',
+	vert_show: true,
 	noedit: true,
-	transform: function (v) {
-	    return v.replace(/, */g,', ');
+	size: 40,
+	transform: function (v,key,rec,n) {
+	    return '<a href="' + baseRef + 'etymon/' + v + '#' + v + '" target="stedt_etymon"'
+		+ '" class="elink ' + ' u' + v + '">'
+		+ v + '</a>';
+	    
 	}
     },
 //    'languagenames.lgid' : {
@@ -127,7 +131,7 @@ setup.morphemes = {
 	noedit: true,
 	hide: true
     },
-    'morphemes.srcabbr' : {
+    'srcabbr' : {
 	label: 'source(s)',
 	noedit: true,
 	size: 80,
@@ -166,10 +170,4 @@ setup.morphemes = {
 	size: 20,
 	hide: false
     }
-//    },
-//    'languagegroups.ord' : {
-//	noedit: true,
-//	size: 40,
-//	hide: true
-//    }
 };
