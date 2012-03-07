@@ -17,3 +17,4 @@
   CREATE INDEX idx_morphemes_reflex ON morphemes (reflex);
   CREATE INDEX idx_morphemes_gloss ON morphemes (gloss);
   CREATE INDEX idx_morphemes_gfn ON morphemes (gfn);
+  CREATE index idx_morphemes_tag on stedt.morphemes (tag);
