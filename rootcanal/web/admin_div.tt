@@ -1,6 +1,6 @@
 Edit tables:
 <ul>
-[% FOREACH tbl IN ['chapters', 'etyma', 'lexicon', 'languagenames', 'srcbib', 'hptb', 'projects', 'glosswords'] -%]
+[% FOREACH tbl IN ['chapters', 'etyma', 'lexicon', 'languagenames', 'srcbib', 'hptb', 'projects', 'glosswords', 'morphemes', 'soundlaws'] -%]
 	<li><a href="[% self_url %]/edit/[% tbl %]">[% tbl %]</a></li>
 [% END -%]
 </ul>
@@ -9,6 +9,7 @@ Fun stuff:
 <ul>
 <li><a href="[% self_url %]/chapters/tweak">semtree tweaker</a></li>
 <li><a href="[% self_url %]/chapters">chapter browser</a></li>
+<li><a href="[% self_url %]/chapters/grid">semantic grid</a></li>
 <li><a href="https://corpus.linguistics.berkeley.edu/~stedt-cgi/lg_table.cgi">db lg stats</a></li>
 </ul>
 
