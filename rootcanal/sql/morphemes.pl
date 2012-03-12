@@ -51,13 +51,17 @@ sub breakJuncture {
     $str =~ s/($vowels)$juncture($vowels)/\1$replacePat\2/g;
     #return $str if ($str =~ s/($vowels)$juncture($vowels)/\1$replacePat\2/);
   }
+  # repair damage that may have been done...
   $str =~ s/◦($cons)(◦)/\1\2/g;
+  $str =~ s/◦+/◦/g;
+  $str =~ s/([- ])◦+/\1/g;
+  $str =~ s/◦+([- ])/\1/g;
   return $str;
 }
 
 while (<>) {
   chomp;
-  my ($rn,$reflex,$gloss,$gfn,$lg,$grp,$grpno,$srcabbr,$srcid,$semkey,$lgid) = split("\t");
+  my ($rn,$reflex,$gloss,$gfn,$glosshandle,$lg,$grp,$grpno,$srcabbr,$srcid,$semkey,$lgid) = split("\t");
   $gloss = from_utf8_to_xml_entities($gloss);
   $reflex = decode('utf8', $reflex);
   my $reflex = breakJuncture($reflex);
@@ -66,7 +70,7 @@ while (<>) {
   #print Dumper($syls);
   my $s = 0;
   foreach (@{$syls->{syls}}) {
-    print join("\t",($rn,$s,$_,$reflex,$gloss,$gfn,$lg,$grp,$grpno,$srcabbr,$srcid,$semkey,$lgid)) . "\n";
+    print join("\t",($rn,$s,$_,$reflex,$gloss,$gfn,$glosshandle,$lg,$grp,$grpno,$srcabbr,$srcid,$semkey,$lgid)) . "\n";
     $s++;
   }
   #my $xml = $syls->get_xml_mark_cog($etymon);

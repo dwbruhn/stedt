@@ -5,7 +5,6 @@ CREATE INDEX idx_soundlaws_protolg ON soundlaws (protolg);
 CREATE INDEX idx_soundlaws_ancestor ON soundlaws (ancestor);
 CREATE INDEX idx_soundlaws_outcome ON soundlaws (outcome);
 CREATE INDEX idx_soundlaws_language ON soundlaws (language);
-CREATE INDEX idx_soundlaws_context ON soundlaws (context);
 CREATE INDEX idx_soundlaws_n ON soundlaws (n);
 CREATE INDEX idx_soundlaws_srcabbr ON soundlaws (srcabbr);
 CREATE INDEX idx_soundlaws_srcid ON soundlaws (srcid);

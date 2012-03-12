@@ -82,19 +82,13 @@ sub segment {
   $r5 =~ s/t+/T/;
 
   $r4 =~ s/0//g; # final cleanup of handle
+  $r4 =~ s/ng/n/g; # rude, but necessary!
+  $r4 =~ s/^tsh?/c/g;
+  $r4 =~ s/^dz/j/g;
 
   return ($r2,$r4,$r5,$P,$C,$R,$T);
 }
 
-sub syll {
-  my $m = shift;
-  
-  return(split("",$m));
-  my $tonchar = "⁰¹²³⁴⁵⁶⁷⁸0-9ˊˋ";
-  my $cons = "";
-  my $vowel = "";
-  
-}
 sub format_protoform {
   my $string = shift;
   $string = decode('utf8', $string);

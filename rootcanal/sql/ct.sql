@@ -7,6 +7,7 @@ CREATE TABLE morphemes (
   reflex varchar(84) NOT NULL DEFAULT '',
   gloss varchar(255) NOT NULL DEFAULT '',
   gfn varchar(15) NOT NULL DEFAULT '',
+  glosshandle varchar(255) NOT NULL DEFAULT '',
 
   language varchar(80) NOT NULL,
   grp varchar(80) NOT NULL,

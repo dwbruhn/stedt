@@ -7,7 +7,7 @@
 # clean up any old files
 rm lexicon.csv temp1.csv morphemes.txt 
 # extract lexicon records
-mysql -D stedt --default-character-set=utf8 -u $1 -p$2 -e "SELECT rn,reflex,gloss,gfn,language,grp,grpno,languagenames.srcabbr,lexicon.srcid,semkey,lexicon.lgid FROM lexicon,languagenames,languagegroups WHERE lexicon.lgid=languagenames.lgid AND languagenames.grpid=languagegroups.grpid;" > lexicon.csv
+mysql -D stedt --default-character-set=utf8 -u $1 -p$2 -e "SELECT rn,reflex,gloss,gfn,gloss as glosshandle,language,grp,grpno,languagenames.srcabbr,lexicon.srcid,semkey,lexicon.lgid FROM lexicon,languagenames,languagegroups WHERE lexicon.lgid=languagenames.lgid AND languagenames.grpid=languagegroups.grpid;" > lexicon.csv
 # split into "morphemes"
 perl morphemes.pl < lexicon.csv > temp1.csv 
 # split "morphemes" into syllabic constituents
