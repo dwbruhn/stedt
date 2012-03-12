@@ -29,7 +29,7 @@ use utf8;
 use Encode qw/ decode encode from_to /;
 
 # character classes for regular expressions
-my $tonchar = "⁰¹²³⁴⁵⁶⁷⁸0-9ˊˋ˥-˩";
+my $tonchar = "⁰¹²³⁴⁵⁶⁷⁸0-9ˊˋ˥-˩ˇˆ˯˰";
 my $delim = "-=≡≣+.,;/~◦⪤↮ ()"; # '-' hyphen must be at beginning or end
 	# or else it screws up the regex set
 
