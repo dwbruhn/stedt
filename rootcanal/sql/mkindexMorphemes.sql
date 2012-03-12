@@ -21,7 +21,11 @@
   CREATE INDEX idx_morphemes_gfn ON morphemes (gfn);
  
   update morphemes set glosshandle = trim(left(glosshandle,instr(glosshandle,'/')-1)) where instr(trim(glosshandle),'/') > 0;
+  update morphemes set glosshandle = trim(left(glosshandle,instr(glosshandle,',')-1)) where instr(trim(glosshandle),',') > 0;
+  update morphemes set glosshandle = trim(left(glosshandle,instr(glosshandle,';')-1)) where instr(trim(glosshandle),';') > 0;
+  update morphemes set glosshandle = trim(left(glosshandle,instr(glosshandle,'(')-1)) where instr(trim(glosshandle),'(') > 0;  
   update morphemes set glosshandle = trim(left(glosshandle,length(glosshandle)-1)) where substr(glosshandle,length(glosshandle)) = "s" and instr('aeious',substr(glosshandle,length(glosshandle)-1,1)) = 0 ;
+
   update morphemes set glosshandle = upper(glosshandle);
   CREATE INDEX idx_morphemes_glosshandle ON morphemes (glosshandle);
   update morphemes m,lx_et_hash x set m.tag = x.tag where m.rn=x.rn and m.mseq = x.ind;
