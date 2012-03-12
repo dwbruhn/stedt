@@ -23,6 +23,7 @@ while (<DAT>) {
   my ($f,$pat) = split("\t");
   my $sourcestr = $pat;
   $sourcestr =~ s/\-//g;
+  $pat =~ s/-/◦/g; # make it a STEDT delimiter
   $pats{$sourcestr} = $pat;
 }
 
@@ -39,15 +40,18 @@ while (<DAT>) {
 }
 
 my $vowels = '[' . $types{'v'} . ']';
+my $cons   = '[' . $types{'c'} . ']';
 
 sub breakJuncture {
   my ($str) = @_;
-  return $str if $str =~ /[-◦ |]/; # don't mess with it if it already has delimiters
+  return $str if $str =~ /[◦|]/; # don't mess with it if it already has STEDT delimiters
   foreach my $juncture (@patarray) {
     next unless $str =~ /$juncture/; # don't even both unless the string contains a target
     my $replacePat = $pats{$juncture};
-    return $str if ($str =~ s/($vowels)$juncture($vowels)/\1$replacePat\2/);
+    $str =~ s/($vowels)$juncture($vowels)/\1$replacePat\2/g;
+    #return $str if ($str =~ s/($vowels)$juncture($vowels)/\1$replacePat\2/);
   }
+  $str =~ s/◦($cons)(◦)/\1\2/g;
   return $str;
 }
 
