@@ -80,6 +80,12 @@ setup.morphemes = {
 	noedit: true,
 	size: 80
     },
+    'morphemes.handle' : {
+	label: 'handle',
+	noedit: true,
+	noedit: !(stedtuserprivs & 16),
+	size: 80
+    },
     'reflexes' : {
 	label: 'reflexes(s)',
 	noedit: true,
