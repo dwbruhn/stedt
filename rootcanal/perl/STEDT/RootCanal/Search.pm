@@ -259,7 +259,7 @@ sub combo : Runmode {
 	if ($f || $s || $lg || $lggrp || $lgcode || !$q->param) {
 		if ($ENV{HTTP_REFERER} && ($f || $s || $lg || $lggrp)) {
 			$self->dbh->do("INSERT querylog VALUES (?,?,?,?,?,NOW())", undef,
-				'simple', $s, $lg, $lggrp, $ENV{REMOTE_ADDR});	# record search in query log (put table name, query, lg, lggroup, ip in separate fields)
+				'simple', "{$f} $s", $lg, $lggrp, $ENV{REMOTE_ADDR});	# record search in query log (put table name, query, lg, lggroup, ip in separate fields)
 		}
 		$result->{etyma} = $self->searchresults_from_querystring($f, $s, 'etyma');
 		$result->{lexicon} = $self->searchresults_from_querystring($f, $s, 'lexicon', $lg, $lggrp, $lgcode);
@@ -287,7 +287,7 @@ sub ajax : Runmode {
 	my $result; # hash ref for the results
 
 	$self->dbh->do("INSERT querylog VALUES (?,?,?,?,?,NOW())", undef,
-		$tbl, $s, $lg, $lggrp, $ENV{REMOTE_ADDR}) if $s || $lg || $lggrp || $f;		# record search in query log (put table name, query, lg, lggroup, ip in separate fields)
+		$tbl, "{$f} $s", $lg, $lggrp, $ENV{REMOTE_ADDR}) if $s || $lg || $lggrp || $f;		# record search in query log (put table name, query, lg, lggroup, ip in separate fields)
 
 	if (defined($s) || defined($f)) {
 		if ($tbl eq 'lexicon' || $tbl eq 'etyma') {
