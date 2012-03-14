@@ -141,7 +141,7 @@ sub group : Runmode {
 }
 
 sub searchresults_from_querystring {
-	my ($self, $s, $tbl, $lg, $lggrp, $lgcode) = @_;
+	my ($self, $f, $s, $tbl, $lg, $lggrp, $lgcode) = @_;
 	my $t = $self->load_table_module($tbl);
 	my $query = $self->query->new(''); # for some reason faster than saying "new CGI"? disk was thrashing.
 	
@@ -151,24 +151,31 @@ sub searchresults_from_querystring {
 	# meant to imply that users should attempt to do boolean searches
 	# across fields (e.g. dog & *kwi will now be interpreted as an AND search
 	# in the lexicon.gloss field).
-	$s =~ s/\s*([,\&])\s*/$1/g;
+	$s =~ s/\s*([,\&])\s*/$1/g;	# gloss field
+	$f =~ s/\s*([,\&])\s*/$1/g;	# form field
+
+	$f =~ s/^\*//g;			# strip initial asterisk from form field, in case anyone tries it
 
 	# figure out the table and the search terms
 	# and make sure there's a (unicode) letter in there somewhere
 	if ($tbl eq 'etyma') {
 		for my $token (split / /, $s) {
-			if ($token =~ /^\*\p{Letter}/) {
-				$token =~ s/^\*//;
+			if ($token =~ /\p{Letter}/) {
+				$query->param('etyma.protogloss' => $token);
+				# print STDERR "Etyma protogloss is $token\n";	# debugging
+			}
+		}
+		for my $token (split / /, $f) {		# allow user to enter proto-form OR tag num in form field
+			if ($token =~ /\p{Letter}/) {
+				# $token =~ s/^\*//;
 				$query->param('etyma.protoform' => $token);
+				# print STDERR "Etyma protoform is $token\n";	# debugging
 			}
 			elsif ($token =~ /^\d+$/) {
 				$query->param('etyma.tag' => $token);
 			}
-			elsif ($token =~ /\p{Letter}/) {
-				$query->param('etyma.protogloss' => $token);
-			}
-		}
-		if (!$s) {
+		}	
+		if (!$s && !$f) {
 			$query->param('etyma.chapter'=>('1.9.1', '1.9.2', '1.6.5', '1.9.3', '1.5.1' )[int(rand 5)]);
 		} elsif (!$query->param) {
 			$query->param('etyma.tag' => 2436);
@@ -180,22 +187,31 @@ sub searchresults_from_querystring {
 		$query->param('languagegroups.grp' => $lggrp) if $lggrp =~ /^[\dX]\.\d((\.\d)(\.\d)?)?$/;
 		
 		# language code must be an integer
-		$query->param('languagenames.lgcode' => $lgcode) if $lgcode =~ /^\d+$/;
+		if (defined($lgcode)) {		# include this test for now, since there's no js code yet to pass lgcode param via ajax
+			$query->param('languagenames.lgcode' => $lgcode) if $lgcode =~ /^\d+$/;
+		}
 
-		for my $token (split / /, $s) {
+		for my $token (split / /, $f) {		# allow user to query reflex or analysis in form field
 			if ($token =~ /^\d+$/) {
 				$query->param('analysis' => $token);
 			}
 			elsif ($token =~ /\p{Letter}/) {
-				$query->param('lexicon.gloss' => $token);
+				$query->param('lexicon.reflex' => $token);
+				# print STDERR "Lexicon reflex is $token\n";	# debugging
 			}
 		}
-		if (!$s && !$lg && !$lggrp) {
+		for my $token (split / /, $s) {
+			if ($token =~ /\p{Letter}/) {
+				$query->param('lexicon.gloss' => $token);
+				# print STDERR "Lexicon gloss is $token\n";	# debugging
+			}
+		}
+		if (!$s && !$lg && !$lggrp && !$f) {
 			$query->param('analysis'=>1764);
 		} elsif (!$query->param) {
 			$query->param('analysis'=>5035);
 		}
-	} elsif ($tbl eq 'morphemes') {
+	} elsif ($tbl eq 'morphemes') {		# is this actually used yet?
 		$query->param('languagenames.language' => $lg) if $lg =~ /\p{Letter}/;
 		
 		# languagegroups param must match start with X or a digit and not go past 4 levels (first two levels are obligatory)
@@ -231,6 +247,8 @@ sub searchresults_from_querystring {
 sub combo : Runmode {
 	my $self = shift;
 	my $q = $self->query;
+	my $f = decode_utf8($q->param('f')) || '';	# form (i.e. lemma) paramter
+	# print STDERR "COMBO: Form param is $f\n";	# debugging
 	my $s = decode_utf8($q->param('t')) || '';
 	my $lg = decode_utf8($q->param('lg')) || '';
 	my $lggrp = decode_utf8($q->param('lggrp')) || '';
@@ -238,13 +256,13 @@ sub combo : Runmode {
 	# print STDERR "COMBO: Language group param is $lggrp\n";	# debugging
 	my $result;
 
-	if ($s || $lg || $lggrp || $lgcode || !$q->param) {
-		if ($ENV{HTTP_REFERER} && ($s || $lg || $lggrp)) {
+	if ($f || $s || $lg || $lggrp || $lgcode || !$q->param) {
+		if ($ENV{HTTP_REFERER} && ($f || $s || $lg || $lggrp)) {
 			$self->dbh->do("INSERT querylog VALUES (?,?,?,?,?,NOW())", undef,
 				'simple', $s, $lg, $lggrp, $ENV{REMOTE_ADDR});	# record search in query log (put table name, query, lg, lggroup, ip in separate fields)
 		}
-		$result->{etyma} = $self->searchresults_from_querystring($s, 'etyma');
-		$result->{lexicon} = $self->searchresults_from_querystring($s, 'lexicon', $lg, $lggrp, $lgcode);
+		$result->{etyma} = $self->searchresults_from_querystring($f, $s, 'etyma');
+		$result->{lexicon} = $self->searchresults_from_querystring($f, $s, 'lexicon', $lg, $lggrp, $lgcode);
 	} else {
 		$result->{etyma} = $self->load_table_module('etyma')->search($q);
 		$result->{lexicon} = $self->load_table_module('lexicon')->search($q);
@@ -260,6 +278,8 @@ sub combo : Runmode {
 sub ajax : Runmode {
 	my $self = shift;
 	my $s = decode_utf8($self->query->param('s'));
+	my $f = decode_utf8($self->query->param('f'));		# form (i.e. lemma) paramter
+	# print STDERR "AJAX: Form param is $f\n";	# debugging
 	my $lg = decode_utf8($self->query->param('lg'));
 	my $lggrp = decode_utf8($self->query->param('lggrp'));
 	my $tbl = $self->query->param('tbl');
@@ -267,11 +287,11 @@ sub ajax : Runmode {
 	my $result; # hash ref for the results
 
 	$self->dbh->do("INSERT querylog VALUES (?,?,?,?,?,NOW())", undef,
-		$tbl, $s, $lg, $lggrp, $ENV{REMOTE_ADDR}) if $s || $lg || $lggrp;	# record search in query log (put table name, query, lg, lggroup, ip in separate fields)
+		$tbl, $s, $lg, $lggrp, $ENV{REMOTE_ADDR}) if $s || $lg || $lggrp || $f;		# record search in query log (put table name, query, lg, lggroup, ip in separate fields)
 
-	if (defined($s)) {
+	if (defined($s) || defined($f)) {
 		if ($tbl eq 'lexicon' || $tbl eq 'etyma') {
-			$result = $self->searchresults_from_querystring($s, $tbl, $lg, $lggrp, $lgcode);
+			$result = $self->searchresults_from_querystring($f, $s, $tbl, $lg, $lggrp, $lgcode);
 		} else {
 			die "bad table name!";
 		}

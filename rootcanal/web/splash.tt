@@ -7,8 +7,9 @@
 <br><br><br>
 <form id="simple_search" method="get" action="[% self_url %]/gnis">
 <table>
-<tr><th>(proto)gloss</th><th>language</th><th>language group</th></tr>
-<tr><td><input type="text" name="t" id="simple_searchinput" size="48" maxlength="128"></td>
+<tr><th>form (etymon or reflex)</th><th>(proto)gloss</th><th>language</th><th>language group</th></tr>
+<tr><td><input type="text" name="f" id="simple_searchform" size="24" maxlength="128"></td>
+<td><input type="text" name="t" id="simple_searchinput" size="24" maxlength="128"></td>
 <td><input type="text" name="lg" id="simple_searchlg" size="32" maxlength="96"></td>
 <td><select name="lggrp" id="simple_searchlggrp"> 
 <option selected="selected" value=""></option> 
