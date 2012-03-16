@@ -18,7 +18,7 @@
 [% END -%]
 </select>
 </td>
-<td><input type="submit" name="search" value="Search" ><input type="button" name="clear" value="Clear" onclick="document.forms[0].reset();">
+<td><input type="submit" name="search" value="Search" ><input type="button" name="clear" value="Clear" onclick="this.form.reset();">
 <a href="[% self_base %]help.html" target="_blank">Help</a></td></tr>
 <tr>
 	<td><a href="#" onclick="Effect.toggle('example_queries', 'blind', { duration: 0.5 }); return false;">Show/hide examples</a>&nbsp;</td>
@@ -41,7 +41,7 @@
 	<td width=141><b>dog</b></td>
 	<td width=141>-</td>
 	<td width=222>-</td>
-	<td width=129><a href="#" onclick="document.forms[0].reset();
+	<td width=129><a href="#" onclick="document.getElementById('simple_search').reset();
 		document.getElementById('simple_searchinput').value='dog';">Try it!</a></td>
 </tr>
 <tr>
@@ -50,7 +50,7 @@
 	<td><b>smell</b></td>
 	<td>-</td>
 	<td><b>6.1 Lolo-Burmese</b></td>
-	<td><a href="#" onclick="document.forms[0].reset();
+	<td><a href="#" onclick="document.getElementById('simple_search').reset();
 		document.getElementById('simple_searchinput').value='smell';
 		document.getElementById('simple_searchlggrp').selectedIndex=39;">Try it!</a></td>
 </tr>
@@ -60,7 +60,7 @@
 	<td><b>hit</b></td>
 	<td><b>lotha</b></td>
 	<td>-</td>
-	<td><a href="#" onclick="document.forms[0].reset();
+	<td><a href="#" onclick="document.getElementById('simple_search').reset();
 		document.getElementById('simple_searchform').value='tap';
 		document.getElementById('simple_searchinput').value='hit';
 		document.getElementById('simple_searchlg').value='lotha'">Try it!</a></td>
