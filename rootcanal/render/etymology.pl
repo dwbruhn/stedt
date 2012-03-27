@@ -25,7 +25,7 @@ if (param('tag')) {
 elsif (param('semkey')) {
   makeheader();
   if (param('format') eq 'pdf') {
-    my $url = "https://stedt.berkeley.edu/~stedt-cgi/etymology.pl?semkey=" . param('semkey');
+    my $url = "https://corpus.linguistics.berkeley.edu/~stedt-cgi-ssl/makefasc.pl?semkey=" . param('semkey');
     redirect($url);
   }
   else {
