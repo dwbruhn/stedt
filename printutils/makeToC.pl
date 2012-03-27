@@ -30,9 +30,9 @@ my $sth = $dbh->prepare($sql);
 
 $sth->execute();
 
-my ($Chapter,$ChapterTitle);
+my ($Semkey,$VfcTitle);
 
-$sth->bind_columns(\$Chapter,\$ChapterTitle);
+$sth->bind_columns(\$Semkey,\$VfcTitle);
 
 # get the files in the dissemination directory, hash the filenames on "chapter" key.
 $dissemDir = "/home/stedt/public_html/dissemination";
@@ -46,7 +46,7 @@ my %Filelist;
 grep {
      if (/pdf/) {
          my ($volume,$fascicle,$chapter,$date,$version,$draft,$filetype) = /^(\d+)\-(\d+)\-(\d+)\-(\d+)(\-\d+)?(-draft)?\.(pdf|html)/;
-         $id = join('.',$fascicle,$chapter);
+         $id = join('.',$volume,$fascicle,$chapter);
          $Filelist{$id} = $_ ;
          print STDERR "id: $id file: $_\n";
          }
@@ -57,12 +57,12 @@ while ( (my $key, my $value) = each %Filelist) {
   print STDERR "$key = $value\n";
 }
 
-my $result = "<table border=\"1\"><tr><th>Chapter<th>Title<th>File";
+my $result = "<table border=\"1\"><tr><th>VFC<th>Title<th>File";
 while ($sth->fetch()) {
-  if ($Filelist{$Chapter}) {
-    my $chapter = $cgi->a({-href=>$dissemURL . $Filelist{$Chapter},
-			 -target=>'reflexes'},$Filelist{$Chapter}) ;
-    $result .= "<tr><td>" . join("<td>",($Chapter,b($ChapterTitle),$chapter));
+  if ($Filelist{$Semkey}) {
+    my $chapter = $cgi->a({-href=>$dissemURL . $Filelist{$Semkey},
+			 -target=>'reflexes'},$Filelist{$Semkey}) ;
+    $result .= "<tr><td>" . join("<td>",($Semkey,b($VfcTitle),$chapter));
     }
 }
 $result .= "</table>";
@@ -73,21 +73,21 @@ return $result ;
 #STEDTUtil::make_header($cgi,'Electronic Dissemination of STEDT Etymologies');
 
 $overview = <<EndXML;
-The following "electronic etymologies" are the result of years of historical research and curation of language resources.
+The following "electronic etymologies" are preliminary publications and subject to revision. Caveat lector!
 EndXML
 
 $termsofuse = <<EndXML;
-This is a TEST version of the database and its "browser."
+This is a TEST version of the database and its associated software.
+Terms of use are forthcoming; at the moment these documents are strictly experimental and not for general use.
 <p/>
-You may search this database as much as you like, but please, at least for now, refrain from trying to crawl the entire database content, until we have a chance to complete our testing and verification.
 EndXML
 
 print $cgi->table(
-  $cgi->Tr($cgi->td($cgi->h2('Electronic Dissemination of STEDT Etymologies'))),
-  $cgi->Tr($cgi->td($overview)),
-  $cgi->Tr($cgi->td($cgi->h2('Terms of Use'))),
-  $cgi->Tr($cgi->td($termsofuse)),
-  $cgi->Tr($cgi->td($cgi->h2("Table of Contents"))),
+  #$cgi->Tr($cgi->td($cgi->h2('Electronic Dissemination of STEDT Etymologies'))),
+  #$cgi->Tr($cgi->td($overview)),
+  #$cgi->Tr($cgi->td($cgi->h2('Terms of Use'))),
+  #$cgi->Tr($cgi->td($termsofuse)),
+  #$cgi->Tr($cgi->td($cgi->h2("Table of Contents"))),
   $cgi->Tr($cgi->td("as of: ", scalar localtime)),
   get_toc($dbh)),"\n";
 
