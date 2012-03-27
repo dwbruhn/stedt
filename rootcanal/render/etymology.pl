@@ -24,8 +24,13 @@ if (param('tag')) {
 
 elsif (param('semkey')) {
   makeheader();
-  byKey(param('semkey'));
-
+  if (param('format') eq 'pdf') {
+    my $url = "https://stedt.berkeley.edu/~stedt-cgi/etymology.pl?semkey=" . param('semkey');
+    redirect($url);
+  }
+  else (param('semkey')) {
+    byKey(param('semkey'));
+  }
 }
 
 else {
@@ -72,7 +77,7 @@ sub byKey {
   my $where = " v = $volume ";
   $where .= " AND f = $fascicle " if ($fascicle);
   #$where .= " AND c = $inchapter  " if ($inchapter);
-  $sql = "SELECT chapter, chaptertitle, v, f, c FROM chapters WHERE $where ORDER BY v,f,c,s1,s2,s3";
+  $sql = "SELECT semkey, chaptertitle, v, f, c FROM chapters WHERE $where ORDER BY v,f,c,s1,s2,s3";
   $sth = $dbh->prepare($sql);
   $sth->execute();
   
