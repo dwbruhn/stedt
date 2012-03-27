@@ -28,7 +28,7 @@ elsif (param('semkey')) {
     my $url = "https://stedt.berkeley.edu/~stedt-cgi/etymology.pl?semkey=" . param('semkey');
     redirect($url);
   }
-  else (param('semkey')) {
+  else {
     byKey(param('semkey'));
   }
 }
@@ -139,7 +139,7 @@ sub byTag {
   
   # Query for record from Etyma database
   
-  $sql = "SELECT plg, protoform, protogloss, chapters.chapter, chapters.chaptertitle, sequence FROM etyma, chapters WHERE etyma.chapter=chapters.chapter AND tag=?";
+  $sql = "SELECT plg, protoform, protogloss, chapters.semkey, chapters.chaptertitle, sequence FROM etyma, chapters WHERE etyma.chapter=chapters.semkey AND tag=?";
   #print STDERR "$sql\n";
   $sth = $dbh->prepare($sql);
   $sth->execute($etymon);
