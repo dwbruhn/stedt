@@ -475,7 +475,7 @@ sub accept : Runmode {
 	# The alternative is to move the DELETE and UPDATE lines inside the loop
 	# and do them for each iteration. This may not be much a performance hit
 	# and is guaranteed to not fail.
-	my ($rns) = $self->dbh->selectrow_array("SELECT GROUP_CONCAT(DISTINCT rn) FROM lx_et_hash WHERE uid=? AND tag=?", undef, $uid, $tag);
+	my ($rns) = $self->dbh->selectrow_array("SELECT GROUP_CONCAT(DISTINCT rn) FROM lx_et_hash WHERE uid=? AND tag=? AND BINARY tag != tag_str", undef, $uid, $tag);
 	if ($rns) {
 		# figure out changes for the changelog
 		# you have to do a LEFT JOIN for the stedt tags in case it's empty
@@ -486,7 +486,7 @@ SELECT lexicon.rn,
 FROM lexicon
 	LEFT JOIN lx_et_hash AS leh1 ON (lexicon.rn=leh1.rn AND leh1.uid=8)
 	JOIN lx_et_hash AS leh2 ON (lexicon.rn=leh2.rn AND leh2.uid=$uid)
-WHERE leh2.tag=$tag
+WHERE leh2.tag=$tag AND BINARY leh2.tag != leh2.tag_str
 GROUP BY lexicon.rn
 END
 		# bless the tagging
