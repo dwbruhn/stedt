@@ -28,57 +28,46 @@ my $t = $self->SUPER::new($dbh, 'morphemes', 'morphemes.id', $privs); # dbh, tab
 
 $t->query_from(q|morphemes|);
 #$t->query_from(q|morphemes LEFT JOIN languagenames USING (lgid) LEFT JOIN languagegroups USING (grpid)|);
-$t->order_by('morphemes.grpno, morphemes.language, morphemes.morpheme, morphemes.srcabbr, morphemes.srcid');
-$t->group_by('morphemes.handle, morphemes.grpno');
+$t->order_by('morphemes.handle, morphemes.grpno, morphemes.language, morphemes.morpheme, morphemes.srcabbr, morphemes.srcid');
 $t->fields(
 	'morphemes.id',
 	'morphemes.rn',
-	'morphemes.tag AS tag',
-	"(SELECT GROUP_CONCAT(DISTINCT tag_str SEPARATOR ', ') FROM lx_et_hash WHERE rn=morphemes.rn AND mseq = ind) AS user_tag",
-	"GROUP_CONCAT(DISTINCT morpheme SEPARATOR ', ') AS morphemes",
-	"GROUP_CONCAT(DISTINCT reflex SEPARATOR ', ')   AS reflexes",
-	"GROUP_CONCAT(DISTINCT glosshandle SEPARATOR ', ')    AS glosses",
-	"GROUP_CONCAT(DISTINCT language SEPARATOR ', ') AS languages",
+	'morphemes.tag',
+	'morphemes.handle',
+	'morphemes.morpheme',
+	'morphemes.reflex',
+	'morphemes.glosshandle',
+	'morphemes.gloss',
+	'morphemes.language',
+	'morphemes.semkey',
+	'morphemes.prefx',
+	'morphemes.initial',
+	'morphemes.rhyme',
+	'morphemes.tone',
 #	'languagenames.lgid',
-#	'morphemes.language',
 #	'languagegroups.grpid',
 	'morphemes.grpno',
 	'morphemes.grp',
-	"GROUP_CONCAT(DISTINCT srcabbr SEPARATOR ', ') AS srcabbr",
 #	'morphemes.srcabbr', 
 	'morphemes.srcid',
 #	'morphemes.status',
 #	'morphemes.semcat',
-	'morphemes.semkey',
+);
+$t->searchable('morphemes.tag',
 	'morphemes.handle',
 	'morphemes.glosshandle',
-	'morphemes.prefx',
-	'morphemes.initial',
-	'morphemes.rhyme',
-	'morphemes.tone',
-	'(SELECT COUNT(*) FROM notes WHERE rn=morphemes.rn) AS num_notes'
-);
-$t->searchable('morphemes.rn', 'tag', 'user_tag', 'morphemes.reflex',
-	'morphemes.morpheme',
-	'morphemes.gloss', 'morphemes.glosshandle', 'morphemes.language', 'morphemes.grp',
-#	'languagegroups.grpid',
-	'morphemes.srcabbr', 'morphemes.srcid',
-#	'morphemes.semcat', 
+	'morphemes.language',
 	'morphemes.semkey',
-	'morphemes.handle',
 	'morphemes.prefx',
 	'morphemes.initial',
 	'morphemes.rhyme',
 	'morphemes.tone',
-	'morphemes.lgid', 
-#	'morphemes.status',
 );
 $t->field_visible_privs(
-	'user_tag' => 1,
+	'morphemes.tag' => 1,
 );
 $t->field_editable_privs(
-	'tag' => 8,
-	'user_tag' => 1,
+	'morphemes.tag' => 8,
 	'morphemes.reflex' => 1,
 	'morphemes.morpheme' => 1,
 	'morphemes.gloss' => 16,
@@ -132,7 +121,7 @@ $t->wheres(
 #	'languagegroups.grpid' => 'int',
 	'morphemes.lgid' => 'int',
 	'morphemes.semkey' => 'value',
-	'tag' => sub {
+	'morphemes.tag' => sub {
 		my ($k,$v) = @_;
 		if ($v eq '0') { # use special value of 0 to search for empty tag
 			return "0 = (SELECT COUNT(*) FROM lx_et_hash WHERE rn=morphemes.rn AND uid=$uid1)";
@@ -147,22 +136,9 @@ $t->wheres(
 			return $is_string ? "lx_et_hash.tag_str='$v'" : "lx_et_hash.tag=$v";
 		}
 	},
-	'user_tag' => sub {
-		my ($k,$v) = @_;
-		# $v =~ s/\D//g; return "'bad int!'='0'" unless $v =~ /\d/;
-		if ($v eq '0') {
-			return "0 = (SELECT COUNT(*) FROM lx_et_hash WHERE rn=morphemes.rn AND uid=$uid2)";
-		} elsif ($v eq '!0') {
-			return "0 < (SELECT COUNT(*) FROM lx_et_hash WHERE rn=morphemes.rn AND uid=$uid2)";
-		} else {
-			my $is_string = ($v !~ /^\d+$/);
-			unless ($t->{query_from} =~ / lx_et_hash AS l_e_h2 ON \(morphemes.rn/) {
-				$t->{query_from} .= " LEFT JOIN lx_et_hash AS l_e_h2 ON (morphemes.rn = l_e_h2.rn AND l_e_h2.uid=$uid2)";
-			}
-			return $is_string ? "l_e_h2.tag_str='$v'" : "l_e_h2.tag=$v";
-		}
-	},
 	'morphemes.gloss' => 'word',
+	'morphemes.glosshandle' => 'value',
+	'morphemes.handle' => 'value',
 	'morphemes.morpheme' => 'value',
 	'morphemes.prefx' => 'value',
 	'morphemes.initial' => 'value',
@@ -187,7 +163,7 @@ $t->wheres(
 
 
 $t->save_hooks(
-	'tag' => sub {
+	'morphemes.tag' => sub {
 		my ($rn, $s) = @_;
 		# simultaneously update lx_et_hash
 		$dbh->do('DELETE FROM lx_et_hash WHERE rn=? AND uid=?', undef, $rn, $uid1);
@@ -205,19 +181,6 @@ $t->save_hooks(
 			my $update = qq{UPDATE morphemes SET tag=? WHERE rn=?};
 			my $update_sth = $dbh->prepare($update);
 			$update_sth->execute($s, $rn);
-		}
-		return 0;
-	},
-	'user_tag' => sub {
-		my ($rn, $s) = @_;
-		$dbh->do('DELETE FROM lx_et_hash WHERE rn=? AND uid=?', undef, $rn, $uid2);
-		my $sth = $dbh->prepare(qq{INSERT INTO lx_et_hash (rn, tag, ind, tag_str, uid) VALUES (?, ?, ?, ?, ?)});
-		my $index = 0;
-		for my $tag (split(/, */, $s)) {
-			my $tag_str = $tag;
-			$tag = 0 unless ($tag =~ /^\d+$/);
-			$sth->execute($rn, $tag, $index, $tag_str, $uid2);
-			$index++;
 		}
 		return 0;
 	}
@@ -246,7 +209,7 @@ EOF
 $t->addable(
 	'morphemes.lgid',
 	'morphemes.srcid',
-	'tag',
+	'morphemes.tag',
 	'morphemes.reflex',
 	'morphemes.gloss',
 	'morphemes.gfn',

@@ -1,3 +1,8 @@
+Software details:
+<ul>
+<li>version: <i>#svnversion#</i></li>
+</ul>
+
 Edit tables:
 <ul>
 [% FOREACH tbl IN ['chapters', 'etyma', 'lexicon', 'languagenames', 'srcbib', 'hptb', 'projects', 'glosswords', 'morphemes', 'soundlaws'] -%]

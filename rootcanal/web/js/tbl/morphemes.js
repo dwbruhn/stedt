@@ -12,17 +12,23 @@ setup.morphemes = {
 	hide: true,
 	size: 70
     },
+    'morphemes.tag' : {
+	label: 'tag',
+	noedit: true,
+	hide: false,
+	size: 40
+    },
     'morphemes.prefx' : {
 	label: 'pfx',
 	noedit: true,
 	hide: false,
-	size: 30
+	size: 20
     },
     'morphemes.initial' : {
 	label: 'I',
 	noedit: true,
 	hide: false,
-	size: 30
+	size: 20
     },
     'morphemes.rhyme' : {
 	label: 'R',
@@ -34,77 +40,49 @@ setup.morphemes = {
 	label: 'T',
 	noedit: true,
 	hide: false,
-	size: 30
+	size: 20
     },
     'tag' : {
 	label: 'stedt',
 //	noedit: !(stedtuserprivs & 8),
 	noedit: true,
 	hide: !(stedtuserprivs & 1),
-	size: 80,
+	size: 40,
 	transform: function (v) {
 	    return v.replace(/, */g,', ');
 	}
     },
-    'user_tag' : {
-	label: 'user',
-	vert_show: true,
-	noedit: true,
-	size: 40,
-	transform: function (v,key,rec,n) {
-	    return '<a href="' + baseRef + 'etymon/' + v + '#' + v + '" target="stedt_etymon"'
-		+ '" class="elink ' + ' u' + v + '">'
-		+ v + '</a>';
-	    
-	}
-    },
-//    'languagenames.lgid' : {
-//	label:'lgid',
-//	noedit: true,
-//	hide: true
-//    },
     'morphemes.reflex' : {
 	label: 'form',
 	noedit: true,
 	noedit: !(stedtuserprivs & 1),
-	size: 160
+	size: 100
     },
     'morphemes.morpheme' : {
 	label: 'morpheme',
-	noedit: true,
+	hide: false,
 	noedit: !(stedtuserprivs & 16),
-	size: 80
-    },
-    'morphemes' : {
-	label: 'morpheme(s)',
-	noedit: true,
-	size: 80
+	size: 40
     },
     'morphemes.handle' : {
 	label: 'handle',
 	noedit: true,
-	noedit: !(stedtuserprivs & 16),
-	size: 80
+	size: 40
     },
-    'reflexes' : {
-	label: 'reflexes(s)',
+    'morphemes.glosshandle' : {
+	label: 'glosshandle',
 	noedit: true,
-	size: 180
+	size: 40
     },
     'morphemes.gloss' : {
 	label: 'gloss',
 	noedit: !(stedtuserprivs & 16),
-	size: 160
-    },
-    'glosses' : {
-	label: 'gloss(es)',
-	noedit: !(stedtuserprivs & 16),
-	size: 160
+	size: 100
     },
     'morphemes.gfn' : {
 	label: 'gfn',
 	noedit: !(stedtuserprivs & 16),
-	size: 30
+	size: 20
 		},
     'morphemes.language' : {
 	label: 'language',
@@ -114,16 +92,6 @@ setup.morphemes = {
 	    return '<a href="' + baseRef + 'group/' + rec[n+1] + '/' + rec[n-1] + '" target="stedt_grps">' + v + '</a>';
 	}
     },
-    'languages' : {
-	label: 'language(s)',
-	noedit: true,
-	size: 180
-    },
-//    'languagegroups.grpid' : {
-//	label: 'grpid',
-//	noedit: true,
-//	hide: true
-//    },
     'morphemes.grpno' : {
 	label: 'group',
 	noedit: true,
@@ -137,12 +105,6 @@ setup.morphemes = {
 	noedit: true,
 	hide: true
     },
-    'srcabbr' : {
-	label: 'source(s)',
-	noedit: true,
-	size: 80,
-	hide: false
-    },
     'morphemes.srcid' : {
 	label: 'source',
 	size: 140,
@@ -150,25 +112,14 @@ setup.morphemes = {
 	hide: true
     },
     'morphemes.semcat' : {
-	label: 'semcat'
+	label: 'semcat',
+	hide: true
     },
     'morphemes.semkey' : {
 	label: 'semkey',
 	noedit: true,
 	size: 40,
 	hide: false
-    },
-    'num_notes' : {
-	label: 'notes',
-	noedit: true,
-	hide: true,
-	size: 200,
-	transform: function (v) {
-	    if (v == 0) return '';
-	    return '<a href="#" class="note_retriever">'
-		+ v + '&nbsp;note' + (v == 1 ? '' : 's')
-		+ '</a>';
-	}
     },
     'morphemes.status' : {
 	label:'status',
