@@ -88,6 +88,14 @@ $t->wheres(
 	   'soundlaws.rhyme' => 'value',
 	   'soundlaws.tone' => 'value',
 	   'soundlaws.lgid' => 'value',
+	   'soundlaws.language' => sub {
+		my ($k,$v) = @_;
+		$v =~ s/\(/\\\(/g; # escape all parens
+		$v =~ s/\)/\\\)/g;
+		STEDT::Table::prep_regex $v;
+		$v =~ s/(\w)/[[:<:]]$1/; # put a word boundary before the first \w char
+		return "$k RLIKE '$v'";
+	}
 );
 
 
