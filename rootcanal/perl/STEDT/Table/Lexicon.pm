@@ -249,7 +249,7 @@ $t->save_hooks(
 		for my $tag (split(/\s*,\s*/, $s)) { # Split the contents of the field on commas (whitespace surrounding commas will be stripped)
 			# Insert new records into lx_et_hash based on the updated analysis field
 			my $tag_str = $tag;
-			$tag = 0 unless ($tag =~ s/^(\d+)/$1/); # allow tag numbers followed by any non-numeric string
+			$tag = 0 unless ($tag =~ s/^(\d+).*/$1/); # allow tag numbers followed by any string that begins with a non-numeric character
 			die "$tag is too big of a tag number\n" unless $tag <= 65535;
 			$sth->execute($rn, $tag, $index, $tag_str, $uid1);
 			$index++;
@@ -266,7 +266,7 @@ $t->save_hooks(
 		$s =~ s/\s+$//;
 		for my $tag (split(/\s*,\s*/, $s)) {
 			my $tag_str = $tag;
-			$tag = 0 unless ($tag =~ s/^(\d+)/$1/);
+			$tag = 0 unless ($tag =~ s/^(\d+).*/$1/); # allow tag numbers followed by any string that begins with a non-numeric character
 			die "$tag is too big of a tag number\n" unless $tag <= 65535;
 			$sth->execute($rn, $tag, $index, $tag_str, $uid2);
 			$index++;
