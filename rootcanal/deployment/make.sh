@@ -11,4 +11,4 @@ find ~/svn-rootcanal/web/js/ -name "*.js" -exec perl ~/svn-rootcanal/deployment/
 find ~/svn-rootcanal/web/scriptaculous/src/ -name "*.js" -exec perl ~/svn-rootcanal/deployment/minify.pl {} \;
 
 svn info ~/svn-rootcanal | grep 'Revision' > ~/deployed.txt
-perl -pe  's/#svnversion#/`svnversion`/e' ~/svn-rootcanal/web/admin_div.tt > ~/public_html/admin_div.tt
+perl -pe  's/#svnversion#/`svnversion ~/svn-rootcanal/`/e' ~/svn-rootcanal/web/admin_div.tt > ~/public_html/admin_div.tt
