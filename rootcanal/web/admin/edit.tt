@@ -124,7 +124,7 @@ Displaying items [% a %]-[% b %] of [% result.data.size %].
 </form>
 [%- END -%]
 
-[% IF c.has_privs(t.table == 'etyma' ? 1 : 16) %]
+[% IF c.has_privs(t.table == 'etyma' ? 1 : 16) && t.table != 'hptb' %]
 <a href="#" onclick="$('add_form_span').toggle(); scrollEnd(); return false;">Add a record...</a>
 <span id="add_form_span" style="display:none">
 <form id="add_form" onsubmit="add_record(); return false;">
