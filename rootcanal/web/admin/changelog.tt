@@ -5,7 +5,7 @@
 <col style="width:6em">
 <col style="width:4em">
 <col style="width:3em">
-<col style="width:6em">
+<col style="width:7em">
 <col style="width:5em">
 <col style="width:7em">
 <col style="width:auto">
@@ -25,10 +25,31 @@
 	<th>time</th>
 </tr>
 [% FOREACH row IN changes -%]
+[% SWITCH row.3	# determine which table has been edited in order to set links correctly %]
+[% CASE 'etyma' %]
+	[% tbl_key = 'tag' %]
+[% CASE 'lexicon' %]
+	[% tbl_key = 'rn' %]
+[% CASE 'hptb' %]
+	[% tbl_key = 'hptbid' %]
+[% CASE 'languagenames' %]
+	[% tbl_key = 'lgid' %]
+[% CASE 'srcbib' %]
+	[% tbl_key = 'srcabbr' %]
+[% CASE # in most cases it's just 'id' %]
+	[% tbl_key = 'id' %]
+[% END %]
 <tr>
-[% FOREACH col IN row -%]
-<td>[% col | html %]</td>
-[% END -%]
+<td>[% row.0 | html %]</td>
+<td>[% row.1 | html %]</td>
+<td>[% row.2 | html %]</td>
+<td>[% row.3 | html %]</td>
+<td><a href="[% self_url %]/edit/[% row.3 %]?[% row.3 %].[% tbl_key %]=[% row.4 %]" target="change_viewer">[% row.4 | html %]</td>
+<td>[% row.5 | html %]</td>
+<td>[% row.6 | html %]</td>
+<td>[% row.7 | html %]</td>
+<td>[% row.8 | html %]</td>
+<td>[% row.9 | html %]</td>
 </tr>
 [% END -%]
 </table>
