@@ -61,9 +61,9 @@ sub breakJuncture {
 
 while (<>) {
   chomp;
+  $_= decode('utf8', $_);
   my ($rn,$reflex,$gloss,$gfn,$glosshandle,$lg,$grp,$grpno,$srcabbr,$srcid,$semkey,$lgid) = split("\t");
   $gloss = from_utf8_to_xml_entities($gloss);
-  $reflex = decode('utf8', $reflex);
   my $reflex = breakJuncture($reflex);
   #print '>>> ',$reflex,' ',$reflex2,"\n" if ($reflex ne $reflex2);
   $syls->split_form($reflex);
