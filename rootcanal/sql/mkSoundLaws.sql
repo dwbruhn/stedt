@@ -53,7 +53,6 @@ DELETE FROM soundlaws WHERE n < 2;
 DELETE FROM soundlaws WHERE outcome = '' OR ancestor = '';
 
 CREATE INDEX idx_soundlaws_id ON soundlaws (id);
-CREATE INDEX idx_soundlaws_tag ON soundlaws (tag);
 CREATE INDEX idx_soundlaws_slot ON soundlaws (slot);
 CREATE INDEX idx_soundlaws_protolg ON soundlaws (protolg);
 CREATE INDEX idx_soundlaws_ancestor ON soundlaws (ancestor);
@@ -65,6 +64,7 @@ CREATE INDEX idx_soundlaws_srcid ON soundlaws (srcid);
 
 CREATE INDEX idx_soundlawsupport_id ON soundlawsupport (id);
 CREATE INDEX idx_soundlawsupport_slid ON soundlawsupport (slid);
+CREATE INDEX idx_soundlawsupport_tag ON soundlawsupport (tag);
 CREATE INDEX idx_soundlawsupport_slot ON soundlawsupport (slot);
 CREATE INDEX idx_soundlawsupport_protolg ON soundlawsupport (protolg);
 CREATE INDEX idx_soundlawsupport_ancestor ON soundlawsupport (ancestor);
