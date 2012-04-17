@@ -441,6 +441,7 @@ sub accept : Runmode {
 	my $q = $self->query();
 	my $tag = $q->param('tag');
 	my $uid = $q->param('uid');
+	my $ord = $q->param('ord');	# if approving by subgroup
 	
 	if ($uid !~ /^\d+$/ || $tag !~ /^\d+$/) {
 		$self->header_add(-status => 400);
@@ -475,10 +476,14 @@ sub accept : Runmode {
 	# The alternative is to move the DELETE and UPDATE lines inside the loop
 	# and do them for each iteration. This may not be much a performance hit
 	# and is guaranteed to not fail.
-	my ($rns) = $self->dbh->selectrow_array("SELECT GROUP_CONCAT(DISTINCT rn) FROM lx_et_hash WHERE uid=? AND tag=? AND BINARY tag = tag_str", undef, $uid, $tag);
+
+	# get a different list of rn's if approving a subgroup (i.e., if $ord is defined)
+	my ($rns) = (defined $ord ? $self->dbh->selectrow_array("SELECT GROUP_CONCAT(DISTINCT lx_et_hash.rn) FROM lx_et_hash LEFT JOIN lexicon ON lx_et_hash.rn=lexicon.rn LEFT JOIN languagenames ON lexicon.lgid=languagenames.lgid LEFT JOIN languagegroups ON languagenames.grpid=languagegroups.grpid WHERE uid=? AND tag=? AND BINARY tag = tag_str AND ord=?", undef, $uid, $tag, $ord) : $self->dbh->selectrow_array("SELECT GROUP_CONCAT(DISTINCT rn) FROM lx_et_hash WHERE uid=? AND tag=? AND BINARY tag = tag_str", undef, $uid, $tag));
 	if ($rns) {
 		# figure out changes for the changelog
 		# you have to do a LEFT JOIN for the stedt tags in case it's empty
+		my $extra_join = (defined $ord ? "LEFT JOIN languagenames ON lexicon.lgid=languagenames.lgid LEFT JOIN languagegroups ON languagenames.grpid=languagegroups.grpid" : "");
+		my $extra_where = (defined $ord ? "AND ord=$ord" : "");	# extra condition in case of subgroup approval
 		my $changed_recs = $self->dbh->selectall_arrayref(<<END);
 SELECT lexicon.rn,
 	(SELECT GROUP_CONCAT(tag_str ORDER BY ind) FROM lx_et_hash WHERE rn=lexicon.rn AND uid=8) AS analysis,
@@ -486,7 +491,8 @@ SELECT lexicon.rn,
 FROM lexicon
 	LEFT JOIN lx_et_hash AS leh1 ON (lexicon.rn=leh1.rn AND leh1.uid=8)
 	JOIN lx_et_hash AS leh2 ON (lexicon.rn=leh2.rn AND leh2.uid=$uid)
-WHERE leh2.tag=$tag AND BINARY leh2.tag = leh2.tag_str
+	$extra_join
+WHERE leh2.tag=$tag AND BINARY leh2.tag = leh2.tag_str $extra_where
 GROUP BY lexicon.rn
 END
 		# bless the tagging
