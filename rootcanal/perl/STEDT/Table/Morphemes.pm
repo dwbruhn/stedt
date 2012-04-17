@@ -28,11 +28,12 @@ my $t = $self->SUPER::new($dbh, 'morphemes', 'morphemes.id', $privs); # dbh, tab
 
 $t->query_from(q|morphemes|);
 #$t->query_from(q|morphemes LEFT JOIN languagenames USING (lgid) LEFT JOIN languagegroups USING (grpid)|);
-$t->order_by('morphemes.handle, morphemes.grpno, morphemes.language, morphemes.morpheme, morphemes.srcabbr, morphemes.srcid');
+$t->order_by('morphemes.handle, morphemes.glosshandle, morphemes.grpno, morphemes.language, morphemes.morpheme, morphemes.srcabbr, morphemes.srcid');
 $t->fields(
 	'morphemes.id',
 	'morphemes.rn',
 	'morphemes.tag',
+	"CONCAT(handle,' :: ',glosshandle,' :: ',LEFT(grpno,3)) AS lexkey",
 	'morphemes.handle',
 	'morphemes.morpheme',
 	'morphemes.reflex',
@@ -62,6 +63,7 @@ $t->searchable('morphemes.tag',
 	'morphemes.initial',
 	'morphemes.rhyme',
 	'morphemes.tone',
+	'morphemes.lgid',
 );
 $t->field_visible_privs(
 	'morphemes.tag' => 1,
@@ -80,14 +82,14 @@ $t->field_editable_privs(
 
 # Stuff for searching
 $t->search_form_items(
-	'languagegroups.grp' => sub {
+	'morphemes.grp' => sub {
 		my $cgi = shift;
 		my $grps = $dbh->selectall_arrayref("SELECT grpno, CONCAT(grpno,' ',LEFT(grp,15),' (id:',grpid,')') FROM languagegroups");
 		my @grp_nos = map {$_->[0]} @$grps;
 		my %grp_labels;
 		@grp_labels{@grp_nos} = map {$_->[1]} @$grps;
 		
-		return $cgi->popup_menu(-name => 'languagegroups.grp', -values=>['',@grp_nos],
+		return $cgi->popup_menu(-name => 'morphemes.grp', -values=>['',@grp_nos],
  								-default=>'', # -override=>1,
   								-labels=>\%grp_labels);
 	},

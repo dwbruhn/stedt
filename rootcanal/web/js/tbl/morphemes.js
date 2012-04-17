@@ -16,7 +16,7 @@ setup.morphemes = {
 	label: 'tag',
 	noedit: true,
 	hide: false,
-	size: 40
+	size: 30
     },
     'morphemes.prefx' : {
 	label: 'pfx',
@@ -34,7 +34,7 @@ setup.morphemes = {
 	label: 'R',
 	noedit: true,
 	hide: false,
-	size: 30
+	size: 20
     },
     'morphemes.tone' : {
 	label: 'T',
@@ -47,7 +47,7 @@ setup.morphemes = {
 //	noedit: !(stedtuserprivs & 8),
 	noedit: true,
 	hide: !(stedtuserprivs & 1),
-	size: 40,
+	size: 30,
 	transform: function (v) {
 	    return v.replace(/, */g,', ');
 	}
@@ -56,13 +56,23 @@ setup.morphemes = {
 	label: 'form',
 	noedit: true,
 	noedit: !(stedtuserprivs & 1),
-	size: 100
+	size: 60
     },
     'morphemes.morpheme' : {
 	label: 'morpheme',
 	hide: false,
 	noedit: !(stedtuserprivs & 16),
-	size: 40
+	size: 30
+    },
+    'lexkey' : {
+	label: 'key',
+	noedit: true,
+	size: 80
+    },
+    'shortdisp' : {
+	label: 'lexical item',
+	noedit: true,
+	size: 120
     },
     'morphemes.handle' : {
 	label: 'handle',
@@ -77,7 +87,7 @@ setup.morphemes = {
     'morphemes.gloss' : {
 	label: 'gloss',
 	noedit: !(stedtuserprivs & 16),
-	size: 100
+	size: 80
     },
     'morphemes.gfn' : {
 	label: 'gfn',
@@ -87,7 +97,7 @@ setup.morphemes = {
     'morphemes.language' : {
 	label: 'language',
 	noedit: true,
-	size: 180,
+	size: 60,
 	transform : function (v, key, rec, n) {
 	    return '<a href="' + baseRef + 'group/' + rec[n+1] + '/' + rec[n-1] + '" target="stedt_grps">' + v + '</a>';
 	}
@@ -95,7 +105,7 @@ setup.morphemes = {
     'morphemes.grpno' : {
 	label: 'group',
 	noedit: true,
-	size: 120
+	size: 70
 //	transform : function (v, key, rec, n) {
 //	    return v + ' - ' + rec[n+1];
 //	}

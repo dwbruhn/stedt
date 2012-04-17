@@ -11,7 +11,7 @@ $t->order_by('soundlaws.protolg', 'soundlaws.ancestor'); # default is the key
 
 $t->fields(
 	   'soundlaws.id',
-	   'soundlaws.corrid',
+	   'soundlaws.slid',
 	   'soundlaws.slot',
 	   'soundlaws.protolg',
 	   'soundlaws.ancestor',
@@ -19,32 +19,24 @@ $t->fields(
 	   'soundlaws.language',
 	   'soundlaws.context',
 	   'soundlaws.n',
-	   'soundlaws.lgid',
-	   'soundlaws.srcabbr',
-	   'soundlaws.srcid',
 );
 $t->searchable(
 	   'soundlaws.id',
-	   'soundlaws.corrid',
+	   'soundlaws.slid',
 	   'soundlaws.slot',
 	   'soundlaws.protolg',
 	   'soundlaws.ancestor',
 	   'soundlaws.outcome',
 	   'soundlaws.language',
 	   'soundlaws.context',
-	   'soundlaws.srcabbr',
-	   'soundlaws.srcid',
-	   'soundlaws.lgid',
 );
 $t->editable(
-	   'soundlaws.corrid',
 	   'soundlaws.slot',
 	   'soundlaws.protolg',
 	   'soundlaws.ancestor',
 	   'soundlaws.outcome',
 	   'soundlaws.language',
 	   'soundlaws.context',
-	   'soundlaws.lgid',
 );
 
 # Stuff for searching
@@ -87,7 +79,6 @@ $t->wheres(
 	   'soundlaws.initial' => 'value',
 	   'soundlaws.rhyme' => 'value',
 	   'soundlaws.tone' => 'value',
-	   'soundlaws.lgid' => 'value',
 	   'soundlaws.language' => sub {
 		my ($k,$v) = @_;
 		$v =~ s/\(/\\\(/g; # escape all parens
@@ -100,15 +91,12 @@ $t->wheres(
 
 
 $t->addable(
-	   'soundlaws.corrid',
 	   'soundlaws.slot',
 	   'soundlaws.protolg',
 	   'soundlaws.ancestor',
 	   'soundlaws.outcome',
 	   'soundlaws.language',
 	   'soundlaws.context',
-	   'soundlaws.lgid',
-
 );
 
 $t->add_check(sub {
