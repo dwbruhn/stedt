@@ -452,10 +452,10 @@ sub accept : Runmode {
 	}
 	
 	# update the etyma record
-	$self->dbh->do("UPDATE etyma SET uid=8 WHERE tag=?", undef, $tag);
 	my ($old_uid) = $self->dbh->selectrow_array("SELECT uid FROM etyma WHERE tag=$tag");
-	$self->dbh->do("INSERT changelog (uid, `table`, id, col, oldval, newval, owner_uid, time) VALUES (?,?,?,?,?,?,NOW())", undef,
-			   $self->param('uid'), 'etyma', $tag, 'uid', $old_uid, 8) unless $old_uid == 8;
+	$self->dbh->do("UPDATE etyma SET uid=8 WHERE tag=?", undef, $tag);
+	$self->dbh->do("INSERT changelog (uid, `table`, id, col, oldval, newval, owner_uid, time) VALUES (?,?,?,?,?,?,?,NOW())", undef,
+			   $self->param('uid'), 'etyma', $tag, 'uid', $old_uid, 8, $old_uid) unless $old_uid == 8;
 
 	# GROUP_CONCAT has an upper limit (default 1024 bytes) which can be increased to the server max.
 	# Since we are expecting a long list here, and since the value of the
