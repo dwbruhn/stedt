@@ -44,7 +44,7 @@ my $cons   = '[' . $types{'c'} . ']';
 
 sub breakJuncture {
   my ($str) = @_;
-  return $str if $str =~ /[◦|]/; # don't mess with it if it already has STEDT delimiters
+  return $str if $str =~ /[◦| \-\.]/; # don't mess with it if it already has STEDT delimiters or various other delimiters
   foreach my $juncture (@patarray) {
     next unless $str =~ /$juncture/; # don't even both unless the string contains a target
     my $replacePat = $pats{$juncture};
