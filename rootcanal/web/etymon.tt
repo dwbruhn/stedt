@@ -23,7 +23,8 @@ Reflexes <span class="u[% supertag %]">tagged by <select name="DDMenu" onchange=
 
 [% FOREACH e IN etyma -%]
 [% IF e.is_main %]<h1>[% ELSE %]<a name="[% e.tag %]"><h2>[% END -%]
-#[% e.tag %] [% e.plg %] [% e.protoform %] [% e.protogloss %]
+[% IF c.has_privs(1) %]<a href="[% self_url %]/edit/etyma?etyma.tag=[% e.tag %]" target="edit_etyma">[% END %]
+#[% e.tag %][% IF c.has_privs(1) %]</a>[% END %] [% e.plg %] [% e.protoform %] [% e.protogloss %]
 [%- IF e.uid != 8 %] <span class="u[% supertag %]">(proposed by [% e.username %])</span>[% END -%]
 [%- IF e.is_main %]</h1>[% ELSE %]</h2></a>[% END %]
 [%- IF e.is_main && etyma.size > 1 %]
