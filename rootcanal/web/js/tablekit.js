@@ -708,6 +708,7 @@ TableKit.Sortable.addSortType(
 		}}),
 	new TableKit.Sortable.Type('text',{
 		normal : function(v) {
+			v = v.replace(/ /g,"");  // ignore THIN spaces (U+2009) when sorting (produced by stedt delimiters)
 			return v ? v.toLowerCase() : '';
 		}}),
 	new TableKit.Sortable.Type('casesensitivetext',{pattern : /^[A-Z]+$/}),
