@@ -140,7 +140,7 @@ sub progress : Runmode {
 		FROM users LEFT JOIN lx_et_hash USING (uid) LEFT JOIN etyma USING (tag)
 		WHERE tag != 0 GROUP BY uid;");
 	my $b = $self->dbh->selectall_arrayref("SELECT username,users.uid,
-			tag, protoform, protogloss, COUNT(DISTINCT rn) as num_recs
+			tag, plg, protoform, protogloss, COUNT(DISTINCT rn) as num_recs
 		FROM users LEFT JOIN lx_et_hash USING (uid) LEFT JOIN etyma USING (tag)
 		WHERE users.uid !=8 AND tag != 0 GROUP BY uid,tag ORDER BY uid, num_recs DESC");
 	

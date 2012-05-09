@@ -33,12 +33,14 @@
 <table class="sortable resizable" style="table-layout:fixed">
 <col style="width:8em">
 <col style="width:4em">
+<col style="width:4em">
 <col style="width:10em">
 <col style="width:15em">
 <col style="width:3em">
 <tr>
 	<th>username</th>
 	<th>tag</th>
+	<th>plg</th>
 	<th>protoform</th>
 	<th>protogloss</th>
 	<th>reflexes</th>
@@ -50,6 +52,7 @@
 <td>[% row.3 | html %]</td>
 <td>[% row.4 | html %]</td>
 <td>[% row.5 | html %]</td>
+<td>[% row.6 | html %]</td>
 </tr>
 [% END -%]
 </table>
