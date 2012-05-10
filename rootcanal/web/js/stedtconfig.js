@@ -279,14 +279,19 @@ var setup = { // in the form setup.[tablename].[fieldname]
 				rows.sort(function (a,b) {
 					var a_id = a.id.substring(3); // strip off the "et_" part of the tr's id.
 					var b_id = b.id.substring(3);
-					var asid = t.raw.data[a_id][sindex];
-					var bsid = t.raw.data[b_id][sindex];
+					var asid = t.raw.data[a_id][sindex]; // get id for a's super-root
+					var bsid = t.raw.data[b_id][sindex]; // get id for b's super-root
+					// if the super-root isn't in the table, pretend that the the meso-root IS the super-root
+					// by setting the super-root id equal to the id of the meso-root
+					if (t.raw.data[asid] == undefined) { asid = a_id };
+					if (t.raw.data[bsid] == undefined) { bsid = b_id };
 					var super_a_val = t.raw.data[asid][index];
 					var super_b_val = t.raw.data[bsid][index];
 					// sort by superroot's values
 					var result = tkstdt.compare(super_a_val, super_b_val);
 					if (result === 0) {
 						// fall back to super's chapter
+						// dwbruhn note: BUG! this sometimes returns NaN, because the chapters aren't always true numbers
 						result = t.raw.data[asid][chapindex] - t.raw.data[bsid][chapindex];
 						if (result === 0) {
 							// fall back to super's sequence
