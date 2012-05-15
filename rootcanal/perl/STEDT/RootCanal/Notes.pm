@@ -443,9 +443,9 @@ sub accept : Runmode {
 	my $uid = $q->param('uid');
 	my $ord = $q->param('ord');	# if approving by subgroup
 	
-	if ($uid !~ /^\d+$/ || $tag !~ /^\d+$/) {
+	if ($uid !~ /^\d+$/ || $tag !~ /^\d+$/ || (defined($ord) && $ord !~ /^\d+$/)) {
 		$self->header_add(-status => 400);
-		return "Invalid tag/uid!";
+		return "Invalid tag/uid/lg_ord!";
 	}
 	if ($uid == 8) { # prevent accidental deleting of approved tagging
 		$self->header_add(-status => 400);
