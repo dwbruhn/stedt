@@ -2,13 +2,13 @@
 # use -rtvni to do a dry run with itemized changes
 
 svn up ~/svn-rootcanal
-rsync -rti --exclude '.svn' --exclude 'js' --exclude 'scriptaculous/src' ~/svn-rootcanal/web/ ~/public_html
+rsync -rti --exclude '.svn' --exclude 'js' --exclude 'scriptaculous/' --exclude 'admin_div.tt' ~/svn-rootcanal/web/ ~/public_html
 rsync -rti --exclude '.svn' ~/svn-rootcanal/perl/STEDT/ ~/pm/STEDT
 # add new files to js directory if necessary, but let minify do the replacing
 rsync -rti --exclude '.svn' --ignore-existing --delete ~/svn-rootcanal/web/js/ ~/public_html/js
-rsync -rti --exclude '.svn' --ignore-existing --delete ~/svn-rootcanal/web/scriptaculous/src/ ~/public_html/scriptaculous/src
+rsync -rti --exclude '.svn' --ignore-existing --delete ~/svn-rootcanal/web/scriptaculous/ ~/public_html/scriptaculous/
 find ~/svn-rootcanal/web/js/ -name "*.js" -exec perl ~/svn-rootcanal/deployment/minify.pl {} \;
-find ~/svn-rootcanal/web/scriptaculous/src/ -name "*.js" -exec perl ~/svn-rootcanal/deployment/minify.pl {} \;
+find ~/svn-rootcanal/web/scriptaculous/*/ -name "*.js" -exec perl ~/svn-rootcanal/deployment/minify.pl {} \;
 
 svn info ~/svn-rootcanal | grep 'Revision' > ~/deployed.txt
 perl -pe  's{#svnversion#}{`svnversion ~/svn-rootcanal/`}e' ~/svn-rootcanal/web/admin_div.tt > ~/public_html/admin_div.tt
