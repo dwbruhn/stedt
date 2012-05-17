@@ -291,7 +291,7 @@ var setup = { // in the form setup.[tablename].[fieldname]
 					var result = tkstdt.compare(super_a_val, super_b_val);
 					if (result === 0) {
 						// fall back to super's chapter (tablekit should auto-recognize semkey sort type)
-						var result = tkstdt.compare(t.raw.data[asid][chapindex], t.raw.data[bsid][chapindex]);
+						result = tkstdt.compare(t.raw.data[asid][chapindex], t.raw.data[bsid][chapindex]);
 						if (result === 0) {
 							// fall back to super's sequence
 							result = t.raw.data[asid][seqindex] - t.raw.data[bsid][seqindex];
