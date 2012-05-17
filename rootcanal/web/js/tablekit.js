@@ -628,7 +628,7 @@ TableKit.Sortable = {
 		});
 	},
 	types : {},
-	detectors : $w('date-iso date date-eu date-au time currency datasize number casesensitivetext text'),
+	detectors : $w('date-iso date date-eu date-au time currency datasize semkey number casesensitivetext text'),
 	addSortType : function() {
 		$A(arguments).each(function(o){
 			TableKit.Sortable.types[o.name] = o;
@@ -699,6 +699,44 @@ TableKit.Sortable.Type.compare = function(a,b) {
 };
 
 TableKit.Sortable.addSortType(
+	new TableKit.Sortable.Type('semkey', {	// sort type for chapter and semkey fields
+		pattern : /^[\dx]+\.[\dx]+(\.[\d]+)*?$/, // matches digits or (first two) x's separated by decimal points; required to end with digit
+		compare : function(a,b) {
+			// alert(a + " vs. " + b);
+			if(a == b) {	// this also covers cases in which both a and b are 'x.x'
+				return 0;
+			}
+			if(a == 'x.x' || a== '') {	// if only a is x.x or blank, then it sorts after b
+				return 1;
+			} else if(b == 'x.x' || b == '') {	// otherwise, if only b is x.x or blank, then it sorts after a
+				return -1;
+			}
+			// now splice the VFC.SSS levels out
+			var aLevels = a.split('.');
+			var bLevels = b.split('.');
+			// loop through the levels
+			for (var i = 0; i < aLevels.length; ++i) {
+				// if we've reached the end of b but a has additional levels, then a is greater
+				if (bLevels.length == i) {
+					return 1;
+				}
+				if (parseInt(aLevels[i]) == parseInt(bLevels[i])) {	// if the levels are equal, continue to the next level
+					continue;
+				}
+				else if (parseInt(aLevels[i]) > parseInt(bLevels[i])) {	// a's level is greater than b's, so a > b
+					return 1;
+				}
+				else {	// b's level is greater than a's, so b > a
+					return -1;
+				}
+			}
+			// we've reached the end of a, so if b has additional levels, then b is greater
+			if (aLevels.length != bLevels.length) {
+				return -1;
+			}
+			// otherwise, they're the same (this should never execute, since the equivalency case was handled above)
+			return 0;
+		}}),
 	new TableKit.Sortable.Type('number', {
 		pattern : /^[-+]?[\d]*\.?[\d]+(?:[eE][-+]?[\d]+)?$/,
 		normal : function(v) {

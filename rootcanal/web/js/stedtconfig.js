@@ -290,9 +290,8 @@ var setup = { // in the form setup.[tablename].[fieldname]
 					// sort by superroot's values
 					var result = tkstdt.compare(super_a_val, super_b_val);
 					if (result === 0) {
-						// fall back to super's chapter
-						// dwbruhn note: BUG! this sometimes returns NaN, because the chapters aren't always true numbers
-						result = t.raw.data[asid][chapindex] - t.raw.data[bsid][chapindex];
+						// fall back to super's chapter (tablekit should auto-recognize semkey sort type)
+						var result = tkstdt.compare(t.raw.data[asid][chapindex], t.raw.data[bsid][chapindex]);
 						if (result === 0) {
 							// fall back to super's sequence
 							result = t.raw.data[asid][seqindex] - t.raw.data[bsid][seqindex];
