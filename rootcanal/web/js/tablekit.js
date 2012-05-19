@@ -703,14 +703,20 @@ TableKit.Sortable.addSortType(
 		pattern : /^[\dx]+\.[\dx]+(\.[\d]+)*?$/, // matches digits or (first two) x's separated by decimal points; required to end with digit
 		compare : function(a,b) {
 			// alert(a + " vs. " + b);
-			if(a == b) {	// this also covers cases in which both a and b are 'x.x'
+			if(a == b) {	// this also covers cases in which both a and b are 'x.x' or blank
 				return 0;
 			}
-			if(a == 'x.x' || a== '') {	// if only a is x.x or blank, then it sorts after b
+			// sort x.x's after real semkeys, then blanks finally
+			if(a== '') {		// if only a is blank, then a > b
 				return 1;
-			} else if(b == 'x.x' || b == '') {	// otherwise, if only b is x.x or blank, then it sorts after a
+			} else if(b == '') {	// else if only b is blank, then b > a
+				return -1;
+			} else if(a == 'x.x') {	// else if a is x.x and b is a real semkey, then a > b
+				return 1;
+			} else if(b == 'x.x') {	// else if b is x.x and a is a real semkey, then b > a
 				return -1;
 			}
+			
 			// now splice the VFC.SSS levels out
 			var aLevels = a.split('.');
 			var bLevels = b.split('.');
