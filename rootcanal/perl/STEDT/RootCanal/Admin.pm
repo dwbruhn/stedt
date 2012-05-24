@@ -118,7 +118,7 @@ sub deviants : Runmode {
 	# count number of records with deviant glosses
 	my %conditions = ('to VERB','^to ',
 			'to be VERB','^to be ',
-			'be VERB','^be [^/]',
+			'be VERB','^be [^/(]',
 			'a(n) NOUN','^an? ',
 			'the NOUN','^the ',
 			'records with curly quotes','“|”|‘|’');
