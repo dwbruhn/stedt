@@ -700,24 +700,24 @@ TableKit.Sortable.Type.compare = function(a,b) {
 
 TableKit.Sortable.addSortType(
 	new TableKit.Sortable.Type('semkey', {	// sort type for chapter and semkey fields
-		pattern : /^[\dx]+\.[\dx]+(\.[\d]+)*?$/, // matches digits or (first two) x's separated by decimal points; required to end with digit
+		pattern : /^[\dx]+\.[\dx]+(\.[\d]+)*$/, // matches digits or (first two) x's separated by decimal points; required to end with digit
 		compare : function(a,b) {
 			// alert(a + " vs. " + b);
-			if(a == b) {	// this also covers cases in which both a and b are 'x.x' or blank
+			if(a === b) {	// this also covers cases in which both a and b are 'x.x' or blank
 				return 0;
 			}
 			// sort x.x's after real semkeys, then blanks finally
-			if(a== '') {		// if only a is blank, then a > b
+			if(a === '') {		// if only a is blank, then a > b
 				return 1;
-			} else if(b == '') {	// else if only b is blank, then b > a
+			} else if(b === '') {	// else if only b is blank, then b > a
 				return -1;
-			} else if(a == 'x.x') {	// else if a is x.x and b is a real semkey, then a > b
+			} else if(a === 'x.x') {	// else if a is x.x and b is a real semkey, then a > b
 				return 1;
-			} else if(b == 'x.x') {	// else if b is x.x and a is a real semkey, then b > a
+			} else if(b === 'x.x') {	// else if b is x.x and a is a real semkey, then b > a
 				return -1;
 			}
 			
-			// now splice the VFC.SSS levels out
+			// now split the VFCSSS levels
 			var aLevels = a.split('.');
 			var bLevels = b.split('.');
 			// loop through the levels
@@ -726,22 +726,23 @@ TableKit.Sortable.addSortType(
 				if (bLevels.length == i) {
 					return 1;
 				}
-				if (parseInt(aLevels[i]) == parseInt(bLevels[i])) {	// if the levels are equal, continue to the next level
+				if (aLevels[i] === bLevels[i]) {	// if the levels are equal, continue to the next level
 					continue;
 				}
-				else if (parseInt(aLevels[i]) > parseInt(bLevels[i])) {	// a's level is greater than b's, so a > b
+				else if (parseInt(aLevels[i],10) > parseInt(bLevels[i],10)) {	// a's level is greater than b's, so a > b
 					return 1;
 				}
 				else {	// b's level is greater than a's, so b > a
 					return -1;
 				}
 			}
+			return -1;
 			// we've reached the end of a, so if b has additional levels, then b is greater
-			if (aLevels.length != bLevels.length) {
-				return -1;
-			}
-			// otherwise, they're the same (this should never execute, since the equivalency case was handled above)
-			return 0;
+// 			if (aLevels.length != bLevels.length) {
+// 				return -1;
+// 			}
+// 			// otherwise, they're the same (this should never execute, since the equivalency case was handled above)
+// 			return 0;
 		}}),
 	new TableKit.Sortable.Type('number', {
 		pattern : /^[-+]?[\d]*\.?[\d]+(?:[eE][-+]?[\d]+)?$/,
@@ -752,8 +753,7 @@ TableKit.Sortable.addSortType(
 		}}),
 	new TableKit.Sortable.Type('text',{
 		normal : function(v) {
-			v = v.replace(/ /g,"");  // ignore THIN spaces (U+2009) when sorting (produced by stedt delimiters)
-			return v ? v.toLowerCase() : '';
+			return v ? v.toLowerCase().replace(/ /g,"") : ''; // ignore THIN spaces (U+2009) when sorting (produced by stedt delimiters)
 		}}),
 	new TableKit.Sortable.Type('casesensitivetext',{pattern : /^[A-Z]+$/}),
 	new TableKit.Sortable.Type('datasize',{

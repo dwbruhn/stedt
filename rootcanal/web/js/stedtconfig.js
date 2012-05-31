@@ -283,8 +283,8 @@ var setup = { // in the form setup.[tablename].[fieldname]
 					var bsid = t.raw.data[b_id][sindex]; // get id for b's super-root
 					// if the super-root isn't in the table, pretend that the the meso-root IS the super-root
 					// by setting the super-root id equal to the id of the meso-root
-					if (t.raw.data[asid] == undefined) { asid = a_id };
-					if (t.raw.data[bsid] == undefined) { bsid = b_id };
+					if (t.raw.data[asid] === undefined) { asid = a_id }
+					if (t.raw.data[bsid] === undefined) { bsid = b_id }
 					var super_a_val = t.raw.data[asid][index];
 					var super_b_val = t.raw.data[bsid][index];
 					// sort by superroot's values

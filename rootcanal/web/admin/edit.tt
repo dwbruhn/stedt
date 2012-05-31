@@ -177,7 +177,7 @@ TableKit.tables[tablename + '_resulttable'].editAjaxExtraParams += '&uid1=' + [%
 TableKit.Rows.stripe($(tablename + '_resulttable'));
 [%- END %]
 [%- IF c.has_privs(16) %]
-if($('time_elapsed_js') != undefined) { $('time_elapsed_js').insert((Date.now()-rootcanal_t0)/1000); }
+if($('time_elapsed_js')) { $('time_elapsed_js').insert((Date.now()-rootcanal_t0)/1000); }
 [%- END %]
 var scrollEnd = function() {
 	if (document.body.scrollHeight) { window.scrollTo(0, document.body.scrollHeight); 
