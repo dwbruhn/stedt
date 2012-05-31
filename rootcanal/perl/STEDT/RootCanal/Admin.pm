@@ -116,10 +116,10 @@ sub deviants : Runmode {
 	$self->require_privs(1);
 
 	# count number of records with deviant glosses
-	my %conditions = ('to VERB','^to ',
+	my %conditions = ('to VERB','^to [^/(]',
 			'to be VERB','^to be ',
 			'be VERB','^be [^/(]',
-			'a(n) NOUN','^an? ',
+			'a(n) NOUN','^an? [^/(]',
 			'the NOUN','^the ',
 			'records with curly quotes','“|”|‘|’');
 	foreach my $cond (keys %conditions)
