@@ -9,7 +9,7 @@ use Time::HiRes qw(time);
 sub chapter_browser : StartRunMode {
 	my $self = shift;
 	my $t0 = time();
-	my $tweak = $self->param('tweak');
+	my $tweak = $self->param('tweak'); # for now this means either "grid view" or "show all the glosswords and not the other columns"
 	my $public = '';
 	my $blessed = '';
 	my $public_ch = '';
@@ -29,8 +29,6 @@ SELECT chapters.semkey, chapters.chaptertitle,
 FROM chapters LEFT JOIN notes ON (notes.id=chapters.semkey) LEFT JOIN glosswords ON (chapters.semkey=glosswords.semkey)
 GROUP BY 1 $public_ch ORDER BY v,f,c,s1,s2,s3
 SQL
-	# this query is extremely slow in "tweak mode" (i.e. when the glosswords for each VFC are looked up)
-	# the hack below 'reverts' the query to its faster version.
 	if ($tweak eq 'tweak') {
 	  # allow long GROUP_CONCAT's.
 	  # see comment below under &accept.

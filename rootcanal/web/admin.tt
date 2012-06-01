@@ -1,6 +1,56 @@
-[% PROCESS header.tt title="STEDT Database: Admin Page" %]
-<div id="admin" class="left">
-[% PROCESS admin_div.tt %]
-</div>
-</body>
-</html>
+﻿[% PROCESS header.tt title="STEDT Database: Admin Page" %]
+<!-- svnversion -->
+Edit tables:
+<table border="0">
+<tr>
+[% FOREACH list IN [['etyma', 'lexicon', 'languagenames', 'srcbib', 'chapters'], ['hptb', 'morphemes', 'soundlaws', 'projects', 'glosswords']] -%]
+<td style="text-indent:0em; padding-left:0em; padding-right:1em;"><ul>[%# override default <td> style %]
+[% FOREACH tbl IN list -%]
+	<li><a href="[% self_url %]/edit/[% tbl %]">[% tbl %]</a></li>
+[% END -%]
+</ul></td>
+[% END -%]
+<td style="text-indent:0em; padding-left:0em; padding-right:1em;">
+<br><br><br>
+<ul>
+<li><a href="[% self_url %]/admin/updateprojects">update stats</a> (for "projects" - takes a while!)</li>
+</ul>
+</td>
+</tr></table>
+
+Semantic categorization stuff:
+<ul>
+<li><a href="[% self_url %]/chapters">chapter browser</a></li>
+<li><a href="[% self_url %]/chapters/tweak">semkeys and their glosswords</a></li>
+<li><a href="[% self_url %]/chapters/grid">grid view: volumes ⨉ fascicles</a></li>
+</ul>
+
+Activity:
+<ul>
+<li><a href="[% self_url %]/admin/changes">change log</a></li>
+<li><a href="[% self_url %]/admin/queries">recent queries (public interface)</a></li>
+<li><a href="[% self_url %]/admin/progress">progress report, tagging awaiting approval, etc.</a></li>
+</ul>
+
+Accounts:
+<ul>
+<li><a href="[% self_url %]/account/gsarpa">create new account</a></li>
+<li><a href="[% self_url %]/account/users">view/edit users</a></li>
+</ul>
+
+Tools:
+<ul>
+<li><a href="[% self_url %]/admin/deviants">view records with deviant glosses (violating gloss conventions)</a></li>
+<li><a href="[% self_url %]/admin/listpublic">list of public etyma tag #s</a></li>
+<li><a href="[% self_url %]/admin/listgrpnos">js list of language groups</a></li>
+[% IF c.has_privs(16) -%]
+<li><a href="[% self_url %]/admin/expire_sessions">expire sessions older than 1 month</a> ([% num_sessions %] currently in sessions table)</li>
+[% END -%]
+</ul>
+
+Stuff for the public:
+<ul>
+<li><a href="https://corpus.linguistics.berkeley.edu/~stedt-cgi/lg_table.cgi">STEDT Database Language Statistics</a></li>
+<li><a href="[% self_url %]">public interface (main page)</a></li>
+</ul>
+</body></html>
