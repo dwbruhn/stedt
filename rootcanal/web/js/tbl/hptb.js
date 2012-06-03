@@ -21,7 +21,8 @@ setup.hptb = {
 	},
 	'tags' : {
 		label: 'tags',
-		size:4
+		size:4,
+		noedit: true
 	},
 	'hptb.mainpage': {
 		label: 'main page',
