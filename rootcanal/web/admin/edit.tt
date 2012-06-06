@@ -13,7 +13,7 @@
 [%- IF t.search_form_items(col) %]
 [%- sub(c.query) %]
 [%- ELSE -%]
-<input type="text" name="[% col %]"[% IF c.query.param(col) %] value="[% c.query.param(col) %]"[% END %] style="width:100%">
+<input type="text" name="[% col %]"[% IF c.query.param(col).defined %] value="[% c.query.param(col) %]"[% END %] style="width:100%">
 [%- END %]</td>
 [% END -%]
 </tr>
@@ -59,7 +59,7 @@ and <select id="uid2" name="uid2" onchange="document.location = '?' + Form.seria
 [%- IF manual -%]
 <form method="post">
 [% FOREACH col IN t.searchable.merge(['sortkey']) -%]
-[%- IF c.query.param(col) %]<input name="[% col %]" type="hidden" value="[% c.query.param(col) %]">[% END -%]
+[%- IF c.query.param(col).defined %]<input name="[% col %]" type="hidden" value="[% c.query.param(col) %]">[% END -%]
 [%- END -%]
 <input name="pagenum" type="hidden" value="[% pagenum %]">
 <input name="uid1" type="hidden" value="[% uid1 %]">
@@ -249,8 +249,15 @@ $('search_form').observe('keydown', function (e) {
 	}
 });
 $('search_form').observe('submit', function (e) {
-	e.stop();
-	document.location = '?' + Form.serializeElements(this.select('input:not(:button,:submit,:reset),select').findAll(Form.Element.getValue));
+// 	e.stop();
+// 	document.location = '?' + Form.serializeElements(this.select('input:not(:button,:submit,:reset),select').findAll(Form.Element.getValue));
+//	remember in js the string "0" evaluates to true, so this works for any non-empty form input/select element.
+	var empty_elems = this.select('input:not(:button,:submit,:reset),select').reject(Form.Element.getValue);
+	empty_elems.push(this.select(':submit')[0]);
+	empty_elems.invoke('disable'); // disable unused form elements (temporarily) for cleaner URLs
+	window.setTimeout(function () {
+		empty_elems.invoke('enable');
+	}, 0); // defer this until after the submit happens
 });
 </script>
 </body>
