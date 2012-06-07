@@ -38,7 +38,7 @@ var clear_form = function (f) {
 			case "password":
 			case "textarea":
 			case "hidden":
-				x.value = "";
+				if (x.value === x.defaultValue) { x.value = "" }; // only clear the items that had values filled in to start with (and they haven't changed)
 				break;
 			case "radio":
 			case "checkbox":
@@ -59,10 +59,12 @@ $('search_form').observe('keydown', function (e) {
 		e.stop();
 		currentlySelected = e.findElement();
 		currentlySelected.blur(); // FireFox has problems setting x.value if x is currently selected, so we use this workaround
-		if (this.select('input:not(:button,:submit,:reset),select').any(Form.Element.getValue)) {
-			clear_form(this);
-		} else {
+//		if (this.select('input:not(:button,:submit,:reset),select').any(Form.Element.getValue)) {
+		// reset if all the default-values have been cleared or changed
+		if (this.select(':text').all(function (c) {return !c.defaultValue || c.value !== c.defaultValue})) {
 			this.reset();
+		} else {
+			clear_form(this);
 		}
 		currentlySelected.focus();
 	}
@@ -74,7 +76,14 @@ $('search_form').observe('submit', function (e) {
 	var empty_elems = this.select('input:not(:button,:submit,:reset),select').reject(Form.Element.getValue);
 	empty_elems.push(this.select(':submit')[0]);
 	empty_elems.invoke('disable'); // disable unused form elements (temporarily) for cleaner URLs
+	var prefilled = this.select(':text').findAll(function (c) {return c.value && c.value === c.defaultValue});
+	prefilled.each(function (c) {
+		c.name = c.name + '_';
+	});
 	window.setTimeout(function () {
 		empty_elems.invoke('enable');
+		prefilled.each(function (c) {
+			c.name = c.name.slice(0,-1);
+		});
 	}, 0); // defer this until after the submit happens
 });
