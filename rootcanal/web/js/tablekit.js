@@ -1245,7 +1245,11 @@ TableKit.Editable.CellEditor.prototype = {
 					colheads = table.tHead.rows[0].cells;
 					rowdata = raw.data[rowid];
 					$A(row.cells).each(function (c,i) {
-						c.innerHTML = (raw.config[colheads[i].id].transform||Prototype.K)((rowdata[i]||'').escapeHTML(), rowid, rowdata, i); // see note in initByAjax about null
+						if (raw.config[colheads[i].id].transform) {
+							c.innerHTML = raw.config[colheads[i].id].transform((rowdata[i]||'').escapeHTML(), rowid, rowdata, i); // see note in initByAjax about null
+						} else if (rowdata[i] !== undefined) {
+							c.innerHTML = (rowdata[i]||'').escapeHTML();
+						}
 					});
 					if (raw.config._postprocess_each) raw.config._postprocess_each(row);
 				}
