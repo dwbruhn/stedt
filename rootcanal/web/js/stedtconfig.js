@@ -253,8 +253,8 @@ var setup = { // in the form setup.[tablename].[fieldname]
 		_key: 'etyma.tag',   // maybe send it from the server?
 		_postprocess_onadd: function (row) {
 			make_draggable_id(row.down('span.tagid'));
-			console.log(row);
-			console.log(row.down('span.tagid'));
+//			console.log(row);
+//			console.log(row.down('span.tagid'));
 		},
 		_postprocess: function (tbl) {
 			var z = make_draggable_id;
