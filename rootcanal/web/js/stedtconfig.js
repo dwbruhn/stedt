@@ -418,6 +418,10 @@ var setup = { // in the form setup.[tablename].[fieldname]
 			label: 'xrefs',
 			size: 20
 		},
+		'etyma.status' : {
+			label: 'status',
+			size: 20
+		},
 		'etyma.exemplary' : {
 			label: 'x',
 			size: 10
