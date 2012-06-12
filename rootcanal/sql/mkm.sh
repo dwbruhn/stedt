@@ -5,10 +5,10 @@
 # jbl 3/7/2012, and earlier
 #
 # clean up any old files
-echo "NB: Syllabificationstation.pm and STEDTUtil.pm must be copied here from .../printutils!"
+echo "NB: Syllabificationstation.pm and STEDTUtil.pm must be copied here from ../../printutils!"
 rm lexicon.csv temp1.csv morphemes.txt 
 # extract lexicon records
-mysql -D stedt --default-character-set=utf8 -u $1 -p$2 -e "SELECT rn,reflex,gloss,gfn,gloss as glosshandle,language,grp,grpno,languagenames.srcabbr,lexicon.srcid,semkey,lexicon.lgid FROM lexicon,languagenames,languagegroups WHERE lexicon.lgid=languagenames.lgid AND languagenames.grpid=languagegroups.grpid;" > lexicon.csv
+mysql -D stedt --default-character-set=utf8 -u $1 -p$2 -e "SELECT rn,reflex,gloss,gfn,gloss as glosshandle,language,grp,grpno,languagenames.srcabbr,lexicon.srcid,semkey,lexicon.lgid FROM lexicon,languagenames,languagegroups WHERE lexicon.lgid=languagenames.lgid AND languagenames.grpid=languagegroups.grpid ORDER BY gloss,language,reflex;" > lexicon.csv
 # split into "morphemes"
 perl morphemes.pl < lexicon.csv > temp1.csv 
 # split "morphemes" into syllabic constituents
