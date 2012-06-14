@@ -26,16 +26,6 @@ sub table : StartRunmode {
 	my $t = $self->load_table_module($tbl,$uid2,$uid1);
 	$q->param($_, decode_utf8($q->param($_))) foreach $q->param; # the template will expect these all to be utf8, so convert them here
 
-	# possibly ignore one of the fields if the field name has the magic char _ at the end
-	my %prefilled;
-	for my $k ($q->param) {
-		if ($k =~ s/_$//) {
-			$prefilled{$k} = 1;
-			$q->param($k, $q->param($k . '_'));
-			$q->delete($k . '_');
-		}
-	}
-	
 	my $result = $t->search($q);
 	# it doesn't seem to be too inefficient to pull out all the results
 	# and then count them and/or send partial results to the browser (for paging)
@@ -43,13 +33,6 @@ sub table : StartRunmode {
 	# but we can do that if performance becomes an issue.
 
 	my $numrows = scalar @{$result->{data}};
-	if ($numrows == 0 && %prefilled) {
-		my $q2 = $q->new($q); # make a copy, in case the loop deletes all the params (i.e., there were no results to begin with)
-		foreach (keys %prefilled) {
-			$q2->delete($_);
-		}
-		return $self->redirect($q2->self_url) if $q2->param;
-	}
 	
 	# manual paging for large results
 	my ($manual_paging, $a, $b) = (0, 1, $numrows);

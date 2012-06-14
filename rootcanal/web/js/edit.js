@@ -76,14 +76,7 @@ $('search_form').observe('submit', function (e) {
 	var empty_elems = this.select('input:not(:button,:submit,:reset),select').reject(Form.Element.getValue);
 	empty_elems.push(this.select(':submit')[0]);
 	empty_elems.invoke('disable'); // disable unused form elements (temporarily) for cleaner URLs
-	var prefilled = this.select(':text').findAll(function (c) {return c.value && c.value === c.defaultValue});
-	prefilled.each(function (c) {
-		c.name = c.name + '_';
-	});
 	window.setTimeout(function () {
 		empty_elems.invoke('enable');
-		prefilled.each(function (c) {
-			c.name = c.name.slice(0,-1);
-		});
 	}, 0); // defer this until after the submit happens
 });
