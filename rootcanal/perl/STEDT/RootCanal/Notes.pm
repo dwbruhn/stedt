@@ -9,7 +9,7 @@ use Time::HiRes qw(time);
 sub chapter_browser : StartRunMode {
 	my $self = shift;
 	my $t0 = time();
-	my $tweak = $self->param('tweak'); # for now this means either "grid view" or "show all the glosswords and not the other columns"
+	my $tweak = $self->param('tweak'); # for now this means "show all the glosswords and not the other columns"
 	my $public = '';
 	my $blessed = '';
 	my $public_ch = '';
@@ -40,15 +40,7 @@ COUNT(DISTINCT glosswords.word),
 GROUP_CONCAT(DISTINCT glosswords.word SEPARATOR ', ') AS some_glosswords,
 (SELECT COUNT(*) FROM lexicon WHERE lexicon.semkey=chapters.semkey) AS wcount";
 	  $chapterquery =~ s/XXXX/$clause/m;
-	}
-	elsif ($tweak eq 'grid') {
-	  # grid will need v, f, and c ... but not the expensive join on keywords
-	  $chapterquery =~ s/XXXX/,v,f,c/m;
-	  $chapterquery =~ s/ LEFT JOIN glosswords ON \(chapters.semkey=glosswords.semkey\)//m;
-	  # order by fascicle 1st, so we can output a table easily.
-	  $chapterquery =~ s/ORDER BY v,f,c,s1,s2,s3/ORDER BY f,v,c,s1,s2,s3/m;
-	}
-	else {
+	} else {
 	  $chapterquery =~ s/XXXX//m;
 	  $chapterquery =~ s/ LEFT JOIN glosswords ON \(chapters.semkey=glosswords.semkey\)//m;
 	}
@@ -70,14 +62,32 @@ SQL
 	if ($tweak eq 'tweak') {
 	  $tt = 'chapter_tweaker.tt';
 	}
-	elsif ($tweak eq 'grid') {
-	  $tt = 'semantic_grid.tt';
-	}
 	else {
 	  $tt = 'chapter_browser.tt';
 	}
 	return $self->tt_process($tt, {
 		ch=>$chapters, e=>$e_ghost_chaps, n=>$n_ghost_chaps, time_elapsed=>sprintf("%0.3g", time()-$t0)
+	});
+}
+
+sub semkey_grid : RunMode {
+	my $self = shift;
+	$self->require_privs(1); # since this provides links to edit/etyma and edit/chapters, for now we restrict this to "tagger" privileges until we sort out if/how to present this to the public
+	my $chapterquery = <<SQL;
+SELECT v,f,
+	(SELECT chaptertitle FROM chapters WHERE v=chaps.v AND f=chaps.f AND c=0 AND s1=0 AND s2=0 AND s3=0 ) AS title,
+	(SELECT COUNT(*) FROM etyma WHERE chapter=CONCAT(v,'.',f) OR chapter LIKE CONCAT(v,'.',f,'.%')) AS num_etyma,
+	COUNT(*) AS num_chapters
+FROM chapters AS chaps
+WHERE v<=10 AND f>0
+GROUP BY f,v
+SQL
+	# order by fascicle 1st, so we can output a table easily.
+	my $chapters = $self->dbh->selectall_arrayref($chapterquery);
+	my $volumes = $self->dbh->selectcol_arrayref("SELECT chaptertitle FROM chapters WHERE v<=10 AND f=0 AND c=0 AND s1=0 AND s2=0 AND s3=0 ORDER BY v");
+	return $self->tt_process('semantic_grid.tt', {
+		ch => $chapters,
+		vols => $volumes,
 	});
 }
 

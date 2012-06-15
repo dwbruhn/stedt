@@ -119,8 +119,8 @@ sub require_privs {
 	no warnings 'uninitialized';
 	my ($self, $privs) = @_;
 	return if ($self->param('userprivs') & $privs);
-	die $self->tt_process("admin/https_warning.tt") unless $self->param('user');
 	$self->header_add(-status => 403);
+	die $self->tt_process("admin/https_warning.tt") unless $self->param('user');
 	die 'You do not have sufficient privileges to perform that operation, required by '
 		. caller() . '::' . $self->get_current_runmode() . ".\n";
 		# trailing newline suppresses the file and line number in die's $@ error message

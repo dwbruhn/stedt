@@ -17,6 +17,7 @@ sub dispatch_args {
 			'edit/:tbl/:id'	   => { app=>'Edit', rm => 'single_record' },
 			'add/:tbl'	   => { app=>'Edit', rm => 'add' },
 			'json_lg/:srcabbr' => { app=>'Edit', rm => 'json_lg' },
+			'chapters/grid'    => { app=>'Notes', rm => 'semkey_grid' },
 			'chapters/:tweak?' => { app=>'Notes', rm => 'chapter_browser' },
 			'chap/:chap'  => { app=>'Notes', rm => 'chapter' },
 			':app/:rm'         => { },
