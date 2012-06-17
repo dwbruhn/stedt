@@ -271,7 +271,7 @@ var setup = { // in the form setup.[tablename].[fieldname]
 			// put in a special sort function for all columns of the table
 			// this makes etyma sort by the superroot's value for a given column
 			var t = TableKit.tables['etyma_resulttable'];
-			t.customSortFn = function (rows, index, tkstdt) {
+			t.customSortFn = function (rows, index, tkstdt, order) {
 				var sindex = t.raw.cols['etyma.supertag'];
 				var chapindex = t.raw.cols['etyma.chapter'];
 				var seqindex = t.raw.cols['etyma.sequence'];
@@ -288,7 +288,7 @@ var setup = { // in the form setup.[tablename].[fieldname]
 					var super_a_val = t.raw.data[asid][index];
 					var super_b_val = t.raw.data[bsid][index];
 					// sort by superroot's values
-					var result = tkstdt.compare(super_a_val, super_b_val);
+					var result = tkstdt.compare(super_a_val, super_b_val)*order;
 					if (result === 0) {
 						// fall back to super's chapter (tablekit should auto-recognize semkey sort type)
 						result = tkstdt.compare(t.raw.data[asid][chapindex], t.raw.data[bsid][chapindex]);
@@ -307,6 +307,7 @@ var setup = { // in the form setup.[tablename].[fieldname]
 					}
 					return result;
 				});
+				return true;
 			};
 		},
 		'etyma.tag' : {
