@@ -53,6 +53,26 @@ var clear_form = function (f) {
 		}
 	});
 };
+// helper function, returns true if a form element is not set to the default value or if there is no default value
+var not_defaultval = function (x) {
+	if (x.type !== undefined) switch (x.type.toLowerCase()) {
+		case "text":
+			return (!x.defaultValue || x.value !== x.defaultValue);
+		case "select-one":
+		case "select-multi":
+			var default_index = 0;
+			for (var i = 0; i < x.options.length; ++i) {
+				if (x.options[i].defaultSelected) {
+					default_index = i;
+					break;
+				}
+			}
+			return default_index === 0 || x.selectedIndex !== default_index;
+		default:
+			break;
+	}
+	return false;
+};
 $('search_form').observe('keydown', function (e) {
 	var currentlySelected;
 	if (e.keyCode === Event.KEY_ESC) {
@@ -61,7 +81,7 @@ $('search_form').observe('keydown', function (e) {
 		currentlySelected.blur(); // FireFox has problems setting x.value if x is currently selected, so we use this workaround
 //		if (this.select('input:not(:button,:submit,:reset),select').any(Form.Element.getValue)) {
 		// reset if all the default-values have been cleared or changed
-		if (this.select(':text').all(function (c) {return !c.defaultValue || c.value !== c.defaultValue})) {
+		if (this.select(':text,select').all(not_defaultval)) {
 			this.reset();
 		} else {
 			clear_form(this);

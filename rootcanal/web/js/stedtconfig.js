@@ -486,20 +486,21 @@ var setup = { // in the form setup.[tablename].[fieldname]
 		_cols_done: function (c) {
 			if (c['user_an']) setup.lexicon._an2 = true;
 		},
-		_postprocess: function (t) {
-			t.on('click', 'a.lexadd', function (e) {
+		_postprocess: function (tbl) {
+			tbl.on('click', 'a.lexadd', function (e) {
 				showaddform('L', e.findElement('tr').id); // not sure why this works, since showaddform is defined in another file!
 				e.stop();
 			});
-			t.on('click', 'a.note_retriever', function (e) {
+			tbl.on('click', 'a.note_retriever', function (e) {
 				show_notes(e.findElement('tr').id.substring(3), e.findElement('td'));
 				e.stop();
 			});
-			t.on('click', 'a.elink', show_tag);
+			tbl.on('click', 'a.elink', show_tag);
 			// special sort function
 			// this makes makes "language" sort by grpno, then languagename
 			// but don't do it if it's etymon view (check the table id)
-			if (t.id === 'lexicon_resulttable') {
+			if (tbl.id === 'lexicon_resulttable') {
+				var t = TableKit.tables[tbl.id];
 				t.customSortFn = function (rows, index, tkstdt, order) {
 					var lg_index = t.raw.cols['languagenames.language'];
 					$$('.lggroup').invoke('remove');
