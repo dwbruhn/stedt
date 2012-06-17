@@ -47,4 +47,26 @@ sub update : RunMode {
 	return $indent . $s;
 }
 
+sub add : RunMode {
+	my $self = shift;
+	$self->require_privs(8);
+	my $q = $self->query;
+	if ($q->param("add_grpno") && $q->param("add_grp")) {
+		my $sth = $self->dbh->prepare("INSERT languagegroups ("
+			. join(',', qw|grpno grp plg genetic|)
+			. ") VALUES (?, ?, ?, ?)");
+		eval { $sth->execute($q->param('add_grpno'), $q->param('add_grp'), $q->param('add_plg')||'', $q->param('add_genetic')||0)	};
+		if ($@) {
+			my $err = "Couldn't create new languagegroup: $@";
+			die $err;
+		}
+	} else {
+		die "oops, grpno or grp was left blank!\n";
+	}
+	
+	require CGI::Application::Plugin::Redirect;
+	import CGI::Application::Plugin::Redirect;
+	return $self->redirect($q->url(-absolute=>1) . "/subgroups/view");
+}
+
 1;

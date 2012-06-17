@@ -101,6 +101,13 @@ sub table : StartRunmode {
 		$hash{uid1} = $uid1;
 		$hash{uid2} = $uid2;
 	}
+	elsif ($tbl eq 'etyma') {
+		my $plgs = $self->dbh->selectall_arrayref("SELECT plg, grpid FROM languagegroups WHERE plg != '' ORDER BY plg");
+		unshift @$plgs, ['(other)', ''];
+		push @$plgs, ['', 0];
+		require JSON;
+		$hash{plgs} = JSON::to_json($plgs);
+	}
 
 	# pass to tt: searchable fields, results, addable fields, etc.
 	return $self->tt_process("admin/edit.tt", \%hash);

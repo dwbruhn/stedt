@@ -539,7 +539,7 @@ sub etymon : Runmode {
 						e.tag=e.supertag AS is_main, e.uid, users.username
 FROM `etyma` AS `e` JOIN `etyma` AS `super` ON e.supertag = super.tag LEFT JOIN users ON (e.uid=users.uid)
 WHERE e.supertag=?
-ORDER BY is_main DESC, e.plgord#;
+ORDER BY is_main DESC#;
 	my $etyma_for_tag = $self->dbh->selectall_arrayref($sql, undef, $tag);
 	if (!@$etyma_for_tag) {
 		# if it failed the first time, this is probably a mesoroot.

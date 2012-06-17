@@ -275,7 +275,7 @@ var setup = { // in the form setup.[tablename].[fieldname]
 				var sindex = t.raw.cols['etyma.supertag'];
 				var chapindex = t.raw.cols['etyma.chapter'];
 				var seqindex = t.raw.cols['etyma.sequence'];
-				var pindex = t.raw.cols['etyma.is_mesoroot']; // t.raw.cols['etyma.plgord'];
+				var pindex = t.raw.cols['etyma.is_mesoroot'];
 				rows.sort(function (a,b) {
 					var a_id = a.id.substring(3); // strip off the "et_" part of the tr's id.
 					var b_id = b.id.substring(3);
@@ -375,13 +375,23 @@ var setup = { // in the form setup.[tablename].[fieldname]
 		},
 		'etyma.plg' : {
 			vert_show: true,
-			label: 'plg',
+			label: 'plg2',
 			size: 40
 		},
-		'etyma.plgord' : {
-			label: 'plgord',
-			hide: true,
-			size: 40
+		'etyma.grpid': {
+			label: 'plg',
+			size: 50,
+			transform: function (v,k,rec,n) {
+				if (v === '0') return '';
+				return rec[n+1] || v;
+			},
+			noedit: true // disable on the main page for now until we figure out how to get the popup menu to show up everywhere (not just in edit.tt)
+		},
+		'languagegroups.plg': {
+			hide: true
+		},
+		'languagegroups.grpno': {
+			hide: true
 		},
 		'is_mesoroot' : {
 			hide: true
@@ -394,7 +404,7 @@ var setup = { // in the form setup.[tablename].[fieldname]
 			label: 'notes',
 			noedit: true,
 			hide: !(stedtuserprivs & 1),
-			size: 70,
+			size: 30,
 			transform: function (v,k,rec,n) {
 				if (rec[n+1] === '0') return v;
 				return v + ' (' + rec[n+1] + ' Ch.)';
@@ -526,7 +536,19 @@ var setup = { // in the form setup.[tablename].[fieldname]
 			}
 		},
 		_add_lggrp_headers: function () {
-			var grpno_index = $('languagegroups.grpno').previousSiblings().length; // code mostly copied from etmyon.js, see there for comments
+			var t = $('lexicon_resulttable');
+			var hcells = t.tHead.rows[0].cells;
+			var grpno_index = -1;
+			for (var i = 0; i < hcells.length; ++i) {
+				if (hcells[i].id === 'languagegroups.grpno') {
+					grpno_index = i;
+					break;
+				}
+			}
+			if (grpno_index === -1) {
+				console.log('couldn\'t find grpno_index!');
+				return;
+			}
 			var tbody = $('lexicon_resulttable').tBodies[0];
 			var lastgrpno = '';
 			var visiblecols = $A(tbody.rows[0].cells).findAll(function (c) {return $(c).visible();}).length;

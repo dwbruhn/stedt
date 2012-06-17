@@ -6,8 +6,8 @@ sub new {
 my ($self, $dbh, $privs, $uid) = @_;
 my $t = $self->SUPER::new($dbh, 'etyma', 'etyma.tag', $privs); # dbh, table, key, privs
 
-$t->query_from(q|etyma JOIN `etyma` AS `super` ON etyma.supertag = super.tag LEFT JOIN `users` ON etyma.uid = users.uid|);
-$t->order_by('super.chapter, super.sequence, IF(super.sequence,0,super.tag), is_mesoroot'); # etyma.plgord');
+$t->query_from(q|etyma JOIN `etyma` AS `super` ON etyma.supertag = super.tag LEFT JOIN `users` ON etyma.uid = users.uid LEFT JOIN languagegroups ON etyma.grpid=languagegroups.grpid|);
+$t->order_by('super.chapter, super.sequence, IF(super.sequence,0,super.tag), is_mesoroot, languagegroups.grpno');
 $t->fields('etyma.tag',
 	'etyma.supertag',
 #	'etyma.exemplary',
@@ -17,7 +17,11 @@ $t->fields('etyma.tag',
 	'etyma.chapter',
 	'etyma.sequence',
 	'etyma.protoform', 'etyma.protogloss',
-	'etyma.plg', 'etyma.tag!=etyma.supertag AS is_mesoroot', # 'etyma.plgord',
+	'etyma.tag!=etyma.supertag AS is_mesoroot',
+	'etyma.grpid',
+	'languagegroups.plg',
+	'languagegroups.grpno',
+	'etyma.plg',
 #	'etyma.semkey',
 	'etyma.notes',
 	'(SELECT COUNT(*) FROM notes WHERE tag=etyma.tag) AS num_notes',
@@ -59,7 +63,9 @@ $t->searchable('etyma.tag',
 	'etyma.chapter',
 	'etyma.sequence',
 	'etyma.protoform', 'etyma.protogloss',
-	'etyma.plg', 'etyma.notes',
+	'etyma.plg',
+	'etyma.grpid',
+	'etyma.notes',
 #	'etyma.semkey',
 	#'etyma.xrefs',#'etyma.possallo','etyma.allofams'	# search these and tagging note and notes DB before deleting records. Also switch to OR searching below.
 	'etyma.status',
@@ -77,6 +83,7 @@ $t->field_editable_privs(
 	'etyma.protoform' => 1,
 	'etyma.protogloss' => 1,
 	'etyma.plg' => 1,
+	'etyma.grpid' => 1,
 	'etyma.notes' => 1,
 	'etyma.prefix' => 1,
 	'etyma.initial' => 1,
@@ -132,8 +139,12 @@ $t->search_form_items(
 );
 
 $t->wheres(
-	'etyma.tag' => sub {my ($k,$v) = @_; '(' . STEDT::Table::where_int($k,$v) . ' OR ' . STEDT::Table::where_int('etyma.supertag',$v) . ')'},
+	'etyma.tag' => sub {my ($k,$v) = @_;
+		if ($v eq 'm') {return 'etyma.tag!=etyma.supertag'}
+		if ($v eq '!m') {return 'etyma.tag=etyma.supertag'}
+		'(' . STEDT::Table::where_int($k,$v) . ' OR ' . STEDT::Table::where_int('etyma.supertag',$v) . ')'},
 	'etyma.plg'	=> sub {my ($k,$v) = @_; $v = '' if $v eq '0'; "$k LIKE '$v'"},
+	'etyma.grpid'	=> 'int',
 	'etyma.chapter' => sub { my ($k,$v) = @_; $v eq '0' ? "$k=''" : "$k LIKE '$v'" },
 	'etyma.protogloss' => 'word',
 	'etyma.prefix' => 'value',
@@ -155,22 +166,6 @@ $t->wheres(
 );
 
 $t->save_hooks(
-	'etyma.plg' => sub {
-		my ($id, $value) = @_;
-		# simultaneously update plgord fld
-		my @plgs = ('PST', 'PTB', 'KMR', 'PTani', 'AMD', 'PKC',
-			'KCN', 'PKN', 'PNC', 'PCC', 'PPC', 'PSPC', 'PNN', 'NNA', 'NAG', 'PBG',
-			'HIM', 'PHM', 'WHI', 'BOD', 'TGTM', 'KIR', 'PKir', 'BSD', 'PQ',
-			'Jg/Lu', 'LUI', 'PLB', 'LB', 'BRM', 'PBM', 'PL', 'KAR', 'PKar', 'OC',
-			'IA', 'NPL');
-		my $i;
-		$i++ until ($value eq shift @plgs) || !@plgs;
-		# this has the side effect of making plgs that aren't on this list sort last.
-		
-		my $sth = $dbh->prepare(qq{UPDATE etyma SET etyma.plgord=? WHERE etyma.tag=?});
-		$sth->execute($i, $id);
-		return 1;
-	},
 	# this is really more of an "add" hook, not a save hook,
 	# but the tag will presumably only ever be set when adding a new record
 	# SO, we take this opportunity to set the supertag and the uid
@@ -209,13 +204,17 @@ $t->save_hooks(
 	},
 );
 
+$t->reload_on_save(
+	'etyma.grpid'
+);
+
 # Add form stuff
 $t->addable(
 	'etyma.tag',
 	'etyma.chapter',
 	'etyma.protoform',
 	'etyma.protogloss',
-	'etyma.plg',
+	'etyma.grpid',
 	'etyma.notes',
 	'etyma.semkey',
 );
@@ -237,10 +236,16 @@ $t->add_form_items(
 		$i++;
 		return $cgi->popup_menu(-name => 'etyma.tag', -values=>['',$i,@a],  -default=>'', -override=>1);
 	},
-	'etyma.plg' => sub {
+	'etyma.grpid' => sub {
 		my $cgi = shift;
-		my $plgs = $dbh->selectall_arrayref("SELECT DISTINCT plg FROM etyma");
-		return $cgi->popup_menu(-name => 'etyma.plg', -values=>[map {@$_} @$plgs],  -default=>'PTB', -override=>1);
+		my $a = $dbh->selectall_arrayref("SELECT CONCAT(grpno, ' - ', plg), grpid FROM languagegroups WHERE plg != '' ORDER BY grpno");
+		push @$a, ['(undefined)', 0];
+		my @ids = map {$_->[1]} @$a;
+		my %labels;
+		@labels{@ids} = map {$_->[0]} @$a;
+		return $cgi->popup_menu(-name => 'etyma.grpid', -values=>[@ids],
+  								-default=>'2',
+  								-labels=>\%labels);
 	}
 );
 $t->add_check(sub {

@@ -182,6 +182,8 @@ $('search_form').select('th').each(function (c) {
 TableKit.Raw.init(tablename + '_resulttable', tablename, setup[tablename], '[% self_url %]/update');
 [% IF t.table == "lexicon" -%]
 TableKit.tables[tablename + '_resulttable'].editAjaxExtraParams += '&uid1=' + [% uid1 %] + '&uid2=' + [% uid2 %];
+[% ELSIF t.table == "etyma" -%]
+TableKit.Editable.selectInput('etyma.grpid',{},[% plgs %]);
 [% END # lexicon -%]
 [%- IF manual # tablekit only stripes the rows for sortable, so manually do it here %]
 TableKit.Rows.stripe($(tablename + '_resulttable'));

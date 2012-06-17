@@ -3,3 +3,4 @@ setup['etyma']['num_recs'].transform = function (v,key,rec,n) {
 		? '<a href="' + baseRef + 'edit/lexicon?analysis=' + key + '" target="stedt_lexicon">' + v + '&nbsp;r\'s</a>'
 		: v + '&nbsp;r\'s';
 };
+setup['etyma']['etyma.grpid'].noedit = false;
