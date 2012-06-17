@@ -3,32 +3,6 @@ use strict;
 use base 'STEDT::RootCanal::Base';
 use Encode;
 
-sub extractions : Runmode {
-	my $self = shift;
-	# find all etyma with extraction < 2
-	# there should be an extraction table with name of the extraction
-	# and possibly the name of the pdf file
-	# there should be a pdf directory with pdf's
-	
-	# pass to extractions.tt:
-	# list of extractions
-	
-	# generate a list, with a pdf link too.
-	# each extraction will be
-	# - a set of (semantically based) chapters
-	# - one chapter
-	# - a set of misc. forms, phonologically based.
-	
-	# the phonologically based sets are going to be harder to organize
-	# because we don't want to duplicate sequence numbers
-	
-	# eventually this page should become moot (?) because 
-	# you'll be able to get to it from a "table of contents" page.
-	# or rather, this is intended as a chronological listing of published forms,
-	# rather than a semantically based one.
-	return $self->tt_process("extractions.tt");
-}
-
 sub widget : Runmode {		# WARNING: the code in this runmode is outdated and potentially hazardous
 	my $self = shift;
 	my $q = $self->query;

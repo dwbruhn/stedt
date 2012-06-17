@@ -18,9 +18,8 @@ $t->fields('etyma.tag',
 	'etyma.sequence',
 	'etyma.protoform', 'etyma.protogloss',
 	'etyma.plg', 'etyma.tag!=etyma.supertag AS is_mesoroot', # 'etyma.plgord',
-	'etyma.semkey',
+#	'etyma.semkey',
 	'etyma.notes',
-	# 'etyma.hptbid',
 	'(SELECT COUNT(*) FROM notes WHERE tag=etyma.tag) AS num_notes',
 	'(SELECT COUNT(*) FROM notes WHERE tag=etyma.tag AND notetype="F") AS num_comparanda',
 	#'etyma.xrefs',
@@ -39,7 +38,6 @@ $t->field_visible_privs(
 	'etyma.chapter' => 3,
 	'etyma.plg' => 1,
 	'etyma.notes' => 1,
-	# 'etyma.hptbid' => 1,
 	'etyma.semkey'  => 1,
 	#'etyma.xrefs' => 1,
 	'etyma.status' => 1,
@@ -62,7 +60,7 @@ $t->searchable('etyma.tag',
 	'etyma.sequence',
 	'etyma.protoform', 'etyma.protogloss',
 	'etyma.plg', 'etyma.notes',
-	'etyma.semkey',
+#	'etyma.semkey',
 	#'etyma.xrefs',#'etyma.possallo','etyma.allofams'	# search these and tagging note and notes DB before deleting records. Also switch to OR searching below.
 	'etyma.status',
 	'num_notes',
@@ -80,7 +78,6 @@ $t->field_editable_privs(
 	'etyma.protogloss' => 1,
 	'etyma.plg' => 1,
 	'etyma.notes' => 1,
-	'etyma.hptbid' => 1,
 	'etyma.prefix' => 1,
 	'etyma.initial' => 1,
 	'etyma.rhyme' => 1,
@@ -155,30 +152,9 @@ $t->wheres(
 		return "super.sequence > 0";
 	},
 	'etyma.semkey' => 'value',
-	'etyma.hptbid' => sub {
-		my ($k,$v) = @_;
-		if ($v eq '0') {
-			return "$k=''";
-		} else {
-			STEDT::Table::prep_regex $v;
-			return "$k RLIKE '[[:<:]]${v}[[:>:]]'";
-		}
-	},
 );
 
 $t->save_hooks(
-	'etyma.hptbid' => sub {
-		my ($tag, $s) = @_;
-		# simultaneously update et_hptb_hash
-		$dbh->do('DELETE FROM et_hptb_hash WHERE tag=?', undef, $tag);
-		my $sth = $dbh->prepare(qq{INSERT INTO et_hptb_hash (tag, hptbid, ord) VALUES (?, ?, ?)});
-		my $index = 0;
-		for my $id (split(/, */, $s)) {
-			$sth->execute($tag, $id, $index) if ($id =~ /^\d+$/);
-			$index++;
-		}
-		return 1;
-	},
 	'etyma.plg' => sub {
 		my ($id, $value) = @_;
 		# simultaneously update plgord fld

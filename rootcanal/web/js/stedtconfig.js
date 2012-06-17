@@ -390,16 +390,6 @@ var setup = { // in the form setup.[tablename].[fieldname]
 			label: 'tagging note',
 			size: 160
 		},
-		'etyma.hptbid' : {
-			label: 'HPTB',
-			size: 70,
-			transform: function (v) {
-				if (v === '') return '';
-				v = v.replace(/, */g,', ');
-				return '<a href="' + baseRef + 'edit/hptb' + '?hptb.hptbid=' + v
-					+ '" target="stedt_hptb">' + v + '</a>';
-			}
-		},
 		'num_notes' : {
 			label: 'notes',
 			noedit: true,
