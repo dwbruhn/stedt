@@ -161,7 +161,6 @@ $t->wheres(
 	'lexicon.lgid' => 'int',
 	'languagenames.lgcode' => 'int',
 	'lexicon.semkey' => 'value',
-	# search for all tags regardless of tagger
 	'analysis' => sub {
 		my ($k,$v) = @_;
 		if ($v eq '0') { # use special value of 0 to search for empty analysis (i.e., nobody's tagged it anywhere)
@@ -171,7 +170,11 @@ $t->wheres(
 		} else {
 			my $is_string = ($v !~ /^\d+$/);
 			unless ($t->{query_from} =~ / lx_et_hash ON \(lexicon.rn/) {
-				$t->{query_from} .= " LEFT JOIN lx_et_hash ON (lexicon.rn = lx_et_hash.rn)";
+				if ($uid2) {
+					$t->{query_from} .= " LEFT JOIN lx_et_hash ON (lexicon.rn = lx_et_hash.rn)"; # if user is logged in, search for all tags regardless of tagger
+				} else {
+					$t->{query_from} .= " LEFT JOIN lx_et_hash ON (lexicon.rn = lx_et_hash.rn AND uid=8)"; # otherwise just show official stedt tags
+				}
 			}
 			if ($is_string) {
 				STEDT::Table::prep_regex $v;
