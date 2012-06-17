@@ -1,0 +1,29 @@
+﻿[% PROCESS header.tt title="STEDT Language Groups" -%]
+
+<form>
+<table id="lggrps">
+<thead><tr>
+<th class="noedit">grpno</th>
+<th id="grp">grp</th>
+<th id="plg">grp</th>
+<th id="genetic">genetic?</th>
+<th class="noedit">num. lgs</th>
+</tr></thead>
+<tbody>
+[% FOREACH r IN result -%]
+<tr id="gr_[% r.0 %]">
+<td>[% r.1 %]</td>
+<td>[% r.2 | html %]</td>
+<td[% UNLESS r.5 %] class="noedit"[% END %]>[% r.4 | html %]</td>
+<td align="center">[% r.5 %]</td>
+<td align="right">[% IF r.3 %]<a href="[% self_url %]/group/[% r.0 %]">[% r.3 %] lgs</a>[% ELSE %]0 lgs[% END %]</td>
+</tr>
+[% END # FOREACH row -%]
+</tbody>
+</table>
+</form>
+<script>
+TableKit.Editable.init('lggrps', {editAjaxURI:'[% self_url %]/subgroups/update'});
+</script>
+</body>
+</html>

@@ -293,7 +293,7 @@ sub query_where {
 					# otherwise, default to an int if it's a calculated field, a string (RLIKE) otherwise.
 					my $sub = $self->wheres($key) || ($self->in_calculated_fields($key) ? \&where_int : \&where_rlike);
 					my $not = $value =~ s/^!//;
-					my $rstring = $sub->($key,$value);
+					my $rstring = $sub->($key,$value,$cgi);
 					$rstring = "NOT($rstring)" if $not;
 					push @restrictions2, $rstring;
 				}

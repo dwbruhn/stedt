@@ -449,11 +449,11 @@ sub accept : Runmode {
 	my $q = $self->query();
 	my $tag = $q->param('tag');
 	my $uid = $q->param('uid');
-	my $ord = $q->param('ord');	# if approving by subgroup
+	my $grpno = $q->param('grpno');	# if approving by subgroup
 	
-	if ($uid !~ /^\d+$/ || $tag !~ /^\d+$/ || (defined($ord) && $ord !~ /^\d+$/)) {
+	if ($uid !~ /^\d+$/ || $tag !~ /^\d+$/ || (defined($grpno) && $grpno !~ /^[\d.]+$/)) {
 		$self->header_add(-status => 400);
-		return "Invalid tag/uid/lg_ord!";
+		return "Invalid tag/uid/grpno!";
 	}
 	if ($uid == 8) { # prevent accidental deleting of approved tagging
 		$self->header_add(-status => 400);
@@ -485,13 +485,15 @@ sub accept : Runmode {
 	# and do them for each iteration. This may not be much a performance hit
 	# and is guaranteed to not fail.
 
-	# get a different list of rn's if approving a subgroup (i.e., if $ord is defined)
-	my ($rns) = (defined $ord ? $self->dbh->selectrow_array("SELECT GROUP_CONCAT(DISTINCT lx_et_hash.rn) FROM lx_et_hash LEFT JOIN lexicon ON lx_et_hash.rn=lexicon.rn LEFT JOIN languagenames ON lexicon.lgid=languagenames.lgid LEFT JOIN languagegroups ON languagenames.grpid=languagegroups.grpid WHERE uid=? AND tag=? AND BINARY tag = tag_str AND ord=?", undef, $uid, $tag, $ord) : $self->dbh->selectrow_array("SELECT GROUP_CONCAT(DISTINCT rn) FROM lx_et_hash WHERE uid=? AND tag=? AND BINARY tag = tag_str", undef, $uid, $tag));
+	# get a different list of rn's if approving a subgroup (i.e., if $grpno is defined)
+	my ($rns) = (defined $grpno
+		? $self->dbh->selectrow_array("SELECT GROUP_CONCAT(DISTINCT lx_et_hash.rn) FROM lx_et_hash LEFT JOIN lexicon ON lx_et_hash.rn=lexicon.rn LEFT JOIN languagenames ON lexicon.lgid=languagenames.lgid LEFT JOIN languagegroups ON languagenames.grpid=languagegroups.grpid WHERE uid=? AND tag=? AND BINARY tag = tag_str AND grpno=?", undef, $uid, $tag, $grpno)
+		: $self->dbh->selectrow_array("SELECT GROUP_CONCAT(DISTINCT rn) FROM lx_et_hash WHERE uid=? AND tag=? AND BINARY tag = tag_str", undef, $uid, $tag));
 	if ($rns) {
 		# figure out changes for the changelog
 		# you have to do a LEFT JOIN for the stedt tags in case it's empty
-		my $extra_join = (defined $ord ? "LEFT JOIN languagenames ON lexicon.lgid=languagenames.lgid LEFT JOIN languagegroups ON languagenames.grpid=languagegroups.grpid" : "");
-		my $extra_where = (defined $ord ? "AND ord=$ord" : "");	# extra condition in case of subgroup approval
+		my $extra_join = (defined $grpno ? "LEFT JOIN languagenames ON lexicon.lgid=languagenames.lgid LEFT JOIN languagegroups ON languagenames.grpid=languagegroups.grpid" : "");
+		my $extra_where = (defined $grpno ? "AND grpno='$grpno'" : "");	# extra condition in case of subgroup approval
 		my $changed_recs = $self->dbh->selectall_arrayref(<<END);
 SELECT lexicon.rn,
 	(SELECT GROUP_CONCAT(tag_str ORDER BY ind) FROM lx_et_hash WHERE rn=lexicon.rn AND uid=8) AS analysis,
@@ -534,7 +536,7 @@ sub etymon : Runmode {
 	my (@etyma, @footnotes, @users);
 	my $footnote_index = 1;
 	my $sql = qq#SELECT e.tag, e.chapter, e.sequence, e.protoform, e.protogloss, e.plg,
-						e.hptbid, e.tag=e.supertag AS is_main, e.uid, users.username
+						e.tag=e.supertag AS is_main, e.uid, users.username
 FROM `etyma` AS `e` JOIN `etyma` AS `super` ON e.supertag = super.tag LEFT JOIN users ON (e.uid=users.uid)
 WHERE e.supertag=?
 ORDER BY is_main DESC, e.plgord#;
@@ -641,7 +643,7 @@ ORDER BY is_main DESC, e.plgord#;
 		push @etyma, \%e;
 	
 		# heading stuff
-		@e{qw/tag chap sequence protoform protogloss plg hptbid is_main uid username/} = @$_;
+		@e{qw/tag chap sequence protoform protogloss plg is_main uid username/} = @$_;
 		$e{plg} = $e{plg} eq 'PTB' ? '' : "$e{plg}";
 	
 		$e{protoform} =~ s/⪤ +/⪤ */g;
@@ -652,34 +654,18 @@ ORDER BY is_main DESC, e.plgord#;
 		
 		# etymon notes
 		$e{notes} = [];
-		my $seen_hptb; # don't generate an HPTB reference if there's a custom HPTB note already
 		foreach (@{$self->dbh->selectall_arrayref("SELECT noteid, notetype, datetime, xmlnote, ord, uid, username FROM notes LEFT JOIN users USING (uid) "
 				. "WHERE tag=$e{tag} AND notetype != 'F' ORDER BY ord")}) {
 			my $notetype = $_->[1];
 			my $xml = $_->[3];
 			next if $notetype eq 'I' && !$INTERNAL_NOTES;
-			$seen_hptb = 1 if $notetype eq 'H';
 			push @{$e{notes}}, { noteid=>$_->[0], type=>$notetype, lastmod=>$_->[2], 'ord'=>$_->[4],
 				text=>xml2html($xml, $self, \@footnotes, \$footnote_index, $_->[0]),
 				markup=>xml2markup($xml), num_lines=>guess_num_lines($xml),
 				uid=>$_->[5], username=>$_->[6]
 			};
 		}
-		if ($e{hptbid} && !$seen_hptb) {
-			my $text = "See <i>HPTB</i> ";
-			my @refs = split /,/, $e{hptbid};
-			my @strings;
-			for my $id (@refs) {
-				my ($pform, $plg, $pages) =
-					$self->dbh->selectrow_array("SELECT protoform, plg, pages FROM hptb WHERE hptbid=?", undef, $id);
-				my $p = ($pages =~ /,/ ? "pp" : "p");
-				push @strings, ($plg eq 'PTB' ? '' : "$plg ") . "<b>$pform</b>, $p. $pages";
-			}
-			$text .= join('; ', @strings);
-			$text .= '.';
-			push @{$e{notes}}, {type=>'H', text=>$text};
-		}
-	
+
 		# do entries
 		if ($supertag_done && $no_meso) {
 			# for mesoroots, make sure we don't list items that were in the superroot section
@@ -694,8 +680,8 @@ SELECT lexicon.rn,
 	(SELECT GROUP_CONCAT(tag_str ORDER BY ind) FROM lx_et_hash WHERE rn=lexicon.rn AND uid=8) AS analysis,
 	$user_analysis_col
 	languagenames.lgid, lexicon.reflex, lexicon.gloss, lexicon.gfn,
-	languagenames.language, languagegroups.grpid, languagegroups.grpno, languagegroups.grp,
-	languagenames.srcabbr, lexicon.srcid, languagegroups.ord,
+	languagenames.language, languagegroups.grpno, languagegroups.grp,
+	languagenames.srcabbr, lexicon.srcid,
 	(SELECT COUNT(*) FROM notes WHERE notes.rn = lexicon.rn) AS num_notes
 FROM lexicon
 	JOIN lx_et_hash ON (lexicon.rn=lx_et_hash.rn AND (lx_et_hash.uid=8 $user_analysis_where))
@@ -705,7 +691,7 @@ WHERE (lx_et_hash.tag = $e{tag}
 	$no_meso
 )
 GROUP BY lexicon.rn
-ORDER BY languagegroups.ord, languagenames.lgsort, reflex, languagenames.srcabbr, lexicon.srcid
+ORDER BY languagegroups.grpno, languagenames.lgsort, reflex, languagenames.srcabbr, lexicon.srcid
 EndOfSQL
 		if (@$recs) { # skip if no records
 			collect_lex_notes($self, $recs, $INTERNAL_NOTES, \@footnotes, \$footnote_index, $e{tag});
@@ -738,8 +724,8 @@ EndOfSQL
 		fields => ['lexicon.rn', 'analysis',
 			($selected_uid ? ('user_an', 'other_an') : ()),
 			'languagenames.lgid', 'lexicon.reflex', 'lexicon.gloss', 'lexicon.gfn',
-			'languagenames.language', 'languagegroups.grpid', 'languagegroups.grpno', 'languagegroups.grp',
-			'languagenames.srcabbr', 'lexicon.srcid', 'languagegroups.ord', 'notes.rn'],
+			'languagenames.language', 'languagegroups.grpno', 'languagegroups.grp',
+			'languagenames.srcabbr', 'lexicon.srcid', 'notes.rn'],
 		footnotes => \@footnotes,
 		breadcrumbs=>$breadcrumbs
 	});

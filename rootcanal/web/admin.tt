@@ -11,9 +11,12 @@ Edit tables:
 </ul></td>
 [% END -%]
 <td style="text-indent:0em; padding-left:0em; padding-right:1em;">
-<br><br><br>
 <ul>
+<li><a href="[% self_url %]/subgroups/view">language groups</a>
+<li>
+<li>
 <li><a href="[% self_url %]/admin/updateprojects">update stats</a> (for "projects" - takes a while!)</li>
+<li>
 </ul>
 </td>
 </tr></table>
@@ -42,7 +45,6 @@ Tools:
 <ul>
 <li><a href="[% self_url %]/admin/deviants">view records with deviant glosses (violating gloss conventions)</a></li>
 <li><a href="[% self_url %]/admin/listpublic">list of public etyma tag #s</a></li>
-<li><a href="[% self_url %]/admin/listgrpnos">js list of language groups</a></li>
 [% IF c.has_privs(16) -%]
 <li><a href="[% self_url %]/admin/expire_sessions">expire sessions older than 1 month</a> ([% num_sessions %] currently in sessions table)</li>
 [% END -%]

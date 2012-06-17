@@ -56,7 +56,7 @@ sub splash : StartRunmode {
 	my $splash_info;
 	
 	# generate the list of language groups for the dropdown box:
-	$splash_info->{grps} = $self->dbh->selectall_arrayref("SELECT grpno, grp FROM languagegroups ORDER BY ord, grpno");
+	$splash_info->{grps} = $self->dbh->selectall_arrayref("SELECT grpno, grp FROM languagegroups ORDER BY grpno");
 	
 	return $self->tt_process("splash.tt", $splash_info);
 }
@@ -136,7 +136,7 @@ sub group : Runmode {
 		grpid=>$grpid,
 		grpno=>$grpno,
 		grpname=>$grpname,
-		grps => $self->dbh->selectall_arrayref("SELECT grpid, grpno, grp FROM languagegroups ORDER BY ord, grpno")
+		grps => $self->dbh->selectall_arrayref("SELECT grpid, grpno, grp FROM languagegroups ORDER BY grpno")
 	});
 }
 
@@ -269,7 +269,7 @@ sub combo : Runmode {
 	}
 
 	# generate the list of language groups for the dropdown box:
-	$result->{grps} = $self->dbh->selectall_arrayref("SELECT grpno, grp FROM languagegroups ORDER BY ord, grpno");
+	$result->{grps} = $self->dbh->selectall_arrayref("SELECT grpno, grp FROM languagegroups ORDER BY grpno");
 
 	return $self->tt_process("index.tt", $result);
 }

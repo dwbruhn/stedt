@@ -505,6 +505,49 @@ var setup = { // in the form setup.[tablename].[fieldname]
 				e.stop();
 			});
 			t.on('click', 'a.elink', show_tag);
+			// special sort function
+			// this makes makes "language" sort by grpno, then languagename
+			var t = TableKit.tables['lexicon_resulttable'];
+			t.customSortFn = function (rows, index, tkstdt, order) {
+				var lg_index = t.raw.cols['languagenames.language'];
+				$$('.lggroup').invoke('remove');
+				if (index !== lg_index) return false;
+				var grpno_index = t.raw.cols['languagegroups.grpno'];
+				rows.sort(function (a,b) {
+					var a_id = a.id.substring(3); // strip off the "et_" part of the tr's id.
+					var b_id = b.id.substring(3);
+					// sort by grno first
+					var result = TableKit.Sortable.Type.compare(t.raw.data[a_id][grpno_index], t.raw.data[b_id][grpno_index]);
+					if (result === 0) {
+						result = tkstdt.compare(t.raw.data[a_id][lg_index], t.raw.data[b_id][lg_index]);
+					}
+					return result*order;
+				});
+				window.setTimeout(setup.lexicon._add_lggrp_headers,0); // defer this so tablekit can do its stuff first
+				return true;
+			};
+			if (!$('manual_paging_f1') || !$('manual_paging_f1').sortkey) {
+				// if there's no manual paging, or if there is but there's no 'sortkey' INPUT element, it's the default sort and we can add the subgroup headings
+				window.setTimeout(setup.lexicon._add_lggrp_headers,0);
+			}
+		},
+		_add_lggrp_headers: function () {
+			var grpno_index = $('languagegroups.grpno').previousSiblings().length; // code mostly copied from etmyon.js, see there for comments
+			var tbody = $('lexicon_resulttable').tBodies[0];
+			var lastgrpno = '';
+			var visiblecols = $A(tbody.rows[0].cells).findAll(function (c) {return $(c).visible();}).length;
+			$A(tbody.rows).each(function (row, j) {
+				var grpno = row.cells[grpno_index].innerHTML;
+				var grp = row.cells[grpno_index+1].innerHTML;
+				if (lastgrpno !== grpno) {
+					var newrow = new Element('tr', {'class':'lggroup'});
+					var c = newrow.insertCell(-1);
+					c.colSpan = visiblecols;
+					c.innerHTML = grpno + ' ' + grp;
+					row.insert({before:newrow});
+					lastgrpno = grpno;
+				}
+			});
 		},
 		'lexicon.rn' : {
 			label: 'rn',
@@ -629,7 +672,9 @@ var setup = { // in the form setup.[tablename].[fieldname]
 			noedit: true,
 			size: 100,
 			transform : function (v, key, rec, n) {
-				return '<a href="' + baseRef + 'group/' + rec[n+1] + '/' + rec[n-1] + '" target="stedt_grps">' + v + '</a>';
+				return '<a href="' + baseRef + 'group/' + rec[n+1] + '/' + rec[n-1] + '"'
+				+ ' title="' + rec[n+2] + ' - ' + rec[n+3].replace(/"/g,'&quot;') + '"'
+				+ ' target="stedt_grps">' + v + '</a>';
 			}
 		},
 		'languagegroups.grpid' : {
@@ -641,9 +686,7 @@ var setup = { // in the form setup.[tablename].[fieldname]
 			label: 'group',
 			noedit: true,
 			size: 120,
-			transform : function (v, key, rec, n) {
-				return v + ' - ' + rec[n+1];
-			}
+			hide: true
 		},
 		'languagegroups.grp' : {
 			label: 'grp',
@@ -693,11 +736,6 @@ var setup = { // in the form setup.[tablename].[fieldname]
 			noedit: false,
 			size: 20,
 			hide: !(stedtuserprivs & 1)
-		},
-		'languagegroups.ord' : {
-			noedit: true,
-			size: 40,
-			hide: true
 		}
 	}
 };

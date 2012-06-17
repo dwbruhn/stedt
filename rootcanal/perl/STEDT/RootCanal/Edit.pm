@@ -11,14 +11,13 @@ sub table : StartRunmode {
 	my $t0 = time();
 	$self->require_privs(1);
 	my $tbl = $self->param('tbl');
-	my $message = $self->param('message') || '';
 	my $q = $self->query;
 	# get 2 uids from edit.tt: the values selected in the two dropdowns.
 	# these will be passed in to the select for the analysis and user_an columns
 	# just in case bad values get passed in, we convert it to a number (by adding 0)
 	# and then switch to default values when 0 (or not a number, which yields 0 when you add 0)
 	my ($uid1, $uid2);
-	{
+	if ($tbl eq 'lexicon') {
 		no warnings 'uninitialized';
 		$uid1 = $q->param('uid1')+0 || 8;
 		$uid2 = $q->param('uid2')+0 || $self->param('uid');
@@ -61,17 +60,25 @@ sub table : StartRunmode {
 		}
 	}
 
+	my %hash = (
+		t=>$t, key_index=>$t->index_of_key(),
+		result => $result, time_elapsed => sprintf("%0.3g", time()-$t0),
+		manual => $manual_paging, sortlinks => \%sortlinks,
+		a => $a, b => $b, pagenum => $pagenum
+	);
+	
 	# special case: add a legend for projects
 	if ($tbl eq 'projects') {
 	  my %legend = ('1 * = In progress' => '#fff2b3', '2 $ Done' => '#b3ffb3', '3 # Blocked' => '#ffb3b3', '4 % Other' => '#ccbcff') ;
-	  $message = '<table style="cellpadding : 10px"><tr>';
+	  my $message = '<table style="cellpadding : 10px"><tr>';
 	  foreach my $status (sort keys %legend) {
 		$message .= '<td style="text-align : center; width : 150px; background-color : ' . $legend{$status} . ';">' . substr($status,1) . '</td>';
 	      }
 	  $message .= '</tr></table>';
+	  $hash{message} = $message;
 	}
 
-	# special case: include footnotes for lexicon table
+	# special case: include footnotes and list of users, etc., for lexicon table
 	my @footnotes;
 	my $footnote_index = 1;
 	if ($tbl eq 'lexicon') {
@@ -80,26 +87,24 @@ sub table : StartRunmode {
 			# only collect notes for the records on this page
 			[@{$result->{data}}[($a-1)..($b-1)]], $self->has_privs(1),
 			\@footnotes, \$footnote_index);
-	}
+		$hash{footnotes} = \@footnotes;
 
-	#make a list of uids and users to be passed in to make the dropdowns for selecting sets of tags.
-	my @users;
-	# find the users who have tagged something, plus the current user if no tags
-	my $u = $self->dbh->selectall_arrayref("SELECT username, users.uid
-		FROM users LEFT JOIN lx_et_hash USING (uid) LEFT JOIN etyma USING (tag)
-		WHERE tag != 0 OR users.uid=? GROUP BY uid", undef, $self->param('uid'));
-	foreach (@$u) {
-		push @users, {uid=>$_->[1], username=>$_->[0]};
+		#make a list of uids and users to be passed in to make the dropdowns for selecting sets of tags.
+		my @users;
+		# find the users who have tagged something, plus the current user if no tags
+		my $u = $self->dbh->selectall_arrayref("SELECT username, users.uid
+			FROM users LEFT JOIN lx_et_hash USING (uid)
+			WHERE tag != 0 OR users.uid=? GROUP BY uid", undef, $self->param('uid'));
+		foreach (@$u) {
+			push @users, {uid=>$_->[1], username=>$_->[0]};
+		}
+		$hash{users} = \@users;
+		$hash{uid1} = $uid1;
+		$hash{uid2} = $uid2;
 	}
 
 	# pass to tt: searchable fields, results, addable fields, etc.
-	return $self->tt_process("admin/edit.tt", {
-		t=>$t, key_index=>$t->index_of_key(),
-		result => $result, time_elapsed => sprintf("%0.3g", time()-$t0),
-		manual => $manual_paging, sortlinks => \%sortlinks, message => $message,
-		a => $a, b => $b, users => \@users, uid1 => $uid1, uid2 => $uid2, pagenum => $pagenum,
-		footnotes => (($tbl eq 'lexicon' && $self->has_privs(1)) ? \@footnotes : undef)
-	});
+	return $self->tt_process("admin/edit.tt", \%hash);
 }
 
 

@@ -583,14 +583,22 @@ TableKit.Sortable = {
 		order = order || op.defaultSortDirection;
 		var rows = TableKit.getBodyRows(table);
 
-		if(cell.hasClassName(op.ascendingClass) || cell.hasClassName(op.descendingClass)) {
+		if((cell.hasClassName(op.ascendingClass) || cell.hasClassName(op.descendingClass)) && !TableKit.tables[table.id].customSortFn) {
 			rows.reverse(); // if it was already sorted we just need to reverse it.
 			order = cell.hasClassName(op.descendingClass) ? 1 : -1;
 		} else {
 			var datatype = TableKit.Sortable.getDataType(cell,index,table);
 			var tkst = TableKit.Sortable.types;
 			if (TableKit.tables[table.id].customSortFn) {
-				TableKit.tables[table.id].customSortFn(rows, index, tkst[datatype]); // we might want to add an order argument to this too, right now order is ignored.
+				if (cell.hasClassName(op.ascendingClass) || cell.hasClassName(op.descendingClass)) {
+					order = cell.hasClassName(op.descendingClass) ? 1 : -1;
+				}
+				if (!TableKit.tables[table.id].customSortFn(rows, index, tkst[datatype], order)) {
+					// this is just copy-pasted from below...
+					rows.sort(function(a,b) {
+						return order * tkst[datatype].compare(TableKit.getCellText(a.cells[index]),TableKit.getCellText(b.cells[index]));
+					});
+				}
 			} else {
 				rows.sort(function(a,b) {
 					return order * tkst[datatype].compare(TableKit.getCellText(a.cells[index]),TableKit.getCellText(b.cells[index]));
@@ -1223,16 +1231,17 @@ TableKit.Editable.CellEditor.prototype = {
 		form = form || cell.down('form');
 		var head = $(TableKit.getHeaderCells(null, cell)[TableKit.getCellIndex(cell)]);
 		var row = cell.up('tr');
-		var rowid = row.id.substring(3);
+		var rowid = row.id;
 		var table = cell.up('table');
 		// *** DY added custom params
 		var raw = TableKit.tables[table.id].raw, s, tbl;
 		s = 'row=' + (TableKit.getRowIndex(row)+1) + '&cell=' + (TableKit.getCellIndex(cell)+1);
 		s += TableKit.option1('editAjaxExtraParams', table.id)||'';
 		if (raw) {
-			tbl = raw.tblname;
-			s += '&tbl=' + tbl + '&id=' + rowid + '&field=' + head.id + '&' + Form.serialize(form);
+			s += '&tbl=' + raw.tblname;
+			rowid = rowid.substring(3);
 		}
+		s += '&id=' + rowid + '&field=' + head.id + '&' + Form.serialize(form);
 		new Ajax.Request(op.ajaxURI || TableKit.option1('editAjaxURI', table.id), Object.extend(op.ajaxOptions || TableKit.option1('editAjaxOptions', table.id), {
 			// *** DY changed Ajax.Update to Request to better handle rawData: escapeHTML on client side, not server side
 			postBody : s,
@@ -1252,6 +1261,8 @@ TableKit.Editable.CellEditor.prototype = {
 						}
 					});
 					if (raw.config._postprocess_each) raw.config._postprocess_each(row);
+				} else {
+					cell.innerHTML = text.escapeHTML();
 				}
 				// restore possible hanging ident
 				cell.style.paddingLeft = null;

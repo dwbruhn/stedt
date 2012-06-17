@@ -87,7 +87,7 @@ my ($self, $dbh, $privs, $uid2, $uid1) = @_;
 my $t = $self->SUPER::new($dbh, 'lexicon', 'lexicon.rn', $privs); # dbh, table, key, privs
 
 $t->query_from(q|lexicon LEFT JOIN languagenames USING (lgid) LEFT JOIN languagegroups USING (grpid)|);
-$t->order_by('languagegroups.ord, languagenames.lgsort, lexicon.reflex, languagenames.srcabbr, lexicon.srcid');
+$t->order_by('languagegroups.grpno, languagenames.lgsort, lexicon.reflex, languagenames.srcabbr, lexicon.srcid');
 $t->fields(
 	'lexicon.rn',
 	($uid1 ? "(SELECT GROUP_CONCAT(tag_str ORDER BY ind) FROM lx_et_hash WHERE rn=lexicon.rn AND uid=$uid1) AS analysis" : () ),
@@ -109,7 +109,6 @@ $t->fields(
 );
 $t->searchable('lexicon.rn', 'analysis', 'user_an', 'lexicon.reflex',
 	'lexicon.gloss', 'languagenames.language', 'languagegroups.grp',
-	'languagegroups.grpid',
 	'languagenames.srcabbr', 'lexicon.srcid',
 #	'lexicon.semcat', 
 	'lexicon.semkey',
@@ -136,14 +135,17 @@ $t->field_editable_privs(
 $t->search_form_items(
 	'languagegroups.grp' => sub {
 		my $cgi = shift;
-		my $grps = $dbh->selectall_arrayref("SELECT grpno, CONCAT(grpno,' ',LEFT(grp,15),' (id:',grpid,')') FROM languagegroups ORDER BY grpno");
+		my $grps = $dbh->selectall_arrayref("SELECT grpno, CONCAT(grpno,' ',LEFT(grp,18)) FROM languagegroups ORDER BY grpno");
 		my @grp_nos = map {$_->[0]} @$grps;
 		my %grp_labels;
 		@grp_labels{@grp_nos} = map {$_->[1]} @$grps;
 		
 		return $cgi->popup_menu(-name => 'languagegroups.grp', -values=>['',@grp_nos],
   								-default=>'', # -override=>1,
-  								-labels=>\%grp_labels);
+  								-labels=>\%grp_labels)
+  			. '<small><input type="checkbox" name="strict_grp" id="strict_grp"'
+  			. ($cgi->param('strict_grp') ? ' checked' : '')
+  			. '><label for="strict_grp">strict</label></small>';
 	},
 #	'lexicon.status' => sub {
 #		my $cgi = shift;
@@ -216,8 +218,14 @@ $t->wheres(
 		}
 	},
 	'lexicon.gloss' => 'word',
-	'languagegroups.grp' => sub {my ($k,$v) = @_; $v =~ s/(\.0)+$//; "languagegroups.grpno LIKE '$v\%'"},
-		# make it search all subgroups as well
+	'languagegroups.grp' => sub {
+		my ($k,$v,$cgi) = @_;
+		if ($cgi->param('strict_grp')) {
+			return "languagegroups.grpno='$v'";
+		}
+		$v =~ s/(\.0)+$//;
+		return "languagegroups.grpno LIKE '$v\%'" # make it search all subgroups as well
+	},
 	'languagenames.language' => sub {
 		my ($k,$v) = @_;
 		if ($v eq '0') {

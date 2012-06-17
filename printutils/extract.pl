@@ -8,9 +8,6 @@
 #
 # to do: it ignores any "sections" (e.g. I.6.5.1)
 #
-# we need a better way to print out cross-references to roots that have
-# already been published, e.g. in TBRS
-#
 # also, should synonym sets, multiple sections, etc. go in here?
 
 
@@ -20,7 +17,6 @@ use Encode;
 use Unicode::Normalize;
 use SyllabificationStation;
 use FascicleXetexUtil;
-use EtymaSets;
 use STEDTUtil;
 use Template;
 
@@ -43,7 +39,6 @@ USAGE
 }
 
 my $dbh = STEDTUtil::connectdb();
-my %groupno2name = EtymaSets::groupno2name($dbh);
 my $syls = SyllabificationStation->new();
 binmode(STDERR, ":utf8");
 
@@ -100,7 +95,7 @@ my $chapter_notes = [map {xml2tex(decode_utf8($_))} @{$dbh->selectcol_arrayref(
 
 my @etyma; # array of infos to be passed on to the template
 my $etyma_in_chapter = $dbh->selectall_arrayref(
-	qq#SELECT e.tag, e.sequence, e.protoform, e.protogloss, e.plg, e.hptbid, e.tag=e.supertag AS is_main
+	qq#SELECT e.tag, e.sequence, e.protoform, e.protogloss, e.plg, e.tag=e.supertag AS is_main
 		FROM `etyma` AS `e` JOIN `etyma` AS `super` ON e.supertag = super.tag
 		WHERE e.uid=8 AND super.chapter = '$vol.$fasc.$chap' AND super.sequence >= 1
 		ORDER BY super.sequence, is_main DESC, e.plgord#);
@@ -114,7 +109,7 @@ foreach (@$etyma_in_chapter) {
 	push @etyma, \%e;
 
 	# heading stuff
-	@e{qw/tag seq protoform protogloss plg hptbid is_main/}
+	@e{qw/tag seq protoform protogloss plg is_main/}
 		= map {escape_tex(decode_utf8($_))} @$_;
 
 	# prettify sequence number
@@ -139,34 +134,17 @@ foreach (@$etyma_in_chapter) {
 
 	# etymon notes
 	$e{notes} = [];
-	my $seen_hptb; # don't generate an HPTB reference if there's a custom HPTB note already
 	foreach (@{$dbh->selectall_arrayref("SELECT notetype, xmlnote FROM notes "
 			. "WHERE tag=$e{tag} AND notetype != 'F' ORDER BY ord")}) {
 		my $notetype = $_->[0];
 		next if $notetype eq 'I' && !$INTERNAL_NOTES; # skip internal notes if we're publishing
-		$seen_hptb = 1 if $notetype eq 'H';
 		push @{$e{notes}}, {type=>$notetype, text=>xml2tex(decode_utf8($_->[1]))};
-	}
-	if ($e{hptbid} && !$seen_hptb) {
-		my $text = "See \\textit{HPTB} ";
-		my @refs = split /,/, $e{hptbid};
-		my @strings;
-		for my $id (@refs) {
-			my ($pform, $plg, $pages) =
-				$dbh->selectrow_array("SELECT protoform, plg, pages FROM hptb WHERE hptbid=?", undef, $id);
-			$pform = decode_utf8($pform);
-			my $p = ($pages =~ /,/ ? "pp" : "p");
-			push @strings, ($plg eq 'PTB' ? '' : "$plg ") . "\\textbf{$pform}, $p. $pages";
-		}
-		$text .= escape_tex(join('; ', @strings), 1);
-		$text .= '.';
-		push @{$e{notes}}, {type=>'H', text=>$text};
 	}
 
 
 	# do entries
 	my $sql = <<EndOfSQL; # this order forces similar reflexes together, and helps group srcabbr's
-SELECT DISTINCT languagegroups.ord, grp, language, lexicon.rn, 
+SELECT DISTINCT languagegroups.grpno, grp, language, lexicon.rn, 
    (SELECT GROUP_CONCAT(tag_str ORDER BY ind) FROM lx_et_hash WHERE rn=lexicon.rn AND uid=8) AS analysis,
    reflex, gloss, languagenames.srcabbr, lexicon.srcid, notes.rn
 FROM lexicon LEFT JOIN notes ON notes.rn=lexicon.rn, languagenames, languagegroups, lx_et_hash
@@ -174,7 +152,7 @@ WHERE (lx_et_hash.tag = $e{tag}
 AND lx_et_hash.rn=lexicon.rn AND lx_et_hash.uid=8
 AND languagenames.lgid=lexicon.lgid
 AND languagenames.grpid=languagegroups.grpid)
-ORDER BY languagegroups.ord, languagenames.lgsort, reflex, languagenames.srcabbr, lexicon.srcid
+ORDER BY languagegroups.grpno, languagenames.lgsort, reflex, languagenames.srcabbr, lexicon.srcid
 EndOfSQL
 	my $recs = $dbh->selectall_arrayref($sql);
 	print STDERR "#$e{tag}: ";
@@ -227,7 +205,7 @@ EndOfSQL
 			
 			if ($grpno ne $lastgrpno) {
 				$text .= '[1ex]' unless $lastgrpno eq ''; # add space above this row
-				$text .= "\\multicolumn{5}{l}{$groupno2name{$grpno}}\\\\*$group_space\n"; # if the star doesn't work, use \\nopagebreak before the \n
+				$text .= "\\multicolumn{5}{l}{$grpno. $grp}\\\\*$group_space\n"; # if the star doesn't work, use \\nopagebreak before the \n
 				$lastgrpno = $grpno;
 			}
 			
@@ -345,13 +323,7 @@ sub _tag2info {
 		$t = "($seq)";
 		$t = "$volume $t" if $volume;
 	} else {
-		my ($hptb_page) =
-			$dbh->selectrow_array(qq#SELECT mainpage FROM etyma, hptb WHERE etyma.hptbid = hptb.hptbid AND etyma.tag = $t#);
-		if ($hptb_page) {
-			$t = "(H:$hptb_page)";
-		} else {
-			$t = $ETYMA_TAGS ? "\\textit{\\tiny[#$t]}" : ''; # don't escape the # symbol here, it will be taken care of by escape_tex
-		}
+		$t = $ETYMA_TAGS ? "\\textit{\\tiny[#$t]}" : ''; # don't escape the # symbol here, it will be taken care of by escape_tex
 	}
 	if ($s =~ /^\s+$/) { # empty space means only put the number, no protogloss
 		$s = '';

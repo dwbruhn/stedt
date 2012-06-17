@@ -1,5 +1,7 @@
-setup['lexicon']['languagenames.language'].transform = function (v) {
-	return '<a href="' + baseRef + 'edit/languagenames?languagenames.language=' +  v + '" target="stedt_lgs">' + v + '</a>';
+setup['lexicon']['languagenames.language'].transform = function (v, k, rec, n) {
+	return '<a href="' + baseRef + 'edit/languagenames?languagenames.language=' +  v + '"'
+		+ ' title="' + rec[n+2] + ' - ' + rec[n+3].replace(/"/g,'&quot;') + '"'
+		+ ' target="stedt_lgs">' + v + '</a>';
 };
 
 setup['lexicon']['lexicon.srcid'].transform = function (v, k, rec, n) {
