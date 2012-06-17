@@ -5,7 +5,7 @@
 <thead><tr>
 <th class="noedit">grpno</th>
 <th id="grp">grp</th>
-<th id="plg">grp</th>
+<th id="plg">plg</th>
 <th id="genetic">genetic?</th>
 <th class="noedit">num. lgs</th>
 </tr></thead>
