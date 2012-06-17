@@ -1134,7 +1134,6 @@ TableKit.Editable.CellEditor.prototype = {
 							if (nextrow && (nextrow.id ||  // only if there's another row..., and the row looks like it's operable...
 									(nextrow = nextrow.next()) && nextrow.id)) { // or the one after that...
 								Event.stop(event); // otherwise the return gets typed into the form
-								var table = cell.up('table');
 								var colnum = TableKit.getCellIndex(cell);
 								var head = $(TableKit.getHeaderCells(table, cell)[colnum]);
 								var ftype = TableKit.Editable.getCellEditor(null,null,head);
@@ -1250,6 +1249,13 @@ TableKit.Editable.CellEditor.prototype = {
 				data.active = false;
 				data.refresh = true; // mark cell cache for refreshing, in case cell contents has changed and sorting is applied
 				if (raw) {
+					if (t.headerJSON) {
+						var fields = t.headerJSON.fields;
+						rowdata = t.headerJSON.data[0];
+						for (var i = 0; i < fields.length; ++i) {
+							raw.data[rowid][raw.cols[fields[i]]] = rowdata[i];
+						}
+					}
 					raw.data[rowid][raw.cols[head.id]] = text;
 					colheads = table.tHead.rows[0].cells;
 					rowdata = raw.data[rowid];

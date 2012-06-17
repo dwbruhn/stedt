@@ -47,6 +47,7 @@ our %set_vars = map {$_,1} qw(
 	searchable
 	editable
 	addable
+	reload_on_save
 	
 	search_by_disjunction
 );

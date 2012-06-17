@@ -77,11 +77,10 @@ sub table : StartRunmode {
 	  $message .= '</tr></table>';
 	  $hash{message} = $message;
 	}
-
 	# special case: include footnotes and list of users, etc., for lexicon table
-	my @footnotes;
-	my $footnote_index = 1;
-	if ($tbl eq 'lexicon') {
+	elsif ($tbl eq 'lexicon') {
+		my @footnotes;
+		my $footnote_index = 1;
 		require STEDT::RootCanal::Notes;
 		STEDT::RootCanal::Notes::collect_lex_notes($self,
 			# only collect notes for the records on this page
@@ -244,6 +243,12 @@ sub update : Runmode {
 				$self->param('uid'), $tblname, $id, $field =~ /([^.]+)$/,
 				$oldval || '', $value || '',  # $oldval might be undefined (and interpreted as NULL by mysql)
 				$fake_uid || 0);
+		}
+		if ($t->in_reload_on_save($field)) {
+			my $q2 = $q->new('');
+			$q2->param($t->key, $id);
+			require JSON;
+			$self->header_add('-X-JSON' => JSON::to_json($t->search($q2)));
 		}
 		return $value;
 	} else {
