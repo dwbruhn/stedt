@@ -113,9 +113,6 @@ Object.extend(TableKit, {
 		}
 		return TableKit.tables[id].dom.head;
 	},
-	getCellIndex : function(cell) {
-		return $A(cell.parentNode.cells).indexOf(cell);
-	},
 	getRowIndex : function(row) {
 		return $A(row.parentNode.rows).indexOf(row);
 	},
@@ -575,7 +572,7 @@ TableKit.Sortable = {
 		} else {
 			cell = $(index);
 			table = table ? $(table) : cell.up('table');
-			index = TableKit.getCellIndex(cell);
+			index = cell.cellIndex;
 		}
 		var op = TableKit.option('noSortClass descendingClass ascendingClass defaultSortDirection', table.id);
 		
@@ -644,7 +641,7 @@ TableKit.Sortable = {
 	},
 	getDataType : function(cell,index,table) {
 		cell = $(cell);
-		index = (index || index === 0) ? index : TableKit.getCellIndex(cell);
+		index = (index || index === 0) ? index : cell.cellIndex;
 		
 		var colcache = TableKit.Sortable._coltypecache;
 		var cache = colcache[table.id] ? colcache[table.id] : (colcache[table.id] = {});
@@ -915,7 +912,7 @@ TableKit.Resizable = {
 		} else {
 			cell = $(index);
 			table = table ? $(table) : cell.up('table');
-			index = TableKit.getCellIndex(cell);
+			index = cell.cellIndex;
 		}
 		var pad = parseInt(cell.getStyle('paddingLeft'),10) + parseInt(cell.getStyle('paddingRight'),10);
 		w = Math.max(w-pad, TableKit.option1('minWidth', table.id));
@@ -1040,7 +1037,7 @@ TableKit.Editable = {
 		var nec = TableKit.option1('noEditClass', table.id);
 		if(cell.hasClassName(nec)) {return;}
 		
-		var head = $(TableKit.getHeaderCells(table, cell)[TableKit.getCellIndex(cell)]);
+		var head = $(TableKit.getHeaderCells(table, cell)[cell.cellIndex]);
 		if(head.hasClassName(nec)) {return;}
 		
 		var data = TableKit.getCellData(cell);
@@ -1051,7 +1048,7 @@ TableKit.Editable = {
 		data.active = true;
 	},
 	getCellEditor : function(cell, table, head) {
-	  var head = head ? head : $(TableKit.getHeaderCells(table, cell)[TableKit.getCellIndex(cell)]);
+	  var head = head ? head : $(TableKit.getHeaderCells(table, cell)[cell.cellIndex]);
 	  var ftype = TableKit.Editable.types['text-input'];
 		if(head.id && TableKit.Editable.types[head.id]) {
 			ftype = TableKit.Editable.types[head.id];
@@ -1093,7 +1090,7 @@ TableKit.Editable.CellEditor.prototype = {
 		var formwidth = cell.offsetWidth; // getWidth();
 		var formheight = cell.getHeight();
 		var rowid = cell.up('tr').id.substring(3);
-		var colid = $(TableKit.getHeaderCells(table, cell)[TableKit.getCellIndex(cell)]).id;
+		var colid = $(TableKit.getHeaderCells(table, cell)[cell.cellIndex]).id;
 		var raw = TableKit.tables[table.id].raw;
 		var rawValue = raw ? raw.data[rowid][raw.cols[colid]] : null;
 		var oldValue = raw ? rawValue : TableKit.getCellText(cell);
@@ -1134,7 +1131,7 @@ TableKit.Editable.CellEditor.prototype = {
 							if (nextrow && (nextrow.id ||  // only if there's another row..., and the row looks like it's operable...
 									(nextrow = nextrow.next()) && nextrow.id)) { // or the one after that...
 								Event.stop(event); // otherwise the return gets typed into the form
-								var colnum = TableKit.getCellIndex(cell);
+								var colnum = cell.cellIndex;
 								var head = $(TableKit.getHeaderCells(table, cell)[colnum]);
 								var ftype = TableKit.Editable.getCellEditor(null,null,head);
 								
@@ -1228,13 +1225,13 @@ TableKit.Editable.CellEditor.prototype = {
 	submit : function(cell, form) {
 		var op = this.options;
 		form = form || cell.down('form');
-		var head = $(TableKit.getHeaderCells(null, cell)[TableKit.getCellIndex(cell)]);
+		var head = $(TableKit.getHeaderCells(null, cell)[cell.cellIndex]);
 		var row = cell.up('tr');
 		var rowid = row.id;
 		var table = cell.up('table');
 		// *** DY added custom params
 		var raw = TableKit.tables[table.id].raw, s, tbl;
-		s = 'row=' + (TableKit.getRowIndex(row)+1) + '&cell=' + (TableKit.getCellIndex(cell)+1);
+		s = 'row=' + (TableKit.getRowIndex(row)+1) + '&cell=' + (cell.cellIndex+1);
 		s += TableKit.option1('editAjaxExtraParams', table.id)||'';
 		if (raw) {
 			s += '&tbl=' + raw.tblname;

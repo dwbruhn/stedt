@@ -50,7 +50,7 @@ var grp_confirm = function (tag, grp_name) {
 	return confirm('Are you sure you want to approve tagging by ' + stedt_other_username
 		+ ' for tag #' + tag + ' in subgroup ' + grp_name + '?');
 };
-var grpno_index = $('languagegroups.grpno').previousSiblings().length;
+var grpno_index = $('languagegroups.grpno').cellIndex;
 	// Counting backwards doesn't work (i.e., "tbody.rows[0].cells.length - 3")
 	// because there may or may not be a HIST column depending on if the user is logged in.
 	// Note that having multiple <TH> elements with the same id value ("languagegroups.grpid", etc.)

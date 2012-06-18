@@ -2,14 +2,16 @@
 
 <form action="[% self_url %]/subgroups/add" method="get">
 <table id="lggrps">
-<thead><tr>
+[% FOR sec IN ['thead','tfoot'] -%]
+<[% sec %]><tr>
 <th class="noedit">grpno</th>
 <th id="grp">grp</th>
 <th id="plg">plg</th>
 <th id="genetic">genetic?</th>
 <th class="noedit">num. lgs</th>
 <th class="noedit">grpid</th>
-</tr></thead>
+</tr></[% sec %]>
+[% END -%]
 <tbody>
 [% FOREACH r IN result -%]
 <tr id="gr_[% r.0 %]">
@@ -31,14 +33,6 @@
 </tr>
 [% END -%]
 </tbody>
-<tfoot><tr>
-<th class="noedit">grpno</th>
-<th id="grp">grp</th>
-<th id="plg">plg</th>
-<th id="genetic">genetic?</th>
-<th class="noedit">num. lgs</th>
-<th class="noedit">grpid</th>
-</tr></tfoot>
 </table>
 </form>
 <h2>Cheat sheet</h2>

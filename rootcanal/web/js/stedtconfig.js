@@ -501,50 +501,46 @@ var setup = { // in the form setup.[tablename].[fieldname]
 				e.stop();
 			});
 			tbl.on('click', 'a.elink', show_tag);
+
+			// stop here if it's etymon view, which (a) doesn't allow sorting,
+			// and (b) does its own thing for adding language group headers
+			if (tbl.id !== 'lexicon_resulttable') return;
+
 			// special sort function
 			// this makes makes "language" sort by grpno, then languagename
-			// but don't do it if it's etymon view (check the table id)
-			if (tbl.id === 'lexicon_resulttable') {
-				var t = TableKit.tables[tbl.id];
-				t.customSortFn = function (rows, index, tkstdt, order) {
-					var lg_index = t.raw.cols['languagenames.language'];
-					$$('.lggroup').invoke('remove');
-					if (index !== lg_index) return false;
-					var grpno_index = t.raw.cols['languagegroups.grpno'];
-					rows.sort(function (a,b) {
-						var a_id = a.id.substring(3); // strip off the "et_" part of the tr's id.
-						var b_id = b.id.substring(3);
-						// sort by grno first
-						var result = TableKit.Sortable.Type.compare(t.raw.data[a_id][grpno_index], t.raw.data[b_id][grpno_index]);
-						if (result === 0) {
-							result = tkstdt.compare(t.raw.data[a_id][lg_index], t.raw.data[b_id][lg_index]);
-						}
-						return result*order;
-					});
-					window.setTimeout(setup.lexicon._add_lggrp_headers,0); // defer this so tablekit can do its stuff first
-					return true;
-				};
-				if (!$('manual_paging_f1') || !$('manual_paging_f1').sortkey) {
-					// if there's no manual paging, or if there is but there's no 'sortkey' INPUT element, it's the default sort and we can add the subgroup headings
-					window.setTimeout(setup.lexicon._add_lggrp_headers,0);
-				}
+			var t = TableKit.tables[tbl.id];
+			t.customSortFn = function (rows, index, tkstdt, order) {
+				var lg_index = t.raw.cols['languagenames.language'];
+				$$('.lggroup').invoke('remove');
+				if (index !== lg_index) return false;
+				var grpno_index = t.raw.cols['languagegroups.grpno'];
+				rows.sort(function (a,b) {
+					var a_id = a.id.substring(3); // strip off the "le_" part of the tr's id.
+					var b_id = b.id.substring(3);
+					// sort by grno first
+					var result = TableKit.Sortable.Type.compare(t.raw.data[a_id][grpno_index], t.raw.data[b_id][grpno_index]);
+					if (result === 0) {
+						result = tkstdt.compare(t.raw.data[a_id][lg_index], t.raw.data[b_id][lg_index]);
+					}
+					return result*order;
+				});
+				window.setTimeout(setup.lexicon._add_lggrp_headers,0); // defer this so tablekit can do its stuff first
+				return true;
+			};
+			if (!$('manual_paging_f1') || !$('manual_paging_f1').sortkey) {
+				// if there's no manual paging, or if there is but there's no 'sortkey' INPUT element, it's the default sort and we can add the subgroup headings
+				window.setTimeout(setup.lexicon._add_lggrp_headers,0);
 			}
 		},
 		_add_lggrp_headers: function () {
 			var t = $('lexicon_resulttable');
-			var hcells = t.tHead.rows[0].cells;
-			var grpno_index = -1;
-			for (var i = 0; i < hcells.length; ++i) {
-				if (hcells[i].id === 'languagegroups.grpno') {
-					grpno_index = i;
-					break;
-				}
-			}
-			if (grpno_index === -1) {
+			var hcell = t.select('th[id="languagegroups.grpno"]')[0];
+			if (!hcell) {
 				console.log('couldn\'t find grpno_index!');
 				return;
 			}
-			var tbody = $('lexicon_resulttable').tBodies[0];
+			var grpno_index = hcell.cellIndex;
+			var tbody = t.tBodies[0];
 			var lastgrpno = '';
 			var visiblecols = $A(tbody.rows[0].cells).findAll(function (c) {return $(c).visible();}).length;
 			$A(tbody.rows).each(function (row, j) {

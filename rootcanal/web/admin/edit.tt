@@ -4,7 +4,7 @@
 <tr>[% FOREACH col IN t.searchable %]<th>[% col %]</th>[% END -%]</tr>
 <tr>
 [% FOREACH col IN t.searchable -%]
-<td>
+<td style="padding-left:0px;padding-right:5px;text-indent:0px;">
 [%- sub = t.search_form_items(col) %]
 [%- IF t.search_form_items(col) %]
 [%- sub(c.query) %]
