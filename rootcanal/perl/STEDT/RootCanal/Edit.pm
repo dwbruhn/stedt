@@ -102,7 +102,7 @@ sub table : StartRunmode {
 		$hash{uid2} = $uid2;
 	}
 	elsif ($tbl eq 'etyma') {
-		my $plgs = $self->dbh->selectall_arrayref("SELECT plg, grpid FROM languagegroups WHERE plg != '' ORDER BY plg");
+		my $plgs = $self->dbh->selectall_arrayref("SELECT plg, grpid FROM languagegroups WHERE plg != '' ORDER BY grpno");
 		unshift @$plgs, ['(other)', ''];
 		push @$plgs, ['', 0];
 		require JSON;

@@ -535,9 +535,9 @@ sub etymon : Runmode {
 	my $INTERNAL_NOTES = $self->has_privs(1);
 	my (@etyma, @footnotes, @users);
 	my $footnote_index = 1;
-	my $sql = qq#SELECT e.tag, e.chapter, e.sequence, e.protoform, e.protogloss, e.plg,
+	my $sql = qq#SELECT e.tag, e.chapter, e.sequence, e.protoform, e.protogloss, languagegroups.plg,
 						e.tag=e.supertag AS is_main, e.uid, users.username
-FROM `etyma` AS `e` JOIN `etyma` AS `super` ON e.supertag = super.tag LEFT JOIN users ON (e.uid=users.uid)
+FROM `etyma` AS `e` JOIN `etyma` AS `super` ON e.supertag = super.tag LEFT JOIN users ON (e.uid=users.uid) LEFT JOIN languagegroups ON (e.grpid=languagegroups.grpid)
 WHERE e.supertag=?
 ORDER BY is_main DESC#;
 	my $etyma_for_tag = $self->dbh->selectall_arrayref($sql, undef, $tag);

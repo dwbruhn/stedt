@@ -43,7 +43,7 @@ sub elink : Runmode {
 		my %e;
 		push @etyma, \%e;
 		$e{tag} = $t;
-		@e{qw/plg pform pgloss/} = $self->dbh->selectrow_array("SELECT plg, protoform, protogloss FROM etyma WHERE tag=?", undef, $t);
+		@e{qw/plg pform pgloss/} = $self->dbh->selectrow_array("SELECT languagegroups.plg, protoform, protogloss FROM etyma LEFT JOIN languagegroups USING (grpid) WHERE tag=?", undef, $t);
 		$e{pform} =~ s/⪤ +/⪤ */g;
 		$e{pform} =~ s/OR +/OR */g;
 		$e{pform} =~ s/~ +/~ */g;

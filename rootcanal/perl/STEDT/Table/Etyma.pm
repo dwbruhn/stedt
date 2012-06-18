@@ -21,7 +21,6 @@ $t->fields('etyma.tag',
 	'etyma.grpid',
 	'languagegroups.plg',
 	'languagegroups.grpno',
-	'etyma.plg',
 #	'etyma.semkey',
 	'etyma.notes',
 	'(SELECT COUNT(*) FROM notes WHERE tag=etyma.tag) AS num_notes',
@@ -40,7 +39,6 @@ $t->fields('etyma.tag',
 $t->field_visible_privs(
 	# 'etyma.supertag' => 1,
 	'etyma.chapter' => 3,
-	'etyma.plg' => 1,
 	'etyma.notes' => 1,
 	'etyma.semkey'  => 1,
 	#'etyma.xrefs' => 1,
@@ -63,7 +61,6 @@ $t->searchable('etyma.tag',
 	'etyma.chapter',
 	'etyma.sequence',
 	'etyma.protoform', 'etyma.protogloss',
-	'etyma.plg',
 	'etyma.grpid',
 	'etyma.notes',
 #	'etyma.semkey',
@@ -82,7 +79,6 @@ $t->field_editable_privs(
 	'etyma.chapter' => 1,
 	'etyma.protoform' => 1,
 	'etyma.protogloss' => 1,
-	'etyma.plg' => 1,
 	'etyma.grpid' => 1,
 	'etyma.notes' => 1,
 	'etyma.prefix' => 1,
@@ -124,17 +120,17 @@ $t->search_form_items(
 		my $tone = $dbh->selectall_arrayref("SELECT DISTINCT tone FROM etyma ORDER by tone");
 		return $cgi->popup_menu(-name => 'etyma.tone', -values=>['', map {@$_} @$tone], -labels=>{'0'=>'(no value)'},  -default=>'');
 	},
-	'etyma.plg' => sub {
+	'etyma.grpid' => sub {
 		my $cgi = shift;
-		# get list of proto-lgs
-		my $plgs = $dbh->selectall_arrayref("SELECT DISTINCT plg FROM etyma");
-		if ($plgs->[0][0] eq '') {
-			# indexes 0,0 relies on sorted list of plgs.
-			# allow explicit searching for empty strings
-			# see 'wheres' sub, below
-			$plgs->[0][0] = '0';
-		}
-		return $cgi->popup_menu(-name => 'etyma.plg', -values=>['', map {@$_} @$plgs], -labels=>{'0'=>'(no value)'},  -default=>'');
+		my $a = $dbh->selectall_arrayref("SELECT CONCAT(grpno, ' - ', plg), grpid FROM languagegroups WHERE plg != '' ORDER BY grpno");
+		unshift @$a, ['', ''];
+		push @$a, ['(undefined)', 0];
+		my @ids = map {$_->[1]} @$a;
+		my %labels;
+		@labels{@ids} = map {$_->[0]} @$a;
+		return $cgi->popup_menu(-name => 'etyma.grpid', -values=>[@ids],
+  								-default=>'',
+  								-labels=>\%labels);
 	}
 );
 
@@ -143,7 +139,6 @@ $t->wheres(
 		if ($v eq 'm') {return 'etyma.tag!=etyma.supertag'}
 		if ($v eq '!m') {return 'etyma.tag=etyma.supertag'}
 		'(' . STEDT::Table::where_int($k,$v) . ' OR ' . STEDT::Table::where_int('etyma.supertag',$v) . ')'},
-	'etyma.plg'	=> sub {my ($k,$v) = @_; $v = '' if $v eq '0'; "$k LIKE '$v'"},
 	'etyma.grpid'	=> 'int',
 	'etyma.chapter' => sub { my ($k,$v) = @_; $v eq '0' ? "$k=''" : "$k LIKE '$v'" },
 	'etyma.protogloss' => 'word',
@@ -254,7 +249,7 @@ $t->add_check(sub {
 	$err .= "Chapter not specified!\n" unless $cgi->param('etyma.chapter');
 	$err .= "Protoform is empty!\n" unless $cgi->param('etyma.protoform');
 	$err .= "Protogloss is empty!\n" unless $cgi->param('etyma.protogloss');
-	$err .= "Protolanguage is empty!\n" unless $cgi->param('etyma.plg');
+	$err .= "Protolanguage not specified!\n" unless $cgi->param('etyma.grpid');
 	return $err;
 });
 

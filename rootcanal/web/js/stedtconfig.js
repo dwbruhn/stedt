@@ -373,11 +373,6 @@ var setup = { // in the form setup.[tablename].[fieldname]
 			label: 'protogloss',
 			size: 200
 		},
-		'etyma.plg' : {
-			vert_show: true,
-			label: 'plg2',
-			size: 40
-		},
 		'etyma.grpid': {
 			label: 'plg',
 			size: 50,
