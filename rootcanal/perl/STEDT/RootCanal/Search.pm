@@ -157,8 +157,8 @@ sub searchresults_from_querystring {
 	} elsif ($tbl eq 'lexicon') {
 		$query->param('languagenames.language' => $lg) if $lg =~ /\p{Letter}/;
 		
-		# languagegroups param must match start with X or a digit and not go past 4 levels (first two levels are obligatory)
-		$query->param('languagegroups.grp' => $lggrp) if $lggrp =~ /^[\dX]\.\d((\.\d)(\.\d)?)?$/;
+		# languagegroups param must match start with X or a digit and not go past 4 levels (first level is obligatory)
+		$query->param('languagegroups.grp' => $lggrp) if $lggrp =~ /^[\dX](\.\d((\.\d)(\.\d)?)?)?$/;
 		
 		# language code must be an integer
 		if (defined($lgcode)) {		# include this test for now, since there's no js code yet to pass lgcode param via ajax
@@ -180,7 +180,7 @@ sub searchresults_from_querystring {
 				# print STDERR "Lexicon gloss is $token\n";	# debugging
 			}
 		}
-		if (!$s && !$lg && !$lggrp && !$f) {
+		if (!$s && !$lg && $lggrp eq '' && !$f) {
 			$query->param('analysis'=>1764);
 		} elsif (!$query->param) {
 			$query->param('analysis'=>5035);
@@ -188,8 +188,8 @@ sub searchresults_from_querystring {
 	} elsif ($tbl eq 'morphemes') {		# is this actually used yet?
 		$query->param('languagenames.language' => $lg) if $lg =~ /\p{Letter}/;
 		
-		# languagegroups param must match start with X or a digit and not go past 4 levels (first two levels are obligatory)
-		$query->param('languagegroups.grp' => $lggrp) if $lggrp =~ /^[\dX]\.\d((\.\d)(\.\d)?)?$/;
+		# languagegroups param must match start with X or a digit and not go past 4 levels (first level is obligatory)
+		$query->param('languagegroups.grp' => $lggrp) if $lggrp =~ /^[\dX](\.\d((\.\d)(\.\d)?)?)?$/;
 		
 		# language code must be an integer
 		$query->param('languagenames.lgcode' => $lgcode) if $lgcode =~ /^\d+$/;
@@ -202,7 +202,7 @@ sub searchresults_from_querystring {
 				$query->param('morphemes.gloss' => $token);
 			}
 		}
-		if (!$s && !$lg && !$lggrp) {
+		if (!$s && !$lg && $lggrp eq '') {
 			$query->param('analysis'=>1764);
 		} elsif (!$query->param) {
 			$query->param('analysis'=>5035);
@@ -225,13 +225,14 @@ sub combo : Runmode {
 	# print STDERR "COMBO: Form param is $f\n";	# debugging
 	my $s = decode_utf8($q->param('t')) || '';
 	my $lg = decode_utf8($q->param('lg')) || '';
-	my $lggrp = decode_utf8($q->param('lggrp')) || '';
+	my $lggrp = decode_utf8($q->param('lggrp'));
+	$lggrp = '' unless length($lggrp);
 	my $lgcode = decode_utf8($q->param('lgcode')) || '';	# note that lgcode=0 functions as if the param is blank
 	# print STDERR "COMBO: Language group param is $lggrp\n";	# debugging
 	my $result;
 
-	if ($f || $s || $lg || $lggrp || $lgcode || !$q->param) {
-		if ($ENV{HTTP_REFERER} && ($f || $s || $lg || $lggrp)) {
+	if ($f || $s || $lg || $lggrp ne '' || $lgcode || !$q->param) {
+		if ($ENV{HTTP_REFERER} && ($f || $s || $lg || $lggrp ne '')) {
 			$self->dbh->do("INSERT querylog VALUES (?,?,?,?,?,?,NOW())", undef,
 				'simple', $f, $s, $lg, $lggrp, $ENV{REMOTE_ADDR});	# record search in query log (put table name, form, gloss, lg, lggroup, ip in separate fields)
 		}
@@ -256,12 +257,13 @@ sub ajax : Runmode {
 	# print STDERR "AJAX: Form param is $f\n";	# debugging
 	my $lg = decode_utf8($self->query->param('lg'));
 	my $lggrp = decode_utf8($self->query->param('lggrp'));
+	$lggrp = '' unless length($lggrp);
 	my $tbl = $self->query->param('tbl');
 	my $lgcode = decode_utf8($self->query->param('lgcode'));
 	my $result; # hash ref for the results
 
 	$self->dbh->do("INSERT querylog VALUES (?,?,?,?,?,?,NOW())", undef,
-		$tbl, $f, $s, $lg, $lggrp, $ENV{REMOTE_ADDR}) if $s || $lg || $lggrp || $f;	# record search in query log (put table name, form, gloss, lg, lggroup, ip in separate fields)
+		$tbl, $f, $s, $lg, $lggrp, $ENV{REMOTE_ADDR}) if $s || $lg || $lggrp ne '' || $f;	# record search in query log (put table name, form, gloss, lg, lggroup, ip in separate fields)
 
 	if (defined($s) || defined($f)) {
 		if ($tbl eq 'lexicon' || $tbl eq 'etyma') {
