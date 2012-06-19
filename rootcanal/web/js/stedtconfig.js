@@ -435,7 +435,7 @@ var setup = { // in the form setup.[tablename].[fieldname]
 					v = rec[n-1] ? '[-]' : '';
 				}
 				if (stedtuserprivs & 8 && rec[n-1]) {
-					return '<a href="' + baseRef + 'admin/seq?c=' + rec[n-1]
+					return '<a href="' + baseRef + 'chapters/seq?c=' + rec[n-1]
 					+ '" target="stedt_sequencer">' + v + '</a>'
 				}
 				return v;

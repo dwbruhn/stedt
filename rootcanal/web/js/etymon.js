@@ -75,7 +75,7 @@ for (var i = 1; i < num_tables; i++) {
 			if (stedtuserprivs & 1) {
 				// insert html form for approving this subgroup only
 				grp = grp.replace(/"/g,'&quot;'); // escape quotes for inclusion in the string below
-				cell2.innerHTML = '<form action="' + baseRef + 'notes/accept" method="post" '
+				cell2.innerHTML = '<form action="' + baseRef + 'tags/accept" method="post" '
 					+ 'onsubmit="return grp_confirm(' + table_tag +  ',\'' + grp + '\')">'
 					+ '<input name="tag" value="' + table_tag + '" type="hidden">'
 					+ '<input name="uid" value="' + uid2 + '" type="hidden">'

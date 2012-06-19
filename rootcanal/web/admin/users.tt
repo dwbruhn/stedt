@@ -87,6 +87,7 @@ Otherwise the whole row will be ignored.</p>
 	<li>reorder notes</li>
 	<li>run the sequencer (on etyma in a "chapter")</li>
 	<li>edit "chapters" table</li>
+	<li>edit and add records to languagegroups table</li>
 </ul>
 
 <h3>16 - superuser</h3>

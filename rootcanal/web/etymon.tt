@@ -56,7 +56,7 @@ Reconstructed mesoroots below:
 
 [% IF e.records -%]
 [% IF selected_uid && c.has_privs(8) %]
-<form action="[% self_url %]/notes/accept" method="post" onsubmit="return confirm('Are you sure you want to approve all the tagging by [% selected_username %] for tag #[% e.tag %]? Any conflicting tags will be clobbered!')" class="u[% supertag %]" style="display:inline; padding:3px">
+<form action="[% self_url %]/tags/accept" method="post" onsubmit="return confirm('Are you sure you want to approve all the tagging by [% selected_username %] for tag #[% e.tag %]? Any conflicting tags will be clobbered!')" class="u[% supertag %]" style="display:inline; padding:3px">
 <input name="tag" value="[% e.tag %]" type="hidden">
 <input name="uid" value="[% selected_uid %]" type="hidden">
 <input type="submit" value="Accept tagging by [% selected_username %] for tag #[% e.tag %]">
