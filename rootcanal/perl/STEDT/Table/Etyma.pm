@@ -7,6 +7,7 @@ my ($self, $dbh, $privs, $uid) = @_;
 my $t = $self->SUPER::new($dbh, 'etyma', 'etyma.tag', $privs); # dbh, table, key, privs
 
 $t->query_from(q|etyma JOIN `etyma` AS `super` ON etyma.supertag = super.tag LEFT JOIN `users` ON etyma.uid = users.uid LEFT JOIN languagegroups ON etyma.grpid=languagegroups.grpid|);
+$t->default_where('etyma.status != "DELETE"');
 $t->order_by('super.chapter, super.sequence, IF(super.sequence,0,super.tag), is_mesoroot, languagegroups.grpno');
 $t->fields('etyma.tag',
 	'etyma.supertag',
@@ -138,6 +139,7 @@ $t->wheres(
 	'etyma.tag' => sub {my ($k,$v) = @_;
 		if ($v eq 'm') {return 'etyma.tag!=etyma.supertag'}
 		if ($v eq '!m') {return 'etyma.tag=etyma.supertag'}
+		if ($v eq 'd') {$t->default_where(''); return "etyma.status='DELETE'"}
 		'(' . STEDT::Table::where_int($k,$v) . ' OR ' . STEDT::Table::where_int('etyma.supertag',$v) . ')'},
 	'etyma.grpid'	=> 'int',
 	'etyma.chapter' => sub { my ($k,$v) = @_; $v eq '0' ? "$k=''" : "$k LIKE '$v'" },

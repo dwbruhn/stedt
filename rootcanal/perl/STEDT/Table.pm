@@ -15,6 +15,7 @@ our %ivars = map {$_,1} qw(
 	table
 	key
 	query_from
+	default_where
 	order_by
 	group_by
 	search_limit
@@ -132,9 +133,8 @@ sub AUTOLOAD {
 	$name =~ s/.*:://;
 
 	if ($ivars{$name}) {
-		my $s = shift;
-		if ($s) {
-			$self->{$name} = $s;
+		if (@_) {
+			$self->{$name} = $_[0];
 		} else {
 			return $self->{$name};
 		}
@@ -205,10 +205,16 @@ sub get_query {
 	my ($where, $having) = $self->query_where($cgi);
 	my $flds = join(', ', $self->fields_for_priv('full'));
 	my $from = $self->{query_from} || $self->{table};
-	return "SELECT $flds FROM $from GROUP BY $self->{key} LIMIT 1", '[first item]' unless $where;
-	
+	if (!$where) {
+		my $default_where = $self->{default_where} ? 'WHERE ' . $self->{default_where} : '';
+		return "SELECT $flds FROM $from $default_where GROUP BY $self->{key} LIMIT 1", '[first item]' unless $where;
+	}
+
 	my $order = $self->{order_by} || $self->{key};
 	my $group = $self->{group_by} || $self->{key};
+	if ($self->{default_where}) {
+		$where .= ' AND ' . $self->{default_where};
+	}
 	return "SELECT $flds FROM $from WHERE $where "
 		. "GROUP BY $group "
 		. ($having ? " HAVING $having " : '')

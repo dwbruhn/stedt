@@ -251,17 +251,23 @@ $t->wheres(
 $t->save_hooks(
 	'analysis' => sub {
 		my ($rn, $s) = @_;
+		$s =~ s/\s//g; # strip all whitespace
+		# check for valid tags if it's a number
+		for my $tag (split(/,/, $s)) {
+			next unless ($tag =~ s/^(\d+).*/$1/); # initial digits will be interpreted as a tag number; skip otherwise.
+			die "$tag is too big of a tag number\n" unless $tag <= 65535;
+			my ($n, $status) = $dbh->selectrow_array("SELECT tag,status FROM etyma WHERE tag=$tag");
+			die "$tag is not a valid tag\n" unless $n;
+			die "$tag has been deleted!\n" if uc($status) eq 'DELETE';
+		}
 		# simultaneously update lx_et_hash
 		$dbh->do('DELETE FROM lx_et_hash WHERE rn=? AND uid=?', undef, $rn, $uid1);
 		my $sth = $dbh->prepare(qq{INSERT INTO lx_et_hash (rn, tag, ind, tag_str, uid) VALUES (?, ?, ?, ?, ?)});
 		my $index = 0;
-		$s =~ s/^\s+//; # strip starting and trailing whitespace
-		$s =~ s/\s+$//;
-		for my $tag (split(/\s*,\s*/, $s)) { # Split the contents of the field on commas (whitespace surrounding commas will be stripped)
+		for my $tag (split(/,/, $s)) {
 			# Insert new records into lx_et_hash based on the updated analysis field
 			my $tag_str = $tag;
 			$tag = 0 unless ($tag =~ s/^(\d+).*/$1/); # allow tag numbers followed by any string that begins with a non-numeric character
-			die "$tag is too big of a tag number\n" unless $tag <= 65535;
 			$sth->execute($rn, $tag, $index, $tag_str, $uid1);
 			$index++;
 		}
@@ -270,15 +276,19 @@ $t->save_hooks(
 	'user_an' => sub {
 		my ($rn, $s) = @_;
 		$s =~ s/\s//g;
+		for my $tag (split(/,/, $s)) {
+			next unless ($tag =~ s/^(\d+).*/$1/); # initial digits will be interpreted as a tag number; skip otherwise.
+			die "$tag is too big of a tag number\n" unless $tag <= 65535;
+			my ($n, $status) = $dbh->selectrow_array("SELECT tag,status FROM etyma WHERE tag=$tag");
+			die "$tag is not a valid tag\n" unless $n;
+			die "$tag has been deleted!\n" if uc($status) eq 'DELETE';
+		}
 		$dbh->do('DELETE FROM lx_et_hash WHERE rn=? AND uid=?', undef, $rn, $uid2);
 		my $sth = $dbh->prepare(qq{INSERT INTO lx_et_hash (rn, tag, ind, tag_str, uid) VALUES (?, ?, ?, ?, ?)});
 		my $index = 0;
-		$s =~ s/^\s+//;
-		$s =~ s/\s+$//;
 		for my $tag (split(/\s*,\s*/, $s)) {
 			my $tag_str = $tag;
 			$tag = 0 unless ($tag =~ s/^(\d+).*/$1/); # allow tag numbers followed by any string that begins with a non-numeric character
-			die "$tag is too big of a tag number\n" unless $tag <= 65535;
 			$sth->execute($rn, $tag, $index, $tag_str, $uid2);
 			$index++;
 		}

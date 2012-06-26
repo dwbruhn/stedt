@@ -214,7 +214,7 @@ sub _markup2xml {
 
 sub _tag2info {
 	my ($t, $s, $c) = @_;
-	my ($form, $gloss) = $c->dbh->selectrow_array("SELECT etyma.protoform,etyma.protogloss FROM etyma WHERE tag=?", undef, $t);
+	my ($form, $gloss) = $c->dbh->selectrow_array("SELECT etyma.protoform,etyma.protogloss FROM etyma WHERE tag=? AND status != 'DELETE'", undef, $t);
 	return "[ERROR! Dead etyma ref #$t!]" unless $form;
 	$form =~ s/-/‑/g; # non-breaking hyphens
 	$form =~ s/^/*/;

@@ -103,13 +103,13 @@ sub etymon : Runmode {
 	my $sql = qq#SELECT e.tag, e.chapter, e.sequence, e.protoform, e.protogloss, languagegroups.plg,
 						e.tag=e.supertag AS is_main, e.uid, users.username
 FROM `etyma` AS `e` JOIN `etyma` AS `super` ON e.supertag = super.tag LEFT JOIN users ON (e.uid=users.uid) LEFT JOIN languagegroups ON (e.grpid=languagegroups.grpid)
-WHERE e.supertag=?
+WHERE e.supertag=? AND e.status != 'DELETE' AND super.status != 'DELETE'
 ORDER BY is_main DESC#;
 	my $etyma_for_tag = $self->dbh->selectall_arrayref($sql, undef, $tag);
 	if (!@$etyma_for_tag) {
 		# if it failed the first time, this is probably a mesoroot.
 		# get the mesoroot's supertag and redirect to it
-		($tag) = $self->dbh->selectrow_array("SELECT supertag FROM etyma WHERE tag=?", undef, $tag);
+		($tag) = $self->dbh->selectrow_array("SELECT supertag FROM etyma WHERE tag=? AND status != 'DELETE'", undef, $tag);
 		if (!$tag) {
 			die "no etymon with tag #" . $self->param('tag');
 		}
