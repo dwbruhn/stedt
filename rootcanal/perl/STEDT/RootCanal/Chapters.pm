@@ -189,7 +189,7 @@ sub seq : Runmode {
 		$msg = "Success!";
 	}
 
-	my $a = $self->dbh->selectall_arrayref("SELECT tag, protoform, protogloss, sequence FROM etyma WHERE tag=supertag AND chapter=? ORDER BY sequence", undef, $chap); # no mesoroots should go in this list!
+	my $a = $self->dbh->selectall_arrayref("SELECT tag, protoform, protogloss, sequence FROM etyma WHERE tag=supertag AND chapter=? AND status != 'DELETE' ORDER BY sequence", undef, $chap); # no mesoroots should go in this list!
 	
 	# run through results and group allofams
 	my @fams;
