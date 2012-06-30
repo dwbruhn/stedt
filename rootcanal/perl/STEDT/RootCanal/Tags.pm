@@ -88,6 +88,8 @@ END
 sub etymon : Runmode {
 	my $self = shift;
 	my $tag = $self->param('tag');
+	
+	# figure out the "selected" user for the second col, if specified
 	my $selected_uid = $self->param('uid2');
 	if ($selected_uid ne '' && ($selected_uid !~ /^[1-9]\d*$/ || $selected_uid == 8)) {
 		$self->header_add(-status => 400);
@@ -100,6 +102,8 @@ sub etymon : Runmode {
 	my $INTERNAL_NOTES = $self->has_privs(1);
 	my (@etyma, @footnotes, @users);
 	my $footnote_index = 1;
+
+	# pull out the etyma record, along with its mesoroots in the etyma table
 	my $sql = qq#SELECT e.tag, e.chapter, e.sequence, e.protoform, e.protogloss, languagegroups.plg,
 						e.tag=e.supertag AS is_main, e.uid, users.username
 FROM `etyma` AS `e` JOIN `etyma` AS `super` ON e.supertag = super.tag LEFT JOIN users ON (e.uid=users.uid) LEFT JOIN languagegroups ON (e.grpid=languagegroups.grpid)
@@ -116,6 +120,8 @@ ORDER BY is_main DESC#;
 		return $self->redirect($self->query->url(-absolute=>1) . "/etymon/$tag" . ($selected_uid ? "/$selected_uid" : ''));
 	}
 
+	# pull together a list of users who have tagged this root,
+	# and choose a sensible default for the "selected" user if not specified yet
 	my $self_uid = $self->param('uid');
 	my $stedt_count = 0;
 	my $selected_username;
@@ -178,7 +184,7 @@ ORDER BY is_main DESC#;
 	my $user_analysis_col = '';
 	my $user_analysis_where = '';
 	my $no_meso = '';
-	my $supertag = $etyma_for_tag->[0][0] if @$etyma_for_tag;
+	my $supertag = $etyma_for_tag->[0][0];
 	my $supertag_done = 0;
 	my $breadcrumbs;
 	{
@@ -188,7 +194,7 @@ ORDER BY is_main DESC#;
 			$v, $f||0, $c||0, $s1||0, $s2||0);
 	}
 	
-	if ($selected_uid && @$etyma_for_tag) {
+	if ($selected_uid) {
 		# OK to concatenate the uid into the query since we've made sure it's just digits
 		$user_analysis_col = "(SELECT GROUP_CONCAT(tag_str ORDER BY ind) FROM lx_et_hash WHERE rn=lexicon.rn AND uid=$selected_uid) AS user_an,
 			(SELECT GROUP_CONCAT(CONCAT(uid, ':', tag_str) ORDER BY uid,ind) FROM lx_et_hash WHERE rn=lexicon.rn AND uid!=8 AND uid!=$selected_uid) AS other_an,";
@@ -219,7 +225,7 @@ ORDER BY is_main DESC#;
 		
 		# etymon notes
 		$e{notes} = [];
-		foreach (@{$self->dbh->selectall_arrayref("SELECT noteid, notetype, datetime, xmlnote, ord, uid, username FROM notes LEFT JOIN users USING (uid) "
+		foreach (@{$self->dbh->selectall_arrayref("SELECT noteid, notetype, datetime, xmlnote, ord, uid, username, id FROM notes LEFT JOIN users USING (uid) "
 				. "WHERE tag=$e{tag} AND notetype != 'F' ORDER BY ord")}) {
 			my $notetype = $_->[1];
 			my $xml = $_->[3];
@@ -227,9 +233,15 @@ ORDER BY is_main DESC#;
 			push @{$e{notes}}, { noteid=>$_->[0], type=>$notetype, lastmod=>$_->[2], 'ord'=>$_->[4],
 				text=>xml2html($xml, $self, \@footnotes, \$footnote_index, $_->[0]),
 				markup=>xml2markup($xml), num_lines=>guess_num_lines($xml),
-				uid=>$_->[5], username=>$_->[6]
+				uid=>$_->[5], username=>$_->[6], id=>$_->[7] # id is grpid in spec=E context
 			};
 		}
+# 		
+# 		# mesoroots
+# 		foreach (@{$self->dbh->selectall_arrayref("SELECT mesoroots.tag,grpid,grpno,form,gloss,noteid FROM mesoroots LEFT JOIN notes ON (mesoroots.tag=notes.tag AND mesoroots.grpid=notes.id) LEFT JOIN languagegroups USING (grpid) WHERE mesoroots.tag=$e{tag}",
+# 			, {Slice=>{}})}) {
+# 			push @{$e{mesoroots}}, $_;
+# 		}
 
 		# do entries
 		if ($supertag_done && $no_meso) {
@@ -307,5 +319,133 @@ EndOfSQL
 	# ]
 }
 
+# for a given tag, return a list of errors that would prevent its deletion.
+# returns empty string if all OK.
+sub delete_check0 : Runmode {
+	my $self = shift;
+	my $tag = $self->query->param('tag');
+	die "invalid tag '$tag'!\n" unless $tag =~ s/^(\d+)$/$1/;
+	my $sql = qq#SELECT
+			(SELECT COUNT(DISTINCT tag) FROM etyma WHERE supertag=e.tag AND tag != e.tag) AS num_mesoroots,
+			(SELECT COUNT(DISTINCT rn) FROM lx_et_hash WHERE tag=e.tag) AS num_recs,
+			(SELECT COUNT(DISTINCT notes.noteid) FROM notes WHERE tag=e.tag) AS num_notes
+		FROM `etyma` AS `e`
+		WHERE e.tag=$tag#;
+	my @a = $self->dbh->selectrow_array($sql);
+	my @errs = (
+		'has # mesoroot(s).',
+		'has # record(s) tagged to it.',
+		'has # note(s).'
+	);
+	for my $i (reverse 0..2) {
+		if ($a[$i]) {
+			$errs[$i] =~ s/#/$a[$i]/;
+		} else {
+			splice @errs, $i, 1;
+		}
+	}
+	return join "\n", @errs;
+}
+
+sub hilite_text {
+	my ($s,$tag) = @_;
+	$s =~ s|(?<!/)\b$tag\b(?!">)|<span class="cognate">$tag</span>|g; # try not to mess up links by checking for '/' before and '">' after
+	$s =~ s|(<a href="[^"]+$tag")>|$1 class="cognate">|g; # hilite the entire link
+	return $s;
+}
+
+sub delete_check : Runmode {
+	my $self = shift;
+	my $tag = $self->query->param('tag');
+	die "invalid tag '$tag'!\n" unless $tag =~ s/^(\d+)$/$1/;
+	my $sql = qq#SELECT tag, 
+			(SELECT COUNT(DISTINCT tag) FROM etyma WHERE supertag=e.tag AND tag != e.tag) AS num_mesoroots,
+			(SELECT COUNT(DISTINCT rn) FROM lx_et_hash WHERE tag=e.tag AND uid=8) AS num_recs,
+			protoform, protogloss, plg,
+			(SELECT COUNT(DISTINCT notes.noteid) FROM notes WHERE tag=e.tag) AS num_notes,
+			(SELECT GROUP_CONCAT(DISTINCT notes.noteid) FROM notes WHERE tag != e.tag AND xmlnote RLIKE CONCAT('<xref ref="',e.tag,'">')) AS xref_notes,
+			(SELECT GROUP_CONCAT(DISTINCT notes.noteid) FROM notes WHERE tag != e.tag AND xmlnote NOT RLIKE CONCAT('<xref ref="',e.tag,'">') AND xmlnote RLIKE CONCAT('[[:<:]]',e.tag,'[[:>:]]')) AS other_notes
+		FROM `etyma` AS e LEFT JOIN languagegroups USING (grpid)
+		WHERE e.tag=$tag#;
+
+	# etymon notes
+	my $e = @{$self->dbh->selectall_arrayref($sql, {Slice=>{}})}[0];
+	$e->{allow_delete} = ($e->{num_recs}==0 && $e->{num_mesoroots}==0 && $e->{num_notes}==0 && $e->{num_xrefs}==0);
+
+	# the code for compiling notes into a format to pass to notes_etyma.tt, etc. could possibly be put into a subroutine somehow. Search for "SELECT noteid" to see similar code.... tho, each instance is slightly different.
+	if ($e->{other_notes} || $e->{xref_notes}) {
+		$e->{footnotes} = [];
+		$e->{footnote_index} = 1;
+		if ($e->{xref_notes}) {
+			foreach (@{$self->dbh->selectall_arrayref("SELECT noteid, notetype, datetime, xmlnote, ord, uid, username, id, rn, tag, spec FROM notes LEFT JOIN users USING (uid) "
+					. "WHERE noteid IN ($e->{xref_notes})")}) {
+				my $notetype = $_->[1];
+				my $xml = $_->[3];
+				push @{$e->{notes}}, { noteid=>$_->[0], type=>$notetype, lastmod=>$_->[2], 'ord'=>$_->[4],
+					text=>hilite_text(xml2html($xml, $self, $e->{footnotes}, \$e->{footnote_index}, $_->[0]), $tag),
+						# note that this hiliting will be lost if the user edits the note!
+					markup=>xml2markup($xml), num_lines=>guess_num_lines($xml),
+					uid=>$_->[5], username=>$_->[6], id=>$_->[7],
+					rn=>$_->[8], tag=>$_->[9], spec=>$_->[10]
+				};
+			}
+		}
+		if ($e->{other_notes}) {
+			foreach (@{$self->dbh->selectall_arrayref("SELECT noteid, notetype, datetime, xmlnote, ord, uid, username, id, rn, tag, spec FROM notes LEFT JOIN users USING (uid) "
+					. "WHERE noteid IN ($e->{other_notes})")}) {
+				my $notetype = $_->[1];
+				my $xml = $_->[3];
+				push @{$e->{notes}}, { noteid=>$_->[0], type=>$notetype, lastmod=>$_->[2], 'ord'=>$_->[4],
+					text=>hilite_text(xml2html($xml, $self, $e->{footnotes}, \$e->{footnote_index}, $_->[0]), $tag),
+						# note that this hiliting will be lost if the user edits the note!
+					markup=>xml2markup($xml), num_lines=>guess_num_lines($xml),
+					uid=>$_->[5], username=>$_->[6], id=>$_->[7],
+					rn=>$_->[8], tag=>$_->[9], spec=>$_->[10]
+				};
+			}
+		}
+		foreach (@{$e->{footnotes}}) {
+			$_->{text} = hilite_text($_->{text}, $tag);
+		}
+	}
+	return $self->tt_process("admin/etyma_delete_check.tt", $e);
+}
+
+sub soft_delete : Runmode {
+	my $self = shift;
+	$self->require_privs(1); # for soft delete
+	my $tag = $self->query->param('tag');
+	die "invalid tag '$tag'!\n" unless $tag =~ s/^(\d+)$/$1/;
+	my $sql = qq#SELECT
+			(SELECT COUNT(DISTINCT tag) FROM etyma WHERE supertag=e.tag AND tag != e.tag) AS num_mesoroots,
+			(SELECT COUNT(DISTINCT rn) FROM lx_et_hash WHERE tag=e.tag AND uid=8) AS num_recs,
+			(SELECT COUNT(DISTINCT notes.noteid) FROM notes WHERE tag=e.tag) AS num_notes,
+			(SELECT COUNT(DISTINCT notes.noteid) FROM notes WHERE tag != e.tag AND xmlnote RLIKE CONCAT('<xref ref="',e.tag,'">')) AS num_xrefs
+		FROM `etyma` AS e
+		WHERE e.tag=$tag#;
+	my @a = $self->dbh->selectrow_array($sql);
+	if (grep {$_} @a) {
+		die "unable to delete #$tag because there are still records/notes associated with it!\n";
+	}
+	my $merge_tag = $self->query->param('merge_tag')||0 + 0;
+	$merge_tag ||= '';
+	$self->dbh->do("UPDATE etyma SET status='DELETE', xrefs='$merge_tag' WHERE tag=$tag");
+	return '';
+}
+
+sub delete_check_all : Runmode {
+	my $self = shift;
+	my $sql = qq#SELECT tag, 
+			(SELECT COUNT(DISTINCT tag) FROM etyma WHERE supertag=e.tag AND tag != e.tag) AS num_mesoroots,
+			(SELECT COUNT(DISTINCT rn) FROM lx_et_hash WHERE tag=e.tag AND uid=8) AS num_recs,
+			protoform, protogloss, plg,
+			(SELECT COUNT(DISTINCT notes.noteid) FROM notes WHERE tag=e.tag) AS num_notes,
+			(SELECT COUNT(DISTINCT notes.noteid) FROM notes WHERE tag != e.tag AND xmlnote RLIKE CONCAT('<xref ref="',e.tag,'">')) AS num_xrefs,
+			(SELECT COUNT(DISTINCT notes.noteid) FROM notes WHERE tag != e.tag AND xmlnote NOT RLIKE CONCAT('<xref ref="',e.tag,'">') AND xmlnote RLIKE CONCAT('[[:<:]]',e.tag,'[[:>:]]')) AS other_notes
+		FROM `etyma` AS `e` LEFT JOIN languagegroups ON (e.grpid=languagegroups.grpid)
+		WHERE status='DELETE' HAVING num_mesoroots > 0 OR num_recs > 0 OR num_notes > 0 OR num_xrefs > 0 OR other_notes > 0#;
+	my $etyma = $self->dbh->selectall_arrayref($sql, {Slice=>{}});
+	return $self->tt_process("admin/etyma_delete_check_all.tt", {etyma=>$etyma});
+}
 
 1;

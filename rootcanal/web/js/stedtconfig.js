@@ -268,6 +268,11 @@ var setup = { // in the form setup.[tablename].[fieldname]
 				show_supporting_forms(e.findElement('tr').id.substring(3));
 				e.stop();
 			});
+			tbl.on('click', 'input.del_btn', function (e) {
+				e.stop();
+				// do_delete_check is defined in etyma.js; OK to put here because all the input.del_btn's are also created there
+				do_delete_check(e.findElement('tr').id.substring(3));
+			});
 			// put in a special sort function for all columns of the table
 			// this makes etyma sort by the superroot's value for a given column
 			var t = TableKit.tables['etyma_resulttable'];
