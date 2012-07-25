@@ -108,7 +108,8 @@ $t->fields(
 	'(SELECT COUNT(*) FROM notes WHERE rn=lexicon.rn) AS num_notes'
 );
 $t->searchable('lexicon.rn', 'analysis', 'user_an', 'lexicon.reflex',
-	'lexicon.gloss', 'languagenames.language', 'languagegroups.grp',
+	'lexicon.gloss', 'lexicon.gfn',
+	'languagenames.language', 'languagegroups.grp',
 	'languagenames.srcabbr', 'lexicon.srcid',
 #	'lexicon.semcat', 
 	'lexicon.semkey',
