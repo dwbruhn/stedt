@@ -519,10 +519,11 @@ var setup = { // in the form setup.[tablename].[fieldname]
 				$$('.lggroup').invoke('remove');
 				// after removing a bunch of TR's from the DOM in the above line,
 				// the "rows" array may now include some deleted rows
-				// (this problem manifests itself in Firefox)
-				// because TableKit.getBodyRows seems to make a copy using $A().
-				// so we need to manually modify the original array to excise the offending items.
-				// We assume there's a TBODY:
+				// because "rows" came from TableKit.getBodyRows, which
+				// made a copy using $A(). So, we need to manually modify "rows"
+				// to excise the offending items; otherwise they might get
+				// reinserted (e.g. by Firefox) when tablekit reinserts the
+				// contents of the rows array into the table.
 				for (var i = rows.length-1; i >= 0; --i) {
 					if ($(rows[i]).hasClassName('lggroup')) {
 						rows.splice(i, 1);
