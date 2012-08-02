@@ -517,6 +517,17 @@ var setup = { // in the form setup.[tablename].[fieldname]
 			t.customSortFn = function (rows, index, tkstdt, order) {
 				var lg_index = t.raw.cols['languagenames.language'];
 				$$('.lggroup').invoke('remove');
+				// after removing a bunch of TR's from the DOM in the above line,
+				// the "rows" array may now include some deleted rows
+				// (this problem manifests itself in Firefox)
+				// because TableKit.getBodyRows seems to make a copy using $A().
+				// so we need to manually modify the original array to excise the offending items.
+				// We assume there's a TBODY:
+				for (var i = rows.length-1; i >= 0; --i) {
+					if ($(rows[i]).hasClassName('lggroup')) {
+						rows.splice(i, 1);
+					}
+				}
 				if (index !== lg_index) return false;
 				var grpno_index = t.raw.cols['languagegroups.grpno'];
 				rows.sort(function (a,b) {
