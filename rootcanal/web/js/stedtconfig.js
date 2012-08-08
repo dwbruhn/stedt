@@ -717,6 +717,11 @@ var setup = { // in the form setup.[tablename].[fieldname]
 			noedit: true,
 			hide: true
 		},
+		'citation' : {
+			label: 'citation',
+			noedit: true,
+			hide: true
+		},
 		'languagenames.srcabbr' : {
 			label: 'srcabbr',
 			noedit: true,
@@ -728,7 +733,7 @@ var setup = { // in the form setup.[tablename].[fieldname]
 			size: 140,
 			noedit: !(stedtuserprivs & 16),
 			transform : function (v, key, rec, n) {
-				return '<a href="' + baseRef + 'source/' + rec[n-1] + '" target="stedt_src">' + rec[n-1] + '</a>'
+				return '<a href="' + baseRef + 'source/' + rec[n-1] + '" target="stedt_src">' + rec[n-2] + '</a>'
 					+ (v ? ':&thinsp;' + v : '');
 			}
 		},

@@ -101,6 +101,7 @@ $t->fields(
 	'languagegroups.grpid',
 	'languagegroups.grpno',
 	'languagegroups.grp',
+	'(SELECT citation from srcbib WHERE srcabbr=languagenames.srcabbr) AS citation',
 	'languagenames.srcabbr', 'lexicon.srcid',
 #	'lexicon.status',
 #	'lexicon.semcat',
