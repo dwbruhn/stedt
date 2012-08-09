@@ -674,7 +674,7 @@ var setup = { // in the form setup.[tablename].[fieldname]
 					}
 					a += parseInt(link_tag,10)
 						? '<a href="' + baseRef + 'etymon/' + link_tag + '#' + link_tag + '" target="stedt_etymon"'
-							+ '" class="elink ' + syl_class + '">'
+							+ '" class="elink ' + syl_class + '" title="Click for etymology">'
 							+ s.escapeHTML() + '</a>' + delim
 						: '<span class="' + syl_class + '">' + s.escapeHTML() + '</span>' + delim;
 				}
@@ -733,7 +733,7 @@ var setup = { // in the form setup.[tablename].[fieldname]
 			size: 140,
 			noedit: !(stedtuserprivs & 16),
 			transform : function (v, key, rec, n) {
-				return '<a href="' + baseRef + 'source/' + rec[n-1] + '" target="stedt_src">' + rec[n-2] + '</a>'
+				return '<a href="' + baseRef + 'source/' + rec[n-1] + '" target="stedt_src" title="Click for bibliographic info">' + rec[n-2] + '</a>'
 					+ (v ? ':&thinsp;' + v : '');
 			}
 		},
