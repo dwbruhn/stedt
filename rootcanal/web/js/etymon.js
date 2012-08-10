@@ -45,11 +45,42 @@ for (var i = 1; i < num_tables; i++) {
 	TableKit.tables['lexicon' + i].editAjaxExtraParams += '&uid2=' + uid2;
 }
 
+// prompt user to get new tag for migrating reflexes
+function migrate_prompt(tag, grp_name, grp_num)
+{
+	var new_tag = prompt('Subgroup: ' + grp_name + '\nCurrent tag: #' + tag + '\nEnter new tag: ');
+
+	// make sure user entered integer
+	if (new_tag == null || new_tag == '')
+	{
+		// just ignore (they pressed 'cancel')
+	}
+	else if((parseFloat(new_tag) !== parseInt(new_tag)) || isNaN(new_tag))
+	{
+		alert('\"' + new_tag + '\" is not a valid tag number!');
+	}
+	else if(new_tag == tag)
+	{
+		alert('Reflexes are already tagged as #' + tag);
+	}
+	else
+	{
+		// create temporary hidden form to submit data to migration subroutine
+		var temp_form = new Element('form', {method: 'post', action: baseRef + 'tags/migrate_tag'});
+		temp_form.insert(new Element('input', {name: 'tag', value: tag, type: 'hidden'}));
+		temp_form.insert(new Element('input', {name: 'grpno', value: grp_num, type: 'hidden'}));
+		temp_form.insert(new Element('input', {name: 'new_tag', value: new_tag, type: 'hidden'}));
+		$(document.body).insert(temp_form);
+		temp_form.submit();		
+	}	 
+}
+
 // put in section headings for language groups (and subgroup approval button)
 var grp_confirm = function (tag, grp_name) {
 	return confirm('Are you sure you want to approve tagging by ' + stedt_other_username
 		+ ' for tag #' + tag + ' in subgroup ' + grp_name + '?');
 };
+
 var grpno_index = $('languagegroups.grpno').cellIndex;
 	// Counting backwards doesn't work (i.e., "tbody.rows[0].cells.length - 3")
 	// because there may or may not be a HIST column depending on if the user is logged in.
@@ -68,19 +99,25 @@ for (var i = 1; i < num_tables; i++) {
 			row.insert({before:newrow});
 			var cell1 = newrow.insertCell(-1);
 			var cell2 = newrow.insertCell(-1);
+			var cell3 = newrow.insertCell(-1);
 			cell1.colSpan = 3;
-			cell2.colSpan = visiblecols - 3;
+			cell2.colSpan = 2;
+			cell3.colSpan = visiblecols - 5;
 			cell1.innerHTML = grpno + ' ' + grp;
 			cell2.className = "noedit"; // prevent tablekit from trying to edit this cell. Not needed for cell1 since it's in the rn column
+			cell3.className = "noedit";
 			if (stedtuserprivs & 1) {
 				// insert html form for approving this subgroup only
 				grp = grp.replace(/"/g,'&quot;'); // escape quotes for inclusion in the string below
 				cell2.innerHTML = '<form action="' + baseRef + 'tags/accept" method="post" '
-					+ 'onsubmit="return grp_confirm(' + table_tag +  ',\'' + grp + '\')">'
+					+ 'onsubmit="return grp_confirm(' + table_tag + ',\'' + grp + '\')">'
 					+ '<input name="tag" value="' + table_tag + '" type="hidden">'
 					+ '<input name="uid" value="' + uid2 + '" type="hidden">'
 					+ '<input name="grpno" value="' + grpno + '" type="hidden">'
 					+ '<input type="submit" value="Accept ' + grp + ' only"></form>';
+				// insert html form for migrating tagged reflexes in this subgroup
+				cell3.innerHTML = '<button onclick="migrate_prompt(' + table_tag + ',\'' + grp
+					+ '\'' + ',\'' + grpno + '\')">Move tagged reflexes to another tag</button>';
 			}
 			lastgrpno = grpno;
 		}

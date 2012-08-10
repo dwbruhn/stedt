@@ -5,6 +5,57 @@ use utf8;
 use STEDT::RootCanal::Notes;
 use CGI::Application::Plugin::Redirect;
 
+# subroutine for migrating reflexes in a subgroup from one tag to another
+sub migrate_tag : Runmode {
+
+	my $self = shift;
+	unless ($self->has_privs(8)) {
+		$self->header_add(-status => 403);
+		return "User not allowed to migrate tagged reflexes!";
+	}
+	my $q = $self->query();
+	my $tag = $q->param('tag');
+	my $grpno = $q->param('grpno');
+	my $new_tag = $q->param('new_tag');
+	
+	if ($tag !~ /^\d+$/ || $new_tag !~ /^\d+$/ || (defined($grpno) && $grpno !~ /^[\d.]+$/)) {
+	$self->header_add(-status => 400);
+	return "Invalid tag/grpno!";
+	}
+	
+	# verify that an etymon exists with the new tag number
+	my ($etymon_exists) = $self->dbh->selectrow_array("SELECT COUNT(*) FROM etyma WHERE tag=$new_tag");
+	if (!$etymon_exists) {
+	$self->header_add(-status => 400);
+	return "No etymon yet exists with tag #$new_tag";
+	}
+	
+	# GROUP_CONCAT has an upper limit (default 1024 bytes) which can be increased to the server max.
+	# Since we are expecting a long list here, and since the value of the
+	# "IN (...)" is also constrained by the server maximum, increase group_concat_max_len:
+	my (undef, $max_len) = $self->dbh->selectrow_array("SHOW VARIABLES WHERE Variable_name='max_allowed_packet'");
+	die "oops couldn't get max_allowed_packet from mysql" unless $max_len;
+	$self->dbh->do("SET SESSION group_concat_max_len = $max_len");
+	
+	# NOTE: see warnings in 'accept' subroutine about list of rn's longer than server max
+	
+	# get info for changelog (need list of rn's and also users, because all users' tags will be changed)
+	my @changed_recs = @{ $self->dbh->selectall_arrayref("SELECT rn, uid FROM lx_et_hash AS leh LEFT JOIN lexicon USING (rn) LEFT JOIN languagenames USING (lgid) LEFT JOIN languagegroups AS grps USING (grpid) WHERE leh.tag=? AND BINARY leh.tag = leh.tag_str AND grps.grpno=?", undef, $tag, $grpno) };
+
+	# migrate tagged reflexes
+	$self->dbh->do("UPDATE lx_et_hash AS leh LEFT JOIN lexicon USING (rn) LEFT JOIN languagenames USING (lgid) LEFT JOIN languagegroups AS grps USING (grpid) SET leh.tag=?, tag_str=? WHERE leh.tag=? AND BINARY leh.tag = leh.tag_str AND grps.grpno=?", undef, $new_tag, $new_tag, $tag, $grpno);
+
+	# update changelog
+	foreach my $row (@changed_recs)
+	{
+		# print STDERR "changelog: RN: $row->[0], UID: $row->[1]\n";
+		$self->dbh->do("INSERT changelog (uid, change_type, `table`, id, col, oldval, newval, owner_uid, time) VALUES (?,?,?,?,?,?,?,?,NOW())", undef,
+		$self->param('uid'), 'migration', 'lexicon', $row->[0], ($row->[1] == 8) ? 'analysis' : 'user_an', $tag, $new_tag, $row->[1]);
+	}
+
+	return $self->redirect($q->url(-absolute=>1) . "/etymon/$new_tag#$new_tag");
+}
+
 sub accept : Runmode {
 	my $self = shift;
 	unless ($self->has_privs(8)) {
