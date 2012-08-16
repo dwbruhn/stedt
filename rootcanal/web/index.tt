@@ -6,7 +6,7 @@
 <tr><td>Search <b>etyma</b>:</td>
 <td><input type="text" title="Type a proto-form" name="f" id="etyma_searchform" size="24" maxlength="128"></td>
 <td><input name="s" type="text" title="Type an English word" size="30" id="etyma_searchinput" maxlength="128"><input name="lg" type="hidden" id="etyma_searchlg" ><input name="lggrp" type="hidden" id="etyma_searchlggrp" ></td>
-<td><input name="btn" type="submit" value="Search"></td></tr></table>
+<td><input name="btn" type="submit" value="Search"><input type="button" name="clear" value="Clear" onclick="this.form.reset();"></td></tr></table>
 [%- IF 0 && c.has_privs(16) %]<a href="#" onclick="return show_advanced_search('etyma')">Advanced Search</a>[% END %]
 </form>
 </div>
@@ -51,7 +51,7 @@
 [% END -%]
 </select>
 </td>
-<td><input name="btn" type="submit" value="Search"></td></tr></table>
+<td><input name="btn" type="submit" value="Search"><input type="button" name="clear" value="Clear" onclick="this.form.reset();"></td></tr></table>
 </form>
 </div>
 <div id="lexicon_status">[% lexicon.data.size ? (lexicon.data.size > 4 ? (lexicon.data.size _ ' records found.') : '') : 'No records found.' %]</div>
