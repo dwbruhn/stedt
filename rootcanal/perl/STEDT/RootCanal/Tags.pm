@@ -481,7 +481,21 @@ sub soft_delete : Runmode {
 	}
 	my $merge_tag = $self->query->param('merge_tag')||0 + 0;
 	$merge_tag ||= '';
+	# get old status and xrefs fields before clobbering them
+	my ($old_status, $old_xrefs) = $self->dbh->selectrow_array("SELECT status,xrefs FROM etyma WHERE tag=$tag");
+	
+	# perform soft-delete
 	$self->dbh->do("UPDATE etyma SET status='DELETE', xrefs='$merge_tag' WHERE tag=$tag");
+	
+	# update changelog
+	if ($old_xrefs || $merge_tag) # if the xrefs field changed, record the change
+	{
+		$self->dbh->do("INSERT changelog (uid, change_type, `table`, id, col, oldval, newval, time) VALUES (?,?,?,?,?,?,?,NOW())", undef,
+			$self->param('uid'), '-', 'etyma', $tag, 'xrefs', $old_xrefs, $merge_tag);
+	}
+	$self->dbh->do("INSERT changelog (uid, change_type, `table`, id, col, oldval, newval, time) VALUES (?,?,?,?,?,?,?,NOW())", undef,
+		$self->param('uid'), '-', 'etyma', $tag, 'status', $old_status, 'DELETE');
+
 	return '';
 }
 
