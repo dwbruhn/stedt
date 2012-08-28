@@ -361,6 +361,7 @@ var setup = { // in the form setup.[tablename].[fieldname]
 		'etyma.chapter' : {
 			label: 'ch.',
 			size: 70,
+			hide: !(stedtuserprivs & 1),
 			transform : function (v) {
 				if (stedtuserprivs & 1) {
 					return '<a href="' + baseRef + 'edit/chapters' + '?chapters.semkey=' + v + '" target="edit_chapters">' + v + '</a>';
@@ -430,6 +431,7 @@ var setup = { // in the form setup.[tablename].[fieldname]
 		'etyma.sequence'  : {
 			label: 'seq',
 			noedit: true,
+			hide: !(stedtuserprivs & 1),
 			size: 50,
 			transform: function (v,k,rec,n) {
 				if (v !== '0.0') {
