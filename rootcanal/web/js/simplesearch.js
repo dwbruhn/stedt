@@ -44,7 +44,15 @@ function stedt_simplesearch_init() {
 		var tbl = e.findElement().id.sub('_search', '');
 		new Ajax.Request(baseRef + 'search/ajax', {
 			method: 'get',
-			parameters: { tbl : tbl, s : $F(tbl + '_searchinput'), lg : $F(tbl + '_searchlg'), lggrp : $F(tbl + '_searchlggrp'), f : $F(tbl + '_searchform')},
+			parameters: {
+				tbl : tbl,
+				s : $F(tbl + '_searchinput'),
+				lg : $F('lg-auto'), // even though this was named 'lexicon_searchlg' in our HTML,
+									// the autosuggest package has changed it to lg-auto, as we specified during initialization
+				'as_values_lg-auto' : $F('as-values-lg-auto'), // this will be populated automatically by the autosuggest script
+				lggrp : $F(tbl + '_searchlggrp'),
+				f : $F(tbl + '_searchform')
+			},
 			onSuccess: ajax_make_table,
 			onFailure: function (transport){ alert('Error: ' + transport.responseText); },
 			onComplete: function (transport){ $(tbl + '_search').enable(); }
@@ -61,7 +69,8 @@ function stedt_simplesearch_init() {
 		onCreate: function() { $('spinner').show() },
 		onComplete: function() { if (0 == Ajax.activeRequestCount) $('spinner' ).hide() }
 	});
-	jQuery('input[name=lg]').autoSuggest('[% self_url %]/autosuggest/lgs',{
+	// there is also a hidden input[name=lg] in #etyma_search, so make sure we get the right one!
+	jQuery('#lexicon_search input[name=lg]').autoSuggest(baseRef+'autosuggest/lgs',{
 		asHtmlID:"lg-auto",
 		startText:"",
 		selectedItemProp:"v",
