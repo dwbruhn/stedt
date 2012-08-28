@@ -69,7 +69,6 @@ Otherwise the whole row will be ignored.</p>
 	<li>see querylog</li>
 	<li>see deviant glosses</li>
 	<li>see progress/detail pages</li>
-	<li>update projects</li>
 	<li>see non-"public" etyma</li>
 	<li>see/use the edit/&lt;TABLE&gt; interface</li>
 	<li>add new etyma</li>
@@ -88,6 +87,7 @@ Otherwise the whole row will be ignored.</p>
 	<li>run the sequencer (on etyma in a "chapter")</li>
 	<li>edit "chapters" table</li>
 	<li>edit and add records to languagegroups table</li>
+	<li>update projects</li>
 </ul>
 
 <h3>16 - superuser</h3>

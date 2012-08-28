@@ -59,7 +59,9 @@ div#lgtree { position:fixed; overflow:auto; top:3em; bottom:0px; left:0px; width
 div#lginfo { position:fixed; overflow:auto; top:3em; bottom:0px; right:0px; left:19em; } 
 
 tr { vertical-align: top; }
+/*
 td { text-indent: -1em; padding-left: 1em; }
+*/
 
 td.grid { text-indent: 0; padding: 2px;}
 

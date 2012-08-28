@@ -15,7 +15,7 @@ Edit tables:
 <li><a href="[% self_url %]/subgroups/view">language groups</a>
 <li>
 <li>
-<li><a href="[% self_url %]/admin/updateprojects">update stats</a> (for "projects" - takes a while!)</li>
+<li>[% IF c.has_privs(8) %]<a href="[% self_url %]/admin/updateprojects">update stats</a> (for "projects" - takes a while!)[% END %]</li>
 <li>
 </ul>
 </td>

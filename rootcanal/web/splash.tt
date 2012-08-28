@@ -80,6 +80,13 @@ $('simple_search').observe('submit',function(e){e.stop();
 var s = Form.serializeElements(this.select('input:not(:submit,:button)','select').findAll(Form.Element.getValue));
 document.location = document.location.pathname + '/gnis' + (s?'?'+s:'')
 });
+jQuery('input[name=lg]').autoSuggest('[% self_url %]/autosuggest/lgs',{
+	asHtmlID:"lg-auto",
+	startText:"",
+	selectedItemProp:"v",
+	selectedValuesProp:"v",
+	searchObjProps:"v"
+});
 </script>
 </body>
 </html>

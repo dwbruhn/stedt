@@ -117,6 +117,7 @@ $t->searchable('lexicon.rn', 'analysis', 'user_an', 'lexicon.reflex',
 #	'lexicon.status',
 	'lexicon.lgid',
 	'languagenames.lgcode',
+	'lg_auto'
 );
 $t->field_visible_privs(
 	'user_an' => 1,
@@ -162,6 +163,7 @@ $t->wheres(
 	'languagenames.srcabbr' => 'beginword',
 	'lexicon.lgid' => 'int',
 	'languagenames.lgcode' => 'int',
+	'lg_auto' => sub { my ($k,$v) = @_; "languagenames.language='$v'" },
 	'lexicon.semkey' => 'value',
 	'analysis' => sub {
 		my ($k,$v) = @_;

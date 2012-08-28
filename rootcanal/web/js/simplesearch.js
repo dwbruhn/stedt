@@ -61,6 +61,13 @@ function stedt_simplesearch_init() {
 		onCreate: function() { $('spinner').show() },
 		onComplete: function() { if (0 == Ajax.activeRequestCount) $('spinner' ).hide() }
 	});
+	jQuery('input[name=lg]').autoSuggest('[% self_url %]/autosuggest/lgs',{
+		asHtmlID:"lg-auto",
+		startText:"",
+		selectedItemProp:"v",
+		selectedValuesProp:"v",
+		searchObjProps:"v"
+	});
 };
 
 function vert_tog() {

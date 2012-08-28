@@ -116,7 +116,7 @@ sub group : Runmode {
 }
 
 sub searchresults_from_querystring {
-	my ($self, $f, $s, $tbl, $lg, $lggrp, $lgcode) = @_;
+	my ($self, $f, $s, $tbl, $lg, $lggrp, $lgcode, $lg_auto) = @_;
 	my $t = $self->load_table_module($tbl);
 	my $query = $self->query->new(''); # for some reason faster than saying "new CGI"? disk was thrashing.
 	
@@ -157,6 +157,7 @@ sub searchresults_from_querystring {
 		}
 	} elsif ($tbl eq 'lexicon') {
 		$query->param('languagenames.language' => $lg) if $lg =~ /\p{Letter}/;
+		$query->param('lg_auto' => $lg_auto) if $lg_auto;
 		
 		# languagegroups param must match start with X or a digit and not go past 4 levels (first level is obligatory)
 		$query->param('languagegroups.grp' => $lggrp) if $lggrp =~ /^[\dX](\.\d((\.\d)(\.\d)?)?)?$/;
@@ -226,19 +227,20 @@ sub combo : Runmode {
 	# print STDERR "COMBO: Form param is $f\n";	# debugging
 	my $s = decode_utf8($q->param('t')) || '';
 	my $lg = decode_utf8($q->param('lg')) || '';
+	my $lg_auto = decode_utf8($q->param('as_values_lg-auto')) || '';
 	my $lggrp = decode_utf8($q->param('lggrp'));
 	$lggrp = '' unless length($lggrp);
 	my $lgcode = decode_utf8($q->param('lgcode')) || '';	# note that lgcode=0 functions as if the param is blank
 	# print STDERR "COMBO: Language group param is $lggrp\n";	# debugging
 	my $result;
 
-	if ($f || $s || $lg || $lggrp ne '' || $lgcode || !$q->param) {
+	if ($f || $s || $lg || $lg_auto || $lggrp ne '' || $lgcode || !$q->param) {
 		if ($ENV{HTTP_REFERER} && ($f || $s || $lg || $lggrp ne '')) {
 			$self->dbh->do("INSERT querylog VALUES (?,?,?,?,?,?,NOW())", undef,
-				'simple', $f, $s, $lg, $lggrp, $ENV{REMOTE_ADDR});	# record search in query log (put table name, form, gloss, lg, lggroup, ip in separate fields)
+				'simple', $f, $s, "$lg, $lg_auto", $lggrp, $ENV{REMOTE_ADDR});	# record search in query log (put table name, form, gloss, lg, lggroup, ip in separate fields)
 		}
 		$result->{etyma} = $self->searchresults_from_querystring($f, $s, 'etyma');
-		$result->{lexicon} = $self->searchresults_from_querystring($f, $s, 'lexicon', $lg, $lggrp, $lgcode);
+		$result->{lexicon} = $self->searchresults_from_querystring($f, $s, 'lexicon', $lg, $lggrp, $lgcode, $lg_auto);
 	} else {
 		$result->{etyma} = $self->load_table_module('etyma')->search($q);
 		$result->{lexicon} = $self->load_table_module('lexicon')->search($q);
@@ -257,6 +259,7 @@ sub ajax : Runmode {
 	my $f = decode_utf8($self->query->param('f'));		# form (i.e. lemma) paramter
 	# print STDERR "AJAX: Form param is $f\n";	# debugging
 	my $lg = decode_utf8($self->query->param('lg'));
+	my $lg_auto = decode_utf8($self->query->param('as_values_lg-auto')) || '';
 	my $lggrp = decode_utf8($self->query->param('lggrp'));
 	$lggrp = '' unless length($lggrp);
 	my $tbl = $self->query->param('tbl');
@@ -264,11 +267,11 @@ sub ajax : Runmode {
 	my $result; # hash ref for the results
 
 	$self->dbh->do("INSERT querylog VALUES (?,?,?,?,?,?,NOW())", undef,
-		$tbl, $f, $s, $lg, $lggrp, $ENV{REMOTE_ADDR}) if $s || $lg || $lggrp ne '' || $f;	# record search in query log (put table name, form, gloss, lg, lggroup, ip in separate fields)
+		$tbl, $f, $s, "$lg, $lg_auto", $lggrp, $ENV{REMOTE_ADDR}) if $s || $lg || $lg_auto || $lggrp ne '' || $f;	# record search in query log (put table name, form, gloss, lg, lggroup, ip in separate fields)
 
 	if (defined($s) || defined($f)) {
 		if ($tbl eq 'lexicon' || $tbl eq 'etyma') {
-			$result = $self->searchresults_from_querystring($f, $s, $tbl, $lg, $lggrp, $lgcode);
+			$result = $self->searchresults_from_querystring($f, $s, $tbl, $lg, $lggrp, $lgcode, $lg_auto);
 		} else {
 			die "bad table name!";
 		}

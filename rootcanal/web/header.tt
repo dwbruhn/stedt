@@ -8,6 +8,7 @@
 	<meta http-equiv="content-type" content="text/html; charset=utf-8">
 	<title>[% title %]</title>
 	<link rel="stylesheet" href="[% self_base %]styles/rootcanal.css">
+	<link rel="stylesheet" href="[% self_base %]styles/autoSuggest.css">
 [% IF cognates.size -%]
 	<style type="text/css">
 [%- FOREACH n IN cognates %].r[% n %] { background-color:yellow; } [% END -%]
@@ -16,6 +17,8 @@
 	<script src="[% self_base %]scriptaculous/lib/prototype.js"></script>
 	<script src="[% self_base %]scriptaculous/src/scriptaculous.js?load=effects,dragdrop,controls"></script>
 	<script src="[% self_base %]js/tablekit.js"></script>
+	<script src="[% self_base %]js/jquery-1.8.0.js"></script>
+	<script src="[% self_base %]js/jquery.autoSuggest.js"></script>
 </head>
 <body>
 <div id="header"[% IF !user %] style="display:none;"[% END %]>
@@ -25,6 +28,7 @@
 <a href="#" onclick="return vert_tog()"><img title="Rotate View" src="[% self_base %]img/toggle.png" alt="toggle" id="tog-img" border="0"></a>&nbsp;
 [% END -%]
 <script>
+$.noConflict();[% # tell jquery to set $ back to the prototype $ %]
 var baseRef = '[% self_url %]/';
 </script>
 [% IF user -%]
