@@ -106,7 +106,8 @@ $t->fields(
 #	'lexicon.status',
 #	'lexicon.semcat',
 	'lexicon.semkey',
-	'(SELECT COUNT(*) FROM notes WHERE rn=lexicon.rn) AS num_notes'
+	# if $privs is undefined, then it's a public user and internal notes should be excluded from the note count
+	((defined $privs) ? '(SELECT COUNT(*) FROM notes WHERE rn=lexicon.rn) AS num_notes' : '(SELECT COUNT(*) FROM notes WHERE rn=lexicon.rn AND notetype!=\'I\') AS num_notes'),
 );
 $t->searchable('lexicon.rn', 'analysis', 'user_an', 'lexicon.reflex',
 	'lexicon.gloss', 'lexicon.gfn',
