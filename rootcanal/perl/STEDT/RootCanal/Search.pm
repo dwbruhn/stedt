@@ -95,14 +95,14 @@ sub group : Runmode {
 	my ($grpno, $grpname) = $self->dbh->selectrow_array(
 		"SELECT grpno, grp FROM languagegroups WHERE grpid=?", undef, $grpid);
 	my $lg_list = $self->dbh->selectall_arrayref(
-		"SELECT silcode, language, lgcode, srcabbr, lgid, COUNT(lexicon.rn) AS num_recs FROM languagenames LEFT JOIN lexicon USING (lgid) WHERE grpid=? AND lgcode != 0 GROUP BY lgid HAVING num_recs > 0 ORDER BY lgcode, language", undef, $grpid);
+		"SELECT silcode, language, lgcode, srcabbr, citation, lgid, COUNT(lexicon.rn) AS num_recs FROM languagenames LEFT JOIN lexicon USING (lgid) LEFT JOIN srcbib USING (srcabbr) WHERE grpid=? AND lgcode != 0 GROUP BY lgid HAVING num_recs > 0 ORDER BY lgcode, language", undef, $grpid);
 
 	# do a linear search for the index of the record we're interested in
 	my $i;
 	if ($lgid) {
 		my $max = $#$lg_list; # set this here, or else get stuck in an infinite loop if there's no matching record!
 		$i = 0;
-		$i++ until $lg_list->[$i][4] == $lgid || $i > $max;
+		$i++ until $lg_list->[$i][5] == $lgid || $i > $max;
 		undef $i if $i > $max;
 	}
 	return $self->tt_process('groups.tt', {
