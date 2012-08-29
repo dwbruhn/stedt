@@ -63,7 +63,7 @@
 	<td><a href="#" onclick="document.getElementById('simple_search').reset();
 		document.getElementById('simple_searchform').value='tap';
 		document.getElementById('simple_searchinput').value='hit';
-		document.getElementById('simple_searchlg').value='lotha'">Try it!</a></td>
+		document.getElementById('lg-auto').value='lotha'">Try it!</a></td>
 </tr>
 </table>
 </div>
