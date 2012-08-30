@@ -62,7 +62,7 @@ Reconstructed mesoroots below:
 <input type="submit" value="Accept tagging by [% selected_username %] for tag #[% e.tag %]">
 </form>
 [% END # has_privs 8 %]
-<table id="lexicon[% lexicon_id %]" tag="[% e.tag %]">[% lexicon_id = lexicon_id+1 %]
+<table id="lexicon[% lexicon_id %]" tag="[% e.tag %]" class="hangindent">[% lexicon_id = lexicon_id+1 %]
 <thead><tr>
 [%- FOREACH fld IN fields -%]
 <th id="[% fld %]">[% fld.replace('^.*?\.','') %]</th>

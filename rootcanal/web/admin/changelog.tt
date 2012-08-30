@@ -1,7 +1,7 @@
 [% PROCESS header.tt title="Change Log - STEDT Database" %]
 <p>[% changes.size %] most recent changes:</p>
 
-<table class="sortable resizable" width="100%" style="table-layout:fixed">
+<table class="sortable resizable hangindent" width="100%" style="table-layout:fixed">
 <col style="width:6em">
 <col style="width:4em">
 <col style="width:3em">

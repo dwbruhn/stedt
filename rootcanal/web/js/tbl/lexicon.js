@@ -3,12 +3,6 @@ setup['lexicon']['languagenames.language'].transform = function (v, k, rec, n) {
 		+ ' title="' + rec[n+2] + ' - ' + rec[n+3].replace(/"/g,'&quot;') + '"'
 		+ ' target="stedt_lgs">' + v + '</a>';
 };
-
-setup['lexicon']['lexicon.srcid'].transform = function (v, k, rec, n) {
-	return '<a href="' + baseRef + 'edit/srcbib?srcbib.srcabbr=' + rec[n-1] + '" target="edit_src">' + rec[n-1] + '</a>'
-		+ (v ? ':&thinsp;' + v : '');
-};
-
 setup['lexicon']['num_notes'] = {
 	label: 'notes',
 	noedit: true,

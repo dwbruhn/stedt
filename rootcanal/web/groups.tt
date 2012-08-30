@@ -29,7 +29,7 @@ from source <a href="[% self_url %]/source/[% row.3 %]" target="stedt_src">[% ro
 [% IF other_lgs.size %]
 <p>Other sources which include this language:</p>
 
-<table>
+<table class="hangindent">
 <tr><th>Language Name</th><th>Source</th><th>num. of records</th></tr>
 [% FOREACH row IN other_lgs -%]
 <tr>

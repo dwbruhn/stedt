@@ -25,7 +25,7 @@ on [% USE date %][% date.format(date.now, '%F') %].
 
 <p>Languages in this source:</p>
 
-<table>
+<table class="hangindent">
 <tr>
 	<th>ISO 639-3</th>
 	<th>Language Name</th>

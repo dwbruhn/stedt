@@ -13,7 +13,7 @@
 <div id="etyma_status">[% etyma.data.size ? (etyma.data.size > 4 ? (etyma.data.size _ ' records found.') : '') : 'No records found.' %]</div>
 <div id="etyma_results"></div>
 [% IF etyma.data.size %]
-<table id="etyma_resulttable" class="sortable resizable[% IF c.has_privs(1) %] editable[% END %]" width="100%" style="table-layout:fixed;">
+<table id="etyma_resulttable" class="hangindent sortable resizable[% IF c.has_privs(1) %] editable[% END %]" width="100%" style="table-layout:fixed;">
 <thead><tr>
 [%- FOREACH col IN etyma.fields %]
 <th id="[% col %]">[%- col.replace('^.*\.','') %]</th>
@@ -57,7 +57,7 @@
 <div id="lexicon_status">[% lexicon.data.size ? (lexicon.data.size > 4 ? (lexicon.data.size _ ' records found.') : '') : 'No records found.' %]</div>
 <div id="lexicon_results"></div>
 [% IF lexicon.data.size %]
-<table id="lexicon_resulttable" class="sortable resizable[% IF c.has_privs(1) %] editable[% END %]" width="100%" style="table-layout:fixed;">
+<table id="lexicon_resulttable" class="hangindent sortable resizable[% IF c.has_privs(1) %] editable[% END %]" width="100%" style="table-layout:fixed;">
 <thead><tr>
 [%- FOREACH col IN lexicon.fields %]
 <th id="[% col %]">[%- col.replace('^.*\.','') %]</th>

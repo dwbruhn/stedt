@@ -98,6 +98,7 @@ var ajax_make_table = function (transport,json){ // function suitable for the on
 		stedtuserprivs&1 ? baseRef+'update' : 0,
 		tablename + '_results'
 	);
+	$(tablename + '_resulttable').addClassName('hangindent');
 };
 function show_supporting_forms(tag) {
 	new Ajax.Request(baseRef + 'search/ajax', {

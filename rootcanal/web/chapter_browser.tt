@@ -2,7 +2,7 @@
 
 <h1>Chapters</h1>
 <p>[% ch.size %] nodes (took [% time_elapsed %] seconds to retrieve)</p>
-<table id="ch" class="sortable resizable" style="table-layout:fixed">
+<table id="ch" class="sortable resizable hangindent" style="table-layout:fixed">
 <thead><tr>
 	<th id="chapters.semkey">Ch.</th>
 	<th id="chapters.chaptertitle">Title</th>

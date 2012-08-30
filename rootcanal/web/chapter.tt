@@ -23,7 +23,7 @@
 
 [% IF result.data.size -%]
 <h2>Etyma in this chapter</h2>
-<table id="etyma_resulttable" class="resizable" width="100%" style="table-layout:fixed;">
+<table id="etyma_resulttable" class="resizable hangindent" width="100%" style="table-layout:fixed;">
 <thead><tr>
 [%- FOREACH col IN result.fields %]
 <th id="[% col %]">

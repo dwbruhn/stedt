@@ -72,7 +72,7 @@ No records found. (WHERE [% result.debug %])
 [% END # result.data.size -%]
 
 <form>
-<table id="[% t.table %]_resulttable" class="[% IF !manual %]sortable [% END %]resizable editable [% t.table %]_edit_table" width="100%" style="table-layout:fixed;">
+<table id="[% t.table %]_resulttable" class="[% IF !manual %]sortable [% END %]resizable editable [% t.table %]_edit_table hangindent" width="100%" style="table-layout:fixed;">
 <thead><tr>
 [%- FOREACH col IN result.fields %]
 <th id="[% col %]">
