@@ -40,7 +40,8 @@ function stedt_simplesearch_init() {
 	// show only tag, protoform, and protogloss cols:
 	$H(setup.etyma).each(function (fld) {
 		if (fld.key.charAt(0) === '_') return; // skip non-fields
-		if (!fld.value.vert_show) fld.value.hide=true;
+		fld.value.old_hide = fld.value.hide;
+		fld.value.hide = !fld.value.vert_show;
 	});
 	$w('etyma lexicon').each(function (t) {
 		if ($(t + '_resulttable'))
