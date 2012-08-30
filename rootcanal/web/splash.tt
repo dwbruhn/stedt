@@ -27,22 +27,14 @@
 </form>
 <div id="example_queries" style="display: none">
 <table>
-<!-- <tr>
-	<td></td>
-	<th width=160>form</th>
-	<th width=160>(proto)gloss</th>
-	<th width=160>language</th>
-	<th width=230>language group</th>
-</tr>
--->
 <tr>
-	<td width=119></td>	<!-- this width stuff will need to be improved in the future -->
+	<td width=119></td>[% # this width stuff will need to be improved in the future %]
 	<td width=141>-</td>
 	<td width=141><b>dog</b></td>
 	<td width=141>-</td>
 	<td width=222>-</td>
 	<td width=129><a href="#" onclick="document.getElementById('simple_search').reset();
-		document.getElementById('simple_searchinput').value='dog';">Try it!</a></td>
+		document.getElementById('simple_searchinput').value='dog';return false">Try it!</a></td>
 </tr>
 <tr>
 	<td></td>
@@ -52,7 +44,7 @@
 	<td><b>6.1 Lolo-Burmese</b></td>
 	<td><a href="#" onclick="document.getElementById('simple_search').reset();
 		document.getElementById('simple_searchinput').value='smell';
-		document.getElementById('simple_searchlggrp').selectedIndex=49;">Try it!</a></td>
+		document.getElementById('simple_searchlggrp').selectedIndex=49;return false">Try it!</a></td>
 </tr>
 <tr>
 	<td></td>
@@ -63,7 +55,7 @@
 	<td><a href="#" onclick="document.getElementById('simple_search').reset();
 		document.getElementById('simple_searchform').value='tap';
 		document.getElementById('simple_searchinput').value='hit';
-		document.getElementById('lg-auto').value='lotha'">Try it!</a></td>
+		document.getElementById('lg-auto').value='lotha';return false">Try it!</a></td>
 </tr>
 </table>
 </div>
@@ -83,9 +75,9 @@ document.location = document.location.pathname + '/gnis' + (s?'?'+s:'')
 jQuery('input[name=lg]').autoSuggest('[% self_url %]/autosuggest/lgs',{
 	asHtmlID:"lg-auto",
 	startText:"",
-	selectedItemProp:"v",
+	selectedItemProp:"s",
 	selectedValuesProp:"v",
-	searchObjProps:"v"
+	searchObjProps:"s"
 });
 </script>
 </body>

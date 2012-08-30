@@ -84,9 +84,9 @@ function stedt_simplesearch_init() {
 	jQuery('#lexicon_search input[name=lg]').autoSuggest(baseRef+'autosuggest/lgs',{
 		asHtmlID:"lg-auto",
 		startText:"",
-		selectedItemProp:"v",
+		selectedItemProp:"s",
 		selectedValuesProp:"v",
-		searchObjProps:"v"
+		searchObjProps:"s"
 	});
 };
 
