@@ -252,18 +252,20 @@ var setup = { // in the form setup.[tablename].[fieldname]
 	etyma : {
 		_key: 'etyma.tag',   // maybe send it from the server?
 		_postprocess_onadd: function (row) {
-			make_draggable_id(row.down('span.tagid'));
+			if (stedtuserprivs & 1) make_draggable_id(row.down('span.tagid'));
 //			console.log(row);
 //			console.log(row.down('span.tagid'));
 		},
 		_postprocess: function (tbl) {
 			var z = make_draggable_id;
-			z.scrollElement = $('etyma') || window; // if we're not in the combo view, there's no etyma div; if we pass a nonexistent element to Draggable, prototype will crash (in firefox and possibly other browsers)
-			tbl.select('span.tagid').each(z);
-			tbl.on('click', 'span.tagid', function (e) {
-				if (z.moved) e.stop();  // don't follow the link if it was dragged
-				z.moved=0; // reset
-			});
+			if (stedtuserprivs & 1) { // don't allow making mesoroots by dragging unless user has tagging privileges
+				z.scrollElement = $('etyma') || window; // if we're not in the combo view, there's no etyma div; if we pass a nonexistent element to Draggable, prototype will crash (in firefox and possibly other browsers)
+				tbl.select('span.tagid').each(z);
+				tbl.on('click', 'span.tagid', function (e) {
+					if (z.moved) e.stop();  // don't follow the link if it was dragged
+					z.moved=0; // reset
+				});
+			}
 			tbl.on('click', 'a.lexlink', function (e) {
 				show_supporting_forms(e.findElement('tr').id.substring(3));
 				e.stop();
@@ -675,7 +677,7 @@ var setup = { // in the form setup.[tablename].[fieldname]
 						link_tag = stedttagger ? (skipped_roots[t2[i]] ? '' : t2[i]) : t2[i];
 					}
 					a += parseInt(link_tag,10)
-						? '<a href="' + baseRef + 'etymon/' + link_tag + '#' + link_tag + '" target="stedt_etymon"'
+						? '<a href="' + baseRef + 'etymon/' + link_tag + '" target="stedt_etymon"'
 							+ '" class="elink ' + syl_class + '" title="Click for etymology">'
 							+ s.escapeHTML() + '</a>' + delim
 						: '<span class="' + syl_class + '">' + s.escapeHTML() + '</span>' + delim;
@@ -696,7 +698,7 @@ var setup = { // in the form setup.[tablename].[fieldname]
 		'languagenames.language' : {
 			label: 'language',
 			noedit: true,
-			size: 100,
+			size: 120,
 			transform : function (v, key, rec, n) {
 				return '<a href="' + baseRef + 'group/' + rec[n+1] + '/' + rec[n-1] + '"'
 				+ ' title="' + rec[n+2] + ' - ' + rec[n+3].replace(/"/g,'&quot;') + '"'
@@ -720,9 +722,13 @@ var setup = { // in the form setup.[tablename].[fieldname]
 			hide: true
 		},
 		'citation' : {
-			label: 'citation',
+			label: 'source',
 			noedit: true,
-			hide: true
+			size: 140,
+			transform : function (v, key, rec, n) {
+				return '<a href="' + baseRef + 'source/' + rec[n+1] + '" target="stedt_src" title="Click for bibliographic info">' + (v||rec[n+1]) + '</a>';
+				// show srcabbr if citation is blank
+			}
 		},
 		'languagenames.srcabbr' : {
 			label: 'srcabbr',
@@ -731,13 +737,9 @@ var setup = { // in the form setup.[tablename].[fieldname]
 			hide: true
 		},
 		'lexicon.srcid' : {
-			label: 'source',
-			size: 140,
-			noedit: !(stedtuserprivs & 16),
-			transform : function (v, key, rec, n) {
-				return '<a href="' + baseRef + 'source/' + rec[n-1] + '" target="stedt_src" title="Click for bibliographic info">' + rec[n-2] + '</a>'
-					+ (v ? ':&thinsp;' + v : '');
-			}
+			label: 'srcid',
+			size: 60,
+			noedit: !(stedtuserprivs & 16)
 		},
 		'lexicon.semcat' : {
 			label: 'semcat'

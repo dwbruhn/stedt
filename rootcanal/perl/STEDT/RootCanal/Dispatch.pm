@@ -7,7 +7,6 @@ sub dispatch_args {
 		table  => [
 			''                 => { app => 'Search' },
 			'gnis'		   => { app => 'Search', rm => 'combo' },
-			'widget'       	   => { app => 'Search', rm => 'widget' },
 			'logout'           => { app => 'Account', rm => 'logout' },
 			'update'	   => { app=>'Edit', rm => 'update' },
 			'source/:srcabbr'  => { app=>'Search', rm => 'source' },

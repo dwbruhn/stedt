@@ -218,7 +218,7 @@ sub get_query {
 	return "SELECT $flds FROM $from WHERE $where "
 		. "GROUP BY $group "
 		. ($having ? " HAVING $having " : '')
-		. " ORDER BY $order LIMIT 20000", # a sane limit to prevent sending too much back to the user
+		. " ORDER BY $order LIMIT 10000", # a sane limit to prevent sending too much back to the user
 		$where . ($having ? " HAVING $having" : '');
 }
 

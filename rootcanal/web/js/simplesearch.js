@@ -36,23 +36,34 @@ var vert_dragger = function () {
 
 // this function will be called when loaded (see last line)
 function stedt_simplesearch_init() {
+	// start with vertical panes by default.
+	// show only tag, protoform, and protogloss cols:
+	$H(setup.etyma).each(function (fld) {
+		if (fld.key.charAt(0) === '_') return; // skip non-fields
+		if (!fld.value.vert_show) fld.value.hide=true;
+	});
 	$w('etyma lexicon').each(function (t) {
 		if ($(t + '_resulttable'))
 			TableKit.Raw.init(t + '_resulttable', t, setup[t], stedtuserprivs&1 ? baseRef+'update' : 0);
 	});
 	var do_search = function (e) {
 		var tbl = e.findElement().id.sub('_search', '');
+		var params = {
+			tbl : tbl,
+			s : $F(tbl + '_searchinput'),
+			f : $F(tbl + '_searchform')
+		};
+		if ($(tbl + '_searchlggrp'))
+			params.lggrp = $F(tbl + '_searchlggrp');
+		if ($('lg-auto'))
+			params.lg = $F('lg-auto');
+			// even though this was named 'lexicon_searchlg' in our HTML,
+			// the autosuggest package has changed it to lg-auto, as we specified during initialization
+		if ($('as-values-lg-auto'))
+			params['as_values_lg-auto'] = $F('as-values-lg-auto'); // this will be populated automatically by the autosuggest script
 		new Ajax.Request(baseRef + 'search/ajax', {
 			method: 'get',
-			parameters: {
-				tbl : tbl,
-				s : $F(tbl + '_searchinput'),
-				lg : $F('lg-auto'), // even though this was named 'lexicon_searchlg' in our HTML,
-									// the autosuggest package has changed it to lg-auto, as we specified during initialization
-				'as_values_lg-auto' : $F('as-values-lg-auto'), // this will be populated automatically by the autosuggest script
-				lggrp : $F(tbl + '_searchlggrp'),
-				f : $F(tbl + '_searchform')
-			},
+			parameters: params,
 			onSuccess: ajax_make_table,
 			onFailure: function (transport){ alert('Error: ' + transport.responseText); },
 			onComplete: function (transport){ $(tbl + '_search').enable(); }
@@ -64,7 +75,7 @@ function stedt_simplesearch_init() {
 	
 	$('etyma_search').onsubmit = do_search;
 	$('lexicon_search').onsubmit = do_search;
-	my_dragger = horz_dragger();
+	my_dragger = vert_dragger();
 	Ajax.Responders.register({
 		onCreate: function() { $('spinner').show() },
 		onComplete: function() { if (0 == Ajax.activeRequestCount) $('spinner' ).hide() }

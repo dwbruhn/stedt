@@ -4,36 +4,23 @@
 	div#lexicon { position: static; }
 	div#dragger { display: none; }
 	div#info { display:none; }
-	form#search_form, .edit { display:none; }
+	form#etyma_search, form#lexicon_search, .edit { display:none; }
 }
 
 @media screen { 
 	div#etyma { position:fixed; overflow:auto; top:3em; height:12em; width:100%; left:0px; } 
 	div#lexicon { position:fixed; overflow:auto; top:15.5em; bottom: 0px; width:100%; left:0px; }
-	div#etyma.vert { height:auto; bottom:0px; width:18.5em; } 
-	div#lexicon.vert { width:auto; top:3em; right: 0px; left:19em; }
+	div#etyma.vert { height:auto; bottom:0px; width:24em; } 
+	div#lexicon.vert { width:auto; top:3em; right: 0px; left:24.5em; }
 	div#dragger { cursor:row-resize;
 		position:fixed; top: 15em; height: 0.5em;
 		background-color:teal;
 		width:100%; left: 0px; right: 0px;
 	}
 	div#dragger.vert {  cursor:col-resize; top:3em; bottom:0px;
-		height:auto; width:0.5em; left: 18.5em; right: auto;
+		height:auto; width:0.5em; left: 24em; right: auto;
 	 }
 
-	div#tools { position:fixed; overflow:auto; top:3em; height:2.5em; width:100%; left:0px; } 
-	div#etymawidget { position:fixed; overflow:auto; top:6em; height:12em; width:100%; left:0px; } 
-	div#moprhemeswidget { position:fixed; overflow:auto; top:18.5em; bottom: 0px; width:100%; left:0px; }
-	div#etymawidget.vert { height:auto; bottom:0px; width:18.5em; } 
-	div#moprhemeswidget.vert { width:auto; top:3em; right: 0px; left:19em; }
-	div#draggerwidget { cursor:row-resize;
-		position:fixed; top: 15em; height: 0.5em;
-		background-color:teal;
-		width:100%; left: 0px; right: 0px;
-	}
-	div#draggerwidget.vert {  cursor:col-resize; top:6em; bottom:0px;
-		height:auto; width:0.5em; left: 18.5em; right: auto;
-	 }
 }
 
 div#info

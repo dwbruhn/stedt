@@ -3,28 +3,6 @@ use strict;
 use base 'STEDT::RootCanal::Base';
 use Encode;
 
-sub widget : Runmode {		# WARNING: the code in this runmode is outdated and potentially hazardous
-	my $self = shift;
-	my $q = $self->query;
-	my $s = decode_utf8($q->param('t')) || '';
-	my $lg = decode_utf8($q->param('lg')) || '';
-	my $lggrp = decode_utf8($q->param('lggrp')) || '';
-	my $result;
-
-	if ($s || $lg || $lggrp || !$q->param) {
-		if ($ENV{HTTP_REFERER} && ($s || $lg || $lggrp)) {
-			$self->dbh->do("INSERT querylog VALUES (?,?,?,?,?,NOW())", undef,
-				'smart', $s, $lg, $lggrp, $ENV{REMOTE_ADDR});	# record search in query log (put table name, query, lg, lggroup, ip in separate fields)
-		}
-		$result->{etyma} = $self->searchresults_from_querystring($s, 'etyma');
-		$result->{morphemes} = $self->searchresults_from_querystring($s, 'morphemes', $lg, $lggrp);
-	} else {
-		$result->{etyma} = $self->load_table_module('etyma')->search($q);
-		$result->{morphemes} = $self->load_table_module('morphemes')->search($q);
-	}
-	return $self->tt_process("widget.tt", $result);
-}
-
 sub splash : StartRunmode {
 	my $self = shift;
 	my $splash_info;
