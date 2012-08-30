@@ -308,7 +308,7 @@ SELECT lexicon.rn,
 	(SELECT GROUP_CONCAT(tag_str ORDER BY ind) FROM lx_et_hash WHERE rn=lexicon.rn AND uid=8) AS analysis,
 	$user_analysis_col
 	languagenames.lgid, lexicon.reflex, lexicon.gloss, lexicon.gfn,
-	languagenames.language, languagegroups.grpno, languagegroups.grp,
+	languagenames.language, languagegroups.grpid, languagegroups.grpno, languagegroups.grp,
 	(SELECT citation from srcbib WHERE srcabbr=languagenames.srcabbr) AS citation,
 	languagenames.srcabbr, lexicon.srcid,
 	(SELECT COUNT(*) FROM notes WHERE notes.rn = lexicon.rn) AS num_notes
@@ -353,7 +353,7 @@ EndOfSQL
 		fields => ['lexicon.rn', 'analysis',
 			($selected_uid ? ('user_an', 'other_an') : ()),
 			'languagenames.lgid', 'lexicon.reflex', 'lexicon.gloss', 'lexicon.gfn',
-			'languagenames.language', 'languagegroups.grpno', 'languagegroups.grp',
+			'languagenames.language', 'languagegroups.grpid', 'languagegroups.grpno', 'languagegroups.grp',
 			'citation','languagenames.srcabbr', 'lexicon.srcid', 'notes.rn'],
 		footnotes => \@footnotes,
 		breadcrumbs=>$breadcrumbs
