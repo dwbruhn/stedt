@@ -5,6 +5,7 @@ setup['lexicon']['lexicon.rn'].transform = function (v) {
 	else return v;
 };
 setup['lexicon']['languagegroups.grpno'].hide = true;
+setup['lexicon']['languagegroups.genetic'] = {hide:true};
 setup['lexicon']['notes.rn'] = {
 	label: 'notes',
 	noedit: true,
@@ -43,6 +44,32 @@ for (var i = 1; i < num_tables; i++) {
 	TableKit.Raw.init('lexicon' + i, 'lexicon', setup['lexicon'], stedtuserprivs&1 ? baseRef+'update' : 0);
 	TableKit.Rows.stripe('lexicon' + i);
 	TableKit.tables['lexicon' + i].editAjaxExtraParams += '&uid2=' + uid2;
+}
+
+function show_meso_editform(e)
+{
+	var row = e.findElement().up('tr');
+	var tag = row.up('table').getAttribute("tag");
+	var grpid = row.id.substring(7);
+	new Ajax.Updater('edit_meso_form', baseRef + 'tags/mesoforms', {
+		parameters: {tag:tag,grp:grpid}
+	});
+	$('edit_meso_form').innerHTML = '';
+	$('edit_meso_form').show();
+	e.stop();
+}
+
+function submit_meso_editform(f)
+{
+	var rowid = 'grprow_' + f.grp.value;
+	var reconstructions = $(rowid).down('span.pform');
+	var cell = reconstructions.up('td');
+	new Ajax.Updater(reconstructions, baseRef + 'tags/meso_edit', {
+		parameters: f.serialize(true)
+	});
+	Effect.ScrollTo(cell, {offset:-100});
+	$('edit_meso_form').hide();
+	return false;
 }
 
 // prompt user to get new tag for migrating reflexes
@@ -86,38 +113,131 @@ var grpno_index = $('languagegroups.grpno').cellIndex;
 	// because there may or may not be a HIST column depending on if the user is logged in.
 	// Note that having multiple <TH> elements with the same id value ("languagegroups.grpid", etc.)
 	// is technically incorrect HTML, but in this case seems to have no ill effect.
+
+// You have to add these in *after* tablekit does its thing, otherwise it tries to apply transforms, etc.
+// Though I suppose we could modify tablekit to ignore certain rows.
 for (var i = 1; i < num_tables; i++) {
 	var tbody = $('lexicon' + i).tBodies[0];
 	var table_tag = $('lexicon' + i).getAttribute("tag"); // access a custom HTML attribute
+	tbody.on('click', 'a.et_grp_add', function (e) {
+		showaddform('M', table_tag, e);
+		e.stop();
+	});
+	tbody.on('click', 'a.meso_editlink', show_meso_editform);
 	var lastgrpno = '';
 	var visiblecols = $A(tbody.rows[0].cells).findAll(function (c) {return $(c).visible();}).length;
 	$A(tbody.rows).each(function (row, j) {
 		var grpno = row.cells[grpno_index].innerHTML;
 		var grp = row.cells[grpno_index+1].innerHTML;
+		var grp_isgenetic = parseInt(row.cells[grpno_index+2].innerHTML, 10);
+		var grpid = row.cells[grpno_index-1].innerHTML;
+		var newrow, meso, footnote, cell1, cell2, cell3, cell4, tmp_string;
+		var addlink = ' <a href="#" class="et_grp_add">[+]</a>';
 		if (lastgrpno !== grpno) {
-			var newrow = new Element('tr', {'class':'lggroup'});
+			// put in any mesoroots with no (immediate daughter) supporting forms
+			// and same with the subgroup notes
+			while ((mesoroots.length && mesoroots[0].grpno.localeCompare(lastgrpno) < 0)
+				|| (subgroupnotes.length && subgroupnotes[0].grpno.localeCompare(lastgrpno) < 0)) {
+				// yes we're working through two arrays and we have to interleave the values
+				if ((mesoroots.length && mesoroots[0].grpno.localeCompare(lastgrpno) < 0))
+					meso = mesoroots.shift();
+				else meso = null;
+				if ((subgroupnotes.length && subgroupnotes[0].grpno.localeCompare(lastgrpno) < 0))
+					footnote = subgroupnotes.shift();
+				else footnote = null;
+				newrow = new Element('tr', {'class':'lggroup'});
+				row.insert({before:newrow});
+				cell1 = newrow.insertCell(-1);
+				cell2 = newrow.insertCell(-1);
+				cell5 = newrow.insertCell(-1);
+				cell1.colSpan = stedtuserprivs&1 ? 3 : 2;
+				cell2.colSpan = visiblecols - (stedtuserprivs&1 ? 5 : 3);
+				cell5.colSpan = stedtuserprivs&1 ? 2 : 1;
+				cell2.className = "noedit";
+				cell5.className = "noedit";
+				if (meso) {
+					cell1.innerHTML = '<a name="' + meso.grpno + '">' + meso.grpno + ' ' + meso.grp + '</a>';
+					tmp_string = '<span class="pform">' + meso.plg + ' *' + meso.form + ' ' + meso.gloss;
+					// there may be multiple mesoroots for this node, so check for those too
+					while (mesoroots.length && mesoroots[0].grpno === meso.grpno) {
+						meso = mesoroots.shift();
+						tmp_string += ',<br>' + meso.plg + ' *' + meso.form + ' ' + meso.gloss;
+					}
+					tmp_string += '</span>';
+					newrow.id = 'grprow_' + meso.grpid;
+					if (meso.genetic && (stedtuserprivs & 1)) tmp_string += ' <small><a href="#" class="meso_editlink">add/edit reconstruction</a></small>';
+					cell2.innerHTML = tmp_string;
+				}
+				if (footnote) {
+					cell5.innerHTML = '<a href="#foot' + footnote.ind + '" id="toof' + footnote.ind + '">' + footnote.ind + '</a>';
+					while (subgroupnotes.length && subgroupnotes[0].grpno === footnote.grpno) {
+						footnote = subgroupnotes.shift();
+						cell5.innerHTML += ' <a href="#foot' + footnote.ind + '" id="toof' + footnote.ind + '">' + footnote.ind + '</a>';
+					}
+				}
+			}
+			// check if current group has an explicit mesoroot
+			if (mesoroots.length && mesoroots[0].grpno === grpno) {
+				meso = mesoroots.shift();
+			} else {
+				meso = null;
+			}
+			// check if there's a subgroup note
+			if (subgroupnotes.length && subgroupnotes[0].grpno === grpno) {
+				footnote = subgroupnotes.shift();
+			} else {
+				footnote = null;
+			}
+			
+			newrow = new Element('tr', {'class':'lggroup', 'id':'grprow_' + grpid});
 			row.insert({before:newrow});
-			var cell1 = newrow.insertCell(-1);
-			var cell2 = newrow.insertCell(-1);
-			var cell3 = newrow.insertCell(-1);
-			cell1.colSpan = 3;
-			cell2.colSpan = 2;
-			cell3.colSpan = visiblecols - 5;
-			cell1.innerHTML = grpno + ' ' + grp;
+			// there's not enough columns when you're not logged in, so adjust accordingly by not creating TD's for the approval and migration buttons
+			cell1 = newrow.insertCell(-1);
+			cell2 = newrow.insertCell(-1);
+			if (stedtuserprivs & 1) cell3 = newrow.insertCell(-1);
+			if (stedtuserprivs & 1) cell4 = newrow.insertCell(-1);
+			cell5 = newrow.insertCell(-1);
+			cell1.colSpan = stedtuserprivs & 1 ? 3 : 2;
+			cell2.colSpan = stedtuserprivs & 1 ? 2 : visiblecols - 3;
+			if (stedtuserprivs & 1) cell3.colSpan = 1;
+			if (stedtuserprivs & 1) cell4.colSpan = visiblecols - 8;
+			cell5.colSpan = stedtuserprivs & 1 ? 2 : 1;
 			cell2.className = "noedit"; // prevent tablekit from trying to edit this cell. Not needed for cell1 since it's in the rn column
-			cell3.className = "noedit";
+			if (stedtuserprivs & 1) cell3.className = "noedit";
+			if (stedtuserprivs & 1) cell4.className = "noedit";
+			cell5.className = "noedit";
+			cell1.innerHTML = '<a name="' + grpno + '">' + grpno + ' ' + grp + '</a>';
+			if (meso) {
+				tmp_string = '<span class="pform">' + meso.plg + ' *' + meso.form + ' ' + meso.gloss;
+				// there may be multiple mesoroots for this node, so check for those too
+				while (mesoroots.length && mesoroots[0].grpno === meso.grpno) {
+					meso = mesoroots.shift();
+					tmp_string += ',<br>' + meso.plg + ' *' + meso.form + ' ' + meso.gloss;
+				}
+				tmp_string += '</span>';
+				cell2.innerHTML = tmp_string;
+			}
+			if (grp_isgenetic && (stedtuserprivs & 1)) cell2.innerHTML += ' <small><a href="#" class="meso_editlink">add/edit reconstruction</a></small>';
+			if (footnote) {
+				cell5.innerHTML = '<a href="#foot' + footnote.ind + '" id="toof' + footnote.ind + '">' + footnote.ind + '</a>';
+				while (subgroupnotes.length && subgroupnotes[0].grpno === footnote.grpno) {
+					footnote = subgroupnotes.shift();
+					cell5.innerHTML += ' <a href="#foot' + footnote.ind + '" id="toof' + footnote.ind + '">' + footnote.ind + '</a>';
+				}
+			}
+			if (stedtuserprivs & 1) cell5.innerHTML += addlink; // currently putting the addlink only for nodes with forms underneath them
 			if (stedtuserprivs & 1) {
 				// insert html form for approving this subgroup only
 				grp = grp.replace(/"/g,'&quot;'); // escape quotes for inclusion in the string below
-				cell2.innerHTML = '<form action="' + baseRef + 'tags/accept" method="post" '
+				cell3.innerHTML = '<form action="' + baseRef + 'tags/accept" method="post" '
 					+ 'onsubmit="return grp_confirm(' + table_tag + ',\'' + grp + '\')">'
 					+ '<input name="tag" value="' + table_tag + '" type="hidden">'
 					+ '<input name="uid" value="' + uid2 + '" type="hidden">'
 					+ '<input name="grpno" value="' + grpno + '" type="hidden">'
-					+ '<input type="submit" value="Accept ' + grp + ' only"></form>';
+					+ '<input type="submit" value="Accept ' + grpno + ' only..."></form>';
 				// insert html form for migrating tagged reflexes in this subgroup
-				cell3.innerHTML = '<button onclick="migrate_prompt(' + table_tag + ',\'' + grp
-					+ '\'' + ',\'' + grpno + '\')">Move tagged reflexes to another tag</button>';
+				cell4.innerHTML += '<input type="button" value="Move tagged reflexes to another tag..." onclick="migrate_prompt(' + table_tag + ',\'' + grp
+					+ '\'' + ',\'' + grpno + '\'); return false">';
 			}
 			lastgrpno = grpno;
 		}

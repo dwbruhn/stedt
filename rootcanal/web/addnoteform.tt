@@ -14,11 +14,12 @@
 </div>
 <input type="hidden" name="spec">
 <input type="hidden" name="id">
+<input type="hidden" name="id2">
 <input type="hidden" name="ord">
 <input type="hidden" name="fn_counter">
 <h1>New Note</h1>
 <p>The following markup codes will be converted to XML tags:</p>
-<pre>&lt;return&gt;&lt;return&gt; - paragraph break
+<pre id="cheat_source">&lt;return&gt;&lt;return&gt; - paragraph break
 &lt;return&gt; - line break
 [[_subscript]]
 [[^superscript]]

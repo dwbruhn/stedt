@@ -16,18 +16,25 @@ sub add : RunMode {
 	}
 	my $dbh = $self->dbh;
 	my $q = $self->query;
-	my ($spec, $id, $ord, $type, $xml, $uid) = ($q->param('spec'), $q->param('id'),
-		$q->param('ord'), $q->param('notetype'), decode_utf8(markup2xml($q->param('xmlnote'))), $q->param('uid'));
+	my ($spec, $id, $ord, $type, $xml, $uid, $id2) = ($q->param('spec'), $q->param('id'),
+		$q->param('ord'), $q->param('notetype'),
+		decode_utf8(markup2xml($q->param('xmlnote'))),
+		$q->param('uid'), $q->param('id2'));
 	my $key = $spec eq 'L' ? 'rn' : $spec eq 'E' ? 'tag' : 'id';
 	if ($uid != 8 && $uid != $self->param('uid')) {
 		# force uid to be either 8 or the current user's uid
 		$uid = $self->param('uid');
 	}
-	my $sth = $dbh->prepare("INSERT notes (spec, $key, ord, notetype, xmlnote, uid) VALUES (?,?,?,?,?,?)");
-	$sth->execute($spec, $id, $ord, $type, $xml, $uid);
+	my $sql = "INSERT notes (spec, $key, ord, notetype, xmlnote, uid) VALUES (?,?,?,?,?,?)";
+	if ($id2) {
+		$sql =~ s/uid\)/uid, id\)/;
+		$sql =~ s/\?\)/?,?\)/;
+	}
+	my $sth = $dbh->prepare($sql);
+	$sth->execute($spec, $id, $ord, $type, $xml, $uid, $id2 ? $id2 : ());
 
 	my $kind = $spec eq 'L' ? 'lex' : $spec eq 'C' ? 'chapter' : # special handling for comparanda
-		$spec eq 'S' ? 'source' : $type eq 'F' ? 'comparanda' : 'etyma';
+		$spec eq 'S' ? 'source' : $type eq 'F' ? 'comparanda' : $id2 ? 'et_subgroup' : 'etyma';
 	my $noteid = $dbh->selectrow_array("SELECT LAST_INSERT_ID()");
 	my $lastmod = $dbh->selectrow_array("SELECT datetime FROM notes WHERE noteid=?", undef, $noteid);
 	$self->header_add('-x-json'=>qq|{"id":"$noteid"}|);

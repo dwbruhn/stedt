@@ -222,16 +222,21 @@ $t->add_form_items(
 		my @a;	# available tag numbers
 		my $i = shift @$tags;
 		$i = $i->[0];
+		my $suggested_tag = 0;
 		foreach (@$tags) {
 			$_ = $_->[0];
 			next if ++$i == $_;
 			$i--; # reset
 			while (++$i < $_) {
+				if (!$suggested_tag && $i > 5355) {
+					$suggested_tag = $i;
+					next;
+				}
 				push @a, $i;
 			}
 		}
-		$i++;
-		return $cgi->popup_menu(-name => 'etyma.tag', -values=>['',$i,@a],  -default=>'', -override=>1);
+		$i++; # $i should now be the next autoincrement value
+		return $cgi->popup_menu(-name => 'etyma.tag', -values=>[$suggested_tag,@a,$i],  -default=>$suggested_tag, -override=>1);
 	},
 	'etyma.grpid' => sub {
 		my $cgi = shift;

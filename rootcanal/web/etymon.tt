@@ -1,5 +1,4 @@
-[% cogs = [] %][% FOREACH e IN etyma %][% cogs.push(e.tag) %][% END -%]
-[% PROCESS header.tt title="STEDT Etymon #" _ etyma.0.tag cognates=cogs -%]
+[% PROCESS header.tt title="STEDT Etymon #" _ etyma.0.tag cognates=[etyma.0.tag] -%]
 <a name="[% etyma.0.tag %]"></a>
 [% lexicon_id = 1 %]
 
@@ -7,12 +6,12 @@
 [%- ELSE %][% b.0 %] <b>[% b.1 %]</b> &gt; [% END #IF %][% END #FOREACH %]</p>
 
 [% IF c.has_privs(1) %]
-[% stedt_count %] records <span class="r[% supertag %]">tagged by <b>stedt</b></span> under this etymon.
+[% stedt_count %] records <span class="r[% etyma.0.tag %]">tagged by <b>stedt</b></span> under this etymon.
 [% IF selected_uid %]
 <form name="selectuser" method="POST" style="display:inline">
-Reflexes <span class="u[% supertag %]">tagged by <select name="DDMenu" onchange="location.href=(form.DDMenu.options[form.DDMenu.selectedIndex].value)">
+Reflexes <span class="u[% etyma.0.tag %]">tagged by <select name="DDMenu" onchange="location.href=(form.DDMenu.options[form.DDMenu.selectedIndex].value)">
 [% FOREACH u IN users %]
-<option value="[% self_url %]/etymon/[% supertag %]/[% u.uid %]" [% IF selected_uid == u.uid %]selected[% END %] >[% u.username %] ([% u.count %] tagged forms)</option>
+<option value="[% self_url %]/etymon/[% etyma.0.tag %]/[% u.uid %]" [% IF selected_uid == u.uid %]selected[% END %] >[% u.username %] ([% u.count %] tagged forms)</option>
 [% END -%]
 </select>
 </span></form>
@@ -22,18 +21,16 @@ Reflexes <span class="u[% supertag %]">tagged by <select name="DDMenu" onchange=
 [% END # has_privs 1 %]
 
 [% FOREACH e IN etyma -%]
-[% IF e.is_main %]<h1>[% ELSE %]<a name="[% e.tag %]"><h2>[% END -%]
-[% IF c.has_privs(1) %]<a href="[% self_url %]/edit/etyma?etyma.tag=[% e.tag %]" target="edit_etyma">[% END %]
+<h1>[% IF c.has_privs(1) %]<a href="[% self_url %]/edit/etyma?etyma.tag=[% e.tag %]" target="edit_etyma">[% END %]
 #[% e.tag %][% IF c.has_privs(1) %]</a>[% END %] [% e.plg %] [% e.protoform %] [% e.protogloss %]
-[%- IF e.uid != 8 %] <span class="u[% supertag %]">(proposed by [% e.username %])</span>[% END -%]
-[%- IF e.is_main %]</h1>[% ELSE %]</h2></a>[% END %]
-[%- IF e.is_main && etyma.size > 1 %]
+[%- IF e.uid != 8 %] <span class="u[% etyma.0.tag %]">(proposed by [% e.username %])</span>[% END -%]
+</h1>
+[%- IF e.mesoroots.size > 1 %]
 
 Reconstructed mesoroots below:
 <ul>
-[% FOREACH e2 IN etyma -%]
-[% NEXT IF e2.is_main -%]
-<li><a href="#[% e2.tag %]">[% e2.plg %] [% e2.protoform %] [% e2.protogloss %]</a> (#[% e2.tag %])</li>
+[% FOREACH e2 IN e.mesoroots -%]
+<li><a href="#[% e2.grpno %]">[% e2.plg %] *[% e2.form %] [% e2.gloss %]</a></li>
 [% END -%]
 </ul>
 [%- END %]
@@ -56,7 +53,7 @@ Reconstructed mesoroots below:
 
 [% IF e.records -%]
 [% IF selected_uid && c.has_privs(8) %]
-<form action="[% self_url %]/tags/accept" method="post" onsubmit="return confirm('Are you sure you want to approve all the tagging by [% selected_username %] for tag #[% e.tag %]? Any conflicting tags will be clobbered!')" class="u[% supertag %]" style="display:inline; padding:3px">
+<form action="[% self_url %]/tags/accept" method="post" onsubmit="return confirm('Are you sure you want to approve all the tagging by [% selected_username %] for tag #[% e.tag %]? Any conflicting tags will be clobbered!')" class="u[% etyma.0.tag %]" style="display:inline; padding:3px">
 <input name="tag" value="[% e.tag %]" type="hidden">
 <input name="uid" value="[% selected_uid %]" type="hidden">
 <input type="submit" value="Accept tagging by [% selected_username %] for tag #[% e.tag %]">
@@ -86,7 +83,7 @@ Reconstructed mesoroots below:
 </table>
 [% END -%]
 
-[% IF e.comparanda.size || (c.has_privs(1) && e.is_main) -%]
+[% IF e.comparanda.size || c.has_privs(1) -%]
 [% label = 'Chinese comparand' _ (e.comparanda.size == 1 ? 'um' : 'a') -%]
 <h2>[% label %]</h2>
 [% IF c.has_privs(1) -%]
@@ -114,6 +111,8 @@ Reconstructed mesoroots below:
 <div class="footnote[% IF n.super %] fnote-[% n.super %][% END %]" id="foot[% fncounter %]">
 <a href="#toof[% fncounter %]" class="left">^ [% fncounter %].</a>
 <div class="notepreview">[% n.text %]</div></div>
+[% ELSIF n.spec == 'E' -%]
+[% PROCESS notes_et_subgroup.tt -%]
 [% ELSE -%]
 [% PROCESS notes_lex.tt -%]
 [% END -%]
@@ -121,14 +120,17 @@ Reconstructed mesoroots below:
 
 [% IF c.has_privs(1) -%]
 [% PROCESS addnoteform.tt -%]
+<div id="edit_meso_form" style="display:none"></div>
 [% END -%]
 
 <script>
 var footnote_counter = [% footnotes.size %];
-[% FOREACH c IN cogs %]skipped_roots[[% c %]]=true;[% END %]
+skipped_roots[[% etyma.0.tag %]]=true;
 num_tables=[% lexicon_id %];
 var stedt_other_username = '[% selected_username || '' %]';
 var uid2 = '[% selected_uid %]';
+var mesoroots = [% etyma.0.mesorootsjson %];
+var subgroupnotes = [% etyma.0.subgroupnotesjson %];
 </script>
 <script src="[% self_base %]js/etymon.js"></script>
 <script src="[% self_base %]js/notes.js"></script>

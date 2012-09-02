@@ -11,58 +11,58 @@
 // };
 
 // code to make things draggable and droppable for the subroots
-var makesubroot = function (dragged, destination, e) {
-	var data = TableKit.tables['etyma_resulttable'].raw.data;
-	var cols = TableKit.tables['etyma_resulttable'].raw.cols;
-	var src = dragged.identify().sub('tag',''); // get just the numbers (id is "tag###")
-	var dst = destination.identify().sub('tag','');
-	var srcsuper = data[src][cols['etyma.supertag']];
-	new Ajax.Request(baseRef + 'update', {
-		parameters: {
-			tbl:'etyma',
-			field:'etyma.supertag',
-			id:src,
-			value: srcsuper == dst ? src : dst
-		},
-		onSuccess: function(transport) {
-			if (srcsuper == dst) {
-				// if it's already the subroot of the destination,
-				// make it a main root, and resort.
-				data[src][cols['etyma.supertag']] = src;
-				destination.up('tbody').insert(dragged.up('tr'));
-				dragged.up('td').nextSibling.innerHTML = '';
-			} else {
-				data[src][cols['etyma.supertag']] = dst;
-				destination.up('tr').insert({after:dragged.up('tr')});
-				dragged.up('td').nextSibling.innerHTML = dst;
-			}
-			
-			// restripe
-			TableKit.reload();
-		},
-		onFailure: function(transport) {
-			alert(transport.responseText);
-		},
-		onComplete: function() {
-			dragged.setAttribute('style',''); // put it back where it came from
-		}
-	});
-};
-var make_draggable_id = function z(obj) {
-	// z.scrollElement should be set to the containing element to be scrolled
-	z.onstart = function(d,e) { z.old_y = e.pointerY() };
-	z.ondrag = function (d,e) {
-		if (!z.moved && (Math.abs(e.pointerY()-z.old_y)>2)) z.moved=1
-	};
-	new Draggable(obj, { revert: 'failure', constraint:'vertical', scroll:z.scrollElement,
-		onStart:z.onstart, onDrag:z.ondrag
-	});
-	Droppables.add(obj,
-	  { hoverclass : 'hoverdrop',
-		accept : 'tagid',
-		onDrop : makesubroot
-	  } );
-};
+// var makesubroot = function (dragged, destination, e) {
+// 	var data = TableKit.tables['etyma_resulttable'].raw.data;
+// 	var cols = TableKit.tables['etyma_resulttable'].raw.cols;
+// 	var src = dragged.identify().sub('tag',''); // get just the numbers (id is "tag###")
+// 	var dst = destination.identify().sub('tag','');
+// 	var srcsuper = data[src][cols['etyma.supertag']];
+// 	new Ajax.Request(baseRef + 'update', {
+// 		parameters: {
+// 			tbl:'etyma',
+// 			field:'etyma.supertag',
+// 			id:src,
+// 			value: srcsuper == dst ? src : dst
+// 		},
+// 		onSuccess: function(transport) {
+// 			if (srcsuper == dst) {
+// 				// if it's already the subroot of the destination,
+// 				// make it a main root, and resort.
+// 				data[src][cols['etyma.supertag']] = src;
+// 				destination.up('tbody').insert(dragged.up('tr'));
+// 				dragged.up('td').nextSibling.innerHTML = '';
+// 			} else {
+// 				data[src][cols['etyma.supertag']] = dst;
+// 				destination.up('tr').insert({after:dragged.up('tr')});
+// 				dragged.up('td').nextSibling.innerHTML = dst;
+// 			}
+// 			
+// 			// restripe
+// 			TableKit.reload();
+// 		},
+// 		onFailure: function(transport) {
+// 			alert(transport.responseText);
+// 		},
+// 		onComplete: function() {
+// 			dragged.setAttribute('style',''); // put it back where it came from
+// 		}
+// 	});
+// };
+// var make_draggable_id = function z(obj) {
+// 	// z.scrollElement should be set to the containing element to be scrolled
+// 	z.onstart = function(d,e) { z.old_y = e.pointerY() };
+// 	z.ondrag = function (d,e) {
+// 		if (!z.moved && (Math.abs(e.pointerY()-z.old_y)>2)) z.moved=1
+// 	};
+// 	new Draggable(obj, { revert: 'failure', constraint:'vertical', scroll:z.scrollElement,
+// 		onStart:z.onstart, onDrag:z.ondrag
+// 	});
+// 	Droppables.add(obj,
+// 	  { hoverclass : 'hoverdrop',
+// 		accept : 'tagid',
+// 		onDrop : makesubroot
+// 	  } );
+// };
 
 function show_notes(rn, container) {
 	new Ajax.Updater(container, baseRef + 'notes/notes_for_rn', {
@@ -252,21 +252,21 @@ function type$less (e) { // yes, $ is allowed in variable names!
 var setup = { // in the form setup.[tablename].[fieldname]
 	etyma : {
 		_key: 'etyma.tag',   // maybe send it from the server?
-		_postprocess_onadd: function (row) {
-			if (stedtuserprivs & 1) make_draggable_id(row.down('span.tagid'));
-//			console.log(row);
-//			console.log(row.down('span.tagid'));
-		},
+// 		_postprocess_onadd: function (row) {
+// 			if (stedtuserprivs & 1) make_draggable_id(row.down('span.tagid'));
+// //			console.log(row);
+// //			console.log(row.down('span.tagid'));
+// 		},
 		_postprocess: function (tbl) {
-			var z = make_draggable_id;
-			if (stedtuserprivs & 1) { // don't allow making mesoroots by dragging unless user has tagging privileges
-				z.scrollElement = $('etyma') || window; // if we're not in the combo view, there's no etyma div; if we pass a nonexistent element to Draggable, prototype will crash (in firefox and possibly other browsers)
-				tbl.select('span.tagid').each(z);
-				tbl.on('click', 'span.tagid', function (e) {
-					if (z.moved) e.stop();  // don't follow the link if it was dragged
-					z.moved=0; // reset
-				});
-			}
+// 			var z = make_draggable_id;
+// 			if (stedtuserprivs & 1) { // don't allow making mesoroots by dragging unless user has tagging privileges
+// 				z.scrollElement = $('etyma') || window; // if we're not in the combo view, there's no etyma div; if we pass a nonexistent element to Draggable, prototype will crash (in firefox and possibly other browsers)
+// 				tbl.select('span.tagid').each(z);
+// 				tbl.on('click', 'span.tagid', function (e) {
+// 					if (z.moved) e.stop();  // don't follow the link if it was dragged
+// 					z.moved=0; // reset
+// 				});
+// 			}
 			tbl.on('click', 'a.lexlink', function (e) {
 				show_supporting_forms(e.findElement('tr').id.substring(3));
 				e.stop();
@@ -344,12 +344,7 @@ var setup = { // in the form setup.[tablename].[fieldname]
 		'num_recs' : {
 			label: 'reflexes',
 			noedit: true,
-			size: 50,
-			transform: function (v) {
-				return v !== '0'
-					? '<a href="#" class="lexlink">' + v + '&nbsp;r\'s</a>'
-					: v + '&nbsp;r\'s';
-			}
+			size: 30
 		},
 		'u_recs' : {
 			label: 'u',
@@ -367,7 +362,7 @@ var setup = { // in the form setup.[tablename].[fieldname]
 			hide: !(stedtuserprivs & 1),
 			transform : function (v) {
 				if (stedtuserprivs & 1) {
-					return '<a href="' + baseRef + 'edit/chapters' + '?chapters.semkey=' + v + '" target="edit_chapters">' + v + '</a>';
+					return '<a href="' + baseRef + 'chap/' + v + '" target="stedt_chapters">' + v + '</a>';
 				}
 				else return v;
 			}
@@ -664,7 +659,7 @@ var setup = { // in the form setup.[tablename].[fieldname]
 						if (tags[i]===t2[i]) {
 							// if stedt and user tags match, use the user's style
 							syl_class += ' u' + t2[i];
-							link_tag = stedttagger ? (skipped_roots[t2[i]] ? '' : t2[i]) : t2[i];
+							link_tag = skipped_roots[t2[i]] ? '' : t2[i];
 						} else {
 							// otherwise mark this syllable as a conflict
 							syl_class += ' t_' + t2[i] + ' approve-conflict';
@@ -672,10 +667,10 @@ var setup = { // in the form setup.[tablename].[fieldname]
 						}
 					} else if (tags[i]) { // if only one or the other of the columns is defined, then simply mark it as such.
 						syl_class = 't_' + tags[i] + ' r' + tags[i];
-						link_tag = stedttagger ? (skipped_roots[tags[i]] ? '' : tags[i]) : tags[i];
+						link_tag = skipped_roots[tags[i]] ? '' : tags[i];
 					} else if (t2[i]) {
 						syl_class = 't_' + t2[i] + ' u' + t2[i];
-						link_tag = stedttagger ? (skipped_roots[t2[i]] ? '' : t2[i]) : t2[i];
+						link_tag = skipped_roots[t2[i]] ? '' : t2[i];
 					}
 					a += parseInt(link_tag,10)
 						? '<a href="' + baseRef + 'etymon/' + link_tag + '" target="stedt_etymon"'

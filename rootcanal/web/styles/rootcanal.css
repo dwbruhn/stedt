@@ -249,3 +249,16 @@ div.move-handle {
 	padding: 5pt;
 	z-index:1;
 }
+
+#notes_markup_cheatsheet, #edit_meso_form
+{
+	position: fixed;
+	top: 20%;
+	left: 10%;
+	width: 40%;
+	height: 50%;
+	background-color: white;
+	border: 3pt solid black;
+	padding: 5pt;
+	z-index:1;
+}

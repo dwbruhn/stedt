@@ -18,6 +18,7 @@ user: <select name="uid">
 <option selected="selected" value="[% n.uid %]">[% n.username %]</option>
 </select>
 [% END -%]
+<a href="#" class="cheatsheet_link">markup</a>
 </form>
 <div id="preview[% n.noteid %]" class="notepreview">
 [% n.text -%]

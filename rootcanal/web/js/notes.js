@@ -77,7 +77,8 @@ $$('.reordcheckbox').each(function (c) {
 
 // adding new notes
 var addform_fullid;
-function showaddform (spec, id) { // C, E, L; F for comparanda (special handling of notetype)
+function showaddform (spec, id, e) {
+	// C, E, L; F for comparanda and M for subgroup notes (special handling of notetype)
 	if (spec==='L') {
 		addform_fullid = id;
 		id = id.substring(3); // chop off front of tr id
@@ -87,10 +88,15 @@ function showaddform (spec, id) { // C, E, L; F for comparanda (special handling
 	var f = $('addnoteform');
 	// constrain notetypes
 	var types = spec === 'L' ? ['N','I','O'] : spec === 'F' ? ['F'] :
-		spec === 'E' ? ['T','I','H','N'] : spec === 'C' ? ['T','I','N','G','F'] : ['I','N'];
+		spec === 'E' ? ['T','I','H','N'] : spec === 'C' ? ['T','I','N','G','F'] :
+		spec === 'M' ? ['T','I'] : ['I','N'];
 	// set spec, id
 	f.spec.value = spec;
 	f.id.value = id;
+	if (spec==='M') { // special handling for etyma subgroup notes
+		addform_fullid = e.findElement().up('tr').identify(); // save the tr for later access
+		f.id2.value = e.findElement().up('tr').getAttribute('grpid');
+	}
 	f.fn_counter.value = footnote_counter;
 	var menu = f.notetype.options;
 	menu.length = 0; // clear out the menu
@@ -112,10 +118,13 @@ $('addnoteform').observe('submit', function (e) {
 	// also set ord
 	if (spec === 'E') {
 		container = $('allnotes' + id);
+	} else if (spec === 'M') {
+		// special case, change M -> E
+		f.spec.value = 'E';
+		f.ord.value = 1;
 	} else if (spec === 'F') {
 		container = $('allcomparanda' + id);
-		spec = 'E'; // special case, change spec F -> E
-		f.spec.value = 'E';
+		f.spec.value = 'E'; // special case, change spec F -> E
 	} else if (spec === 'C' || spec === 'S') {
 		container = $('allnotes');
 	} else { // lexicon note
@@ -154,7 +163,7 @@ $('addnoteform').observe('submit', function (e) {
 				if (container.select('.reord').length > 1)
 					container.down('.reordcheckbox').enable();
 			} else {
-				// if it's a lex note, stick it in at the bottom, and add the footnotemark in the table
+				// if it's a lex or subgroup note, stick it in at the bottom, and add the footnotemark in the table
 				f.up('body').insert(note);
 				++footnote_counter;
 				var cell = $(addform_fullid).childElements().last();
@@ -172,5 +181,15 @@ $('addnoteform').observe('submit', function (e) {
 // show/hide the editing form
 $(document.body).on('click', 'input:button.note_edit_toggle', function (e) {
 	e.findElement().up('.lexnote').down('.noteform').toggle();
+	e.stop();
+});
+
+// make a separate cheat sheet
+var notes_cheatsheet = $('cheat_source').clone(true);
+notes_cheatsheet.id = 'notes_markup_cheatsheet';
+notes_cheatsheet.style.display = 'none';
+$('addnoteform').insert({after:notes_cheatsheet});
+$(document.body).on('click', 'a.cheatsheet_link', function (e) {
+	$("notes_markup_cheatsheet").toggle();
 	e.stop();
 });

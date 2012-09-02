@@ -2,6 +2,7 @@ package STEDT::RootCanal::Tags;
 use strict;
 use base 'STEDT::RootCanal::Base';
 use utf8;
+use Encode;
 use STEDT::RootCanal::Notes;
 use CGI::Application::Plugin::Redirect;
 
@@ -154,21 +155,14 @@ sub etymon : Runmode {
 	my (@etyma, @footnotes, @users);
 	my $footnote_index = 1;
 
-	# pull out the etyma record, along with its mesoroots in the etyma table
+	# pull out the etyma record
 	my $sql = qq#SELECT e.tag, e.chapter, e.sequence, e.protoform, e.protogloss, languagegroups.plg,
-						e.tag=e.supertag AS is_main, e.uid, users.username
-FROM `etyma` AS `e` JOIN `etyma` AS `super` ON e.supertag = super.tag LEFT JOIN users ON (e.uid=users.uid) LEFT JOIN languagegroups ON (e.grpid=languagegroups.grpid)
-WHERE e.supertag=? AND e.status != 'DELETE' AND super.status != 'DELETE'
-ORDER BY is_main DESC#;
+						e.uid, users.username
+FROM `etyma` AS `e` LEFT JOIN users ON (e.uid=users.uid) LEFT JOIN languagegroups ON (e.grpid=languagegroups.grpid)
+WHERE e.tag=? AND e.status != 'DELETE'#;
 	my $etyma_for_tag = $self->dbh->selectall_arrayref($sql, undef, $tag);
 	if (!@$etyma_for_tag) {
-		# if it failed the first time, this is probably a mesoroot.
-		# get the mesoroot's supertag and redirect to it
-		($tag) = $self->dbh->selectrow_array("SELECT supertag FROM etyma WHERE tag=? AND status != 'DELETE'", undef, $tag);
-		if (!$tag) {
-			die "no etymon with tag #" . $self->param('tag');
-		}
-		return $self->redirect($self->query->url(-absolute=>1) . "/etymon/$tag" . ($selected_uid ? "/$selected_uid" : ''));
+		die "no etymon with tag #" . $self->param('tag');
 	}
 
 	# pull together a list of users who have tagged this root,
@@ -179,7 +173,7 @@ ORDER BY is_main DESC#;
 	if ($self->has_privs(1)) {
 		my $self_count = 0;
 		my $mosttagged_uid;
-		my $userrecs = $self->dbh->selectall_arrayref("SELECT users.uid,username,COUNT(DISTINCT rn) as num_forms, users.uid=8 AS not_stedt FROM users JOIN lx_et_hash USING (uid) JOIN etyma USING (tag) WHERE supertag=? GROUP BY uid ORDER BY not_stedt, num_forms DESC",undef,$tag);
+		my $userrecs = $self->dbh->selectall_arrayref("SELECT users.uid,username,COUNT(DISTINCT rn) as num_forms, users.uid=8 AS not_stedt FROM users JOIN lx_et_hash USING (uid) WHERE tag=? GROUP BY uid ORDER BY not_stedt, num_forms DESC",undef,$tag);
 		if (@$userrecs) {
 			# get number of stedt records (it's the last row, if it's there)
 			if ($userrecs->[-1][0] == 8) {
@@ -234,9 +228,6 @@ ORDER BY is_main DESC#;
 
 	my $user_analysis_col = '';
 	my $user_analysis_where = '';
-	my $no_meso = '';
-	my $supertag = $etyma_for_tag->[0][0];
-	my $supertag_done = 0;
 	my $breadcrumbs;
 	{
 		my ($v, $f, $c, $s1, $s2) = split /\./, $etyma_for_tag->[0][1];
@@ -250,22 +241,14 @@ ORDER BY is_main DESC#;
 		$user_analysis_col = "(SELECT GROUP_CONCAT(tag_str ORDER BY ind) FROM lx_et_hash WHERE rn=lexicon.rn AND uid=$selected_uid) AS user_an,
 			(SELECT GROUP_CONCAT(CONCAT(uid, ':', tag_str) ORDER BY uid,ind) FROM lx_et_hash WHERE rn=lexicon.rn AND uid!=8 AND uid!=$selected_uid) AS other_an,";
 		$user_analysis_where = "OR lx_et_hash.uid=$selected_uid";
-
-		# if there's two columns, we need to make sure the first column
-		# in the superroot section does not contain records tagged with mesoroots,
-		# since those will show up later on and we don't want them to appear twice.
-		$no_meso = "AND lexicon.rn NOT IN (SELECT lexicon.rn FROM lexicon
-			JOIN lx_et_hash AS leh1 ON (lexicon.rn=leh1.rn AND leh1.uid=8)
-			JOIN lx_et_hash AS leh2 ON (lexicon.rn=leh2.rn AND leh2.uid=$selected_uid)
-			JOIN etyma AS e2 ON (leh2.tag=e2.tag)
-		WHERE (leh1.tag=$supertag AND e2.supertag=$supertag AND e2.tag != e2.supertag))";
 	}
+	require JSON;
 	foreach (@$etyma_for_tag) {
 		my %e; # hash of infos to be added to @etyma
 		push @etyma, \%e;
 	
 		# heading stuff
-		@e{qw/tag chap sequence protoform protogloss plg is_main uid username/} = @$_;
+		@e{qw/tag chap sequence protoform protogloss plg uid username/} = @$_;
 		$e{plg} = $e{plg} eq 'PTB' ? '' : "$e{plg}";
 	
 		$e{protoform} =~ s/⪤ +/⪤ */g;
@@ -276,39 +259,54 @@ ORDER BY is_main DESC#;
 		
 		# etymon notes
 		$e{notes} = [];
-		foreach (@{$self->dbh->selectall_arrayref("SELECT noteid, notetype, datetime, xmlnote, ord, uid, username, id FROM notes LEFT JOIN users USING (uid) "
-				. "WHERE tag=$e{tag} AND notetype != 'F' ORDER BY ord")}) {
+		$e{notes_subgroup} = [];
+		foreach (@{$self->dbh->selectall_arrayref("SELECT noteid, notetype, datetime, xmlnote, ord, uid, username, id, grpno FROM notes "
+				. "LEFT JOIN users USING (uid) "
+				. "LEFT JOIN languagegroups ON (notes.id = languagegroups.grpid) "
+				. "WHERE tag=$e{tag} AND notetype != 'F' ORDER BY grpno,ord")}) {
 			my $notetype = $_->[1];
 			my $xml = $_->[3];
+			my $grpid = $_->[7]; # id is grpid in spec=E context
+			my $grpno = $_->[8];
 			next if $notetype eq 'I' && !$INTERNAL_NOTES;
-			push @{$e{notes}}, { noteid=>$_->[0], type=>$notetype, lastmod=>$_->[2], 'ord'=>$_->[4],
-				text=>xml2html($xml, $self, \@footnotes, \$footnote_index, $_->[0]),
-				markup=>xml2markup($xml), num_lines=>guess_num_lines($xml),
-				uid=>$_->[5], username=>$_->[6], id=>$_->[7] # id is grpid in spec=E context
-			};
+			if ($grpid) {
+				# add to the footnotes if this is a subgroup note
+				my @discard; # subgroup notes should have no footnotes in them
+				my $x = 10000;
+				my $note = xml2html($xml, $self, \@discard, \$x);
+				if ($notetype eq 'I') {
+					$note =~ s/^/[Internal] <i>/;
+					$note =~ s|$|</i>|;
+				}
+				push @footnotes, { noteid=>$_->[0], type=>$notetype, lastmod=>$_->[2], 'ord'=>$_->[4],
+					text=>$note,
+					markup=>xml2markup($xml), num_lines=>guess_num_lines($xml),
+					uid=>$_->[5], username=>$_->[6], spec=>'E'
+				};
+				push @{$e{notes_subgroup}}, {grpno=>$grpno, ind=>$footnote_index++};
+			} else {
+				push @{$e{notes}}, { noteid=>$_->[0], type=>$notetype, lastmod=>$_->[2], 'ord'=>$_->[4],
+					text=>xml2html($xml, $self, \@footnotes, \$footnote_index, $_->[0]),
+					markup=>xml2markup($xml), num_lines=>guess_num_lines($xml),
+					uid=>$_->[5], username=>$_->[6], id=>$grpid
+				};
+			}
 		}
-# 		
-# 		# mesoroots
-# 		foreach (@{$self->dbh->selectall_arrayref("SELECT mesoroots.tag,grpid,grpno,form,gloss,noteid FROM mesoroots LEFT JOIN notes ON (mesoroots.tag=notes.tag AND mesoroots.grpid=notes.id) LEFT JOIN languagegroups USING (grpid) WHERE mesoroots.tag=$e{tag}",
-# 			, {Slice=>{}})}) {
-# 			push @{$e{mesoroots}}, $_;
-# 		}
+		$e{subgroupnotesjson} = JSON::to_json($e{notes_subgroup});
+		
+		# mesoroots
+		$e{mesoroots} = $self->dbh->selectall_arrayref("SELECT grpid,grpno,grp,plg,form,gloss,genetic FROM mesoroots
+			LEFT JOIN languagegroups USING (grpid)
+			WHERE mesoroots.tag=$e{tag} ORDER BY grpno", {Slice=>{}});
+		$e{mesorootsjson} = JSON::to_json($e{mesoroots});
 
 		# do entries
-		if ($supertag_done && $no_meso) {
-			# for mesoroots, make sure we don't list items that were in the superroot section
-			$no_meso = "AND lexicon.rn NOT IN (SELECT lexicon.rn FROM lexicon
-				JOIN lx_et_hash AS leh1 ON (lexicon.rn=leh1.rn AND leh1.uid=8)
-				JOIN lx_et_hash AS leh2 ON (lexicon.rn=leh2.rn AND leh2.uid=$selected_uid)
-			WHERE (leh1.tag=$e{tag} AND leh2.tag=$supertag))";
-		}
-		$supertag_done = 1;
 		my $recs = $self->dbh->selectall_arrayref(<<EndOfSQL);
 SELECT lexicon.rn,
 	(SELECT GROUP_CONCAT(tag_str ORDER BY ind) FROM lx_et_hash WHERE rn=lexicon.rn AND uid=8) AS analysis,
 	$user_analysis_col
 	languagenames.lgid, lexicon.reflex, lexicon.gloss, lexicon.gfn,
-	languagenames.language, languagegroups.grpid, languagegroups.grpno, languagegroups.grp,
+	languagenames.language, languagegroups.grpid, languagegroups.grpno, languagegroups.grp, languagegroups.genetic,
 	(SELECT citation from srcbib WHERE srcabbr=languagenames.srcabbr) AS citation,
 	languagenames.srcabbr, lexicon.srcid,
 	(SELECT COUNT(*) FROM notes WHERE notes.rn = lexicon.rn) AS num_notes
@@ -317,7 +315,6 @@ FROM lexicon
 	LEFT JOIN languagenames USING (lgid)
 	LEFT JOIN languagegroups ON (languagenames.grpid=languagegroups.grpid)
 WHERE (lx_et_hash.tag = $e{tag}
-	$no_meso
 )
 GROUP BY lexicon.rn
 ORDER BY languagegroups.grpno, languagenames.lgsort, reflex, languagenames.srcabbr, lexicon.srcid
@@ -353,22 +350,64 @@ EndOfSQL
 		fields => ['lexicon.rn', 'analysis',
 			($selected_uid ? ('user_an', 'other_an') : ()),
 			'languagenames.lgid', 'lexicon.reflex', 'lexicon.gloss', 'lexicon.gfn',
-			'languagenames.language', 'languagegroups.grpid', 'languagegroups.grpno', 'languagegroups.grp',
+			'languagenames.language', 'languagegroups.grpid', 'languagegroups.grpno', 'languagegroups.grp', 'languagegroups.genetic',
 			'citation','languagenames.srcabbr', 'lexicon.srcid', 'notes.rn'],
 		footnotes => \@footnotes,
 		breadcrumbs=>$breadcrumbs
 	});
-	# @etyma : [
-	# 	{
-	# 		tag,
-	# 		sequence,
-	# 		...
-	# 		notes : [],
-	# 		fields: [],
-	# 		records: [],
-	# 		comparanda: [],
-	# 	}
-	# ]
+	# e : {
+	# 	tag,
+	# 	sequence,
+	# 	...
+	# 	notes : [],
+	# 	fields: [],
+	# 	records: [],
+	# 	comparanda: [],
+	# }
+}
+
+sub mesoforms : Runmode {
+	my $self = shift;
+	my $q = $self->query;
+	my $tag = $q->param('tag');
+	my $grpid = $q->param('grp');
+	die "bad tag!\n" unless $tag =~ /^\d+$/;
+	die "bad grpid!\n" unless $grpid =~ /^\d+$/;
+	my $a = $self->dbh->selectall_arrayref("SELECT id,form,gloss,plg FROM mesoroots LEFT JOIN languagegroups USING (grpid)
+			WHERE tag=$tag AND grpid=$grpid", {Slice=>{}});
+	return $self->tt_process('tt/edit_mesoreconstructions.tt', {
+		forms=>$a,
+		tag=>$tag, grpid=>$grpid,
+		plg => $a->[0] ? $a->[0]{plg} : $self->dbh->selectrow_array("SELECT plg FROM languagegroups WHERE grpid=$grpid"),
+		all_ids => join ',', map {$_->{id}} @$a
+	});
+}
+
+sub meso_edit : Runmode {
+	my $self = shift;
+	$self->require_privs(1);
+	my $q = $self->query;
+	my $tag = $q->param('tag');
+	my $grpid = $q->param('grp');
+	my $plg = decode_utf8($q->param('plg'));
+	my $all_ids = $q->param('all_ids');
+	my @result;
+	for my $id (split /,/, $all_ids) {
+		if ($q->param('delete_' . $id)) {
+			$self->dbh->do("DELETE FROM mesoroots WHERE id=?", undef, $id);
+			next;
+		}
+		my $form = decode_utf8($q->param('form_' . $id));
+		my $gloss = decode_utf8($q->param('gloss_' . $id));
+		$self->dbh->do("UPDATE mesoroots SET form=?, gloss=? WHERE id=?", undef, $form, $gloss, $id);
+		push @result, "$plg *$form $gloss";
+	}
+	if ((my $form = decode_utf8($q->param("form_00"))) && (my $gloss = decode_utf8($q->param("gloss_00")))) {
+		$self->dbh->do("INSERT mesoroots (form,gloss,tag,grpid) VALUES (?,?,?,?)", undef,
+			$form, $gloss, $tag, $grpid);
+		push @result, "$plg *$form $gloss";
+	}
+	return join ",<br>", @result;
 }
 
 # for a given tag, return a list of errors that would prevent its deletion.
