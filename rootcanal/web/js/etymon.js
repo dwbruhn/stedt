@@ -136,15 +136,32 @@ for (var i = 1; i < num_tables; i++) {
 		if (lastgrpno !== grpno) {
 			// put in any mesoroots with no (immediate daughter) supporting forms
 			// and same with the subgroup notes
-			while ((mesoroots.length && mesoroots[0].grpno.localeCompare(lastgrpno) < 0)
-				|| (subgroupnotes.length && subgroupnotes[0].grpno.localeCompare(lastgrpno) < 0)) {
+			while ((mesoroots.length && mesoroots[0].grpno.localeCompare(grpno) < 0)
+				|| (subgroupnotes.length && subgroupnotes[0].grpno.localeCompare(grpno) < 0)) {
 				// yes we're working through two arrays and we have to interleave the values
-				if ((mesoroots.length && mesoroots[0].grpno.localeCompare(lastgrpno) < 0))
+				// if both arrays have something in them, we need to find which one comes first:
+				if (mesoroots.length && subgroupnotes.length) {
+					var cmp = mesoroots[0].grpno.localeCompare(subgroupnotes[0].grpno);
+					if (cmp === 0) {
+						meso = mesoroots.shift();
+						footnote = subgroupnotes.shift();
+					} else if (cmp < 0) {
+						meso = mesoroots.shift();
+						footnote = null;
+					} else {
+						footnote = subgroupnotes.shift();
+						meso = null;
+					}
+				}
+				// otherwise we only need to worry about one of the two arrays
+				else if (mesoroots.length) {
 					meso = mesoroots.shift();
-				else meso = null;
-				if ((subgroupnotes.length && subgroupnotes[0].grpno.localeCompare(lastgrpno) < 0))
+					footnote = null;
+				} else {
 					footnote = subgroupnotes.shift();
-				else footnote = null;
+					meso = null;
+				}
+
 				newrow = new Element('tr', {'class':'lggroup'});
 				row.insert({before:newrow});
 				cell1 = newrow.insertCell(-1);
@@ -157,11 +174,11 @@ for (var i = 1; i < num_tables; i++) {
 				cell5.className = "noedit";
 				if (meso) {
 					cell1.innerHTML = '<a name="' + meso.grpno + '">' + meso.grpno + ' ' + meso.grp + '</a>';
-					tmp_string = '<span class="pform">' + meso.plg + ' *' + meso.form + ' ' + meso.gloss;
+					tmp_string = '<span class="pform">' + (meso.variant?'('+meso.variant+') ':'') + meso.plg + ' *' + meso.form + ' ' + meso.gloss;
 					// there may be multiple mesoroots for this node, so check for those too
 					while (mesoroots.length && mesoroots[0].grpno === meso.grpno) {
 						meso = mesoroots.shift();
-						tmp_string += ',<br>' + meso.plg + ' *' + meso.form + ' ' + meso.gloss;
+						tmp_string += ',<br>' + (meso.variant?'('+meso.variant+') ':'') + meso.plg + ' *' + meso.form + ' ' + meso.gloss;
 					}
 					tmp_string += '</span>';
 					newrow.id = 'grprow_' + meso.grpid;
@@ -208,11 +225,11 @@ for (var i = 1; i < num_tables; i++) {
 			cell5.className = "noedit";
 			cell1.innerHTML = '<a name="' + grpno + '">' + grpno + ' ' + grp + '</a>';
 			if (meso) {
-				tmp_string = '<span class="pform">' + meso.plg + ' *' + meso.form + ' ' + meso.gloss;
+				tmp_string = '<span class="pform">' + (meso.variant?'('+meso.variant+') ':'') + meso.plg + ' *' + meso.form + ' ' + meso.gloss;
 				// there may be multiple mesoroots for this node, so check for those too
 				while (mesoroots.length && mesoroots[0].grpno === meso.grpno) {
 					meso = mesoroots.shift();
-					tmp_string += ',<br>' + meso.plg + ' *' + meso.form + ' ' + meso.gloss;
+					tmp_string += ',<br>' + (meso.variant?'('+meso.variant+') ':'') + meso.plg + ' *' + meso.form + ' ' + meso.gloss;
 				}
 				tmp_string += '</span>';
 				cell2.innerHTML = tmp_string;

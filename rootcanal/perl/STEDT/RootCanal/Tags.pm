@@ -295,9 +295,9 @@ WHERE e.tag=? AND e.status != 'DELETE'#;
 		$e{subgroupnotesjson} = JSON::to_json($e{notes_subgroup});
 		
 		# mesoroots
-		$e{mesoroots} = $self->dbh->selectall_arrayref("SELECT grpid,grpno,grp,plg,form,gloss,genetic FROM mesoroots
+		$e{mesoroots} = $self->dbh->selectall_arrayref("SELECT grpid,grpno,grp,plg,form,gloss,variant,genetic FROM mesoroots
 			LEFT JOIN languagegroups USING (grpid)
-			WHERE mesoroots.tag=$e{tag} ORDER BY grpno", {Slice=>{}});
+			WHERE mesoroots.tag=$e{tag} ORDER BY grpno,variant", {Slice=>{}});
 		$e{mesorootsjson} = JSON::to_json($e{mesoroots});
 
 		# do entries
