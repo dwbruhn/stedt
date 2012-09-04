@@ -51,7 +51,7 @@
 [% END -%]
 </select>
 </td>
-<td><input name="btn" type="submit" value="Search"><input type="reset" name="clear" value="Clear"></td></tr></table>
+<td><input name="btn" type="submit" value="Search"><input type="button" name="clear" value="Clear" onclick="this.form.reset(); $('as-values-lg-auto').value=''; $$('.as-selection-item').invoke('remove');"></td></tr></table>
 </form>
 </div>
 <div id="lexicon_status">[% lexicon.data.size ? (lexicon.data.size > 4 ? (lexicon.data.size _ ' records found.') : '') : 'No records found.' %]</div>

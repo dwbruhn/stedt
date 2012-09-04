@@ -18,7 +18,7 @@
 [% END -%]
 </select>
 </td>
-<td><input type="submit" title="Click to search!" name="search" value="Search" ><input type="reset" title="Click to clear the search form" name="clear" value="Clear">
+<td><input type="submit" title="Click to search!" name="search" value="Search" ><input type="button" title="Click to clear the search form" name="clear" value="Clear" onclick="this.form.reset(); $('as-values-lg-auto').value=''; $$('.as-selection-item').invoke('remove');">
 <a href="[% self_base %]help.html" target="_blank">Help</a></td></tr>
 <tr>
 	<td><a href="#" onclick="Effect.toggle('example_queries', 'blind', { duration: 0.5 }); return false;">Show/hide examples</a>&nbsp;</td>
