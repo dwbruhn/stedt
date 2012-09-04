@@ -234,7 +234,10 @@ for (var i = 1; i < num_tables; i++) {
 				tmp_string += '</span>';
 				cell2.innerHTML = tmp_string;
 			}
-			if (grp_isgenetic && (stedtuserprivs & 1)) cell2.innerHTML += ' <small><a href="#" class="meso_editlink">add/edit reconstruction</a></small>';
+			if (grp_isgenetic && (stedtuserprivs & 1)) {
+				if (!meso) cell2.innerHTML = '<span class="pform"></span>';
+				cell2.innerHTML += ' <small><a href="#" class="meso_editlink">add/edit reconstruction</a></small>';
+			}
 			if (footnote) {
 				cell5.innerHTML = '<a href="#foot' + footnote.ind + '" id="toof' + footnote.ind + '">' + footnote.ind + '</a>';
 				while (subgroupnotes.length && subgroupnotes[0].grpno === footnote.grpno) {
