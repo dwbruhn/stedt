@@ -54,7 +54,7 @@ sub migrate_tag : Runmode {
 		$self->param('uid'), 'migration', 'lexicon', $row->[0], ($row->[1] == 8) ? 'analysis' : 'user_an', $tag, $new_tag, $row->[1]);
 	}
 
-	return $self->redirect($q->url(-absolute=>1) . "/etymon/$new_tag#$new_tag");
+	return $self->redirect($q->url(-absolute=>1) . "/etymon/$new_tag#$grpno");
 }
 
 sub accept : Runmode {
