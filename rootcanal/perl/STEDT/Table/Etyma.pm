@@ -8,7 +8,7 @@ my $t = $self->SUPER::new($dbh, 'etyma', 'etyma.tag', $privs); # dbh, table, key
 
 $t->query_from(q|etyma LEFT JOIN `users` ON etyma.uid = users.uid LEFT JOIN languagegroups ON etyma.grpid=languagegroups.grpid|);
 $t->default_where('etyma.status != "DELETE"');
-$t->order_by('etyma.chapter, etyma.sequence, languagegroups.grpno');
+$t->order_by('etyma.chapter, etyma.sequence');
 $t->fields('etyma.tag',
 #	'etyma.exemplary',
 	'(SELECT COUNT(DISTINCT rn) FROM lx_et_hash WHERE tag=etyma.tag AND uid=8) AS num_recs',

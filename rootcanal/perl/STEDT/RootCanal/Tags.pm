@@ -395,16 +395,30 @@ sub meso_edit : Runmode {
 	for my $id (split /,/, $all_ids) {
 		if ($q->param('delete_' . $id)) {
 			$self->dbh->do("DELETE FROM mesoroots WHERE id=?", undef, $id);
+			$self->dbh->do("INSERT changelog (uid, change_type, `table`, id, time)
+							VALUES (?,?,?,?,NOW())", undef,
+					   $self->param('uid'), 'delete', 'mesoroots', $id);
 			next;
 		}
-		my $form = decode_utf8($q->param('form_' . $id));
-		my $gloss = decode_utf8($q->param('gloss_' . $id));
-		$self->dbh->do("UPDATE mesoroots SET form=?, gloss=? WHERE id=?", undef, $form, $gloss, $id);
-		push @result, "$plg *$form $gloss";
+		my $new = {};
+		$new->{form} = decode_utf8($q->param('form_' . $id));
+		$new->{gloss} = decode_utf8($q->param('gloss_' . $id));
+		my $old = @{$self->dbh->selectall_arrayref("SELECT form,gloss FROM mesoroots WHERE id=?", {Slice=>{}}, $id)}[0];
+		$self->dbh->do("UPDATE mesoroots SET form=?, gloss=? WHERE id=?", undef, $new->{form}, $new->{gloss}, $id);
+		for my $fld (qw|form gloss|) {
+			next if $new->{$fld} eq $old->{$fld};
+			$self->dbh->do("INSERT changelog (uid, `table`, id, col, oldval, newval, time)
+							VALUES (?,?,?,?,?,?,NOW())", undef,
+				$self->param('uid'), 'mesoroots', $id, $fld, $old->{$fld}, $new->{$fld});
+		}
+		push @result, "$plg *$new->{form} $new->{gloss}";
 	}
 	if ((my $form = decode_utf8($q->param("form_00"))) && (my $gloss = decode_utf8($q->param("gloss_00")))) {
 		$self->dbh->do("INSERT mesoroots (form,gloss,tag,grpid) VALUES (?,?,?,?)", undef,
 			$form, $gloss, $tag, $grpid);
+		$self->dbh->do("INSERT changelog (uid, change_type, `table`, id, time)
+						VALUES (?,?,?,LAST_INSERT_ID(),NOW())", undef,
+				   $self->param('uid'), 'new_rec', 'mesoroots');
 		push @result, "$plg *$form $gloss";
 	}
 	return join ",<br>", @result;
@@ -417,7 +431,7 @@ sub delete_check0 : Runmode {
 	my $tag = $self->query->param('tag');
 	die "invalid tag '$tag'!\n" unless $tag =~ s/^(\d+)$/$1/;
 	my $sql = qq#SELECT
-			(SELECT COUNT(DISTINCT id) FROM mesoroots WHERE tag != e.tag) AS num_mesoroots,
+			(SELECT COUNT(DISTINCT id) FROM mesoroots WHERE tag = e.tag) AS num_mesoroots,
 			(SELECT COUNT(DISTINCT rn) FROM lx_et_hash WHERE tag=e.tag) AS num_recs,
 			(SELECT COUNT(DISTINCT notes.noteid) FROM notes WHERE tag=e.tag) AS num_notes
 		FROM `etyma` AS `e`
@@ -450,7 +464,7 @@ sub delete_check : Runmode {
 	my $tag = $self->query->param('tag');
 	die "invalid tag '$tag'!\n" unless $tag =~ s/^(\d+)$/$1/;
 	my $sql = qq#SELECT tag, 
-			(SELECT COUNT(DISTINCT id) FROM mesoroots WHERE tag != e.tag) AS num_mesoroots,
+			(SELECT COUNT(DISTINCT id) FROM mesoroots WHERE tag = e.tag) AS num_mesoroots,
 			(SELECT COUNT(DISTINCT rn) FROM lx_et_hash WHERE tag=e.tag AND uid=8) AS num_recs,
 			protoform, protogloss, plg,
 			(SELECT COUNT(DISTINCT notes.noteid) FROM notes WHERE tag=e.tag) AS num_notes,
@@ -508,7 +522,7 @@ sub soft_delete : Runmode {
 	my $tag = $self->query->param('tag');
 	die "invalid tag '$tag'!\n" unless $tag =~ s/^(\d+)$/$1/;
 	my $sql = qq#SELECT
-			(SELECT COUNT(DISTINCT id) FROM mesoroots WHERE tag != e.tag) AS num_mesoroots,
+			(SELECT COUNT(DISTINCT id) FROM mesoroots WHERE tag = e.tag) AS num_mesoroots,
 			(SELECT COUNT(DISTINCT rn) FROM lx_et_hash WHERE tag=e.tag AND uid=8) AS num_recs,
 			(SELECT COUNT(DISTINCT notes.noteid) FROM notes WHERE tag=e.tag) AS num_notes,
 			(SELECT COUNT(DISTINCT notes.noteid) FROM notes WHERE tag != e.tag AND xmlnote RLIKE CONCAT('<xref ref="',e.tag,'">')) AS num_xrefs
@@ -541,7 +555,7 @@ sub soft_delete : Runmode {
 sub delete_check_all : Runmode {
 	my $self = shift;
 	my $sql = qq#SELECT tag, 
-			(SELECT COUNT(DISTINCT id) FROM mesoroots WHERE tag != e.tag) AS num_mesoroots,
+			(SELECT COUNT(DISTINCT id) FROM mesoroots WHERE tag = e.tag) AS num_mesoroots,
 			(SELECT COUNT(DISTINCT rn) FROM lx_et_hash WHERE tag=e.tag AND uid=8) AS num_recs,
 			protoform, protogloss, plg,
 			(SELECT COUNT(DISTINCT notes.noteid) FROM notes WHERE tag=e.tag) AS num_notes,
