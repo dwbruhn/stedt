@@ -122,6 +122,7 @@ $t->addable(
 	'languagenames.notes',
 	'languagenames.srcofdata',
 	'languagenames.lgcode',
+	'languagenames.silcode',
 	'languagenames.grpid',
 );
 $t->add_form_items(

@@ -128,9 +128,11 @@ sub add : Runmode {
 		$self->header_add(-status => 400);
 		return $err;
 	}
-	$self->dbh->do("INSERT changelog (uid, change_type, `table`, id, time)
-					VALUES (?,?,?,?,NOW())", undef,
-		       $self->param('uid'), 'new_rec', $tblname, $id);
+	# update changelog (note that oldval and newval are TEXT type fields, which cannot have default values
+	# so we have to explcitly set them to the empty string)
+	$self->dbh->do("INSERT changelog (uid, change_type, `table`, id, oldval, newval, time)
+					VALUES (?,?,?,?,?,?,NOW())", undef,
+		       $self->param('uid'), 'new_rec', $tblname, $id, '', '');
 	
 	# now retrieve it and send back some html
 	$id =~ s/"/\\"/g;
