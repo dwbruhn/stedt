@@ -6,11 +6,10 @@ sub new {
 my ($self, $dbh, $privs, $uid) = @_;
 my $t = $self->SUPER::new($dbh, 'etyma', 'etyma.tag', $privs); # dbh, table, key, privs
 
-$t->query_from(q|etyma JOIN `etyma` AS `super` ON etyma.supertag = super.tag LEFT JOIN `users` ON etyma.uid = users.uid LEFT JOIN languagegroups ON etyma.grpid=languagegroups.grpid|);
+$t->query_from(q|etyma LEFT JOIN `users` ON etyma.uid = users.uid LEFT JOIN languagegroups ON etyma.grpid=languagegroups.grpid|);
 $t->default_where('etyma.status != "DELETE"');
-$t->order_by('super.chapter, super.sequence, IF(super.sequence,0,super.tag), is_mesoroot, languagegroups.grpno');
+$t->order_by('etyma.chapter, etyma.sequence, languagegroups.grpno');
 $t->fields('etyma.tag',
-	'etyma.supertag',
 #	'etyma.exemplary',
 	'(SELECT COUNT(DISTINCT rn) FROM lx_et_hash WHERE tag=etyma.tag AND uid=8) AS num_recs',
 	($uid ? "(SELECT COUNT(DISTINCT rn) FROM lx_et_hash WHERE tag=etyma.tag AND uid=$uid) AS u_recs" : ()),
@@ -18,7 +17,6 @@ $t->fields('etyma.tag',
 	'etyma.chapter',
 	'etyma.sequence',
 	'etyma.protoform', 'etyma.protogloss',
-	'etyma.tag!=etyma.supertag AS is_mesoroot',
 	'etyma.grpid',
 	'languagegroups.plg',
 	'languagegroups.grpno',
@@ -38,17 +36,16 @@ $t->fields('etyma.tag',
 	'users.username',
 );
 $t->field_visible_privs(
-	# 'etyma.supertag' => 1,
 	'etyma.chapter' => 3,
 	'etyma.notes' => 1,
-	'etyma.semkey'  => 1,
+	'etyma.semkey'  => 8,
 	#'etyma.xrefs' => 1,
 	'etyma.status' => 1,
-	'etyma.prefix' => 1,
-	'etyma.initial' => 1,
-	'etyma.rhyme' => 1,
-	'etyma.tone' => 1,
-	'etyma.exemplary' => 1,
+	'etyma.prefix' => 8,
+	'etyma.initial' => 8,
+	'etyma.rhyme' => 8,
+	'etyma.tone' => 8,
+	'etyma.exemplary' => 8,
 	'etyma.sequence'  => 3,
 	'etyma.possallo'  => 1,
 	'etyma.allofams'  => 1,
@@ -75,7 +72,6 @@ $t->searchable('etyma.tag',
 	'etyma.public',
 );
 $t->field_editable_privs(
-	'etyma.supertag' => 1,
 	'etyma.sequence' => 8,
 	'etyma.chapter' => 1,
 	'etyma.protoform' => 1,
@@ -137,10 +133,9 @@ $t->search_form_items(
 
 $t->wheres(
 	'etyma.tag' => sub {my ($k,$v) = @_;
-		if ($v eq 'm') {return 'etyma.tag!=etyma.supertag'}
-		if ($v eq '!m') {return 'etyma.tag=etyma.supertag'}
 		if ($v eq 'd') {$t->default_where(''); return "etyma.status='DELETE'"}
-		'(' . STEDT::Table::where_int($k,$v) . ' OR ' . STEDT::Table::where_int('etyma.supertag',$v) . ')'},
+		return STEDT::Table::where_int($k,$v);
+	},
 	'etyma.grpid'	=> 'int',
 	'etyma.chapter' => sub { my ($k,$v) = @_; $v eq '0' ? "$k=''" : "$k LIKE '$v'" },
 	'etyma.protogloss' => 'word',
@@ -153,11 +148,11 @@ $t->wheres(
 		if ($v =~ /^(\d+)([a-i])?$/) {
 			my ($num, $letter) = ($1, $2);
 			if ($letter) {
-				return "super.sequence = $num." . (ord($letter) - ord('a') + 1);
+				return "etyma.sequence = $num." . (ord($letter) - ord('a') + 1);
 			}
-			return "FLOOR(super.sequence) = $num";
+			return "FLOOR(etyma.sequence) = $num";
 		}
-		return "super.sequence > 0";
+		return "etyma.sequence > 0";
 	},
 	'etyma.semkey' => 'value',
 );
@@ -165,39 +160,12 @@ $t->wheres(
 $t->save_hooks(
 	# this is really more of an "add" hook, not a save hook,
 	# but the tag will presumably only ever be set when adding a new record
-	# SO, we take this opportunity to set the supertag and the uid
+	# SO, we take this opportunity to set the uid
 	'etyma.tag' => sub {
 		my ($id, $value) = @_;
-		# simultaneously set the supertag field
-		my $sth = $dbh->prepare(qq{UPDATE etyma SET supertag=tag,uid=? WHERE tag=?});
+		# simultaneously set the uid field
+		my $sth = $dbh->prepare(qq{UPDATE etyma SET uid=? WHERE tag=?});
 		$sth->execute($uid, $id);
-	},
-	'etyma.supertag' => sub {
-		my ($id, $value) = @_;
-		$value ||= $id; # default to undoing mesoroot if value not specified
-		# make sure supertag is a valid value
-		# and while we're at it, retrieve the supertag's chapter.
-		my $chapter;
-		unless (defined($chapter = $dbh->selectrow_array("SELECT chapter FROM etyma WHERE tag=?", undef, $value))) {
-			die "Invalid supertag number.\n";
-		}
-		# move to end if un-mesoing.
-		my $seq = 0;
-		if ($value == $id && $chapter) {
-			$seq = 1 + $dbh->selectrow_array('SELECT FLOOR(MAX(sequence)) FROM etyma WHERE chapter=?', undef, $chapter);
-		} else {
-			my $super_is_main = $dbh->selectrow_array("SELECT tag=supertag FROM etyma WHERE tag=?", undef, $value);
-			unless ($super_is_main) {
-				die "The super-root cannot be a mesoroot!\n";
-			}
-			my $has_subroots = 1 < $dbh->selectrow_array("SELECT COUNT(*) FROM etyma WHERE supertag=?", undef, $id);
-			if ($has_subroots) {
-				die "Can't make into a mesoroot because it has mesoroots under itself!\n";
-			}
-		}
-		my $sth = $dbh->prepare(qq{UPDATE etyma SET supertag=?, chapter=?, sequence=? WHERE tag=?});
-		$sth->execute($value, $chapter, $seq, $id);
-		return 0;
 	},
 );
 

@@ -8,33 +8,33 @@
 	<th id="chapters.chaptertitle">Title</th>
 	<th>[% IF c.has_privs(1) %]public[% ELSE %]num. etyma[% END %]</th>
 	[%- IF c.has_privs(1) %]<th>etyma</th>[% END %]<th>notes</th><th>flowchart?</th>
-	<th>SemCat</th><th>Old Chapter</th><th>Old Subchapter</th>
 	<th id="chapters.id">id</th>
 </tr></thead>
 <tbody>
 [% FOREACH r IN ch -%]
-<tr><td>[% r.0 %]</td><td>[% r.1 | html %]</td><td>[% r.2 || '' %]</td>
+<tr>
+<td><a target="notes" href="[% self_url %]/chap/[% r.0 | uri %]">[% r.0 %]</a></td>
+<td>[% r.1 | html %]</td><td>[% r.2 || '' %]</td>
 [%- IF c.has_privs(1) %]<td>[% IF r.3 %]<a target="edit_etyma" href="[% self_url %]/edit/etyma?etyma.chapter=[% r.0 | uri %]">[% r.3 %][% END %]</td>[% END -%]
-<td><a target="notes" href="[% self_url %]/chap/[% r.0 | uri %]">[% IF r.4 %][% r.4 %] note[% r.4 == 1 ? '' : 's' %][% ELSE %]-[% END %]</a></td><td>[% IF r.5 %]✓[% END %]</td>
-<td>[% r.7 %]</td><td>[% r.8 %]</td><td>[% r.9 %]</td><td>[% r.10 %]</td>
+<td>[% r.4 || '' %]</td><td>[% IF r.5 %]✓[% END %]</td>
+<td>[% r.7 %]</td>
 </tr>
 [% END -%]
 </tbody>
 </table>
 
+[% IF c.has_privs(8) -%]
 <h2>Undefined chapters:</h2>
 <p>[% e.size %] nodes</p>
 
 <table id="e">
-<tr><th>Ch.</th><th>[% IF c.has_privs(1) %]public[% ELSE %]num. etyma[% END %]</th>
-[%- IF c.has_privs(1) %]<th>etyma</th>[% END %]<td width="80%"></td></tr>
+<tr><th>Ch.</th><th>public</th><th>etyma</th><td width="80%"></td></tr>
 [% FOREACH r IN e -%]
 <tr><td>[% r.0 %]</td><td>[% r.1 %]</td>
-[%- IF c.has_privs(1) %]<td><a target="edit_etyma" href="[% self_url %]/edit/etyma?etyma.chapter=[% r.0 | uri %]">[% r.2 %] etym[% r.2 == 1 ? 'on' : 'a' %]</a></td>[% END %]</tr>
+<td><a target="edit_etyma" href="[% self_url %]/edit/etyma?etyma.chapter=[% r.0 | uri %]">[% r.2 %] etym[% r.2 == 1 ? 'on' : 'a' %]</a></td></tr>
 [% END -%]
 </table>
 
-[% IF c.has_privs(1) -%]
 <h2>Orphaned notes:</h2>
 <p>[% n.size %] orphans</p>
 [% FOREACH r IN n -%]

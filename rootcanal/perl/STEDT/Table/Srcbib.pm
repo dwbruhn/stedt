@@ -43,21 +43,17 @@ $t->searchable(	'srcbib.srcabbr',
 	'srcbib.author',
 	'srcbib.title',
 );
-$t->editable(
-	     'srcbib.citation',
-	     'srcbib.author',
-	     'srcbib.year',
-	     'srcbib.title',
-	     'srcbib.imprint',
-	     'srcbib.status',
-#	     'srcbib.location',
-	     'srcbib.notes',
-	     'srcbib.todo',
-#	     'srcbib.dataformat',
-	     'srcbib.format',
-#	     'srcbib.haveit',
-#	     'srcbib.proofer',
-#	     'srcbib.inputter',
+
+$t->field_editable_privs(
+	     'srcbib.citation' => 8,
+	     'srcbib.author' => 8,
+	     'srcbib.year' => 8,
+	     'srcbib.title' => 8,
+	     'srcbib.imprint' => 8,
+	     'srcbib.status' => 8,
+	     'srcbib.notes' => 8,
+	     'srcbib.todo' => 8,
+	     'srcbib.format' => 8,
 );
 
 $t->wheres(
@@ -70,26 +66,22 @@ $t->wheres(
 
 $t->addable(
 		'srcbib.srcabbr',
-#	    'srcbib.citation',
+	    'srcbib.citation',
 	    'srcbib.author',
 	    'srcbib.year',
 	    'srcbib.title',
 	    'srcbib.imprint',
 	    'srcbib.notes',
 	    'srcbib.status',
-#	    'srcbib.location',
 	    'srcbib.todo',
-#	    'srcbib.dataformat',
 	    'srcbib.format',
-#	    'srcbib.haveit',
-#	    'srcbib.proofer',
-#	    'srcbib.inputter',
 );
 
 $t->add_check(sub {
 	my $cgi = shift;
 	my $err = '';
 	$err .= "srcabbr not specified!\n" unless $cgi->param('srcbib.srcabbr');
+	$err .= "citation not specified!\n" unless $cgi->param('srcbib.citation');
 	$err .= "Author not specified!\n" unless $cgi->param('srcbib.author');
 	$err .= "Year name not specified!\n" unless $cgi->param('srcbib.year');
 	$err .= "Title not specified!\n" unless $cgi->param('srcbib.title');

@@ -246,7 +246,7 @@ for (var i = 1; i < num_tables; i++) {
 				}
 			}
 			if (stedtuserprivs & 1) cell5.innerHTML += addlink; // currently putting the addlink only for nodes with forms underneath them
-			if (stedtuserprivs & 1) {
+			if (stedtuserprivs & 8) {
 				// insert html form for approving this subgroup only
 				grp = grp.replace(/"/g,'&quot;'); // escape quotes for inclusion in the string below
 				cell3.innerHTML = '<form action="' + baseRef + 'tags/accept" method="post" '

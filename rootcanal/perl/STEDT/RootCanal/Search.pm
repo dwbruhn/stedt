@@ -136,7 +136,7 @@ sub searchresults_from_querystring {
 			}
 		}	
 		if (!$s && !$f) {
-			$query->param('etyma.chapter'=>('1.9.1', '1.9.2', '1.6.5', '1.9.3', '1.5.1' )[int(rand 5)]);
+			$query->param('etyma.tag' => (300,1606)[int(rand 2)]); # which came first, the chicken or the egg?
 		} elsif (!$query->param) {
 			$query->param('etyma.tag' => 2436);
 		}
@@ -167,7 +167,8 @@ sub searchresults_from_querystring {
 			}
 		}
 		if (!$s && !$lg && $lggrp eq '' && !$f) {
-			$query->param('analysis'=>1764);
+#			$query->param('analysis'=>1764);
+			$query->param('lexicon.rn'=>344986);
 		} elsif (!$query->param) {
 			$query->param('analysis'=>5035);
 		}

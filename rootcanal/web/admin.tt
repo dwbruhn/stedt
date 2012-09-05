@@ -1,25 +1,33 @@
 ﻿[% PROCESS header.tt title="STEDT Database: Admin Page" %]
 <!-- svnversion -->
-Edit tables:
+Edit/Browse tables:
 <table border="0">
 <tr>
-[% FOREACH list IN [['etyma', 'lexicon', 'languagenames', 'srcbib', 'chapters'], ['hptb', 'morphemes', 'soundlaws', 'projects', 'glosswords']] -%]
-<td style="text-indent:0em; padding-left:0em; padding-right:1em;"><ul>[%# override default <td> style %]
-[% FOREACH tbl IN list -%]
-	<li><a href="[% self_url %]/edit/[% tbl %]">[% tbl %]</a></li>
-[% END -%]
+<td style="padding-right:1em;"><ul>
+	<li><a href="[% self_url %]/edit/etyma">etyma</a></li>
+	<li><a href="[% self_url %]/edit/lexicon">lexicon</a></li>
+	<li><a href="[% self_url %]/edit/languagenames">languagenames</a></li>
+	<li><a href="[% self_url %]/edit/srcbib">srcbib</a></li>
+[% IF c.has_privs(8) %]	<li><a href="[% self_url %]/edit/chapters">chapters</a></li>[% END %]
+</ul></td>
+[% IF c.has_privs(8) -%]
+<td style="padding-right:1em;"><ul>
+	<li><a href="[% self_url %]/edit/hptb">hptb</a></li>
+	<li><a href="[% self_url %]/edit/morphemes">morphemes</a></li>
+	<li><a href="[% self_url %]/edit/soundlaws">soundlaws</a></li>
+	<li><a href="[% self_url %]/edit/projects">projects</a></li>
+	<li><a href="[% self_url %]/edit/glosswords">glosswords</a></li>
+</ul></td>
+<td><ul>
+	<li><a href="[% self_url %]/subgroups/view">language groups</a></li>
+	<li></li>
+	<li></li>
+	<li><a href="[% self_url %]/admin/updateprojects">update stats</a> (for "projects" - takes a while!)</li>
+	<li></li>
 </ul></td>
 [% END -%]
-<td style="text-indent:0em; padding-left:0em; padding-right:1em;">
-<ul>
-<li><a href="[% self_url %]/subgroups/view">language groups</a>
-<li>
-<li>
-<li>[% IF c.has_privs(8) %]<a href="[% self_url %]/admin/updateprojects">update stats</a> (for "projects" - takes a while!)[% END %]</li>
-<li>
-</ul>
-</td>
 </tr></table>
+
 
 Semantic categorization stuff:
 <ul>
@@ -32,7 +40,9 @@ Activity:
 <ul>
 <li><a href="[% self_url %]/admin/changes">change log</a></li>
 <li><a href="[% self_url %]/admin/queries">recent queries (public interface)</a></li>
+[% IF c.has_privs(8) -%]
 <li><a href="[% self_url %]/admin/progress">progress report, tagging awaiting approval, etc.</a></li>
+[% END -%]
 </ul>
 
 Accounts:
@@ -41,14 +51,15 @@ Accounts:
 <li><a href="[% self_url %]/account/users">view/edit users</a></li>
 </ul>
 
+[% IF c.has_privs(8) -%]
 Tools:
 <ul>
 <li><a href="[% self_url %]/admin/deviants">view records with deviant glosses (violating gloss conventions)</a></li>
-<li><a href="[% self_url %]/admin/listpublic">list of public etyma tag #s</a></li>
 [% IF c.has_privs(16) -%]
 <li><a href="[% self_url %]/admin/expire_sessions">expire sessions older than 1 month</a> ([% num_sessions %] currently in sessions table)</li>
 [% END -%]
 </ul>
+[% END -%]
 
 Stuff for the public:
 <ul>

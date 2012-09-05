@@ -20,8 +20,7 @@ sub browser : StartRunMode {
 SELECT chapters.semkey, chapters.chaptertitle, 
 	(SELECT COUNT(*) FROM etyma WHERE chapter=chapters.semkey AND public=1 $blessed) AS num_public,
 	(SELECT COUNT(*) FROM etyma WHERE chapter=chapters.semkey $blessed),
-	COUNT(DISTINCT notes.noteid), MAX(notes.notetype = 'G'), MAX(notes.notetype != 'I') as public_notes,
-        chapters.semcat, chapters.old_chapter, chapters.old_subchapter, chapters.id
+	COUNT(DISTINCT notes.noteid), MAX(notes.notetype = 'G'), MAX(notes.notetype != 'I') as public_notes, chapters.id
 FROM chapters LEFT JOIN notes ON (notes.id=chapters.semkey)
 GROUP BY 1 $public_ch ORDER BY v,f,c,s1,s2,s3
 SQL
@@ -189,7 +188,7 @@ sub seq : Runmode {
 		$msg = "Success!";
 	}
 
-	my $a = $self->dbh->selectall_arrayref("SELECT tag, protoform, protogloss, sequence FROM etyma WHERE tag=supertag AND chapter=? AND status != 'DELETE' ORDER BY sequence", undef, $chap); # no mesoroots should go in this list!
+	my $a = $self->dbh->selectall_arrayref("SELECT tag, protoform, protogloss, sequence FROM etyma WHERE chapter=? AND status != 'DELETE' ORDER BY sequence", undef, $chap);
 	
 	# run through results and group allofams
 	my @fams;

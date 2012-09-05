@@ -7,8 +7,7 @@
 <p class="message">[% msg %]</p>
 [% END -%]
 
-<p>This is a list of all the (super)roots in chapter [% c.query.param('c') %].
-(Mesoroots will be included automatically under their superroots.)
+<p>This is a list of all the roots in chapter [% c.query.param('c') %].
 Drag to reorder them and/or group them into word families.
 Items in the "n/a" box will not be included in PDF's, etc.
 Click on a checkbox to designate a root as that word family's pan-allofamic formula.

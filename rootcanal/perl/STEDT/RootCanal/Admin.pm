@@ -182,14 +182,6 @@ sub progress_detail : Runmode {
 	});
 }
 
-sub listpublic : Runmode {
-	my $self = shift;
-	$self->require_privs(16);
-
-	my $a = $self->dbh->selectcol_arrayref("SELECT tag FROM etyma WHERE public=1");
-	return "[" . join(',', @$a) . "]";
-}
-
 sub expire_sessions : Runmode {
 	my $self = shift;
 	$self->require_privs(16);

@@ -346,7 +346,7 @@ EndOfSQL
 		etyma    => \@etyma,
 		users    => \@users,
 		selected_username => $selected_username, selected_uid => $selected_uid,
-		stedt_count => $stedt_count, supertag => $tag,
+		stedt_count => $stedt_count,
 		fields => ['lexicon.rn', 'analysis',
 			($selected_uid ? ('user_an', 'other_an') : ()),
 			'languagenames.lgid', 'lexicon.reflex', 'lexicon.gloss', 'lexicon.gfn',
@@ -417,14 +417,14 @@ sub delete_check0 : Runmode {
 	my $tag = $self->query->param('tag');
 	die "invalid tag '$tag'!\n" unless $tag =~ s/^(\d+)$/$1/;
 	my $sql = qq#SELECT
-			(SELECT COUNT(DISTINCT tag) FROM etyma WHERE supertag=e.tag AND tag != e.tag) AS num_mesoroots,
+			(SELECT COUNT(DISTINCT id) FROM mesoroots WHERE tag != e.tag) AS num_mesoroots,
 			(SELECT COUNT(DISTINCT rn) FROM lx_et_hash WHERE tag=e.tag) AS num_recs,
 			(SELECT COUNT(DISTINCT notes.noteid) FROM notes WHERE tag=e.tag) AS num_notes
 		FROM `etyma` AS `e`
 		WHERE e.tag=$tag#;
 	my @a = $self->dbh->selectrow_array($sql);
 	my @errs = (
-		'has # mesoroot(s).',
+		'has # mesoreconstruction(s).',
 		'has # record(s) tagged to it.',
 		'has # note(s).'
 	);
@@ -450,7 +450,7 @@ sub delete_check : Runmode {
 	my $tag = $self->query->param('tag');
 	die "invalid tag '$tag'!\n" unless $tag =~ s/^(\d+)$/$1/;
 	my $sql = qq#SELECT tag, 
-			(SELECT COUNT(DISTINCT tag) FROM etyma WHERE supertag=e.tag AND tag != e.tag) AS num_mesoroots,
+			(SELECT COUNT(DISTINCT id) FROM mesoroots WHERE tag != e.tag) AS num_mesoroots,
 			(SELECT COUNT(DISTINCT rn) FROM lx_et_hash WHERE tag=e.tag AND uid=8) AS num_recs,
 			protoform, protogloss, plg,
 			(SELECT COUNT(DISTINCT notes.noteid) FROM notes WHERE tag=e.tag) AS num_notes,
@@ -508,7 +508,7 @@ sub soft_delete : Runmode {
 	my $tag = $self->query->param('tag');
 	die "invalid tag '$tag'!\n" unless $tag =~ s/^(\d+)$/$1/;
 	my $sql = qq#SELECT
-			(SELECT COUNT(DISTINCT tag) FROM etyma WHERE supertag=e.tag AND tag != e.tag) AS num_mesoroots,
+			(SELECT COUNT(DISTINCT id) FROM mesoroots WHERE tag != e.tag) AS num_mesoroots,
 			(SELECT COUNT(DISTINCT rn) FROM lx_et_hash WHERE tag=e.tag AND uid=8) AS num_recs,
 			(SELECT COUNT(DISTINCT notes.noteid) FROM notes WHERE tag=e.tag) AS num_notes,
 			(SELECT COUNT(DISTINCT notes.noteid) FROM notes WHERE tag != e.tag AND xmlnote RLIKE CONCAT('<xref ref="',e.tag,'">')) AS num_xrefs
@@ -541,7 +541,7 @@ sub soft_delete : Runmode {
 sub delete_check_all : Runmode {
 	my $self = shift;
 	my $sql = qq#SELECT tag, 
-			(SELECT COUNT(DISTINCT tag) FROM etyma WHERE supertag=e.tag AND tag != e.tag) AS num_mesoroots,
+			(SELECT COUNT(DISTINCT id) FROM mesoroots WHERE tag != e.tag) AS num_mesoroots,
 			(SELECT COUNT(DISTINCT rn) FROM lx_et_hash WHERE tag=e.tag AND uid=8) AS num_recs,
 			protoform, protogloss, plg,
 			(SELECT COUNT(DISTINCT notes.noteid) FROM notes WHERE tag=e.tag) AS num_notes,

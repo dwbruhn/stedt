@@ -276,69 +276,15 @@ var setup = { // in the form setup.[tablename].[fieldname]
 				// do_delete_check is defined in etyma.js; OK to put here because all the input.del_btn's are also created there
 				do_delete_check(e.findElement('tr').id.substring(3));
 			});
-			// put in a special sort function for all columns of the table
-			// this makes etyma sort by the superroot's value for a given column
-			var t = TableKit.tables['etyma_resulttable'];
-			t.customSortFn = function (rows, index, tkstdt, order) {
-				var sindex = t.raw.cols['etyma.supertag'];
-				var chapindex = t.raw.cols['etyma.chapter'];
-				var seqindex = t.raw.cols['etyma.sequence'];
-				var pindex = t.raw.cols['etyma.is_mesoroot'];
-				rows.sort(function (a,b) {
-					var a_id = a.id.substring(3); // strip off the "et_" part of the tr's id.
-					var b_id = b.id.substring(3);
-					var asid = t.raw.data[a_id][sindex]; // get id for a's super-root
-					var bsid = t.raw.data[b_id][sindex]; // get id for b's super-root
-					// if the super-root isn't in the table, pretend that the the meso-root IS the super-root
-					// by setting the super-root id equal to the id of the meso-root
-					if (t.raw.data[asid] === undefined) { asid = a_id }
-					if (t.raw.data[bsid] === undefined) { bsid = b_id }
-					var super_a_val = t.raw.data[asid][index];
-					var super_b_val = t.raw.data[bsid][index];
-					// sort by superroot's values
-					var result = tkstdt.compare(super_a_val, super_b_val)*order;
-					if (result === 0) {
-						// fall back to super's chapter (tablekit should auto-recognize semkey sort type)
-						result = tkstdt.compare(t.raw.data[asid][chapindex], t.raw.data[bsid][chapindex]);
-						if (result === 0) {
-							// fall back to super's sequence
-							result = t.raw.data[asid][seqindex] - t.raw.data[bsid][seqindex];
-							if (result === 0) {
-								// fall back to the supertag
-								result = t.raw.data[a_id][sindex] - t.raw.data[b_id][sindex];
-								if (result === 0) {
-									// fall back to plgord
-									result = t.raw.data[a_id][pindex] - t.raw.data[b_id][pindex];
-								}
-							}
-						}
-					}
-					return result;
-				});
-				return true;
-			};
 		},
 		'etyma.tag' : {
 			label: '#',
 			vert_show: true,
 			noedit: true,
 			size: 40,
-			transform: function (v,key,rec,n) {
-				// rec[n+1] is the supertag
-				// having #TAG automatically jumps to the mesoroot
-				var link = '<a href="' + baseRef + 'etymon/' + rec[n+1] + (rec[n+1] === v ? '' : '#' + v)
+			transform: function (v) {
+				return '<a href="' + baseRef + 'etymon/' + v
 						+ '" target="stedt_etymon">' + (stedtuserprivs ? '' : '#') + v + '</a>';
-				return '<span id="tag' + v + '" class="tagid">'
-					+ (link || v) + '</span>';
-			}
-		},
-		'etyma.supertag' : {
-			label: 'super',
-			nosort: true,
-			hide: !(stedtuserprivs & 1),
-			size: 40,
-			transform: function (v,key) {
-				 return v === key ? '' : v;
 			}
 		},
 		'num_recs' : {
