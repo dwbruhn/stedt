@@ -395,8 +395,8 @@ sub meso_edit : Runmode {
 	for my $id (split /,/, $all_ids) {
 		if ($q->param('delete_' . $id)) {
 			$self->dbh->do("DELETE FROM mesoroots WHERE id=?", undef, $id);
-			$self->dbh->do("INSERT changelog (uid, change_type, `table`, id, time)
-							VALUES (?,?,?,?,NOW())", undef,
+			$self->dbh->do("INSERT changelog (uid, change_type, `table`, id, oldval, newval, time)
+							VALUES (?,?,?,?,'','',NOW())", undef,
 					   $self->param('uid'), 'delete', 'mesoroots', $id);
 			next;
 		}
@@ -416,8 +416,8 @@ sub meso_edit : Runmode {
 	if ((my $form = decode_utf8($q->param("form_00"))) && (my $gloss = decode_utf8($q->param("gloss_00")))) {
 		$self->dbh->do("INSERT mesoroots (form,gloss,tag,grpid) VALUES (?,?,?,?)", undef,
 			$form, $gloss, $tag, $grpid);
-		$self->dbh->do("INSERT changelog (uid, change_type, `table`, id, time)
-						VALUES (?,?,?,LAST_INSERT_ID(),NOW())", undef,
+		$self->dbh->do("INSERT changelog (uid, change_type, `table`, id, oldval, newval, time)
+						VALUES (?,?,?,LAST_INSERT_ID(), '', '', NOW())", undef,
 				   $self->param('uid'), 'new_rec', 'mesoroots');
 		push @result, "$plg *$form $gloss";
 	}
