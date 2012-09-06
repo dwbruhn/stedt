@@ -6,9 +6,42 @@ use Encode;
 use STEDT::RootCanal::Notes;
 use CGI::Application::Plugin::Redirect;
 
+sub make_meso : Runmode {
+	my $self = shift;
+	my $dbh = $self->dbh;
+	my $q = $self->query;
+	my $oldtag = $q->param('oldtag');
+	my $newtag = $q->param('newtag');
+	if ($oldtag !~ /^\d+$/ || $newtag !~ /^\d+$/) {
+		$self->header_add(-status => 400);
+		return "Invalid tag number(s)!";
+	}
+
+	my ($grpid, $form, $gloss, $note) = map {decode_utf8($_)}
+		$dbh->selectrow_array("SELECT grpid,protoform,protogloss,notes FROM etyma WHERE tag=$oldtag");
+	if ($grpid < 3) {
+		# 0: undefined; 1: PST; 2: PTB
+		$self->header_add(-status => 400);
+		return "Tag #$oldtag is not a meso-level root!";
+	}
+	
+	# change the tags in lx_et_hash
+	$dbh->do("UPDATE lx_et_hash SET tag=$newtag, tag_str=REPLACE(tag_str,'$oldtag','$newtag') WHERE tag=$oldtag");
+
+	# modify notes
+	$dbh->do("UPDATE notes SET tag=$newtag, id=$grpid WHERE tag=$oldtag");
+	
+	# add to the mesoroots table
+	my $sql = "INSERT INTO mesoroots (tag,grpid,form,gloss,old_tag,old_note) VALUES ($newtag, $grpid, ?, ?, $oldtag, ?)";
+	$dbh->do($sql, undef, $form, $gloss, $note);
+	
+	# migrate any existing mesoroots to the new tag
+	$dbh->do("UPDATE mesoroots SET tag=$newtag WHERE tag=$oldtag");
+	return $self->redirect($q->url(-absolute=>1) . "/tags/delete_check?tag=$oldtag&newtag=$newtag");
+}
+
 # subroutine for migrating reflexes in a subgroup from one tag to another
 sub migrate_tag : Runmode {
-
 	my $self = shift;
 	unless ($self->has_privs(8)) {
 		$self->header_add(-status => 403);
@@ -477,7 +510,7 @@ sub delete_check : Runmode {
 
 	# etymon notes
 	my $e = @{$self->dbh->selectall_arrayref($sql, {Slice=>{}})}[0];
-	$e->{allow_delete} = ($e->{num_recs}==0 && $e->{num_mesoroots}==0 && $e->{num_notes}==0 && $e->{num_xrefs}==0);
+	$e->{allow_delete} = ($e->{num_recs}==0 && $e->{num_mesoroots}==0 && $e->{num_notes}==0 && !defined($e->{xref_notes}));
 
 	# the code for compiling notes into a format to pass to notes_etyma.tt, etc. could possibly be put into a subroutine somehow. Search for "SELECT noteid" to see similar code.... tho, each instance is slightly different.
 	if ($e->{other_notes} || $e->{xref_notes}) {
@@ -515,6 +548,7 @@ sub delete_check : Runmode {
 			$_->{text} = hilite_text($_->{text}, $tag);
 		}
 	}
+	$e->{newtag} = $self->query->param('newtag'); # see if there's a suggested value for "migrate to"
 	return $self->tt_process("admin/etyma_delete_check.tt", $e);
 }
 
@@ -551,7 +585,7 @@ sub soft_delete : Runmode {
 	$self->dbh->do("INSERT changelog (uid, change_type, `table`, id, col, oldval, newval, time) VALUES (?,?,?,?,?,?,?,NOW())", undef,
 		$self->param('uid'), '-', 'etyma', $tag, 'status', $old_status, 'DELETE');
 
-	return '';
+	return "Sucessfully soft-deleted #$tag";
 }
 
 sub delete_check_all : Runmode {

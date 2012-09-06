@@ -18,4 +18,22 @@ sub lgs : Runmode {
 	return to_json($result);
 }
 
+sub tags : Runmode {
+	my $self = shift;
+	my $s = $self->query->param('newtag');
+	my $a;
+	if ($s =~ /^\d+$/) {
+		$a = $self->dbh->selectall_arrayref("SELECT tag, LEFT(protogloss,20), CONCAT('*',protoform) FROM etyma WHERE tag RLIKE '^$s' ORDER BY tag LIMIT 11");
+	} else {
+		$s =~ s/(?<!\\)((?:\\\\)*)\\('|$)/$1$2/g;
+		$s =~ s/'/''/g;
+		$s =~ s/\\/\\\\/g;
+		$a = $self->dbh->selectall_arrayref("SELECT tag, LEFT(protogloss,20), CONCAT('*',protoform) FROM etyma WHERE protogloss RLIKE '[[:<:]]$s' ORDER BY tag LIMIT 30");
+		unless (@$a) {
+			$a = $self->dbh->selectall_arrayref("SELECT tag, LEFT(protogloss,20), CONCAT('*',protoform) FROM etyma WHERE protoform RLIKE '$s' ORDER BY tag LIMIT 30");
+		}
+	}
+	return '<ul>' . join('', map {qq|<li>$_->[0]<span class="informal"> - $_->[1] <b>$_->[2]</b></span></li>|} @$a) . '</ul>';
+}
+
 1;

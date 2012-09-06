@@ -25,8 +25,15 @@ Reflexes <span class="u[% etyma.0.tag %]">tagged by <select name="DDMenu" onchan
 #[% e.tag %][% IF c.has_privs(1) %]</a>[% END %] [% e.plg %] [% e.protoform %] [% e.protogloss %]
 [%- IF e.uid != 8 %] <span class="u[% etyma.0.tag %]">(proposed by [% e.username %])</span>[% END -%]
 </h1>
+[% IF e.plg != 'PTB' && e.plg != 'PST' -%]
+<form action="[% self_url %]/tags/make_meso" method="post" onsubmit="if (!parseInt(this.newtag.value,10)) {alert('Please specify a tag number.'); return false};return confirm('Are you sure you want to migrate all tags to #' + this.newtag.value + '? This action cannot be undone!')">
+<input name="btn" type="submit" value="Move all tags and make this a mesoreconstruction of:">
+#<input type="text" name="newtag" id="make_meso_input" size="40" maxlength="8">
+<div id="autocomplete_choices" class="autocomplete"></div>
+<input type="hidden" name="oldtag" value="[% e.tag %]">
+</form>
+[% END -%]
 [%- IF e.mesoroots.size %]
-
 Reconstructed mesoroots below:
 <ul>
 [% FOREACH e2 IN e.mesoroots -%]
@@ -132,6 +139,7 @@ var uid2 = '[% selected_uid %]';
 var mesoroots = [% etyma.0.mesorootsjson %];
 var subgroupnotes = [% etyma.0.subgroupnotesjson %];
 var all_subgroups = [% all_grps_json %];
+new Ajax.Autocompleter("make_meso_input", "autocomplete_choices", baseRef + 'autosuggest/tags', {});
 </script>
 <script src="[% self_base %]js/etymon.js"></script>
 <script src="[% self_base %]js/notes.js"></script>
