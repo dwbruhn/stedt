@@ -342,6 +342,7 @@ EndOfSQL
 		}
 	}
 
+	my $all_lggrps = $self->dbh->selectall_hashref("SELECT grpid,grpno,grp,genetic FROM languagegroups ", 'grpno');
 	return $self->tt_process("etymon.tt", {
 		etyma    => \@etyma,
 		users    => \@users,
@@ -353,7 +354,8 @@ EndOfSQL
 			'languagenames.language', 'languagegroups.grpid', 'languagegroups.grpno', 'languagegroups.grp', 'languagegroups.genetic',
 			'citation','languagenames.srcabbr', 'lexicon.srcid', 'notes.rn'],
 		footnotes => \@footnotes,
-		breadcrumbs=>$breadcrumbs
+		breadcrumbs=>$breadcrumbs,
+		all_grps_json=>JSON::to_json($all_lggrps)
 	});
 	# e : {
 	# 	tag,

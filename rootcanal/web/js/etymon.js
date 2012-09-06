@@ -126,13 +126,41 @@ for (var i = 1; i < num_tables; i++) {
 	tbody.on('click', 'a.meso_editlink', show_meso_editform);
 	var lastgrpno = '';
 	var visiblecols = $A(tbody.rows[0].cells).findAll(function (c) {return $(c).visible();}).length;
+	var addlink = ' <a href="#" class="et_grp_add">[+]</a>';
+	var seen_grpnos = {};
+	var insert_parent_bands = function (next_grpno, row) {
+		var cell1, cell2, cell5;
+		if (next_grpno.substr(0,1) === '0') return; // skip ST and TB
+		while (next_grpno.length > 1) {
+			next_grpno = next_grpno.substr(0, next_grpno.length-2); // chop off the last ".N"
+			if (seen_grpnos[next_grpno]) return;
+			if (!all_subgroups[next_grpno]) continue; // skip if it's not in the table
+			if (all_subgroups[next_grpno].genetic === '0') continue; // skip if it's not a genetic node
+			newrow = new Element('tr', {'class':'lggroup', 'id':'grprow_' + all_subgroups[next_grpno].grpid});
+			row.insert({before:newrow});
+			row = newrow;
+			seen_grpnos[next_grpno] = 1;
+			cell1 = newrow.insertCell(-1);
+			cell2 = newrow.insertCell(-1);
+			cell5 = newrow.insertCell(-1);
+			cell1.colSpan = stedtuserprivs&1 ? 3 : 2;
+			cell2.colSpan = visiblecols - (stedtuserprivs&1 ? 5 : 3);
+			cell5.colSpan = stedtuserprivs&1 ? 2 : 1;
+			cell2.className = "noedit";
+			cell5.className = "noedit";
+			cell1.innerHTML = all_subgroups[next_grpno].grpno + ' ' + all_subgroups[next_grpno].grp;
+			if (stedtuserprivs & 1) {
+				cell2.innerHTML = '<span class="pform"></span>  <small><a href="#" class="meso_editlink">add/edit reconstruction</a></small>';
+				cell5.innerHTML += addlink;
+			}
+		}
+	};
 	$A(tbody.rows).each(function (row, j) {
 		var grpno = row.cells[grpno_index].innerHTML;
 		var grp = row.cells[grpno_index+1].innerHTML;
 		var grp_isgenetic = parseInt(row.cells[grpno_index+2].innerHTML, 10);
 		var grpid = row.cells[grpno_index-1].innerHTML;
 		var newrow, meso, footnote, cell1, cell2, cell3, cell4, tmp_string;
-		var addlink = ' <a href="#" class="et_grp_add">[+]</a>';
 		if (lastgrpno !== grpno) {
 			// put in any mesoroots with no (immediate daughter) supporting forms
 			// and same with the subgroup notes
@@ -163,6 +191,7 @@ for (var i = 1; i < num_tables; i++) {
 				}
 
 				newrow = new Element('tr', {'class':'lggroup'});
+				insert_parent_bands(meso?meso.grpno:footnote.grpno, row);
 				row.insert({before:newrow});
 				cell1 = newrow.insertCell(-1);
 				cell2 = newrow.insertCell(-1);
@@ -173,6 +202,7 @@ for (var i = 1; i < num_tables; i++) {
 				cell2.className = "noedit";
 				cell5.className = "noedit";
 				if (meso) {
+					seen_grpnos[meso.grpno] = 1;
 					cell1.innerHTML = '<a name="' + meso.grpno + '">' + meso.grpno + ' ' + meso.grp + '</a>';
 					tmp_string = '<span class="pform">' + (meso.variant?'('+meso.variant+') ':'') + meso.plg + ' *' + meso.form + ' ' + meso.gloss;
 					// there may be multiple mesoroots for this node, so check for those too
@@ -186,12 +216,15 @@ for (var i = 1; i < num_tables; i++) {
 					cell2.innerHTML = tmp_string;
 				}
 				if (footnote) {
+					seen_grpnos[footnote.grpno] = 1;
+					cell1.innerHTML = footnote.grpno + ' ' + all_subgroups[footnote.grpno].grp;
 					cell5.innerHTML = '<a href="#foot' + footnote.ind + '" id="toof' + footnote.ind + '">' + footnote.ind + '</a>';
 					while (subgroupnotes.length && subgroupnotes[0].grpno === footnote.grpno) {
 						footnote = subgroupnotes.shift();
 						cell5.innerHTML += ' <a href="#foot' + footnote.ind + '" id="toof' + footnote.ind + '">' + footnote.ind + '</a>';
 					}
 				}
+				if (stedtuserprivs & 1) cell5.innerHTML += addlink;
 			}
 			// check if current group has an explicit mesoroot
 			if (mesoroots.length && mesoroots[0].grpno === grpno) {
@@ -207,6 +240,7 @@ for (var i = 1; i < num_tables; i++) {
 			}
 			
 			newrow = new Element('tr', {'class':'lggroup', 'id':'grprow_' + grpid});
+			insert_parent_bands(grpno, row);
 			row.insert({before:newrow});
 			// there's not enough columns when you're not logged in, so adjust accordingly by not creating TD's for the approval and migration buttons
 			cell1 = newrow.insertCell(-1);
@@ -224,6 +258,7 @@ for (var i = 1; i < num_tables; i++) {
 			if (stedtuserprivs & 1) cell4.className = "noedit";
 			cell5.className = "noedit";
 			cell1.innerHTML = '<a name="' + grpno + '">' + grpno + ' ' + grp + '</a>';
+			seen_grpnos[grpno] = 1;
 			if (meso) {
 				tmp_string = '<span class="pform">' + (meso.variant?'('+meso.variant+') ':'') + meso.plg + ' *' + meso.form + ' ' + meso.gloss;
 				// there may be multiple mesoroots for this node, so check for those too
@@ -245,7 +280,7 @@ for (var i = 1; i < num_tables; i++) {
 					cell5.innerHTML += ' <a href="#foot' + footnote.ind + '" id="toof' + footnote.ind + '">' + footnote.ind + '</a>';
 				}
 			}
-			if (stedtuserprivs & 1) cell5.innerHTML += addlink; // currently putting the addlink only for nodes with forms underneath them
+			if (stedtuserprivs & 1) cell5.innerHTML += addlink;
 			if (stedtuserprivs & 8) {
 				// insert html form for approving this subgroup only
 				grp = grp.replace(/"/g,'&quot;'); // escape quotes for inclusion in the string below

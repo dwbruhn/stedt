@@ -131,6 +131,7 @@ var stedt_other_username = '[% selected_username || '' %]';
 var uid2 = '[% selected_uid %]';
 var mesoroots = [% etyma.0.mesorootsjson %];
 var subgroupnotes = [% etyma.0.subgroupnotesjson %];
+var all_subgroups = [% all_grps_json %];
 </script>
 <script src="[% self_base %]js/etymon.js"></script>
 <script src="[% self_base %]js/notes.js"></script>

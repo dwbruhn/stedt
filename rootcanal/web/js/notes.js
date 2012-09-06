@@ -95,7 +95,7 @@ function showaddform (spec, id, e) {
 	f.id.value = id;
 	if (spec==='M') { // special handling for etyma subgroup notes
 		addform_fullid = e.findElement().up('tr').identify(); // save the tr for later access
-		f.id2.value = e.findElement().up('tr').getAttribute('grpid');
+		f.id2.value = e.findElement().up('tr').id.replace('grprow_','');
 	}
 	f.fn_counter.value = footnote_counter;
 	var menu = f.notetype.options;
