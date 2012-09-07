@@ -139,7 +139,7 @@ var uid2 = '[% selected_uid %]';
 var mesoroots = [% etyma.0.mesorootsjson %];
 var subgroupnotes = [% etyma.0.subgroupnotesjson %];
 var all_subgroups = [% all_grps_json %];
-new Ajax.Autocompleter("make_meso_input", "autocomplete_choices", baseRef + 'autosuggest/tags', {parameters:'ignore=[% etyma.0.tag %]'});
+if ($('make_meso_input')) new Ajax.Autocompleter("make_meso_input", "autocomplete_choices", baseRef + 'autosuggest/tags', {parameters:'ignore=[% etyma.0.tag %]'});
 </script>
 <script src="[% self_base %]js/etymon.js"></script>
 <script src="[% self_base %]js/notes.js"></script>

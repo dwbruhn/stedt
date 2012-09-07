@@ -197,15 +197,7 @@ $(document.body).on('click', 'a.cheatsheet_link', function (e) {
 // fun with popovers
 $(document.body).on('mouseover', 'a.footlink', function (e) {
 	var elem = e.findElement();
-	e.stop();
 	var foot = $(elem.id.replace('toof', 'foot')).up('div.lexnote').down('div.notepreview');
 	var text = foot.innerHTML.replace(/<input.*?>/,''); // hide the "Edit" button
-	show_hover_note(text, elem);
+	Tips.add(elem, e, text, {stem:true, delay:0, fixed:true, showEffectDuration:0, className:'glass'});
 });
-show_hover_note = function (t, elem) {
-	var x = $('info'), loc = elem.positionedOffset();
-	elem.getOffsetParent().insert(x);
-	x.down('div').update(t);
-	x.setStyle({left:loc[0] + 'px', top:loc[1] + 'px'}).show();
-	show_tag.curr_elem = elem;
-};
