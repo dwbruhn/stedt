@@ -167,7 +167,7 @@ $('addnoteform').observe('submit', function (e) {
 				f.up('body').insert(note);
 				++footnote_counter;
 				var cell = $(addform_fullid).childElements().last();
-				cell.innerHTML = cell.innerHTML + ' <a href="#foot' + footnote_counter + '" id="toof' + footnote_counter + '">' + footnote_counter + '</a>';
+				cell.innerHTML = cell.innerHTML + ' <a href="#foot' + footnote_counter + '" id="toof' + footnote_counter + '" class="footlink">' + footnote_counter + '</a>';
 			}
 			f.xmlnote.value = ''; // reset the textarea
 			f.hide();
@@ -193,3 +193,19 @@ $(document.body).on('click', 'a.cheatsheet_link', function (e) {
 	$("notes_markup_cheatsheet").toggle();
 	e.stop();
 });
+
+// fun with popovers
+$(document.body).on('mouseover', 'a.footlink', function (e) {
+	var elem = e.findElement();
+	e.stop();
+	var foot = $(elem.id.replace('toof', 'foot')).up('div.lexnote').down('div.notepreview');
+	var text = foot.innerHTML.replace(/<input.*?>/,''); // hide the "Edit" button
+	show_hover_note(text, elem);
+});
+show_hover_note = function (t, elem) {
+	var x = $('info'), loc = elem.positionedOffset();
+	elem.getOffsetParent().insert(x);
+	x.down('div').update(t);
+	x.setStyle({left:loc[0] + 'px', top:loc[1] + 'px'}).show();
+	show_tag.curr_elem = elem;
+};

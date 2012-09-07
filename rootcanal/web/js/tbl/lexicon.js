@@ -11,7 +11,7 @@ setup['lexicon']['num_notes'] = {
 		var addlink = '<a href="#" class="lexadd">[+]</a>';
 		if (v === '0') return (stedtuserprivs & 1) ? addlink : '';
 		var a = v.match(/\d+/g).map(function (s) {
-			return '<a href="#foot' + s + '" id="toof' + s + '">' + s + '</a>';
+			return '<a href="#foot' + s + '" id="toof' + s + '" class="footlink">' + s + '</a>';
 		});
 		a.push(addlink);
 		return a.join(' ');

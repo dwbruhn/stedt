@@ -193,7 +193,7 @@ var show_tag = function z(e) {
 	var tags, elem = e.findElement(),
 		classnames = $w(elem.className).findAll(function(s){return s.substring(0,2)==='t_'});
 	e.stop();
-	if (elem === z.curr_elem && $('info').visible()) {
+	if (elem === z.curr_elem && $('info').visible() && event.type === 'click') {
 		$('info').hide();
 		z.curr_elem = '';
 		return;
@@ -452,6 +452,7 @@ var setup = { // in the form setup.[tablename].[fieldname]
 				e.stop();
 			});
 			tbl.on('click', 'a.elink', show_tag);
+			tbl.on('mouseover', 'a.elink', show_tag);
 
 			// stop here if it's etymon view, which (a) doesn't allow sorting,
 			// and (b) does its own thing for adding language group headers

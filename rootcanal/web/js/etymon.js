@@ -14,7 +14,7 @@ setup['lexicon']['notes.rn'] = {
 		var addlink = '<a href="#" class="lexadd">[+]</a>';
 		if (v === '0') return (stedtuserprivs & 1) ? addlink : '';
 		var a = v.match(/\d+/g).map(function (s) {
-			return '<a href="#foot' + s + '" id="toof' + s + '">' + s + '</a>';
+			return '<a href="#foot' + s + '" id="toof' + s + '" class="footlink">' + s + '</a>';
 		});
 		a.push(addlink);
 		return a.join(' ');
@@ -218,10 +218,10 @@ for (var i = 1; i < num_tables; i++) {
 				if (footnote) {
 					seen_grpnos[footnote.grpno] = 1;
 					cell1.innerHTML = footnote.grpno + ' ' + all_subgroups[footnote.grpno].grp;
-					cell5.innerHTML = '<a href="#foot' + footnote.ind + '" id="toof' + footnote.ind + '">' + footnote.ind + '</a>';
+					cell5.innerHTML = '<a href="#foot' + footnote.ind + '" id="toof' + footnote.ind + '" class="footlink">' + footnote.ind + '</a>';
 					while (subgroupnotes.length && subgroupnotes[0].grpno === footnote.grpno) {
 						footnote = subgroupnotes.shift();
-						cell5.innerHTML += ' <a href="#foot' + footnote.ind + '" id="toof' + footnote.ind + '">' + footnote.ind + '</a>';
+						cell5.innerHTML += ' <a href="#foot' + footnote.ind + '" id="toof' + footnote.ind + '" class="footlink">' + footnote.ind + '</a>';
 					}
 				}
 				if (stedtuserprivs & 1) cell5.innerHTML += addlink;
@@ -274,10 +274,10 @@ for (var i = 1; i < num_tables; i++) {
 				cell2.innerHTML += ' <small><a href="#" class="meso_editlink">add/edit reconstruction</a></small>';
 			}
 			if (footnote) {
-				cell5.innerHTML = '<a href="#foot' + footnote.ind + '" id="toof' + footnote.ind + '">' + footnote.ind + '</a>';
+				cell5.innerHTML = '<a href="#foot' + footnote.ind + '" id="toof' + footnote.ind + '" class="footlink">' + footnote.ind + '</a>';
 				while (subgroupnotes.length && subgroupnotes[0].grpno === footnote.grpno) {
 					footnote = subgroupnotes.shift();
-					cell5.innerHTML += ' <a href="#foot' + footnote.ind + '" id="toof' + footnote.ind + '">' + footnote.ind + '</a>';
+					cell5.innerHTML += ' <a href="#foot' + footnote.ind + '" id="toof' + footnote.ind + '" class="footlink">' + footnote.ind + '</a>';
 				}
 			}
 			if (stedtuserprivs & 1) cell5.innerHTML += addlink;
