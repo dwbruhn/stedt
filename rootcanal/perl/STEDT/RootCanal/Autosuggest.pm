@@ -18,22 +18,35 @@ sub lgs : Runmode {
 	return to_json($result);
 }
 
+sub trunc {
+	# a little helper function to truncate and add dots if necessary
+	my ($s, $len) = @_;
+	return $s if length($s) <= $len;
+	return substr($s,0,$len) . '...';
+}
+
 sub tags : Runmode {
 	my $self = shift;
 	my $s = $self->query->param('newtag');
+	my $skip = $self->query->param('ignore');
+	if ($skip =~ /^\d+$/) {
+		$skip = "AND tag != $skip";
+	} else {
+		$skip = '';
+	}
 	my $a;
 	if ($s =~ /^\d+$/) {
-		$a = $self->dbh->selectall_arrayref("SELECT tag, LEFT(protogloss,20), CONCAT('*',protoform) FROM etyma WHERE tag RLIKE '^$s' ORDER BY tag LIMIT 11");
+		$a = $self->dbh->selectall_arrayref("SELECT tag, protogloss, CONCAT('*',protoform) FROM etyma WHERE tag RLIKE '^$s' $skip ORDER BY tag LIMIT 11");
 	} else {
 		$s =~ s/(?<!\\)((?:\\\\)*)\\('|$)/$1$2/g;
 		$s =~ s/'/''/g;
 		$s =~ s/\\/\\\\/g;
-		$a = $self->dbh->selectall_arrayref("SELECT tag, LEFT(protogloss,20), CONCAT('*',protoform) FROM etyma WHERE protogloss RLIKE '[[:<:]]$s' ORDER BY tag LIMIT 30");
+		$a = $self->dbh->selectall_arrayref("SELECT tag, protogloss, CONCAT('*',protoform) FROM etyma WHERE protogloss RLIKE '[[:<:]]$s' $skip ORDER BY tag LIMIT 30");
 		unless (@$a) {
-			$a = $self->dbh->selectall_arrayref("SELECT tag, LEFT(protogloss,20), CONCAT('*',protoform) FROM etyma WHERE protoform RLIKE '$s' ORDER BY tag LIMIT 30");
+			$a = $self->dbh->selectall_arrayref("SELECT tag, protogloss, CONCAT('*',protoform) FROM etyma WHERE protoform RLIKE '$s' $skip ORDER BY tag LIMIT 30");
 		}
 	}
-	return '<ul>' . join('', map {qq|<li>$_->[0]<span class="informal"> - $_->[1] <b>$_->[2]</b></span></li>|} @$a) . '</ul>';
+	return '<ul>' . join('', map {"<li>$_->[0] - " . trunc($_->[1],20) . " <b>$_->[2]</b></li>"} @$a) . '</ul>';
 }
 
 1;

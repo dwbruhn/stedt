@@ -11,8 +11,8 @@ sub make_meso : Runmode {
 	my $dbh = $self->dbh;
 	my $q = $self->query;
 	my $oldtag = $q->param('oldtag');
-	my $newtag = $q->param('newtag');
-	if ($oldtag !~ /^\d+$/ || $newtag !~ /^\d+$/) {
+	my $newtag = $q->param('newtag'); # newtag can have arbitrary text after the tag number
+	if ($oldtag !~ /^\d+$/ || $newtag !~ s/^(\d+).*/$1/ || $oldtag == $newtag) {
 		$self->header_add(-status => 400);
 		return "Invalid tag number(s)!";
 	}
@@ -585,7 +585,7 @@ sub soft_delete : Runmode {
 	$self->dbh->do("INSERT changelog (uid, change_type, `table`, id, col, oldval, newval, time) VALUES (?,?,?,?,?,?,?,NOW())", undef,
 		$self->param('uid'), '-', 'etyma', $tag, 'status', $old_status, 'DELETE');
 
-	return "Sucessfully soft-deleted #$tag";
+	return qq|Sucessfully soft-deleted #$tag. Merged into <a href="| . $self->query->url(-absolute=>1) . qq|/etymon/$merge_tag">#$merge_tag</a>|;
 }
 
 sub delete_check_all : Runmode {
