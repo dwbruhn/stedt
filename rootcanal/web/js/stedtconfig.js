@@ -453,6 +453,7 @@ var setup = { // in the form setup.[tablename].[fieldname]
 			});
 			// tbl.on('click', 'a.elink', show_tag);
 			tbl.on('mouseover', 'a.elink', show_tag);
+			tbl.on('mouseout', 'a.elink', function (e) {$('info').hide()});
 
 			// stop here if it's etymon view, which (a) doesn't allow sorting,
 			// and (b) does its own thing for adding language group headers
