@@ -451,7 +451,7 @@ var setup = { // in the form setup.[tablename].[fieldname]
 				show_notes(e.findElement('tr').id.substring(3), e.findElement('td'));
 				e.stop();
 			});
-			tbl.on('click', 'a.elink', show_tag);
+			// tbl.on('click', 'a.elink', show_tag);
 			tbl.on('mouseover', 'a.elink', show_tag);
 
 			// stop here if it's etymon view, which (a) doesn't allow sorting,
@@ -563,7 +563,8 @@ var setup = { // in the form setup.[tablename].[fieldname]
 						v += ', ';
 					}
 					if (parseInt(m[2],10))
-					{ v += '<a href="#" class="elink t_' + m[2] + '">' + m[2] + '</a>'; }
+					{ v += '<a href="' + baseRef + 'etymon/' + m[2] + '" target="stedt_etymon"'
+						+ ' class="elink t_' + m[2] + '">' + m[2] + '</a>'; }
 					else v += m[2];
 				}
 				return v;
@@ -621,7 +622,7 @@ var setup = { // in the form setup.[tablename].[fieldname]
 					}
 					a += parseInt(link_tag,10)
 						? '<a href="' + baseRef + 'etymon/' + link_tag + '" target="stedt_etymon"'
-							+ '" class="elink ' + syl_class + '" title="Click for etymology">'
+							+ ' class="elink ' + syl_class + '" title="Click for etymology">'
 							+ s.escapeHTML() + '</a>' + delim
 						: '<span class="' + syl_class + '">' + s.escapeHTML() + '</span>' + delim;
 				}
