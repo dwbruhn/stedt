@@ -155,6 +155,9 @@ $t->add_check(sub {
 	$err .= "lgsort not specified!\n" unless $cgi->param('languagenames.lgsort');
 	$err .= "Language name not specified!\n" unless $cgi->param('languagenames.language');
 	$err .= "Group not specified!\n" unless $cgi->param('languagenames.grpid');
+	if ($cgi->param('languagenames.lgcode') eq '') {	# set lgcode to zero if user has left it blank
+		$cgi->param('languagenames.lgcode',0);
+	}
 	return $err;
 });
 
