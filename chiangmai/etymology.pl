@@ -21,7 +21,7 @@ my $etymon = param('tag');
 
 # Query for record from Etyma database
 
-$sql = "SELECT protoform, protogloss, chapters.chapter, chapters.chaptertitle FROM etyma, chapters WHERE etyma.chapter=chapters.chapter AND tag=?";
+$sql = "SELECT protoform, protogloss, chapters.semkey, chapters.chaptertitle FROM etyma, chapters WHERE etyma.chapter=chapters.semkey AND tag=?";
 #print STDERR "$sql\n";
 $sth = $dbh->prepare($sql);
 $sth->execute($etymon);
@@ -71,7 +71,8 @@ print "    </desc>\n";
 
 $sql = <<EndOfSQL;
 SELECT DISTINCT languagegroups.grpno, grp, language, lexicon.rn, 
-       analysis, reflex, gloss, languagenames.srcabbr, lexicon.srcid 
+       (SELECT GROUP_CONCAT(tag_str ORDER BY ind) FROM lx_et_hash WHERE rn=lexicon.rn AND uid=8) AS analysis, 
+       reflex, gloss, languagenames.srcabbr, lexicon.srcid 
   FROM lexicon, languagenames, languagegroups, lx_et_hash
   WHERE (lx_et_hash.tag = $etymon
     AND lx_et_hash.rn=lexicon.rn
