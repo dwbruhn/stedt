@@ -7,6 +7,6 @@
 [% END -%]
 </ul>
 [% END -%]
-[% IF 0 %]<p><a href="[% c.query.url('-absolute',1) %]/etymon/[% tag %]" target="stedt_etymon">Details for #[% tag %]</a></p>[% END -%]
+<p><a href="[% c.query.url('-absolute',1) %]/etymon/[% tag %]" target="stedt_etymon">Details for #[% tag %]</a></p>
 [% END -%]
-[% IF 0 %]<span class="footnote right"><a href="#" id="hideinfo">hide</a></span>[% END %]
+<span class="footnote right"><a href="#" id="hideinfo">hide</a></span>

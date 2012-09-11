@@ -1,3 +1,5 @@
+var mOut_handler;
+
 // function findPos(obj) { // based on http://www.quirksmode.org/js/findpos.html
 // 	var curleft = 0, curtop = 0;
 // 	if (obj.offsetParent) { // if the browser supports offsetParent
@@ -187,9 +189,10 @@ function show_root(tag) {
 	});
 };
 $(document.body).insert(new Element('div', {id:'info',style:'display:none'}).update('<div></div>')) ;
-$(document.body).on('click', 'a#hideinfo', function (e) { e.stop(); $('info').hide() });
-$(document).on('keydown', function (e) { if (e.keyCode === Event.KEY_ESC) $('info').hide() });
+$(document.body).on('click', 'a#hideinfo', function (e) { e.stop(); $('info').hide(); mOut_handler.start() });
+$(document).on('keydown', function (e) { if (e.keyCode === Event.KEY_ESC) { $('info').hide(); mOut_handler.start() } });
 var show_tag = function z(e) {
+	mOut_handler.start();
 	var tags, elem = e.findElement(),
 		classnames = $w(elem.className).findAll(function(s){return s.substring(0,2)==='t_'});
 	e.stop();
@@ -451,9 +454,13 @@ var setup = { // in the form setup.[tablename].[fieldname]
 				show_notes(e.findElement('tr').id.substring(3), e.findElement('td'));
 				e.stop();
 			});
-			// tbl.on('click', 'a.elink', show_tag);
 			tbl.on('mouseover', 'a.elink', show_tag);
+<<<<<<< .mine
+			mOut_handler = tbl.on('mouseout', 'a.elink', function (e) { e.stop(); $('info').hide() });
+			tbl.on('click', 'a.elink', function (e) { e.stop(); mOut_handler.stop() });
+=======
 			tbl.on('mouseout', 'a.elink', function (e) {$('info').hide()});
+>>>>>>> .r587
 
 			// stop here if it's etymon view, which (a) doesn't allow sorting,
 			// and (b) does its own thing for adding language group headers
@@ -564,8 +571,7 @@ var setup = { // in the form setup.[tablename].[fieldname]
 						v += ', ';
 					}
 					if (parseInt(m[2],10))
-					{ v += '<a href="' + baseRef + 'etymon/' + m[2] + '" target="stedt_etymon"'
-						+ ' class="elink t_' + m[2] + '">' + m[2] + '</a>'; }
+					{ v += '<a href="#" class="elink t_' + m[2] + '">' + m[2] + '</a>'; }
 					else v += m[2];
 				}
 				return v;
@@ -622,8 +628,7 @@ var setup = { // in the form setup.[tablename].[fieldname]
 						link_tag = skipped_roots[t2[i]] ? '' : t2[i];
 					}
 					a += parseInt(link_tag,10)
-						? '<a href="' + baseRef + 'etymon/' + link_tag + '" target="stedt_etymon"'
-							+ ' class="elink ' + syl_class + '" title="Click for etymology">'
+						? '<a href="#"' + ' class="elink ' + syl_class + '" title="Click to freeze the pane">'
 							+ s.escapeHTML() + '</a>' + delim
 						: '<span class="' + syl_class + '">' + s.escapeHTML() + '</span>' + delim;
 				}
