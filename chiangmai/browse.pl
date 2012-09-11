@@ -43,19 +43,20 @@ sub setBrowse {
       return $from,@fields;
     } 
     elsif (/languagegroups/)  {
-      @fields = qw(count(*) grp  grpno  groupabbr  grpid  ord  );
+      @fields = qw(count(*) grp  grpno  groupabbr  grpid  );
       $from = " lexicon join languagenames using (lgid) join languagegroups using(grpid) group by grpid";
       return $from,@fields;
     } 
     elsif (/chapters/)  {
-      #@fields = qw(count(*) chapter chaptertitle chapterabbr  );
-      @fields = qw( chapter chaptertitle chapterabbr  );
-      #$from = " chapters join lexicon using (chapter) group by chapter";
-      $from = " chapters group by chapter";
+      @fields = qw( semkey v f c chaptertitle semcat  );
+      #$from = " chapters join lexicon using (semkey) group by semkey";
+      $from = " chapters group by semkey order by v,f,c,s1,s2,s3";
       return $from,@fields;
     } 
-    elsif (/semcat/)  {
-      return @fields = qw( semcat gloss );
+    elsif (/otherchapters/)  {
+      return @fields = qw( chapter heading semcat subcat cf n id);
+      $from = " otherchapters order by chapter,subcat";
+      return $from,@fields;
     } 
     else { 
       return ('no match' . $item);
@@ -280,7 +281,7 @@ my $cgi = new CGI;
 my $dbh = STEDTUtil::connectdb();
 
 %browseable = ( 'srcbib' => 'Sources of Information', 'languagenames' => 'Language Names', 'languagegroups' => 'Language Groups',
-	      'lexicon'=> 'Lexicon', 'chapters' => 'Chapters');
+	      'lexicon'=> 'Lexicon', 'chapters' => 'Chapters', 'otherchapters' => 'Sem Cats');
 
 STEDTUtil::make_header($cgi,'Browse STEDT Database');
 

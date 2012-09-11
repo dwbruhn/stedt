@@ -36,12 +36,12 @@ sub constants {
 	       'etyma.protoform' => 'Protoform',
 	       'etyma.protogloss' => 'Protogloss',
 	       'etyma.chapter' => 'Chapter',
-	       'etyma.plg' => 'Protolanguage',
+	       'languagegroups.plg' => 'Protolanguage',
 	       'COUNT(lx_et_hash.rn)' => 'Reflexes',
 	      };
   
   # A list of database fields ordered by their sequence in the UI
-  @fields = ('etyma.tag', 'etyma.plg', 'etyma.protoform', 'etyma.protogloss', 'etyma.chapter','COUNT(lx_et_hash.rn)'
+  @fields = ('etyma.tag', 'languagegroups.plg', 'etyma.protoform', 'etyma.protogloss', 'etyma.chapter','COUNT(lx_et_hash.rn)'
 	       );
   
   # A list of UI names in order.
@@ -52,14 +52,14 @@ sub constants {
 	     'etyma.protoform' => 'b',
 	     'etyma.protogloss' => 'i',
 	     'etyma.chapter' => 'tt',
-	     'etyma.plg' => 'tt',
+	     'languagegroups.plg' => 'tt',
 	     'etyma.tag' => '',
 	    };
   #lx_et_hash.rn=lexicon.rn AND 
   # Query strings
   $qdata = {
 	       # for the searching
-	       'from' => q|etyma LEFT JOIN lx_et_hash ON (lx_et_hash.tag=etyma.tag) LEFT JOIN notes ON (notes.spec = 'E' AND notes.id = etyma.tag)|,
+	       'from' => q|etyma JOIN languagegroups using (grpid) LEFT JOIN lx_et_hash ON (lx_et_hash.tag=etyma.tag) LEFT JOIN notes ON (notes.spec = 'E' AND notes.id = etyma.tag)|,
 	       'order' => 'etyma.chapter, etyma.protoform, etyma.protogloss',
 	       'table' => 'etyma', # used for saving/deleting and counting
 	       'key' => 'etyma.tag',
@@ -182,7 +182,7 @@ sub make_browse {
       $cgi->img({-src=>'http://stedt.berkeley.edu/images/STB32x32.gif',-align=>'LEFT'})),
       $cgi->td($cgi->b('STEDT Database Online'))),       
       #$cgi->b('Electronic dissemination of Etymologies')),
-      $cgi->Tr($cgi->td({-colspan=>2, -align=>'center'},$cgi->font({-size=>'-2'}, 'v0.9 1 Nov 2009',$cgi->br,'Lowe, Mortensen, Yu'))),
+      $cgi->Tr($cgi->td({-colspan=>2, -align=>'center'},$cgi->font({-size=>'-2'}, 'v0.9 1 Nov 2009 (updated 11 Sep 2012 jbl)',$cgi->br,'Lowe, Mortensen, Yu'))),
       $cgi->Tr($cgi->td({-colspan=>2},$cgi->a({-href=>"overview.pl", -target=>"reflexes"},'Overview'))),
       $cgi->Tr($cgi->td({-colspan=>2},$cgi->a({-href=>"instructions.html", -target=>"reflexes"},'Instructions'))),
       $cgi->Tr($cgi->td({-colspan=>2},$cgi->a({-href=>"tagger.pl?format=Print", -target=>"_new"},'Tagging worksheet'))),
@@ -194,7 +194,7 @@ sub make_browse {
       $cgi->Tr($cgi->td({-colspan=>2},$cgi->a({-href=>"browse.pl?command=browse&table=srcbib", -target=>"reflexes"},'Sources'))),
       $cgi->Tr($cgi->td({-colspan=>2},$cgi->a({-href=>"browse.pl?command=browse&table=languagenames", -target=>"reflexes"},'Languages'))),
       $cgi->Tr($cgi->td({-colspan=>2},$cgi->a({-href=>"browse.pl?command=browse&table=languagegroups", -target=>"reflexes"},'Language Groups'))),
-      $cgi->Tr($cgi->td({-colspan=>2},$cgi->a({-href=>"browse.pl?command=browse&table=semcat", -target=>"reflexes"},'Sem Cats'))),
+      $cgi->Tr($cgi->td({-colspan=>2},$cgi->a({-href=>"browse.pl?command=browse&table=otherchapters", -target=>"reflexes"},'Sem Cats'))),
       $cgi->Tr($cgi->td({-colspan=>2},$cgi->a({-href=>"browse.pl?command=browse&table=chapters", -target=>"reflexes"},'Chapters'))),
     $cgi->end_table,"\n";
 }
@@ -216,7 +216,7 @@ sub make_query_form {
   print $cgi->Tr($cgi->td({-colspan=>2},"<h2>$browseable{$table}</h2>"));
 
   # get list of proto-lgs
-  my $plgs = $dbh->selectall_arrayref("SELECT DISTINCT plg FROM etyma");
+  my $plgs = $dbh->selectall_arrayref("SELECT DISTINCT plg FROM languagegroups");
   if ($plgs->[0][0] eq '') {
   	# indexes 0,0 relies on sorted list of plgs.
   	# allow explicit searching for empty strings
