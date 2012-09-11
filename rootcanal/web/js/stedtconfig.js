@@ -455,12 +455,8 @@ var setup = { // in the form setup.[tablename].[fieldname]
 				e.stop();
 			});
 			tbl.on('mouseover', 'a.elink', show_tag);
-<<<<<<< .mine
 			mOut_handler = tbl.on('mouseout', 'a.elink', function (e) { e.stop(); $('info').hide() });
 			tbl.on('click', 'a.elink', function (e) { e.stop(); mOut_handler.stop() });
-=======
-			tbl.on('mouseout', 'a.elink', function (e) {$('info').hide()});
->>>>>>> .r587
 
 			// stop here if it's etymon view, which (a) doesn't allow sorting,
 			// and (b) does its own thing for adding language group headers
