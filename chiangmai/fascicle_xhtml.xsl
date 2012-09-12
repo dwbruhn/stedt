@@ -10,9 +10,7 @@
 	    width: 90%; }
 
 	  html { 
-	    font-family: STEDTU,"TITUS Cyberbit Basic",
-	      SILDoulosUnicodeIPA,Gentium,Thryomanes,Cardo,
-              "Arial Unicode MS","Lucida Sans Unicode";
+	    font-family: "Arial Unicode MS","Lucida Sans Unicode";
 	    font-size: 12pt; }
 
 	  hr { 
@@ -46,6 +44,10 @@
 	    font-family: Arial, Helvetica, sans;
 	    padding: 0em 2em 0em 0em;
 	    width: 33%; }
+
+	  span.num,span.title,span.chapternum {
+	    font-family: Arial, Helvetica, sans;
+	    padding: 0em 1em 0em 0em; }
 
 	  span.stedtnum {
 	    font-family: Arial, Helvetica, sans;
@@ -108,7 +110,7 @@
 	<xsl:for-each select="volume">
 	  <h1>
 	    <span class="num">
-	      <xsl:value-of select="num"/>. 
+	      <xsl:value-of select="num"/>
 	    </span>
 	    <span class="title">
 	      <xsl:value-of select="title"/>
@@ -117,7 +119,7 @@
 	  <xsl:for-each select="fascicle">
 	    <h2>
 	      <span class="num">
-		<xsl:value-of select="num"/>. 
+		<xsl:value-of select="num"/>
 	      </span>
 	      <span class="title">
 		<xsl:value-of select="title"/>
@@ -126,7 +128,7 @@
 	    <xsl:for-each select="chapter">
 	      <h3>
 		<span class="chapternum">
-		  <xsl:value-of select="chapternum"/>. 
+		  <xsl:value-of select="chapternum"/>
 		</span>
 		<span class="chaptertitle">
 		  <xsl:value-of select="chaptertitle"/>
