@@ -26,33 +26,31 @@
 	    font-family: Arial, Helvetica, sans;
 	    font-weight: normal; }
 
-	  h1 {
+	  h1,h2,h3,h4,h5 {
 	    font-family: Arial, Helvetica, sans;
-	    font-size: 24pt;
 	    font-weight: bold; }
 
-	  h2 {
-	    text-align: center;
-	    font-size: 18pt;
-	    font-weight: bold;
-	    margin-left: 12pt;
+	  h1 { font-size: 24pt; margin-left: 2pt; }
+	  h2 { font-size: 18pt; margin-left: 10pt; }
+	  h3 { font-size: 14pt; margin-left: 14pt; }
+	  h4 { font-size: 12pt; margin-left: 18pt; }
+	  h5 { font-size: 12pt; margin-left: 20pt; }
+
+	  div.etymology {
+	    padding-left: 18pt;
+	    text-align: justify;
+	    width: 90%;
 	    }
 
-	  h3 {
+	  span.seqno {
 	    font-family: Arial, Helvetica, sans;
-	    font-size: 16pt;
-	    font-weight: bold;
-	    margin-left: 16pt; }
-
-	  h4 {
-	    font-family: Arial, Helvetica, sans;
-	    font-size: 14pt;
-	    font-weight: normal;
-	    margin-left: 18pt; }
+	    padding: 0em 2em 0em 0em;
+	    width: 33%; }
 
 	  span.stedtnum {
 	    font-family: Arial, Helvetica, sans;
-	    padding: 0em 2em 0em 0em;
+	    padding: 0em 2em 0em 10em;
+	    font-size: 10pt;
 	    width: 33%; }
 
 	  span.paf {
@@ -107,99 +105,119 @@
 	</style>
       </head>
       <body>
-	<xsl:for-each select="fascicle">
-	  <xsl:for-each select="chapter">
-	    <h1>
-	      <span class="chapternum">
-		<xsl:value-of select="chapternum"/>. 
+	<xsl:for-each select="volume">
+	  <h1>
+	    <span class="num">
+	      <xsl:value-of select="num"/>. 
+	    </span>
+	    <span class="title">
+	      <xsl:value-of select="title"/>
+	    </span>
+	  </h1>
+	  <xsl:for-each select="fascicle">
+	    <h2>
+	      <span class="num">
+		<xsl:value-of select="num"/>. 
 	      </span>
-	      <span class="chaptertitle">
-		<xsl:value-of select="chaptertitle"/>
+	      <span class="title">
+		<xsl:value-of select="title"/>
 	      </span>
-	    </h1>
-	    <xsl:for-each select="etymology">
-	      <h2>
-		<span class="stedtnum">(<xsl:value-of select="stedtnum"/>)</span>
-		<xsl:variable name="tagnum" select="stedtnum"/>
-		<span class="paf"><xsl:value-of select="paf"/> </span>
-		<span class="pgloss"><xsl:value-of select="pgloss"/> </span>
-	      </h2>
-
-	      <h3>Description</h3>
-
-	      <xsl:for-each select="desc">
-		<xsl:for-each select="note">
-		  <div class="note">
-		    <xsl:for-each select="par">
-		      <p>
-			<xsl:apply-templates />
-		      </p>
+	    </h2>
+	    <xsl:for-each select="chapter">
+	      <h3>
+		<span class="chapternum">
+		  <xsl:value-of select="chapternum"/>. 
+		</span>
+		<span class="chaptertitle">
+		  <xsl:value-of select="chaptertitle"/>
+		</span>
+	      </h3>
+	      <xsl:for-each select="etymology">
+		<div class="etymology">
+		  <h3>
+		    <span class="seqno"><xsl:value-of select="seqno"/></span>
+		    <xsl:variable name="seqno" select="seqno"/>
+		    <span class="paf"><xsl:value-of select="paf"/> </span>
+		    <span class="pgloss"><xsl:value-of select="pgloss"/> </span>
+		    <span class="stedtnum">(<xsl:value-of select="stedtnum"/>)</span>
+		    <xsl:variable name="tagnum" select="stedtnum"/>
+		  </h3>
+		  
+		  <h4>Description</h4>
+		  
+		  <xsl:for-each select="desc">
+		    <xsl:for-each select="note">
+		      <div class="note">
+			<xsl:for-each select="par">
+			  <p>
+			    <xsl:apply-templates />
+			  </p>
+			</xsl:for-each>
+		      </div>
 		    </xsl:for-each>
-		  </div>
-		</xsl:for-each>
-	      </xsl:for-each>
-
-	      <h3>Reflexes</h3>
-
-	      <xsl:for-each select="subgroup">
-		<h4>
-		  <span class="sgnum"><xsl:value-of select="sgnum"/></span>. 
-		  <span class="sgname"><xsl:value-of select="sgname"/></span>
-		</h4>
-		<table>
-		    <tr>
-		      <th>Language</th>
-		      <th>Rn</th>
-		      <th>Analysis</th>
-		      <th>Reflex</th>
-		      <th>Gloss</th>
-		      <th>Src Abbr</th>
-		      <th>Src Id</th>
-		    </tr>
-		  <xsl:for-each select="reflex">
-		    <tr>
-		      <td class="lgname"><xsl:value-of select="lgname"/></td>
-		      <td class="rn"><xsl:value-of select="rn"/></td>
-		      <td class="analysis"><xsl:value-of select="analysis"/></td>
-		      <td class="form">
-                        <xsl:for-each select="form">
-                          <xsl:apply-templates />
-                        </xsl:for-each>
-		      </td>
-		      <td class="gloss"><xsl:value-of select="gloss"/></td>
-		      <td class="srcabbr"><xsl:value-of select="srcabbr"/></td>
-		      <td class="srcid"><xsl:value-of select="srcid"/></td>
-		    </tr>
 		  </xsl:for-each>
-		</table>
+		  
+		  <xsl:for-each select="subgroup">
+		    <h5>
+		      <span class="sgnum"><xsl:value-of select="sgnum"/></span>. 
+		      <span class="sgname"><xsl:value-of select="sgname"/></span>
+		    </h5>
+		    <table>
+		      <tr>
+			<th>Language</th>
+			<th>Rn</th>
+			<th>Analysis</th>
+			<th>Reflex</th>
+			<th>Gloss</th>
+			<th>Src Abbr</th>
+			<th>Src Id</th>
+		      </tr>
+		      <xsl:for-each select="reflex">
+			<tr>
+			  <td class="lgname"><xsl:value-of select="lgname"/></td>
+			  <td class="rn"><xsl:value-of select="rn"/></td>
+			  <td class="analysis"><xsl:value-of select="analysis"/></td>
+			  <td class="form">
+			    <xsl:for-each select="form">
+			      <xsl:apply-templates />
+			    </xsl:for-each>
+			  </td>
+			  <td class="gloss"><xsl:value-of select="gloss"/></td>
+			  <td class="srcabbr"><xsl:value-of select="srcabbr"/></td>
+			  <td class="srcid"><xsl:value-of select="srcid"/></td>
+			</tr>
+		      </xsl:for-each>
+		    </table>
+		  </xsl:for-each>
+		</div>
+		
 	      </xsl:for-each>
-	
 	    </xsl:for-each>
 	  </xsl:for-each>
 	</xsl:for-each>
       </body>
     </html>
   </xsl:template>
-
+  
   <xsl:template match="hanform">
     <span class="hanform">
       <xsl:value-of select="."/>
     </span>
   </xsl:template>
-
+  
   <xsl:template match="latinform">
     <span class="latinform">
       <xsl:value-of select="."/>
     </span>
   </xsl:template>
-
+  
   <xsl:template match="reconstruction">
     <span class="reconstruction">
       <xsl:value-of select="."/>
     </span>
   </xsl:template>
 
-
+  
   <xsl:attribute-set name="reference">
     <xsl:attribute name="href">
       <xsl:text>etymology.pl?tag=</xsl:text>
@@ -209,11 +227,11 @@
       xref
     </xsl:attribute>
   </xsl:attribute-set>
-
+  
   <xsl:template match="xref">
     <xsl:element name="a" use-attribute-sets="reference">
       <xsl:value-of select="."/>
     </xsl:element>
   </xsl:template>
-
+  
 </xsl:stylesheet>

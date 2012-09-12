@@ -1,7 +1,18 @@
 #!/usr/bin/perl -w
 
+  ######################################################################
+  # S T E D T Project
+  ######################################################################
+  # This CGI script generates and presents the "nav bar"
+  # for the public interface.
+  #
+  # It also includes the search UI for etyma, which is part of the
+  # nav bar at the moment.
+  #
+  # copyright 1999-2010 The Regents of the University of California
+
 use strict;
-use utf8;	# for the down arrow â
+use utf8;   
 use DBI;
 use CGI;
 use CGI::Carp qw/fatalsToBrowser/;
