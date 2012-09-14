@@ -2,7 +2,20 @@
 <a name="[% etyma.0.tag %]"></a>
 [% lexicon_id = 1 %]
 
-<p>[% FOREACH b IN breadcrumbs %][% IF loop.last %]<a href=[% self_url %]/chap/[% b.0 %]>[% b.0 %] <b>[% b.1 %]</b></a>
+<p>
+[%- IF etyma.0.allofams.size -%]
+<div class="right">
+<b>Allofams:</b>
+<ul>
+[% FOREACH e2 IN etyma.0.allofams -%]
+<li>[% IF e2.tag != etyma.0.tag %]<a href="[% self_url %]/etymon/[% e2.tag %]">[% ELSE %]<b>[% END -%]
+[% e2.sequence %] #[% e2.tag %] *[% e2.protoform %] [% e2.protogloss %]
+[%- IF e2.tag != etyma.0.tag %]</a>[% ELSE %]</b>[% END %]</li>
+[% END -%]
+</ul>
+</div>
+[%- END -%]
+[% FOREACH b IN breadcrumbs %][% IF loop.last %]<a href=[% self_url %]/chap/[% b.0 %]>[% b.0 %] <b>[% b.1 %]</b></a>
 [%- ELSE %][% b.0 %] <b>[% b.1 %]</b> &gt; [% END #IF %][% END #FOREACH %]</p>
 
 [% IF c.has_privs(1) %]
@@ -43,7 +56,7 @@ Reconstructed mesoroots below:
 [%- END %]
 
 [% IF c.has_privs(1) -%]
-<div id="allnotes[% e.tag %]" class="container">
+<div id="allnotes[% e.tag %]" class="container" style="clear:right">[%# clear the allofams list  %]
 <p class="edit">
 [% IF c.has_privs(8) %]<label><input type="checkbox" value="off" class="reordcheckbox"[% IF e.notes.size < 2 %] disabled[% END %]>Drag to reorder</label>[% END %]
 <a href="#" onclick="return showaddform('E',[% e.tag %])">Add a note...</a>

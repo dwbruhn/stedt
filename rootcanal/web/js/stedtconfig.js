@@ -309,12 +309,11 @@ var setup = { // in the form setup.[tablename].[fieldname]
 			label: 'ch.',
 			size: 70,
 			hide: !(stedtuserprivs & 1),
-			transform : function (v) {
-				if (stedtuserprivs & 1) {
+			transform : (stedtuserprivs & 1)
+				? function (v) {
 					return '<a href="' + baseRef + 'chap/' + v + '" target="stedt_chapters">' + v + '</a>';
-				}
-				else return v;
-			}
+				  }
+				: null
 		},
 		'etyma.protoform' : {
 			vert_show: true,

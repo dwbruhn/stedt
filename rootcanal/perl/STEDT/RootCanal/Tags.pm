@@ -290,6 +290,20 @@ WHERE e.tag=? AND e.status != 'DELETE'#;
 		$e{protoform} =~ s/ = +/ = */g;
 		$e{protoform} = '*' . $e{protoform};
 		
+		# PAFs and allofams
+		$e{allofams} = $self->dbh->selectall_arrayref(
+			"SELECT tag, sequence, protoform, protogloss FROM etyma
+			 WHERE chapter=? and FLOOR(sequence)=FLOOR(?) ORDER BY sequence", {Slice=>{}},
+			$e{chap}, $e{sequence});
+		for (@{$e{allofams}}) {
+			my $s = $_->{sequence};
+			if (int($s) == $s) {
+				$_->{sequence} = int $s;
+				next;
+			}
+			$_->{sequence} =~ s/\.(\d)/chr(ord('a')-1+$1)/e;
+		}
+		
 		# etymon notes
 		$e{notes} = [];
 		$e{notes_subgroup} = [];
