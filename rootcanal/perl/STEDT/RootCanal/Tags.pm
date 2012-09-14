@@ -293,7 +293,7 @@ WHERE e.tag=? AND e.status != 'DELETE'#;
 		# PAFs and allofams
 		$e{allofams} = $self->dbh->selectall_arrayref(
 			"SELECT tag, sequence, protoform, protogloss FROM etyma
-			 WHERE chapter=? and FLOOR(sequence)=FLOOR(?) ORDER BY sequence", {Slice=>{}},
+			 WHERE chapter=? AND sequence != 0 AND FLOOR(sequence)=FLOOR(?) ORDER BY sequence", {Slice=>{}},
 			$e{chap}, $e{sequence});
 		for (@{$e{allofams}}) {
 			my $s = $_->{sequence};

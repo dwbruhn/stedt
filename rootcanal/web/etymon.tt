@@ -3,7 +3,7 @@
 [% lexicon_id = 1 %]
 
 <p>
-[%- IF etyma.0.allofams.size -%]
+[%- IF etyma.0.allofams.size > 1 -%]
 <div class="right">
 <b>Allofams:</b>
 <ul>
