@@ -44,9 +44,9 @@ binmode(STDERR, ":utf8");
 
 # add warning about unsequenced items
 my $hidden_etyma = $dbh->selectall_arrayref(
-	qq#SELECT e.tag, e.protoform, e.protogloss, e.plg
-		FROM `etyma` AS `e` JOIN `etyma` AS `super` ON e.supertag = super.tag
-		WHERE e.uid=8 AND super.chapter = '$vol.$fasc.$chap' AND super.sequence < 1#);
+	qq#SELECT e.tag, e.protoform, e.protogloss, languagegroups.plg 
+		FROM `etyma` AS `e` LEFT JOIN languagegroups ON e.grpid=languagegroups.grpid
+		WHERE e.uid=8 AND e.chapter = '$vol.$fasc.$chap' AND e.sequence < 1#);
 if (@$hidden_etyma) {
 	print STDERR "Warning: The following etyma have a sequence number of 0\nand will not be included:\n";
 	for my $e (@$hidden_etyma) {
@@ -95,13 +95,10 @@ my $chapter_notes = [map {xml2tex(decode_utf8($_))} @{$dbh->selectcol_arrayref(
 
 my @etyma; # array of infos to be passed on to the template
 my $etyma_in_chapter = $dbh->selectall_arrayref(
-	qq#SELECT e.tag, e.sequence, e.protoform, e.protogloss, e.plg, e.tag=e.supertag AS is_main
-		FROM `etyma` AS `e` JOIN `etyma` AS `super` ON e.supertag = super.tag
-		WHERE e.uid=8 AND super.chapter = '$vol.$fasc.$chap' AND super.sequence >= 1
-		ORDER BY super.sequence, is_main DESC, e.plgord#);
-# eventually we should only need to sort by e.plgord
-# (once the marriage between mesoroots and the languagegroups table is complete),
-# but for now use is_main
+	qq#SELECT e.tag, e.sequence, e.protoform, e.protogloss, languagegroups.plg
+		FROM `etyma` AS `e` LEFT JOIN languagegroups ON e.grpid=languagegroups.grpid
+		WHERE e.uid=8 AND e.chapter = '$vol.$fasc.$chap' AND e.sequence >= 1
+		ORDER BY e.sequence#);
 
 print STDERR (scalar @$etyma_in_chapter) . " etyma in this chapter\n";
 foreach (@$etyma_in_chapter) {
@@ -109,7 +106,7 @@ foreach (@$etyma_in_chapter) {
 	push @etyma, \%e;
 
 	# heading stuff
-	@e{qw/tag seq protoform protogloss plg is_main/}
+	@e{qw/tag seq protoform protogloss plg/}
 		= map {escape_tex(decode_utf8($_))} @$_;
 
 	# prettify sequence number
