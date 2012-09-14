@@ -197,7 +197,9 @@ $(document.body).on('click', 'a.cheatsheet_link', function (e) {
 // fun with popovers
 $(document.body).on('mouseover', 'a.footlink', function (e) {
 	var elem = e.findElement();
-	var foot = $(elem.id.replace('toof', 'foot')).up('div.lexnote').down('div.notepreview');
+	var footelem = $(elem.id.replace('toof', 'foot'));
+	footelem = footelem.up('div.lexnote') || footelem; // see edit.tt; the footnote text could be in two slightly different places depending on privileges
+	var foot = footelem.down('div.notepreview');
 	var text = foot.innerHTML.replace(/<input.*?>/,''); // hide the "Edit" button
 	Tips.add(elem, e, text, {stem:true, delay:0, fixed:true, showEffectDuration:0, className:'glass'});
 });
