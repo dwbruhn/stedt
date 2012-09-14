@@ -116,26 +116,30 @@ foreach (@$etyma_in_chapter) {
 	# $e{plg} = '' unless $e{plg} eq 'IA';
 	$e{plg} = $e{plg} eq 'PTB' ? '' : "$e{plg}";
 
-	$e{protoform} =~ s/⪤} +/⪤} */g;
-	$e{protoform} =~ s/ OR +/ or */g;
-	$e{protoform} =~ s/\\textasciitilde\\ +/\\textasciitilde\\ */g;
-	$e{protoform} =~ s/ = +/ = */g;
-	$e{protoform} = '*' . $e{protoform};
-	$e{protoform} =~ s/(\*\S+)/\\textbf{$1}/g; # bold only the protoform, not allofam or "or"
-		# perhaps better to use [^ ] instead of \S...
+	$e{protoform} = format_protoform($e{protoform});
 	$e{protoform_text} = $e{protoform};
 	#$e{protoform_text} =~ s/\\STEDTU{⪤}/⪤/g; # make hyperref stop complaining about "Token not allowed in a PDFDocEncoded string"
 
 	# make protoform pretty
 	$e{protoform} = prettify_protoform($e{protoform}); # make vertical
 
+	$e{mesoroots} = $dbh->selectall_arrayref("SELECT grpno,grp,plg,form,gloss FROM mesoroots
+		LEFT JOIN languagegroups USING (grpid)
+		WHERE mesoroots.tag=$e{tag} ORDER BY grpno,variant", {Slice=>{}});
+
 	# etymon notes
 	$e{notes} = [];
-	foreach (@{$dbh->selectall_arrayref("SELECT notetype, xmlnote FROM notes "
-			. "WHERE tag=$e{tag} AND notetype != 'F' ORDER BY ord")}) {
-		my $notetype = $_->[0];
+	$e{subgroupnotes} = [];
+	foreach (@{$dbh->selectall_arrayref("SELECT notetype, xmlnote, grpno, grp FROM notes
+			LEFT JOIN languagegroups ON (notes.id = languagegroups.grpid)
+			WHERE tag=$e{tag} AND notetype != 'F' ORDER BY grpno,ord")}) {
+		my ($notetype, $xmlnote, $grpno, $grp) = @$_;
 		next if $notetype eq 'I' && !$INTERNAL_NOTES; # skip internal notes if we're publishing
-		push @{$e{notes}}, {type=>$notetype, text=>xml2tex(decode_utf8($_->[1]))};
+		if ($grpno) {
+			push @{$e{subgroupnotes}}, {grpno=>$grpno, grp=>$grp, type=>$notetype, text=>xml2tex(decode_utf8($xmlnote))};
+		} else {
+			push @{$e{notes}}, {type=>$notetype, text=>xml2tex(decode_utf8($xmlnote))};
+		}
 	}
 
 
@@ -202,7 +206,29 @@ EndOfSQL
 			
 			if ($grpno ne $lastgrpno) {
 				$text .= '[1ex]' unless $lastgrpno eq ''; # add space above this row
-				$text .= "\\multicolumn{5}{l}{$grpno. $grp}\\\\*$group_space\n"; # if the star doesn't work, use \\nopagebreak before the \n
+				my ($tmp_grpno, $grpname);
+				while (@{$e{mesoroots}} && $e{mesoroots}[0]{grpno} lt $grpno
+						|| @{$e{subgroupnotes}} && $e{subgroupnotes}[0]{grpno} lt $grpno) {
+					if (@{$e{mesoroots}} && @{$e{subgroupnotes}} or @{$e{mesoroots}}) {
+						$tmp_grpno = $e{mesoroots}[0]{grpno};
+						$grpname   = $e{mesoroots}[0]{grp};
+					} else {
+						$tmp_grpno = $e{subgroupnotes}[0]{grpno};
+						$grpname   = $e{subgroupnotes}[0]{grp};
+					}
+					my ($meso, $note) = get_meso_notes($e{mesoroots}, $e{subgroupnotes}, $tmp_grpno);
+					$text .= "\\multicolumn{4}{>{\\hangindent=.8in}p{5.7in}}{$tmp_grpno. $grpname";
+					$text .= $meso;
+					$text .= '}&';
+					$text .= $note;
+					$text .= "\\\\*$group_space\n";
+				}
+				my ($meso, $note) = get_meso_notes($e{mesoroots}, $e{subgroupnotes}, $grpno);
+				$text .= "\\multicolumn{4}{>{\\hangindent=.8in}p{5.7in}}{$grpno. $grp";
+				$text .= $meso;
+				$text .= '}&';
+				$text .= $note;
+				$text .= "\\\\*$group_space\n"; # if the star doesn't work, use \\nopagebreak before the \n
 				$lastgrpno = $grpno;
 			}
 			
@@ -336,4 +362,45 @@ sub _tag2info {
 		$s = " $s" if $t; # add a space between if there's a printseq
 	}
 	return "\\textbf{$t}$s";
+}
+
+sub format_protoform {
+	my $s = shift;
+	for ($s) {
+		s/⪤} +/⪤} */g;
+		s/ OR +/ or */g;
+		s/\\textasciitilde\\ +/\\textasciitilde\\ */g;
+		s/ = +/ = */g;
+		s/^/*/;
+		s/(\*\S+)/\\textbf{$1}/g; # bold only the protoform, not allofam or "or"
+	}
+	return $s;
+}
+
+# given list of mesoroots and subgroupnotes, pull out everything belonging
+# to the present grpno from the front of the lists
+sub get_meso_notes {
+	my ($mesos, $notes, $grpno) = @_;
+	my @m;
+	while (@$mesos && $mesos->[0]{grpno} eq $grpno) {
+		push @m, shift @$mesos;
+	}
+	my $meso_string = '';
+	if (@m) {
+		$meso_string = ": $m[0]{plg} ";
+	}
+	$meso_string .= join ', ', map {format_protoform($_->{form}) . ' ' . $_->{gloss}} @m;
+	my $notes_string = '';
+	while (@$notes && $notes->[0]{grpno} eq $grpno) {
+		my ($notetype, $note) = ($notes->[0]{type}, $notes->[0]{text});
+		shift @$notes;
+		next if $notetype eq 'I' && !$INTERNAL_NOTES;
+		$notes_string .= "\\raisebox{-0.5ex}{\\footnotemark}";
+		$notes_string .= '\\footnotetext{';
+		$notes_string .= '\textit{' if $notetype eq 'I';
+		$notes_string .= $note;
+		$notes_string .= '}' if $notetype eq 'I';
+		$notes_string .= "}\n";
+	}
+	return $meso_string, $notes_string;
 }
