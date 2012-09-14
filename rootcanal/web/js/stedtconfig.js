@@ -192,7 +192,8 @@ $(document.body).insert(new Element('div', {id:'info',style:'display:none'}).upd
 $(document.body).on('click', 'a#hideinfo', function (e) { e.stop(); $('info').hide(); mOut_handler.start() });
 $(document).on('keydown', function (e) { if (e.keyCode === Event.KEY_ESC) { $('info').hide(); mOut_handler.start() } });
 var show_tag = function z(e) {
-	mOut_handler.start();
+	if (mOut_handler) // check in case this was never initialized (e.g. in edit/etyma, setup[lexicon] doesn't run its initialization)
+		mOut_handler.start();
 	var tags, elem = e.findElement(),
 		classnames = $w(elem.className).findAll(function(s){return s.substring(0,2)==='t_'});
 	e.stop();
@@ -279,6 +280,8 @@ var setup = { // in the form setup.[tablename].[fieldname]
 				// do_delete_check is defined in etyma.js; OK to put here because all the input.del_btn's are also created there
 				do_delete_check(e.findElement('tr').id.substring(3));
 			});
+			tbl.on('mouseover', 'a.elink', show_tag);
+			tbl.on('mouseout', 'a.elink', function () { $('info').hide() });
 		},
 		'etyma.tag' : {
 			label: '#',
@@ -287,7 +290,7 @@ var setup = { // in the form setup.[tablename].[fieldname]
 			size: 40,
 			transform: function (v) {
 				return '<a href="' + baseRef + 'etymon/' + v
-						+ '" target="stedt_etymon">' + (stedtuserprivs ? '' : '#') + v + '</a>';
+						+ '" target="stedt_etymon" class="elink t_'+v+'">' + (stedtuserprivs ? '' : '#') + v + '</a>';
 			}
 		},
 		'num_recs' : {
@@ -452,6 +455,11 @@ var setup = { // in the form setup.[tablename].[fieldname]
 			tbl.on('click', 'a.note_retriever', function (e) {
 				show_notes(e.findElement('tr').id.substring(3), e.findElement('td'));
 				e.stop();
+			});
+			tbl.on('mouseover', 'a.note_retriever', function (e) {
+				var rn = e.findElement('tr').id.substring(3);
+				Tips.add(e.findElement(), e, {ajax:{url:baseRef + 'notes/notes_for_rn', options:{parameters:{rn:rn}}},
+					stem:true, delay:0, fixed:true, showEffectDuration:0, className:'glass'});
 			});
 			tbl.on('mouseover', 'a.elink', show_tag);
 			mOut_handler = tbl.on('mouseout', 'a.elink', function (e) { e.stop(); $('info').hide() });
