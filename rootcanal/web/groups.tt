@@ -1,7 +1,9 @@
 [% PROCESS header.tt title="Language Groups - STEDT Database" %]
+<table id="lgtreehead">
+<tr><th style="width:4em">Group #</th><th>Group Name</th></tr>
+</table>
 <div id="lgtree">
 <table>
-<tr><th>Group #</th><th>Group Name</th></tr>
 [% FOREACH row IN grps -%]
 <tr[% IF row.0 == grpid %] bgcolor="#FFFF99" id="showme"[% END %]>
 	<td>[% row.1 %]</td>

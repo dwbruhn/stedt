@@ -42,8 +42,9 @@ div#info>div
 }
 
 /* for the groups page */
-div#lgtree { position:fixed; overflow:auto; top:3em; bottom:0px; left:0px; width:18em; } 
+div#lgtree { position:fixed; overflow:auto; top:5em; bottom:0px; left:0px; width:18em; }
 div#lginfo { position:fixed; overflow:auto; top:3em; bottom:0px; right:0px; left:19em; } 
+table#lgtreehead {position:fixed; top:3em; left:0px; width:18em; height:2em;}
 
 tr { vertical-align: top; }
 table.hangindent td { text-indent: -1em; padding-left: 1em; }
