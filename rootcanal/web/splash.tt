@@ -61,6 +61,7 @@
 </div>
 <div style="height:10ex"></div>
 <a href="[% self_url %]/group/1" target="stedt_grps">Language Groups Browser</a>
+| <a href="[% self_url %]/source" target="_blank">Source Bibliography</a>
 | <a href="[% self_url %]/chapters" target="_blank">Chapter Browser</a>
 <hr>
 <small>

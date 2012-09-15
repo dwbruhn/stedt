@@ -37,9 +37,14 @@ sub elink : Runmode {
 sub source : Runmode {
 	my $self = shift;
 	my $srcabbr = $self->param('srcabbr');
+	return $self->all_sources unless $srcabbr;
 	
 	my ($author, $year, $title, $imprint)
 		= $self->dbh->selectrow_array("SELECT author, year, title, imprint FROM srcbib WHERE srcabbr=?", undef, $srcabbr);
+	if (!defined($author)) {
+		$self->header_add(-status => 400);
+		return "Error: No source '$srcabbr' found";
+	}
 
 	my $lg_list = $self->dbh->selectall_arrayref(
 		"SELECT silcode, language, lgcode, grpid, grpno, grp, COUNT(lexicon.rn), lgid AS num_recs FROM languagenames NATURAL LEFT JOIN languagegroups LEFT JOIN lexicon USING (lgid) WHERE srcabbr=? AND lgcode != 0 GROUP BY lgid HAVING num_recs > 0 ORDER BY lgcode, language", undef, $srcabbr);
@@ -65,6 +70,17 @@ sub source : Runmode {
 		author=>$author, year=>$year, doc_title=>$title, imprint=>$imprint,
 		lgs  => $lg_list, srcabbr => $srcabbr, notes => \@notes, footnotes => \@footnotes
 	});
+}
+
+sub all_sources {
+	my $self = shift;
+	my $a = $self->dbh->selectall_arrayref("SELECT srcabbr, COUNT(DISTINCT languagenames.lgid) AS num_lgs,
+		COUNT(lexicon.rn) AS num_recs, citation, author, year, title, imprint
+		FROM srcbib LEFT JOIN languagenames USING (srcabbr) LEFT JOIN lexicon USING (lgid)
+		GROUP BY srcabbr
+		HAVING num_recs > 0
+		ORDER BY citation", {Slice=>{}});
+	return $self->tt_process("tt/all_sources.tt", { sources=>$a });
 }
 
 sub group : Runmode {
