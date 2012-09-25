@@ -61,11 +61,15 @@ if (@$hidden_etyma) {
 # build etyma hash
 print STDERR "building etyma data...\n";
 my %tag2info; # this is (and should only be) used inside xml2tex, for looking up etyma refs
+$vol  = "\d+" if ($vol  eq "x");
+$fasc = "\d+" if ($fasc eq "x");
+$chap = "\d+" if ($chap eq "x");
+my $chapterkey = "^$vol.$fasc.$chap";
 for (@{$dbh->selectall_arrayref("SELECT tag,chapter,sequence,protoform,protogloss FROM etyma")}) {
 	my ($tag,$chapter,@info) = map {decode_utf8($_)} @$_;
 	if ($chapter =~ /^1.9.\d$/) {
 		push @info, 'TBRS'; # "volume" info to print for cross refs in the notes
-	} elsif ($chapter ne "$vol.$fasc.$chap") {
+	} elsif ($chapter =~ /$chapterkey/) {
 		$info[0] = ''; # make sequence empty if not in the current extraction
 	}
 	$info[1] = '*' . $info[1];
