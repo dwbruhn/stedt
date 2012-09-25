@@ -1,3 +1,7 @@
+if($('prov_heading') != undefined) {
+	$('prov_heading').addTip('This etymon is provisional and should not be considered an "official" STEDT reconstruction.', 'Provisional Root', {className:'glass'});
+}
+
 setup['lexicon']['lexicon.rn'].transform = function (v) {
 	if (stedtuserprivs & 1) {
 		return '<a href="' + baseRef + 'edit/lexicon' + '?lexicon.rn=' + v + '" target="stedt_lexicon">' + v + '</a>';
@@ -16,7 +20,7 @@ setup['lexicon']['notes.rn'] = {
 		var a = v.match(/\d+/g).map(function (s) {
 			return '<a href="#foot' + s + '" id="toof' + s + '" class="footlink">' + s + '</a>';
 		});
-		a.push(addlink);
+		if (stedtuserprivs & 1) { a.push(addlink) };
 		return a.join(' ');
 	}
 };

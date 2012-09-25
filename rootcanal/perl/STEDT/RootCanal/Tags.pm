@@ -190,7 +190,7 @@ sub etymon : Runmode {
 
 	# pull out the etyma record
 	my $sql = qq#SELECT e.tag, e.chapter, e.sequence, e.protoform, e.protogloss, languagegroups.plg,
-						e.uid, users.username
+						e.uid, users.username, e.public
 FROM `etyma` AS `e` LEFT JOIN users ON (e.uid=users.uid) LEFT JOIN languagegroups ON (e.grpid=languagegroups.grpid)
 WHERE e.tag=? AND e.status != 'DELETE'#;
 	my $etyma_for_tag = $self->dbh->selectall_arrayref($sql, undef, $tag);
@@ -281,7 +281,7 @@ WHERE e.tag=? AND e.status != 'DELETE'#;
 		push @etyma, \%e;
 	
 		# heading stuff
-		@e{qw/tag chap sequence protoform protogloss plg uid username/} = @$_;
+		@e{qw/tag chap sequence protoform protogloss plg uid username public/} = @$_;
 		$e{plg} = $e{plg} eq 'PTB' ? '' : "$e{plg}";
 	
 		$e{protoform} =~ s/⪤ +/⪤ */g;

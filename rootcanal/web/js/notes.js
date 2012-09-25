@@ -109,74 +109,76 @@ function showaddform (spec, id, e) {
 	return false; // still need this here because etymon and chapter views have inline onclick
 };
 
-$('addnoteform').observe('submit', function (e) {
-	e.stop();
-	var f = $('addnoteform');
-	var spec = f.spec.value;
-	var id = f.id.value;
-	var container = null; // id of the enclosing div for sorting
-	// also set ord
-	if (spec === 'E') {
-		container = $('allnotes' + id);
-	} else if (spec === 'M') {
-		// special case, change M -> E
-		f.spec.value = 'E';
-		f.ord.value = 1;
-	} else if (spec === 'F') {
-		container = $('allcomparanda' + id);
-		f.spec.value = 'E'; // special case, change spec F -> E
-	} else if (spec === 'C' || spec === 'S') {
-		container = $('allnotes');
-	} else { // lexicon note
-		f.ord.value = 1;
-	}
-	if (container) {
-		var existing_notes = container.select('.reord');
-		if (existing_notes.size()) {
-			f.ord.value = +existing_notes.last().down('form').ord.value+1;
-		} else { // there are no existing notes; the first note's ord should be 1
+if($('addnoteform') != undefined) {	// doesn't exist for public users
+	$('addnoteform').observe('submit', function (e) {
+		e.stop();
+		var f = $('addnoteform');
+		var spec = f.spec.value;
+		var id = f.id.value;
+		var container = null; // id of the enclosing div for sorting
+		// also set ord
+		if (spec === 'E') {
+			container = $('allnotes' + id);
+		} else if (spec === 'M') {
+			// special case, change M -> E
+			f.spec.value = 'E';
+			f.ord.value = 1;
+		} else if (spec === 'F') {
+			container = $('allcomparanda' + id);
+			f.spec.value = 'E'; // special case, change spec F -> E
+		} else if (spec === 'C' || spec === 'S') {
+			container = $('allnotes');
+		} else { // lexicon note
 			f.ord.value = 1;
 		}
-	}
-	new Ajax.Request(baseRef + 'notes/add', {
-		parameters: f.serialize(),
-		onSuccess: function (t,json) {
-			var result = t.responseText.split("\r");
-			var note = result.shift();
-			if (container) {
-				// insert the HTML in the right place
-				container.insert(note);
-				// insert footnotes at the end, if necessary
-				// *** the code to adjust the footnote numbers is kind of ugly;
-				// the prettier way would be to send the current footnote number
-				// to the server, then increment footnote_counter by the
-				// number of text blocks in result.
-				$A(result).each(function (text) {
-					var n = ++footnote_counter;
-					var elem = new Element('p', {'class':'footnote fnote-' + $F(container.childElements().last().down('form')['noteid']), // the noteid is the value of the form's input named 'noteid'
-						id:'foot' + n});
-					elem.innerHTML = '<a href="#toof' + n + '">^ ' + n + '.</a> '
-						+ text;
-					f.up('body').insert(elem);
-				});
-				// enable the sort box if there are two or more sortable items
-				if (container.select('.reord').length > 1)
-					container.down('.reordcheckbox').enable();
-			} else {
-				// if it's a lex or subgroup note, stick it in at the bottom, and add the footnotemark in the table
-				f.up('body').insert(note);
-				++footnote_counter;
-				var cell = $(addform_fullid).childElements().last();
-				cell.innerHTML = cell.innerHTML + ' <a href="#foot' + footnote_counter + '" id="toof' + footnote_counter + '" class="footlink">' + footnote_counter + '</a>';
+		if (container) {
+			var existing_notes = container.select('.reord');
+			if (existing_notes.size()) {
+				f.ord.value = +existing_notes.last().down('form').ord.value+1;
+			} else { // there are no existing notes; the first note's ord should be 1
+				f.ord.value = 1;
 			}
-			f.xmlnote.value = ''; // reset the textarea
-			f.hide();
-		},
-		onFailure: function(t) {
-			alert(t.responseText);
 		}
+		new Ajax.Request(baseRef + 'notes/add', {
+			parameters: f.serialize(),
+			onSuccess: function (t,json) {
+				var result = t.responseText.split("\r");
+				var note = result.shift();
+				if (container) {
+					// insert the HTML in the right place
+					container.insert(note);
+					// insert footnotes at the end, if necessary
+					// *** the code to adjust the footnote numbers is kind of ugly;
+					// the prettier way would be to send the current footnote number
+					// to the server, then increment footnote_counter by the
+					// number of text blocks in result.
+					$A(result).each(function (text) {
+						var n = ++footnote_counter;
+						var elem = new Element('p', {'class':'footnote fnote-' + $F(container.childElements().last().down('form')['noteid']), // the noteid is the value of the form's input named 'noteid'
+							id:'foot' + n});
+						elem.innerHTML = '<a href="#toof' + n + '">^ ' + n + '.</a> '
+							+ text;
+						f.up('body').insert(elem);
+					});
+					// enable the sort box if there are two or more sortable items
+					if (container.select('.reord').length > 1)
+						container.down('.reordcheckbox').enable();
+				} else {
+					// if it's a lex or subgroup note, stick it in at the bottom, and add the footnotemark in the table
+					f.up('body').insert(note);
+					++footnote_counter;
+					var cell = $(addform_fullid).childElements().last();
+					cell.innerHTML = cell.innerHTML + ' <a href="#foot' + footnote_counter + '" id="toof' + footnote_counter + '" class="footlink">' + footnote_counter + '</a>';
+				}
+				f.xmlnote.value = ''; // reset the textarea
+				f.hide();
+			},
+			onFailure: function(t) {
+				alert(t.responseText);
+			}
+		});
 	});
-});
+}
 
 // show/hide the editing form
 $(document.body).on('click', 'input:button.note_edit_toggle', function (e) {
@@ -185,14 +187,16 @@ $(document.body).on('click', 'input:button.note_edit_toggle', function (e) {
 });
 
 // make a separate cheat sheet
-var notes_cheatsheet = $('cheat_source').clone(true);
-notes_cheatsheet.id = 'notes_markup_cheatsheet';
-notes_cheatsheet.style.display = 'none';
-$('addnoteform').insert({after:notes_cheatsheet});
-$(document.body).on('click', 'a.cheatsheet_link', function (e) {
-	$("notes_markup_cheatsheet").toggle();
-	e.stop();
-});
+if($('cheat_source') != undefined) {	// this doesn't exist for public users
+	var notes_cheatsheet = $('cheat_source').clone(true);
+	notes_cheatsheet.id = 'notes_markup_cheatsheet';
+	notes_cheatsheet.style.display = 'none';
+	$('addnoteform').insert({after:notes_cheatsheet});
+	$(document.body).on('click', 'a.cheatsheet_link', function (e) {
+		$("notes_markup_cheatsheet").toggle();
+		e.stop();
+	});
+}
 
 // fun with popovers
 $(document.body).on('mouseover', 'a.footlink', function (e) {
