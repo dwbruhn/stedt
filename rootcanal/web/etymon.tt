@@ -37,7 +37,7 @@ Reflexes <span class="u[% etyma.0.tag %]">tagged by <select name="DDMenu" onchan
 <h1>[% IF c.has_privs(1) %]<a href="[% self_url %]/edit/etyma?etyma.tag=[% e.tag %]" target="edit_etyma">[% END %]
 #[% e.tag %][% IF c.has_privs(1) %]</a>[% END %] [% e.plg %] [% e.protoform %] [% e.protogloss %]
 [%- IF e.uid != 8 && c.has_privs(1) %] <span class="u[% etyma.0.tag %]">(proposed by [% e.username %])</span>[% END -%]
-[%- IF !e.public %] <span id="prov_heading" style="color:red; cursor:help"><sup>&dagger;</sup></span> [% END -%]
+[%- IF !e.public %] <span id="prov_heading" style="color:red; cursor:help; font-size:medium">(provisional)</span> [% END -%]
 </h1>
 [% IF c.has_privs(1) %]
 [% IF e.plg != '' && e.plg != 'PST' -%]
