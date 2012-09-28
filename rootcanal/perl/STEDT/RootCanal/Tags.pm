@@ -8,6 +8,10 @@ use CGI::Application::Plugin::Redirect;
 
 sub make_meso : Runmode {
 	my $self = shift;
+	unless ($self->has_privs(8)) {
+		$self->header_add(-status => 403);
+		return "User not allowed to make mesoroots!";
+	}
 	my $dbh = $self->dbh;
 	my $q = $self->query;
 	my $oldtag = $q->param('oldtag');
@@ -34,9 +38,17 @@ sub make_meso : Runmode {
 	# add to the mesoroots table
 	my $sql = "INSERT INTO mesoroots (tag,grpid,form,gloss,old_tag,old_note) VALUES ($newtag, $grpid, ?, ?, $oldtag, ?)";
 	$dbh->do($sql, undef, $form, $gloss, $note);
+	my ($new_id) = $self->dbh->selectrow_array("SELECT LAST_INSERT_ID() FROM mesoroots");
+	print STDERR "New id is: $new_id\n";
 	
 	# migrate any existing mesoroots to the new tag
 	$dbh->do("UPDATE mesoroots SET tag=$newtag WHERE tag=$oldtag");
+	
+	# update changelog
+	$self->dbh->do("INSERT changelog (uid, change_type, `table`, id, col, oldval, newval, time) VALUES (?,?,?,?,?,?,?,NOW())", undef,
+		$self->param('uid'), 'make_meso', 'mesoroots', $new_id, 'tag', $oldtag, $newtag);
+
+	# prompt user to delete old tag	
 	return $self->redirect($q->url(-absolute=>1) . "/tags/delete_check?tag=$oldtag&newtag=$newtag");
 }
 
