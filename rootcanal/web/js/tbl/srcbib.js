@@ -11,7 +11,7 @@ setup.srcbib = {
 		noedit: true,
 		size:40,
 		transform : function (v, key) {
-			return '<a href="' + baseRef + 'edit/languagenames?languagenames.srcabbr=' + key + '" target="stedt_lgs">' + v + ' lg' + (v == 1 ? '' : 's') + '</a>';
+			return '<a href="' + baseRef + 'edit/languagenames?languagenames.srcabbr=' + key + '" target="edit_lgs">' + v + ' lg' + (v == 1 ? '' : 's') + '</a>';
 		}
 	},
 	'num_recs': {
