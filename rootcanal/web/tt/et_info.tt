@@ -1,12 +1,11 @@
 [% FOREACH etyma -%]
-<p>#[% tag %]: [% plg %] <b>[% pform %]</b> [% pgloss %]<p>
+<p><a href="[% c.query.url('-absolute',1) %]/etymon/[% tag %]" target="stedt_etymon">#[% tag %]:</a> [% plg %] <b>[% pform %]</b> [% pgloss %]</p>
 [% IF mesoroots.size -%]
 <ul>
 [% FOREACH mesoroots -%]
-<li>[% plg %] <b>*[% form %]</b> [% gloss %]
+<li><a href="[% c.query.url('-absolute',1) %]/etymon/[% tag %]#[% grpno %]" target="stedt_etymon">[% plg %]</a> <b>*[% form %]</b> [% gloss %]
 [% END -%]
 </ul>
 [% END -%]
-<p><a href="[% c.query.url('-absolute',1) %]/etymon/[% tag %]" target="stedt_etymon">Details for #[% tag %]</a></p>
 [% END -%]
 <span class="footnote right"><a href="#" id="hideinfo">hide</a></span>

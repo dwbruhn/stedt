@@ -27,7 +27,7 @@ sub elink : Runmode {
 		$e{pform} =~ s/~ +/~ */g;
 		$e{pform} =~ s/ = +/ = */g;
 		$e{pform} = '*' . $e{pform};
-		$e{mesoroots} = $self->dbh->selectall_arrayref("SELECT form,gloss,plg FROM mesoroots LEFT JOIN languagegroups USING (grpid) WHERE tag=$t", {Slice=>{}});
+		$e{mesoroots} = $self->dbh->selectall_arrayref("SELECT form,gloss,plg,grpno FROM mesoroots LEFT JOIN languagegroups USING (grpid) WHERE tag=$t", {Slice=>{}});
 		push @etyma, \%e;
 	}
 	return "Error: no valid tag numbers!" unless @etyma;
