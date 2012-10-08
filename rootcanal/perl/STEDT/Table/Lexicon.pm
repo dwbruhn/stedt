@@ -162,6 +162,7 @@ $t->wheres(
 	'languagegroups.grpid' => 'int',
 	'languagenames.srcabbr' => 'beginword',
 	'lexicon.lgid' => 'int',
+	'lexicon.srcid' => 'value',
 	'languagenames.lgcode' => 'int',
 	'lexicon.semkey' => 'value',
 	'analysis' => sub {
