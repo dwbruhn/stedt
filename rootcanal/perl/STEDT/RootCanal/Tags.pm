@@ -65,15 +65,15 @@ sub migrate_tag : Runmode {
 	my $new_tag = $q->param('new_tag');
 	
 	if ($tag !~ /^\d+$/ || $new_tag !~ /^\d+$/ || (defined($grpno) && $grpno !~ /^[\d.]+$/)) {
-	$self->header_add(-status => 400);
-	return "Invalid tag/grpno!";
+		$self->header_add(-status => 400);
+		return "Invalid tag/grpno!";
 	}
 	
 	# verify that an etymon exists with the new tag number
 	my ($etymon_exists) = $self->dbh->selectrow_array("SELECT COUNT(*) FROM etyma WHERE tag=$new_tag");
 	if (!$etymon_exists) {
-	$self->header_add(-status => 400);
-	return "No etymon yet exists with tag #$new_tag";
+		$self->header_add(-status => 400);
+		return "No etymon yet exists with tag #$new_tag";
 	}
 	
 	# GROUP_CONCAT has an upper limit (default 1024 bytes) which can be increased to the server max.
@@ -178,7 +178,7 @@ END
 					   $self->param('uid'), 'approval', $tag, 'lexicon', $rn, 'analysis', $old, $new, $uid) unless $old eq $new;
 		}
 	}
-	return $self->redirect($q->url(-absolute=>1) . "/etymon/$tag/$uid");
+	return $self->redirect($q->url(-absolute=>1) . "/etymon/$tag/$uid" . ((defined $grpno) ? "#$grpno" : ""));
 }
 
 # return an etymon page with notes, reflexes, etc.
