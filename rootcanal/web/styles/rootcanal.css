@@ -23,6 +23,11 @@
 
 }
 
+/* style the links */
+a:link {text-decoration:none;}    /* unvisited link */
+a:visited {text-decoration:none;} /* visited link */
+a:hover {color:#ffcc00;}   /* mouse over link */
+
 div#info
 {
 	display: block;
