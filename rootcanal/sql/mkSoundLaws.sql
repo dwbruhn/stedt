@@ -7,7 +7,7 @@ x.tag AS tag,
 m.mseq AS mseq,
 x.ind AS ind,
 'I' AS slot,
-e.plg AS protolg,
+g.plg AS protolg,
 e.initial AS ancestor,
 m.initial AS outcome,
 m.language AS language,
@@ -19,7 +19,10 @@ e.protogloss AS protogloss,
 m.reflex AS reflex,
 m.gloss AS gloss,
 m.morpheme AS morpheme
-FROM lx_et_hash x JOIN morphemes m on (x.rn=m.rn) JOIN etyma e WHERE e.tag = x.tag and m.mseq=x.ind
+FROM lx_et_hash x 
+JOIN morphemes m on (x.rn=m.rn and m.mseq=x.ind) 
+JOIN etyma e on (e.tag = x.tag)
+JOIN languagegroups g on (g.grpno = m.grpno)
 ;
 
 INSERT INTO soundlawsupport 
@@ -30,7 +33,7 @@ x.tag AS tag,
 x.ind AS ind,
 m.mseq AS mseq,
 'R' AS slot,
-e.plg AS protolg,
+g.plg AS protolg,
 e.rhyme AS ancestor,
 m.rhyme AS outcome,
 m.language AS language,
@@ -42,7 +45,10 @@ e.protogloss AS protogloss,
 m.reflex AS reflex,
 m.gloss AS gloss,
 m.morpheme AS morpheme
-FROM lx_et_hash x JOIN morphemes m on (x.rn=m.rn) JOIN etyma e WHERE e.tag = x.tag and m.mseq=x.ind
+FROM lx_et_hash x
+JOIN morphemes m on (x.rn=m.rn and m.mseq=x.ind)
+JOIN etyma e on (e.tag = x.tag)
+JOIN languagegroups g on (g.grpno = m.grpno)
 ;
 
 ALTER TABLE soundlawsupport ADD id INT NOT NULL AUTO_INCREMENT FIRST, ADD PRIMARY KEY (id);

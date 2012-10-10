@@ -4,7 +4,6 @@ use strict;
 use Data::Dumper;
 use utf8;
 use DBI;
-use SyllabificationStation;
 use Encode qw/decode/;
 use STEDTUtil;
 
@@ -24,7 +23,6 @@ while (<DAT>) {
 
 #print $tr1 . "\n";
 
-my $syls = SyllabificationStation->new();
 my $counter = 0;
 
 while (<>) {
