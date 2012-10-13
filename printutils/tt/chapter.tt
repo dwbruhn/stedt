@@ -95,4 +95,14 @@
 
 [% END -%]
 [% END -%]
+
+\newpage
+List of source abbreviations:
+
+\url{http://stedt.berkeley.edu/srcabbr}
+
+List of other references:
+
+\url{http://stedt.berkeley.edu/refonly}
+
 \end{document}
