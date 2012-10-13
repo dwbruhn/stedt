@@ -31,7 +31,7 @@ sub gsarpa : Runmode {
 }
 
 my %secret_codes = (
-	allofam => 2,				# casual user
+	'tibeto-burman' => 2,				# casual user
 	rhinoglottophilia => 1,		# tagger
 	columbicubiculomania => 31,	# superuser with all bits set
 );
