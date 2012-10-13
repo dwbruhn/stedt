@@ -51,6 +51,8 @@ logged in as <b>[% user %]</b>
 <option value="[% self_url %]/edit/lexicon">Lexicon</option>
 <option value="[% self_url %]/edit/languagenames">LgNames</option>
 <option value="[% self_url %]/edit/srcbib">SrcBib</option>
+[% END # has_privs(1) -%]
+[% IF c.has_privs(8) -%]
 <option value="[% self_url %]/edit/projects">Projects</option>
 <option value="[% self_url %]/edit/chapters">Chapters</option> 
 <option value="[% self_url %]/edit/morphemes">Morphemes</option> 
@@ -58,10 +60,8 @@ logged in as <b>[% user %]</b>
 <option value="[% self_url %]/edit/glosswords">Glosses</option> 
 <option value="[% self_url %]/admin/progress">Progress</option> 
 <option value="[% self_url %]/edit/projects">Projects</option>
-[% END # has_privs(1) -%]
-[% IF c.has_privs(8) -%]
-<option value="[% self_url %]/account">My Account</option>
 [% END # has_privs(8) -%]
+<option value="[% self_url %]/account">My Account</option>
 </select>
 </form>
   <a href="[% self_url %]/logout">log out</a>

@@ -83,6 +83,28 @@ sub all_sources {
 	return $self->tt_process("tt/all_sources.tt", { sources=>$a });
 }
 
+sub srcabbr : Runmode {
+	my $self = shift;
+	my $a = $self->dbh->selectall_arrayref("SELECT srcabbr, COUNT(DISTINCT languagenames.lgid) AS num_lgs,
+		COUNT(lexicon.rn) AS num_recs, citation, author, year, title, imprint
+		FROM srcbib LEFT JOIN languagenames USING (srcabbr) LEFT JOIN lexicon USING (lgid)
+		GROUP BY srcabbr
+		HAVING num_recs > 0
+		ORDER BY srcabbr", {Slice=>{}});
+	return $self->tt_process("tt/all_sources_by_srcabbr.tt", { sources=>$a });
+}
+
+sub refonly : Runmode {
+	my $self = shift;
+	my $a = $self->dbh->selectall_arrayref("SELECT srcabbr,
+		COUNT(lexicon.rn) AS num_recs, author, year, title, imprint
+		FROM srcbib LEFT JOIN languagenames USING (srcabbr) LEFT JOIN lexicon USING (lgid)
+		GROUP BY srcabbr
+		HAVING num_recs = 0
+		ORDER BY author,year", {Slice=>{}});
+	return $self->tt_process("tt/ref_only.tt", { sources=>$a });
+}
+
 sub group : Runmode {
 	my $self = shift;
 	my $grpid = $self->param('id');

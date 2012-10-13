@@ -1,0 +1,14 @@
+[% PROCESS header.tt title="References - STEDT Database" %]
+
+<p>List of references (not used as data sources):</p>
+
+<table class="hangindent">
+<tr><th>Reference</tr>
+[% FOREACH sources -%]
+<tr>
+	<td>[% author %] [% year %] <cite>[% title %]</cite> [% imprint %]</td>
+</tr>
+[% END -%]
+</table>
+</body>
+</html>
