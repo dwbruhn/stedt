@@ -34,6 +34,33 @@ sub elink : Runmode {
 	return $self->tt_process("tt/et_info.tt", {etyma=>\@etyma});
 }
 
+# runmode for downloaded all data from a source.
+# must have priv "2" - i.e. must have an account, but need not be a tagger
+sub ddata : Runmode {
+	my $self = shift;
+	$self->require_privs(2);
+	my $srcabbr = $self->query->param('srcabbr');
+	if (!defined($srcabbr)) {
+		$self->header_add(-status => 400);
+		return "Error: No source specified";
+	}
+	my $a = $self->dbh->selectall_arrayref("SELECT rn, reflex, gloss, gfn, srcabbr, lgid, language, srcid
+		FROM lexicon LEFT JOIN languagenames USING (lgid) LEFT JOIN languagegroups USING (grpid)
+		WHERE languagenames.srcabbr=?", undef, $srcabbr);
+	unless (@$a) {
+		$self->header_add(-status => 400);
+		return "Error: No records for source $srcabbr";
+	}
+	my $result = join("\t", qw|rn reflex gloss gfn srcabbr lgid language srcid|) . "\n";
+	for my $row (@$a) {
+		$result .= join("\t", @$row) . "\n";
+	}
+	$self->header_add(-type => 'text/csv',
+		-attachment => "$srcabbr.csv",
+		-Content_length => length($result));
+	return $result;
+}
+
 sub source : Runmode {
 	my $self = shift;
 	my $srcabbr = $self->param('srcabbr');

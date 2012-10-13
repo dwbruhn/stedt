@@ -22,6 +22,9 @@ on [% USE date %][% date.format(date.now, '%F') %].
 <p>[% n.text %]</p>
 [% END # foreach -%]
 [% END # if has_privs(16) -%]
+[% IF c.has_privs(2) && srcabbr != "SIL-Nuosu" -%]
+<p><a href="[% self_url %]/search/ddata?srcabbr=[% srcabbr %]">Download data for [% srcabbr %]</a></p>
+[% END -%]
 
 <p>Languages in this source:</p>
 
