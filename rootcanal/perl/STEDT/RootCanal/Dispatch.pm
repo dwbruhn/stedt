@@ -9,7 +9,7 @@ sub dispatch_args {
 			'gnis'		   => { app => 'Search', rm => 'combo' },
 			'logout'           => { app => 'Account', rm => 'logout' },
 			'update'	   => { app=>'Edit', rm => 'update' },
-			'source/:srcabbr?'  => { app=>'Search', rm => 'source' },
+			'source/:srcabbr?'  => { app=>'Sources' },
 			'group/:id/:lgid?' => { app=>'Search', rm => 'group' },
 			'etymon/:tag/:uid2?'=> { app=>'Tags', rm => 'etymon' },
 			'edit/:tbl'	   => { app=>'Edit', rm => 'table' },
