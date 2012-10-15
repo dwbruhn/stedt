@@ -57,7 +57,8 @@ setup.languagenames = {
 		noedit: true,
 		size:120,
 		transform : function (v, key, rec, i) {
-			return rec[i-2] + ' - ' + rec[i-1];
+			return '<a href="' + baseRef + 'group/' + rec[i] + '" target="stedt_grps">' +
+			rec[i-2] + ' - ' + rec[i-1] + '</a>';
 		}
 	}
 };
