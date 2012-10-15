@@ -25,7 +25,7 @@ if (param('tag')) {
 elsif (param('semkey')) {
   if (param('format') eq 'pdf') {
     my $url = "https://corpus.linguistics.berkeley.edu/~stedt-cgi-ssl/makefasc.pl?semkey=" . param('semkey');
-    redirect($url);
+    print header(-location => $url);
   }
   else {
     makeheader();
@@ -94,7 +94,7 @@ sub byKey {
     next if ($f == 0);
     if ($c == 0) {
       # cache this fascicle info
-      print ">>> start: " . $chapter . "\n";
+      #print ">>> start: " . $chapter . "\n";
       $chaptertitle = from_utf8_to_xml_entities($chaptertitle);
       $startf = "\n<fascicle><num>$chapter</num><title>" . $chaptertitle . "</title>\n" ;
       my $etyma;
@@ -139,7 +139,7 @@ sub byTag {
   
   # Query for record from Etyma database
   
-  $sql = "SELECT plg, protoform, protogloss, chapters.semkey, chapters.chaptertitle, sequence FROM etyma, chapters WHERE etyma.chapter=chapters.semkey AND tag=?";
+  $sql = "SELECT languagegroups.plg, protoform, protogloss, chapters.semkey, chapters.chaptertitle, sequence FROM etyma, chapters, languagegroups WHERE etyma.chapter=chapters.semkey AND etyma.grpid=languagegroups.grpid AND tag=?";
   #print STDERR "$sql\n";
   $sth = $dbh->prepare($sql);
   $sth->execute($etymon);
