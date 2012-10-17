@@ -112,7 +112,7 @@ var grp_confirm = function (tag, grp_name) {
 		+ ' for tag #' + tag + ' in subgroup ' + grp_name + '?');
 };
 
-var grpno_index = $('languagegroups.grpno').cellIndex;
+if ($('languagegroups.grpno')) var grpno_index = $('languagegroups.grpno').cellIndex;
 	// Counting backwards doesn't work (i.e., "tbody.rows[0].cells.length - 3")
 	// because there may or may not be a HIST column depending on if the user is logged in.
 	// Note that having multiple <TH> elements with the same id value ("languagegroups.grpid", etc.)

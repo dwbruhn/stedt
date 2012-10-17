@@ -19,3 +19,4 @@ ALTER TABLE  `srcbib` CHANGE  `refonly`  `refonly` VARCHAR( 2 ) CHARACTER SET ut
 ALTER TABLE  `srcbib` CHANGE  `citechk`  `citechk` VARCHAR( 20 ) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT  '';
 ALTER TABLE  `srcbib` CHANGE  `pi`  `pi` VARCHAR( 20 ) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT  '';
 ALTER TABLE  `srcbib` CHANGE  `totalnum`  `totalnum` VARCHAR( 16 ) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT  '';
+ALTER TABLE  `mesoroots` CHANGE  `old_tag`  `old_tag` SMALLINT( 6 ) UNSIGNED NOT NULL DEFAULT  '0';
