@@ -39,7 +39,7 @@ sub make_meso : Runmode {
 	my $sql = "INSERT INTO mesoroots (tag,grpid,form,gloss,old_tag,old_note) VALUES ($newtag, $grpid, ?, ?, $oldtag, ?)";
 	$dbh->do($sql, undef, $form, $gloss, $note);
 	my ($new_id) = $self->dbh->selectrow_array("SELECT LAST_INSERT_ID() FROM mesoroots");
-	print STDERR "New id is: $new_id\n";
+	# print STDERR "New id is: $new_id\n";
 	
 	# migrate any existing mesoroots to the new tag
 	$dbh->do("UPDATE mesoroots SET tag=$newtag WHERE tag=$oldtag");
