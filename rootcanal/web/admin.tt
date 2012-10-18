@@ -40,9 +40,7 @@ Activity:
 <ul>
 <li><a href="[% self_url %]/admin/changes">change log</a></li>
 <li><a href="[% self_url %]/admin/queries">recent queries (public interface)</a></li>
-[% IF c.has_privs(8) -%]
 <li><a href="[% self_url %]/admin/progress">progress report, tagging awaiting approval, etc.</a></li>
-[% END -%]
 </ul>
 
 Accounts:
@@ -63,7 +61,7 @@ Tools:
 
 Stuff for the public:
 <ul>
-<li><a href="https://corpus.linguistics.berkeley.edu/~stedt-cgi/lg_table.cgi">STEDT Database Language Statistics</a></li>
+<li><a href="http://stedt.berkeley.edu/~stedt-cgi/lg_table.cgi">STEDT Database Language Statistics</a></li>
 <li><a href="[% self_url %]">public interface (main page)</a></li>
 </ul>
 </body></html>

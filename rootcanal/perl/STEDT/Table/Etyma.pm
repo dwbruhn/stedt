@@ -221,10 +221,13 @@ $t->add_form_items(
 $t->add_check(sub {
 	my $cgi = shift;
 	my $err = '';
-	$err .= "Chapter not specified!\n" unless $cgi->param('etyma.chapter');
+	# $err .= "Chapter not specified!\n" unless $cgi->param('etyma.chapter');
 	$err .= "Protoform is empty!\n" unless $cgi->param('etyma.protoform');
 	$err .= "Protogloss is empty!\n" unless $cgi->param('etyma.protogloss');
 	$err .= "Protolanguage not specified!\n" unless $cgi->param('etyma.grpid');
+	if ($cgi->param('etyma.chapter') eq '') {	# set chapter to 'x.x' if user has left it blank
+		$cgi->param('etyma.chapter','x.x');
+	}
 	return $err;
 });
 

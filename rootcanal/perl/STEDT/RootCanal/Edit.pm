@@ -222,6 +222,20 @@ sub update : Runmode {
 	# and recording the field as "user_an" (or "analysis" if changing the stedt tags).
 	my ($tblname, $field, $id, $value) = ($q->param('tbl'), $q->param('field'),
 		$q->param('id'), decode_utf8($q->param('value')));
+	
+	# restrict taggers from editing etyma not their own
+	# this just seemed like the best place to put this code
+	if ($tblname eq 'etyma' && !$self->has_privs(8)) {
+		my $cur_uid = $self->param('uid');
+		my ($ety_owner) = $self->dbh->selectrow_array("SELECT uid FROM etyma WHERE tag=$id");
+		if ($cur_uid != $ety_owner) {
+			$self->header_add(-status => 403); # Forbidden
+			return "You are not allowed to edit other users' etyma.";
+		}
+		# print STDERR "Etymon tag is $id. Uid is $cur_uid. Etymon owner is $ety_owner."
+	}
+	# end tagger restriction test
+	
 	my $uid2 = $q->param('uid2');
 	my $uid1 = $q->param('uid1'); # these will be set to undef if there is no such param
 	my $fake_uid;

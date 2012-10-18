@@ -1,8 +1,12 @@
 setup['etyma']['etyma.grpid'].noedit = false;
-setup['etyma']['etyma.status'].transform = function (v) {
-	if (v.toUpperCase() === 'DELETE' || v === 'KEEP') return v;
-	return v + '<input value="Del" type="button" class="del_btn">';
-};
+
+// add delete button for approvers
+if (stedtuserprivs & 8) {
+	setup['etyma']['etyma.status'].transform = function (v) {
+		if (v.toUpperCase() === 'DELETE' || v === 'KEEP') return v;
+		return v + '<input value="Del" type="button" class="del_btn">';
+	};
+}
 setup['etyma']['etyma.status'].size = 40;
 var do_delete_check = function (tag) {
 	new Ajax.Request(baseRef + 'tags/delete_check0', {

@@ -65,17 +65,16 @@ Otherwise the whole row will be ignored.</p>
 <h3>1 - tagger</h3>
 <ul>
 	<li>see list of users</li>
-	<li>see admin page</li>
+	<li>see (limited) admin page</li>
 	<li>see changelog</li>
 	<li>see querylog</li>
-	<li>see deviant glosses</li>
 	<li>see progress/detail pages</li>
 	<li>see owners of non-"public" (i.e., provisional) etyma</li>
-	<li>see/use the edit/&lt;TABLE&gt; interface</li>
-	<li>add new etyma</li>
-	<li>add, modify, and delete your own notes</li>
+	<li>see/use some of the edit/&lt;TABLE&gt; interfaces</li>
+	<li>add/modify their own etyma</li>
+	<li>add, modify, and delete their own notes</li>
 	<li>see internal notes</li>
-	<li>add/delete delimiters to lexicon.reflex</li>
+	<li>add/delete delimiters in lexicon.reflex</li>
 	<li>see other people's tags</li>
 </ul>
 
@@ -83,7 +82,9 @@ Otherwise the whole row will be ignored.</p>
 <ul>
 	<li>edit other people's tags (including approved STEDT tags)</li>
 	<li>approve tags</li>
-	<li>modify and delete any notes</li>
+	<li>modify any etyma</li>
+	<li>use soft-deletion interface for etyma</li>
+	<li>modify/delete any notes</li>
 	<li>reorder notes</li>
 	<li>run the sequencer (on etyma in a "chapter")</li>
 	<li>edit "chapters" table</li>
@@ -103,8 +104,10 @@ Otherwise the whole row will be ignored.</p>
 	<li>[disabled/unimplemented: show "advanced search"]</li>
 </ul>
 
+[% IF c.has_privs(16) -%]
 <p>See also <tt>field_visible_privs</tt>, <tt>field_editable_privs</tt> in the Table.pm subclasses
 and <tt>stedtuserprivs</tt> in the javascripts.</p>
+[% END -%]
 
 </body>
 </html>

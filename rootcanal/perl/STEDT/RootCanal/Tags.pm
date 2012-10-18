@@ -489,6 +489,7 @@ sub meso_edit : Runmode {
 # returns empty string if all OK.
 sub delete_check0 : Runmode {
 	my $self = shift;
+	$self->require_privs(8);
 	my $tag = $self->query->param('tag');
 	die "invalid tag '$tag'!\n" unless $tag =~ s/^(\d+)$/$1/;
 	my $sql = qq#SELECT
@@ -522,6 +523,7 @@ sub hilite_text {
 
 sub delete_check : Runmode {
 	my $self = shift;
+	$self->require_privs(8);
 	my $tag = $self->query->param('tag');
 	die "invalid tag '$tag'!\n" unless $tag =~ s/^(\d+)$/$1/;
 	my $sql = qq#SELECT tag, 
@@ -580,7 +582,7 @@ sub delete_check : Runmode {
 
 sub soft_delete : Runmode {
 	my $self = shift;
-	$self->require_privs(1); # for soft delete
+	$self->require_privs(8); # for soft delete
 	my $tag = $self->query->param('tag');
 	die "invalid tag '$tag'!\n" unless $tag =~ s/^(\d+)$/$1/;
 	my $sql = qq#SELECT
@@ -616,6 +618,7 @@ sub soft_delete : Runmode {
 
 sub delete_check_all : Runmode {
 	my $self = shift;
+	$self->require_privs(16);
 	my $sql = qq#SELECT tag, 
 			(SELECT COUNT(DISTINCT id) FROM mesoroots WHERE tag = e.tag) AS num_mesoroots,
 			(SELECT COUNT(DISTINCT rn) FROM lx_et_hash WHERE tag=e.tag AND uid=8) AS num_recs,
