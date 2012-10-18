@@ -87,6 +87,7 @@ my ($self, $dbh, $privs, $uid2, $uid1) = @_;
 my $t = $self->SUPER::new($dbh, 'lexicon', 'lexicon.rn', $privs); # dbh, table, key, privs
 
 $t->query_from(q|lexicon LEFT JOIN languagenames USING (lgid) LEFT JOIN languagegroups USING (grpid)|);
+$t->default_where('lexicon.status != "HIDE" AND lexicon.status != "DELETED"');
 $t->order_by('languagegroups.grpno, languagenames.lgsort, lexicon.reflex, languagenames.srcabbr, lexicon.srcid');
 $t->fields(
 	'lexicon.rn',

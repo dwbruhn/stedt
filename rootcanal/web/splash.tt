@@ -66,7 +66,20 @@
 <hr>
 <small>
 <a href="http://stedt.berkeley.edu/">STEDT Home Page</a> | 
-<a href="[% self_base %]contact.html" target="_blank">Contact Us</a>
+<a href="[% self_base %]contact.html" target="_blank">Contact Us</a> | 
+[% IF user -%]
+<script>
+var stedtuserprivs = [% c.param('userprivs') %];
+[% IF c.has_privs(16) -%]
+var rootcanal_t0 = Date.now();
+[% END -%]
+</script>
+logged in as <b>[% user %]</b> | 
+<a href="[% self_url %]/logout">Log out</a>
+[% ELSE # user -%]
+<a href="[% self_url %]/account/login?url=[% c.query.url('-path',1,'-query',1) | url %]">Log in</a> | 
+<a href="[% self_url %]/account/gsarpa">Register</a>
+[% END # user -%]
 </small>
 </center>
 </div>

@@ -3,14 +3,15 @@
 [% IF err.exists -%]
 <p>Could not create account (see error(s) below). You can try again...</p>
 [% END -%]
-
 <form method="post" name="acct_form" action="[% self_url %]/account/create">
-username: <input type="text" size="10" name="newuser" maxlength="15">[% err.newuser %]<br>
-password: <input type="password" size="10" name="newpwd">[% err.newpwd %]<br>
-confirm password: <input type="password" size="10" name="newpwd2">[% err.newpwd2 %]<br>
-email (in case you forget your password): <input type="text" size="30" name="email">[% err.email %]<br>
-secret code: <input type="text" size="10" name="secret_code">[% err.secret_code %] (type "tibeto-burman" for a basic account)<br>
-<input name="btn" type="submit" value="Create">
+<table>
+<tr><td>username:</td><td><input type="text" size="10" name="newuser" maxlength="15"></td><td>[% err.newuser %]</td><td></td></tr>
+<tr><td>password:</td><td><input type="password" size="10" name="newpwd"></td><td>[% err.newpwd %]</td><td></td></tr>
+<tr><td>confirm password:</td><td><input type="password" size="10" name="newpwd2"></td><td>[% err.newpwd2 %]</td><td></td></tr>
+<tr><td>email:</td><td><input type="text" size="30" name="email"></td><td>[% err.email %]</td><td> (in case you forget your password)</td></tr>
+<tr><td>secret code:</td><td><input type="text" size="10" name="secret_code"></td><td>[% err.secret_code %]</td><td>(type "tibeto-burman" for a basic account)</td></tr>
+<tr><td><input name="btn" type="submit" value="Create">
+<table>
 </form>
 
 </body>
