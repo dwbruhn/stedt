@@ -30,7 +30,12 @@ setup.chapters = {
         noedit: true,
         size: 250,
 	transform : function (v,k,rec,n) {
-	    return v ? rec[n-1] + ': <a href="' + baseRef + 'edit/glosswords?glosswords.semkey=' + rec[0] + '" target="edit_glosswords">' + v + '</a>' : '';
+		if (stedtuserprivs & 8) {
+			return v ? rec[n-1] + ': <a href="' + baseRef + 'edit/glosswords?glosswords.semkey=' + rec[0] + '" target="edit_glosswords">' + v + '</a>' : '';
+		}
+		else {
+			return v;
+		}
 	}
     },
     'gloss_link' : {

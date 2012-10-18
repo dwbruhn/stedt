@@ -5,12 +5,22 @@ use Encode;
 use utf8;
 use Time::HiRes qw(time);
 use CGI::Application::Plugin::Redirect;
+use Switch;
 
 sub table : StartRunmode {
 	my $self = shift;
 	my $t0 = time();
-	$self->require_privs(1);
 	my $tbl = $self->param('tbl');
+	# restrict particular tables from tagger-level users
+	switch ($tbl) {
+		case 'chapters'		{ $self->require_privs(8) }
+		case 'hptb'		{ $self->require_privs(8) }
+		case 'glosswords'	{ $self->require_privs(8) }
+		case 'morphemes'	{ $self->require_privs(8) }
+		case 'projects'		{ $self->require_privs(8) }
+		else			{ $self->require_privs(1) }
+	}
+	
 	my $q = $self->query;
 	# get 2 uids from edit.tt: the values selected in the two dropdowns.
 	# these will be passed in to the select for the analysis and user_an columns

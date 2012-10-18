@@ -70,7 +70,7 @@ Otherwise the whole row will be ignored.</p>
 	<li>see querylog</li>
 	<li>see deviant glosses</li>
 	<li>see progress/detail pages</li>
-	<li>see non-"public" etyma</li>
+	<li>see owners of non-"public" (i.e., provisional) etyma</li>
 	<li>see/use the edit/&lt;TABLE&gt; interface</li>
 	<li>add new etyma</li>
 	<li>add, modify, and delete your own notes</li>
@@ -79,9 +79,9 @@ Otherwise the whole row will be ignored.</p>
 	<li>see other people's tags</li>
 </ul>
 
-<h3>8 - authorizer</h3>
+<h3>8 - approver</h3>
 <ul>
-	<li>edit other people's tags</li>
+	<li>edit other people's tags (including approved STEDT tags)</li>
 	<li>approve tags</li>
 	<li>modify and delete any notes</li>
 	<li>reorder notes</li>
@@ -104,7 +104,7 @@ Otherwise the whole row will be ignored.</p>
 </ul>
 
 <p>See also <tt>field_visible_privs</tt>, <tt>field_editable_privs</tt> in the Table.pm subclasses
-and <tt>stedtuserprivs<tt> in the javascripts.</p>
+and <tt>stedtuserprivs</tt> in the javascripts.</p>
 
 </body>
 </html>

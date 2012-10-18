@@ -15,7 +15,13 @@
 [% IF ch.first.0 == v && ch.first.1 == f # check to see if the next semkey belongs in this cell -%]
 [% r = ch.shift -%]
 <div class="chapterlabel">[% r.0 _ '.' _ r.1 %]<br>[% r.2 %]</div>
-[% IF r.4 %]<div class="lowerright" title="chapters"><a target="edit_chapters" href="[% self_url %]/edit/chapters?chapters.v=[% v %]&chapters.f=[% f %]">[% r.4 %]</a></div>[% END -%]
+[% IF r.4 %]<div class="lowerright" title="chapters">
+[%- IF c.has_privs(8) # block taggers from linking to edit/chapters -%]
+<a target="edit_chapters" href="[% self_url %]/edit/chapters?chapters.v=[% v %]&chapters.f=[% f %]">[% r.4 %]</a>
+[%- ELSE -%]
+[% r.4 %]
+[%- END # privileges if-else -%]
+</div>[% END # r.4 %]
 [% IF r.3 %]<div class="lowerleft" title="etyma"><a target="edit_etyma" href="[% self_url %]/edit/etyma?etyma.chapter=[% v _ '.' _ f _ '%' %]">[% r.3 %]</a></div>[% END -%]
 [% END # v.f -%]
 </div></td>

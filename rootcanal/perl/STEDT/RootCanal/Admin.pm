@@ -41,7 +41,7 @@ sub where_word { my ($k,$v) = @_; $v =~ s/^\*(?=.)// ? "$k RLIKE '$v'" : "$k RLI
 
 sub updateprojects : Runmode {
 	my $self = shift;
-	$self->require_privs(1);
+	$self->require_privs(8);
 	my $t0 = time();
 	require STEDT::RootCanal::stopwords;
 	import STEDT::RootCanal::stopwords;
@@ -113,7 +113,7 @@ sub queries : Runmode {
 
 sub deviants : Runmode {
 	my $self = shift;
-	$self->require_privs(1);
+	$self->require_privs(8);
 
 	# count number of records with deviant glosses
 	my %conditions = ('to VERB','^to [^/(]',
@@ -133,7 +133,7 @@ sub deviants : Runmode {
 
 sub progress : Runmode {
 	my $self = shift;
-	$self->require_privs(1);
+	$self->require_privs(8);
 
 	my $a = $self->dbh->selectall_arrayref("SELECT username, users.uid,
 			COUNT(DISTINCT tag), COUNT(DISTINCT rn)
@@ -159,7 +159,7 @@ sub progress : Runmode {
 
 sub progress_detail : Runmode {
 	my $self = shift;
-	$self->require_privs(1);
+	$self->require_privs(8);
 
 	my $months = $self->dbh->selectcol_arrayref("SELECT CONCAT(YEAR(time), ' ', MONTHNAME(time)) FROM changelog WHERE change_type='approval' GROUP BY 1 ORDER BY YEAR(time) DESC, MONTH(time) DESC");
 	my $a = $self->dbh->selectall_arrayref("SELECT CONCAT(YEAR(time), ' ', MONTHNAME(time)), username ,COUNT(*) FROM changelog LEFT JOIN users ON (changelog.owner_uid=users.uid) WHERE change_type='approval' GROUP BY 1,2");
