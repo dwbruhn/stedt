@@ -5,9 +5,9 @@
 # jbl 3/7/2012, and earlier
 #
 # clean up any old files
-if [ ! -f Syllabificationstation.pm ];
+if [ ! -f SyllabificationStation.pm ];
 then
-  echo "NB: Syllabificationstation.pm and STEDTUtil.pm must be copied here from ../../printutils!"
+  echo "NB: SyllabificationStation.pm and STEDTUtil.pm must be copied here from ../../printutils!"
   exit
 fi
 rm lexicon.csv temp1.csv morphemes.txt 
