@@ -4,21 +4,43 @@
 	<th>plg</th>
 	<th>protoform</th>
 	<th>protogloss</th>
+	<th>owner</th>
 	<th></th>
 </tr>
+[% IF c.has_privs(8) # if user has approver privileges, allow editing/deleting of all mesoroots -%]
 [% FOREACH f IN forms -%]
 <tr>
 <td>[% f.plg %]</td>
 <td><input name="form_[% f.id %]" type="text" value="[% f.form | html %]" size="15" maxlength="44"></td>
 <td><input name="gloss_[% f.id %]" type="text" value="[% f.gloss | html %]" size="15" maxlength="62"></td>
+<td>[% f.username | html %]</td>
 <td><input name="delete_[% f.id %]" type="checkbox"><label for="delete_[% f.id %]">delete</label></td>
 </tr>
-[% END -%]
+[% END # privileged user forms loop %]
+[% ELSE # otherwise, user can only edit own mesoroots %]
+[% FOREACH f IN forms # check owner of each mesoroot -%]
+<tr>
+<td>[% f.plg %]</td>
+[% IF f.uid == c.param('uid') # if the mesoroot on this row belongs to the current user, they can edit it %]
+<td><input name="form_[% f.id %]" type="text" value="[% f.form | html %]" size="15" maxlength="44"></td>
+<td><input name="gloss_[% f.id %]" type="text" value="[% f.gloss | html %]" size="15" maxlength="62"></td>
+<td>[% f.username | html %]</td>
+<td><input name="delete_[% f.id %]" type="checkbox"><label for="delete_[% f.id %]">delete</label></td>
+[% ELSE # otherwise, just display the mesoroot, no editing or deleting %]
+<td>[% f.form | html %]</td>
+<td>[% f.gloss | html %]</td>
+<td>[% f.username | html %]</td>
+<td></td>
+[% END # owner check %]
+</tr>
+[% END # restricted user forms loop %]
+[% END # approver privs check -%]
 <tr>
 <td>[% plg %]</td>
 <td><input name="form_00" type="text" size="15" maxlength="44"></td>
 <td><input name="gloss_00" type="text" size="15" maxlength="62"></td>
-<td>&lt;-- add new</td>
+<td></td>
+<td>&#8656; add new</td>
 </tr>
 </table>
 

@@ -36,7 +36,8 @@ sub make_meso : Runmode {
 	$dbh->do("UPDATE notes SET tag=$newtag, id=$grpid WHERE tag=$oldtag");
 	
 	# add to the mesoroots table
-	my $sql = "INSERT INTO mesoroots (tag,grpid,form,gloss,old_tag,old_note) VALUES ($newtag, $grpid, ?, ?, $oldtag, ?)";
+	# note that make_meso sets uid of mesoroot to 8, so it's de facto approval
+	my $sql = "INSERT INTO mesoroots (tag,grpid,form,gloss,old_tag,old_note,uid) VALUES ($newtag, $grpid, ?, ?, $oldtag, ?, 8)";
 	$dbh->do($sql, undef, $form, $gloss, $note);
 	my ($new_id) = $self->dbh->selectrow_array("SELECT LAST_INSERT_ID() FROM mesoroots");
 	# print STDERR "New id is: $new_id\n";
@@ -429,13 +430,20 @@ EndOfSQL
 
 sub mesoforms : Runmode {
 	my $self = shift;
+	$self->require_privs(1);
 	my $q = $self->query;
 	my $tag = $q->param('tag');
 	my $grpid = $q->param('grp');
 	die "bad tag!\n" unless $tag =~ /^\d+$/;
 	die "bad grpid!\n" unless $grpid =~ /^\d+$/;
-	my $a = $self->dbh->selectall_arrayref("SELECT id,form,gloss,plg FROM mesoroots LEFT JOIN languagegroups USING (grpid)
-			WHERE tag=$tag AND grpid=$grpid", {Slice=>{}});
+	my $a = $self->dbh->selectall_arrayref("SELECT id,form,gloss,plg,uid,username FROM mesoroots
+			LEFT JOIN languagegroups USING (grpid)
+			LEFT JOIN users USING (uid)
+			WHERE tag=$tag AND grpid=$grpid
+			ORDER BY FIELD(uid,8) DESC, uid ASC, id ASC", {Slice=>{}});
+			# sort order: stedt mesoroots first, then in ascending order by uid
+			# where one uid has two mesoroots, sort by id
+			
 	return $self->tt_process('tt/edit_mesoreconstructions.tt', {
 		forms=>$a,
 		tag=>$tag, grpid=>$grpid,
@@ -452,34 +460,69 @@ sub meso_edit : Runmode {
 	my $grpid = $q->param('grp');
 	my $plg = decode_utf8($q->param('plg'));
 	my $all_ids = $q->param('all_ids');
+	my $cur_uid = $self->param('uid');
 	my @result;
+
 	for my $id (split /,/, $all_ids) {
 		if ($q->param('delete_' . $id)) {
+			
+			# reject any deletions that taggers try to make to mesoroots not their own
+			# this is the second line of defense: the interface should already lock the delete box
+			unless ($self->has_privs(8)) {
+				my ($meso_owner) = $self->dbh->selectrow_array("SELECT uid FROM mesoroots WHERE id=?", undef, $id);
+
+				# if the mesoroot doesn't belong to the tagger, just skip the attempted deletion
+				# have to push the mesoroot into the result array and skip the DB delete command
+				if ($cur_uid != $meso_owner) {
+					my $undeleted = @{$self->dbh->selectall_arrayref("SELECT form,gloss FROM mesoroots WHERE id=?", {Slice=>{}}, $id)}[0];
+					push @result, "$plg *$undeleted->{form} $undeleted->{gloss}";
+					print STDERR "STEDT: uid $cur_uid attempted to delete mesoroot $id, owned by uid $meso_owner.\n";
+					next;
+				}
+			}
+			
 			$self->dbh->do("DELETE FROM mesoroots WHERE id=?", undef, $id);
 			$self->dbh->do("INSERT changelog (uid, change_type, `table`, id, oldval, newval, time)
 							VALUES (?,?,?,?,'','',NOW())", undef,
-					   $self->param('uid'), 'delete', 'mesoroots', $id);
+					   $cur_uid, 'delete', 'mesoroots', $id);
 			next;
 		}
 		my $new = {};
 		$new->{form} = decode_utf8($q->param('form_' . $id));
 		$new->{gloss} = decode_utf8($q->param('gloss_' . $id));
 		my $old = @{$self->dbh->selectall_arrayref("SELECT form,gloss FROM mesoroots WHERE id=?", {Slice=>{}}, $id)}[0];
+		
+		# prevent taggers from editing mesoroots not their own
+		# note that all mesoroots from the subgroup are passed to the meso_edit function, even if unmodified
+		# so the presence of a mesoroot here not owned by a tagger doesn't necessarily indicate that they modified it
+		unless ($self->has_privs(8)) {
+				my ($meso_owner) = $self->dbh->selectrow_array("SELECT uid FROM mesoroots WHERE id=?", undef, $id);
+
+				# if the mesoroot doesn't belong to the tagger, just skip the attempted edit
+				# push the unmodified mesoroot into the result array and skip the DB update command
+				if ($cur_uid != $meso_owner) {
+					push @result, "$plg *$old->{form} $old->{gloss}";
+					next;
+				}
+			}
+		
 		$self->dbh->do("UPDATE mesoroots SET form=?, gloss=? WHERE id=?", undef, $new->{form}, $new->{gloss}, $id);
 		for my $fld (qw|form gloss|) {
 			next if $new->{$fld} eq $old->{$fld};
 			$self->dbh->do("INSERT changelog (uid, `table`, id, col, oldval, newval, time)
 							VALUES (?,?,?,?,?,?,NOW())", undef,
-				$self->param('uid'), 'mesoroots', $id, $fld, $old->{$fld}, $new->{$fld});
+				$cur_uid, 'mesoroots', $id, $fld, $old->{$fld}, $new->{$fld});
 		}
 		push @result, "$plg *$new->{form} $new->{gloss}";
 	}
+	
+	# add new mesoroot
 	if ((my $form = decode_utf8($q->param("form_00"))) && (my $gloss = decode_utf8($q->param("gloss_00")))) {
-		$self->dbh->do("INSERT mesoroots (form,gloss,tag,grpid) VALUES (?,?,?,?)", undef,
-			$form, $gloss, $tag, $grpid);
+		$self->dbh->do("INSERT mesoroots (form,gloss,tag,grpid,uid) VALUES (?,?,?,?,?)", undef,
+			$form, $gloss, $tag, $grpid, $cur_uid);
 		$self->dbh->do("INSERT changelog (uid, change_type, `table`, id, oldval, newval, time)
 						VALUES (?,?,?,LAST_INSERT_ID(), '', '', NOW())", undef,
-				   $self->param('uid'), 'new_rec', 'mesoroots');
+				   $cur_uid, 'new_rec', 'mesoroots');
 		push @result, "$plg *$form $gloss";
 	}
 	return join ",<br>", @result;
