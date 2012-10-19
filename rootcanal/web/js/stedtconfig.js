@@ -189,7 +189,7 @@ function show_root(tag) {
 	});
 };
 $(document.body).insert(new Element('div', {id:'info',style:'display:none'}).update('<div></div>')) ;
-$(document.body).on('click', 'a#hideinfo', function (e) { e.stop(); $('info').hide(); mOut_handler.start() });
+$(document.body).on('click', 'a#hideinfo', function (e) { e.stop(); $('info').hide(); if (mOut_handler) mOut_handler.start() });
 $(document).on('keydown', function (e) { if (e.keyCode === Event.KEY_ESC) { $('info').hide(); if (mOut_handler) mOut_handler.start() } });
 var show_tag = function z(e) {
 	if (mOut_handler) // check in case this was never initialized (e.g. in edit/etyma, setup[lexicon] doesn't run its initialization)
