@@ -464,13 +464,15 @@ sub meso_edit : Runmode {
 	my @result;
 
 	for my $id (split /,/, $all_ids) {
+
+		# get the owner uid
+		my ($meso_owner) = $self->dbh->selectrow_array("SELECT uid FROM mesoroots WHERE id=?", undef, $id);
+
 		if ($q->param('delete_' . $id)) {
 			
 			# reject any deletions that taggers try to make to mesoroots not their own
 			# this is the second line of defense: the interface should already lock the delete box
 			unless ($self->has_privs(8)) {
-				my ($meso_owner) = $self->dbh->selectrow_array("SELECT uid FROM mesoroots WHERE id=?", undef, $id);
-
 				# if the mesoroot doesn't belong to the tagger, just skip the attempted deletion
 				# have to push the mesoroot into the result array and skip the DB delete command
 				if ($cur_uid != $meso_owner) {
@@ -496,15 +498,13 @@ sub meso_edit : Runmode {
 		# note that all mesoroots from the subgroup are passed to the meso_edit function, even if unmodified
 		# so the presence of a mesoroot here not owned by a tagger doesn't necessarily indicate that they modified it
 		unless ($self->has_privs(8)) {
-				my ($meso_owner) = $self->dbh->selectrow_array("SELECT uid FROM mesoroots WHERE id=?", undef, $id);
-
-				# if the mesoroot doesn't belong to the tagger, just skip the attempted edit
-				# push the unmodified mesoroot into the result array and skip the DB update command
-				if ($cur_uid != $meso_owner) {
-					push @result, "$plg *$old->{form} $old->{gloss}";
-					next;
-				}
+			# if the mesoroot doesn't belong to the tagger, just skip the attempted edit
+			# push the unmodified mesoroot into the result array and skip the DB update command
+			if ($cur_uid != $meso_owner) {
+				push @result, "$plg *$old->{form} $old->{gloss}";
+				next;
 			}
+		}
 		
 		$self->dbh->do("UPDATE mesoroots SET form=?, gloss=? WHERE id=?", undef, $new->{form}, $new->{gloss}, $id);
 		for my $fld (qw|form gloss|) {

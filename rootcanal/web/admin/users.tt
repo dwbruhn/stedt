@@ -73,6 +73,7 @@ Otherwise the whole row will be ignored.</p>
 	<li>see/use some of the edit/&lt;TABLE&gt; interfaces</li>
 	<li>add/modify their own etyma</li>
 	<li>add, modify, and delete their own notes</li>
+	<li>add, modify, and delete their own mesoroots</li>
 	<li>see internal notes</li>
 	<li>add/delete delimiters in lexicon.reflex</li>
 	<li>see other people's tags</li>
@@ -83,6 +84,7 @@ Otherwise the whole row will be ignored.</p>
 	<li>edit other people's tags (including approved STEDT tags)</li>
 	<li>approve tags</li>
 	<li>modify any etyma</li>
+	<li>modify/delete any mesoroots</li>
 	<li>use soft-deletion interface for etyma</li>
 	<li>modify/delete any notes</li>
 	<li>reorder notes</li>
