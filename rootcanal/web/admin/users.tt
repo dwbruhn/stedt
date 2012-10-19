@@ -23,7 +23,7 @@
 <td>[% row.0 %]</td>
 <td>[% uid %]</td>
 <td>[% row.2 %]</td>
-<td><input name="priv2_[% uid %]" type="checkbox"[% row.3 ? ' checked disabled' : '' %][% row.3 || !c.has_privs(16) ? ' disabled' : '' %]></td>
+<td><input name="priv2_[% uid %]" type="checkbox"[% row.3 ? ' checked' : '' %][% c.has_privs(16) ? '' : ' disabled' %]></td>
 <td><input name="priv1_[% uid %]" type="checkbox"[% row.4 ? ' checked' : '' %][% c.has_privs(16) ? '' : ' disabled' %]></td>
 <td><input name="priv8_[% uid %]" type="checkbox"[% row.5 ? ' checked' : '' %][% c.has_privs(16) ? '' : ' disabled' %]></td>
 <td><input name="priv16_[% uid %]" type="checkbox"[% row.6 ? ' checked' : '' %][% c.has_privs(16) ? '' : ' disabled' %]></td>

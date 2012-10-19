@@ -31,8 +31,8 @@ sub gsarpa : Runmode {
 }
 
 my %secret_codes = (
-	'tibeto-burman' => 2,				# casual user
-	rhinoglottophilia => 1,		# tagger
+	'tibeto-burman' => 2,		# casual user
+	rhinoglottophilia => 3,		# tagger
 	columbicubiculomania => 31,	# superuser with all bits set
 );
 
@@ -299,6 +299,7 @@ sub update_all : Runmode {
 		my ($password) = ($q->param("password_$uid"));
 		my $privs = 0;
 		$privs += 2 if $q->param("priv2_$uid");
+		# print STDERR "Bit 2 checkbox for uid $uid is: " . $q->param("priv2_$uid") . "\n";
 		$privs += 1 if $q->param("priv1_$uid");
 		$privs += 8 if $q->param("priv8_$uid");
 		$privs += 16 if $q->param("priv16_$uid");
