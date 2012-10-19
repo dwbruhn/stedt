@@ -65,11 +65,12 @@ $t->searchable('etyma.tag',
 	#'etyma.xrefs',#'etyma.possallo','etyma.allofams'	# search these and tagging note and notes DB before deleting records. Also switch to OR searching below.
 	'etyma.status',
 	'num_notes',
-	'etyma.prefix',
-	'etyma.initial',
-	'etyma.rhyme',
-	'etyma.tone',
+#	'etyma.prefix',
+#	'etyma.initial',
+#	'etyma.rhyme',
+#	'etyma.tone',
 	'etyma.public',
+	'etyma.uid',
 );
 $t->field_editable_privs(
 	'etyma.sequence' => 8,
@@ -128,7 +129,18 @@ $t->search_form_items(
 		return $cgi->popup_menu(-name => 'etyma.grpid', -values=>[@ids],
   								-default=>'',
   								-labels=>\%labels);
-	}
+	},
+	'etyma.uid' => sub {
+		my $cgi = shift;
+		# get list of users who own etyma
+		my $users = $dbh->selectall_arrayref("SELECT DISTINCT uid, username FROM etyma LEFT JOIN users USING (uid) ORDER BY uid");
+		my @uids = map {$_->[0]} @$users;
+		my %usernames;
+		@usernames{@uids} = map {$_->[1] . ' (id:' . $_->[0] . ')'} @$users;
+		return $cgi->popup_menu(-name => 'etyma.uid', -values=>['', @uids],
+							-labels=>\%usernames,
+							-default=>'');
+	},
 );
 
 $t->wheres(

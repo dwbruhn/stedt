@@ -438,9 +438,12 @@ var setup = { // in the form setup.[tablename].[fieldname]
 			noedit: !(stedtuserprivs & 16)
 		},
 		'users.username' : {
-			label: 'user',
+			label: 'owner',
 			size: 60,
 			noedit: true
+		},
+		'etyma.uid' : { // this is just a search field
+			label: 'owner'
 		}
 	},
 	lexicon : {
