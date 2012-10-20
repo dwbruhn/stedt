@@ -8,25 +8,29 @@
 <tr>
 	<th>username</th>
 	<th>uid</th>
+[% IF c.has_privs(8) # only show advanced information to approvers and above %]
 	<th>email</th>
 	<th>user (2)</th>
 	<th>tagger (1)</th>
 	<th>approver (8)</th>
 	<th>superuser (16)</th>
+[% END # privs8 check -%]
 [% IF c.has_privs(16) -%]
 	<th>NEW password</th>
-[% END -%]
+[% END # privs16 check -%]
 </tr>
 [% FOREACH row IN users -%]
 [% SET uid = row.1 %]
 <tr>
 <td>[% row.0 %]</td>
 <td>[% uid %]</td>
+[% IF c.has_privs(8) # only show advanced information to approvers and above %]
 <td>[% row.2 %]</td>
 <td><input name="priv2_[% uid %]" type="checkbox"[% row.3 ? ' checked' : '' %][% c.has_privs(16) ? '' : ' disabled' %]></td>
 <td><input name="priv1_[% uid %]" type="checkbox"[% row.4 ? ' checked' : '' %][% c.has_privs(16) ? '' : ' disabled' %]></td>
 <td><input name="priv8_[% uid %]" type="checkbox"[% row.5 ? ' checked' : '' %][% c.has_privs(16) ? '' : ' disabled' %]></td>
 <td><input name="priv16_[% uid %]" type="checkbox"[% row.6 ? ' checked' : '' %][% c.has_privs(16) ? '' : ' disabled' %]></td>
+[% END # privs8 check -%]
 [% IF c.has_privs(16) -%]
 <td><input name="password_[% uid %]" type="text" size="31" maxlength="63"></td>
 [% END -%]
@@ -52,8 +56,9 @@ Otherwise the whole row will be ignored.</p>
 
 [% ELSE -%]
 </table>
-[% END -%]
+[% END # privs16 check -%]
 
+[% IF c.has_privs(8) # only show privileges information to approvers and above -%]
 <h2>Privileges cheat sheet</h2>
 
 <h3>2 - registered</h3>
@@ -105,6 +110,7 @@ Otherwise the whole row will be ignored.</p>
 	<li>edit source notes</li>
 	<li>[disabled/unimplemented: show "advanced search"]</li>
 </ul>
+[% END # privs8 check -%]
 
 [% IF c.has_privs(16) -%]
 <p>See also <tt>field_visible_privs</tt>, <tt>field_editable_privs</tt> in the Table.pm subclasses
