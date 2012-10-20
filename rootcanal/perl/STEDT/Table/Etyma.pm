@@ -193,7 +193,7 @@ $t->addable(
 	'etyma.protogloss',
 	'etyma.grpid',
 	'etyma.notes',
-	'etyma.semkey',
+#	'etyma.semkey',
 );
 $t->add_form_items(
 	'etyma.tag' => sub {

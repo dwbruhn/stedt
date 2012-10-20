@@ -20,3 +20,4 @@ ALTER TABLE  `srcbib` CHANGE  `citechk`  `citechk` VARCHAR( 20 ) CHARACTER SET u
 ALTER TABLE  `srcbib` CHANGE  `pi`  `pi` VARCHAR( 20 ) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT  '';
 ALTER TABLE  `srcbib` CHANGE  `totalnum`  `totalnum` VARCHAR( 16 ) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT  '';
 ALTER TABLE  `mesoroots` CHANGE  `old_tag`  `old_tag` SMALLINT( 6 ) UNSIGNED NOT NULL DEFAULT  '0';
+ALTER TABLE  `etyma` CHANGE  `semkey`  `semkey` VARCHAR( 50 ) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT  ''
