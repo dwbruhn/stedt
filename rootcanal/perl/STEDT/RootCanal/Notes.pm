@@ -19,7 +19,10 @@ sub add : RunMode {
 	my ($spec, $id, $ord, $type, $xml, $uid, $id2) = ($q->param('spec'), $q->param('id'),
 		$q->param('ord'), $q->param('notetype'),
 		decode_utf8(markup2xml($q->param('xmlnote'))),
-		$q->param('uid'), $q->param('id2'));
+		$q->param('uid') || -1, $q->param('id2'));
+	# $q->param('uid') only exists for "approvers"; if it doesn't exist it will
+	# return an empty list here since it's list context, and id2 will unfortunately
+	# get assigned to $uid. Hence, ||ing with -1 to give a scalar value.
 	my $key = $spec eq 'L' ? 'rn' : $spec eq 'E' ? 'tag' : 'id';
 	if ($uid != 8 && $uid != $self->param('uid')) {
 		# force uid to be either 8 or the current user's uid
