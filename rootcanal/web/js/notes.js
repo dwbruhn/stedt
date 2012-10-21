@@ -161,7 +161,7 @@ if($('addnoteform') != undefined) {	// doesn't exist for public users
 						f.up('body').insert(elem);
 					});
 					// enable the sort box if there are two or more sortable items
-					if (container.select('.reord').length > 1)
+					if ((container.select('.reord').length > 1) && container.down('.reordcheckbox'))
 						container.down('.reordcheckbox').enable();
 				} else {
 					// if it's a lex or subgroup note, stick it in at the bottom, and add the footnotemark in the table
