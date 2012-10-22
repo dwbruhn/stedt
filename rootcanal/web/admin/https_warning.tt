@@ -1,8 +1,11 @@
 [% PROCESS header.tt title="STEDT Database: Login Page" %]
 [%- IF !c.query.cookie('stsec') %]
-<p>Oops. You must be using a secure connection to do that. Try connecting via https...</p>
+<p>Oops. You must be using a secure connection to do that. Please follow the link below if you are not redirected within 3 seconds:</p>
 [%- new_url = c.query.url('-path',1,'-query',1).replace('^http:', 'https:') -%]
 <p><a href="[% new_url | url %]">[% new_url | html %]</a></p>
+<script>
+setTimeout(function(){location.href = "[% new_url | url %]"}, 3000);
+</script>
 [%- ELSIF !c.param('user') -%]
 <h1>STEDT Database Login</h1>
 <p>The page you are trying to access requires you to log in first.</p>
