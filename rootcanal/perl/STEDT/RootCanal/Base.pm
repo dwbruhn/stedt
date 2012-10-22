@@ -7,6 +7,8 @@ use CGI::Application::Plugin::AutoRunmode;
 use CGI::Application::Plugin::DBH qw/dbh_config dbh/;
 use CGI::Application::Plugin::ConfigAuto qw/cfg/;
 
+sub dummy : StartRunMode {'This space intentionally left blank.'} # do nothing instead of generating an error
+
 # This is the base class for different STEDT::RootCanal modules.
 # It handles
 # (1) connecting to the database

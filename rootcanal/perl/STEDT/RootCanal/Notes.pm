@@ -5,8 +5,6 @@ our @EXPORT = qw(xml2html xml2markup guess_num_lines collect_lex_notes);
 use Encode;
 use utf8;
 
-sub dummy : StartRunMode {'This space intentionally left blank.'} # do nothing instead of generating an error
-
 sub add : RunMode {
 	my $self = shift;
 	unless ($self->has_privs(1)) {
