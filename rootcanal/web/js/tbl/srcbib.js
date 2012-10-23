@@ -22,21 +22,27 @@ setup.srcbib = {
 		}
 	},
 	'srcbib.citation': {
-		size:100
+		size:100,
+		noedit: !(stedtuserprivs & 8)
 	},
 	'srcbib.author': {
+		noedit: !(stedtuserprivs & 8),
 		size:120
 	},
 	'srcbib.year': {
+		noedit: !(stedtuserprivs & 8),
 		size:50
 	},
 	'srcbib.title': {
+		noedit: !(stedtuserprivs & 8),
 		size:120
 	},
 	'srcbib.imprint': {
+		noedit: !(stedtuserprivs & 8),
 		size:100
 	},
 	'srcbib.status': {
+		noedit: !(stedtuserprivs & 8),
 		size:100,
 		transform : function (v, key) {
 			v = v.replace(/\n\n+/, '<p>');
@@ -45,12 +51,15 @@ setup.srcbib = {
 		}
 	},
 	'srcbib.notes': {
+		noedit: !(stedtuserprivs & 8),
 		size:100
 	},
 	'srcbib.todo': {
+		noedit: !(stedtuserprivs & 8),
 		size:100
 	},
 	'srcbib.format': {
+		noedit: !(stedtuserprivs & 8),
 		size:100
 	},
 	'num_notes': {

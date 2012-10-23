@@ -13,34 +13,42 @@ setup.languagenames = {
 		}
 	},
 	'languagenames.srcabbr': {
+		noedit: true,
 		size:70,
  		transform : function (v) {
 			return '<a href="' + baseRef + 'edit/srcbib?srcbib.srcabbr=' + v + '" target="edit_src">' + v + '</a>';
 		}
 	},
 	'languagenames.lgabbr': {
-		size:100
+		size:100,
+		noedit: true
 	},
 	'languagenames.lgcode': {
-		size:40
+		size:40,
+		noedit: !(stedtuserprivs & 8)
 	},
 	'languagenames.silcode': {
 		size:40,
+		noedit: !(stedtuserprivs & 8),
 		transform : function (v) {
 			return '<a href="http://www.ethnologue.com/show_language.asp?code=' + v + '" target="stedt_ethnologue">' + v + '</a>';
 		}
 	},
 	'languagenames.language': {
-		size:120
+		size:120,
+		noedit: !(stedtuserprivs & 8)
 	},
 	'languagenames.lgsort': {
-		size:90
+		size:90,
+		noedit: !(stedtuserprivs & 8)
 	},
 	'languagenames.notes': {
-		size:60
+		size:60,
+		noedit: !(stedtuserprivs & 8)
 	},
 	'languagenames.srcofdata': {
-		size:50
+		size:50,
+		noedit: !(stedtuserprivs & 8)
 	},
 	'languagegroups.grpno': {
 		noedit: true,

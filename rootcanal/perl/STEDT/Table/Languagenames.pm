@@ -42,16 +42,26 @@ $t->searchable(
 	'languagegroups.grp',
 
 );
-$t->editable(
-	'languagenames.language',
-	'languagenames.lgsort'  ,
-	'languagenames.notes'   ,
-	'languagenames.lgcode',
-	'languagenames.silcode',
-	'languagenames.srcofdata',
+#$t->editable(
+#	'languagenames.language',
+#	'languagenames.lgsort'  ,
+#	'languagenames.notes'   ,
+#	'languagenames.lgcode',
+#	'languagenames.silcode',
+#	'languagenames.srcofdata',
 #	'languagenames.pinotes' ,
 #	'languagenames.picode'  ,
-	'languagenames.grpid'	,
+#	'languagenames.grpid'	,
+#);
+
+$t->field_editable_privs(
+	     'languagenames.language' => 8,
+	     'languagenames.lgsort' => 8,
+	     'languagenames.notes' => 8,
+	     'languagenames.lgcode' => 8,
+	     'languagenames.silcode' => 8,
+	     'languagenames.srcofdata' => 8,
+	     'languagenames.grpid' => 8,
 );
 
 # Stuff for searching
