@@ -1,4 +1,48 @@
-var mOut_handler;
+// if the window loses focuses (e.g., if the user follows a link inside the etymon info popup),
+// then prevent the popup from disappearing (we want it to still be there when the user returns to the page)
+// doesn't seem to work in Firefox, so maybe can be improved someday using event handlers
+jQuery(window).blur(function() { window.clearTimeout(etHideTimer) });
+
+// This is hideous, but necessary for setTimeout to be able to pass arguments to the callback function in IE
+// (without using an anonymous closure)
+// Otherwise, show_tag doesn't get the event object
+// see https://developer.mozilla.org/en-US/docs/DOM/window.setTimeout
+/*\
+|*|
+|*|  IE-specific polyfill which enables the passage of arbitrary arguments to the
+|*|  callback functions of javascript timers (HTML5 standard syntax).
+|*|
+|*|  https://developer.mozilla.org/en-US/docs/DOM/window.setInterval
+|*|
+|*|  Syntax:
+|*|  var timeoutID = window.setTimeout(func, delay, [param1, param2, ...]);
+|*|  var timeoutID = window.setTimeout(code, delay);
+|*|  var intervalID = window.setInterval(func, delay[, param1, param2, ...]);
+|*|  var intervalID = window.setInterval(code, delay);
+|*|
+\*/
+ 
+if (document.all && !window.setTimeout.isPolyfill) {
+  var __nativeST__ = window.setTimeout;
+  window.setTimeout = function (vCallback, nDelay /*, argumentToPass1, argumentToPass2, etc. */) {
+    var aArgs = Array.prototype.slice.call(arguments, 2);
+    return __nativeST__(vCallback instanceof Function ? function () {
+      vCallback.apply(null, aArgs);
+    } : vCallback, nDelay);
+  };
+  window.setTimeout.isPolyfill = true;
+}
+ 
+if (document.all && !window.setInterval.isPolyfill) {
+  var __nativeSI__ = window.setInterval;
+  window.setInterval = function (vCallback, nDelay /*, argumentToPass1, argumentToPass2, etc. */) {
+    var aArgs = Array.prototype.slice.call(arguments, 2);
+    return __nativeSI__(vCallback instanceof Function ? function () {
+      vCallback.apply(null, aArgs);
+    } : vCallback, nDelay);
+  };
+  window.setInterval.isPolyfill = true;
+}
 
 // function findPos(obj) { // based on http://www.quirksmode.org/js/findpos.html
 // 	var curleft = 0, curtop = 0;
@@ -188,20 +232,18 @@ function show_root(tag) {
 		onFailure: function (transport){ alert('Error: ' + transport.responseText); }
 	});
 };
-$(document.body).insert(new Element('div', {id:'info',style:'display:none'}).update('<div></div>')) ;
-$(document.body).on('click', 'a#hideinfo', function (e) { e.stop(); $('info').hide(); if (mOut_handler) mOut_handler.start() });
-$(document).on('keydown', function (e) { if (e.keyCode === Event.KEY_ESC) { $('info').hide(); if (mOut_handler) mOut_handler.start() } });
+$(document.body).insert(new Element('div', {id:'info',style:'display:none'}).update('<div></div>'));
+// $(document).on('keydown', function (e) { if (e.keyCode === Event.KEY_ESC) { $('info').hide() } });
 var show_tag = function z(e) {
-	if (mOut_handler) // check in case this was never initialized (e.g. in edit/etyma, setup[lexicon] doesn't run its initialization)
-		mOut_handler.start();
 	var tags, elem = e.findElement(),
 		classnames = $w(elem.className).findAll(function(s){return s.substring(0,2)==='t_'});
 	e.stop();
-	if (elem === z.curr_elem && $('info').visible() && event.type === 'click') {
-		$('info').hide();
-		z.curr_elem = '';
-		return;
-	}
+	// this code is for handling clicks on the same elink; no longer needed
+//	if (elem === z.curr_elem && $('info').visible() && event.type === 'click') {
+//		$('info').hide();
+//		z.curr_elem = '';
+//		return;
+//	}
 	if (classnames.length) tags = classnames.invoke('substring', 2).map(function(n){return parseInt(n,10)}); else return;
 	if (z.cache[tags.join(',')]) {
 		z.show_info(z.cache[tags.join(',')], elem);
@@ -226,6 +268,56 @@ show_tag.show_info = function (t, elem) {
 	x.setStyle({left:loc[0] + 'px', top:loc[1] + 'px'}).show();
 	show_tag.curr_elem = elem;
 };
+
+var etShowTimer = 0;
+var etHideTimer = 0;
+var et_info_popup = function (e) {
+
+	// debugging
+	// window.console && console.log && console.log("Event: " + e.type, "| Target: ", e.target);
+
+	if (e.type === 'click' && $w(e.target.className)[0] === 'elink') {  // if the user clicks on an elink, show the info popup immediately
+		window.clearTimeout(etHideTimer);
+		window.clearTimeout(etShowTimer);
+		show_tag(e);
+	}
+	else if (e.type === 'mouseover' && $w(e.target.className)[0] === 'elink') {  // the user moused over an elink
+	
+		if (e.findElement() === show_tag.curr_elem && $('info').visible()) {
+			// if the info popup is visible and is associated with the current elink, then
+			// stop any countdown to clear the info popup
+			window.clearTimeout(etHideTimer);
+		}
+		else {
+			// otherwise, show the new info popup after a delay
+			// (the mouseout/mouseleave event will handle hiding the old info popup)
+			etShowTimer = window.setTimeout(show_tag, 600, e);		
+		}
+	}
+	else if (e.type === 'mouseout' && $w(e.target.className)[0] === 'elink') {  // the user moused off an elink
+		// if the user moused off the elink before the info popup showed, prevent it from showing
+		window.clearTimeout(etShowTimer);
+		
+		// set a small delay before the info div hides
+		etHideTimer = window.setTimeout(function () { $('info').hide() }, 400);
+	}
+	else if (e.type === 'mouseenter') {	// this event type is only associated with the info popup, so we don't have to check the target
+		// the user moused into the info popup
+		// don't let the info popup disappear
+		window.clearTimeout(etHideTimer);
+	}
+	else if (e.type === 'mouseleave') {	// this event type is only associated with the info popup, so we don't have to check the target
+		// the user moused out of the info popup
+		// set a small delay before the info div hides
+		etHideTimer = window.setTimeout(function () { $('info').hide() }, 400);
+	}
+};
+
+// use jQuery hover (combo of mouseenter & mouseleeave) to handle mouse movements into the info popup (which has an unnamed inner div)
+// NOTE that these will pass jQuery-type event objects to et_info_popup (not Prototype)
+// so you can't use stuff like findElement()
+jQuery("#info").hover(et_info_popup);
+
 
 // How to activate tagging mode? (== box around some syllable somewhere)
 // -> double-click a syllable
@@ -280,8 +372,8 @@ var setup = { // in the form setup.[tablename].[fieldname]
 				// do_delete_check is defined in etyma.js; OK to put here because all the input.del_btn's are also created there
 				do_delete_check(e.findElement('tr').id.substring(3));
 			});
-			tbl.on('mouseover', 'a.elink', show_tag);
-			tbl.on('mouseout', 'a.elink', function () { $('info').hide() });
+			tbl.on('mouseover', 'a.elink', et_info_popup);
+			tbl.on('mouseout', 'a.elink', et_info_popup);
 		},
 		'etyma.tag' : {
 			label: '#',
@@ -465,9 +557,9 @@ var setup = { // in the form setup.[tablename].[fieldname]
 				Tips.add(e.findElement(), e, {ajax:{url:baseRef + 'notes/notes_for_rn', options:{parameters:{rn:rn}}},
 					stem:true, delay:0, fixed:true, showEffectDuration:0, className:'glass'});
 			});
-			tbl.on('mouseover', 'a.elink', show_tag);
-			mOut_handler = tbl.on('mouseout', 'a.elink', function (e) { e.stop(); $('info').hide() });
-			tbl.on('click', 'a.elink', function (e) { e.stop(); mOut_handler.stop() });
+			tbl.on('mouseover', 'a.elink', et_info_popup);
+			tbl.on('mouseout', 'a.elink', et_info_popup);
+			tbl.on('click', 'a.elink', function (e) { e.stop(); et_info_popup(e) });
 
 			// stop here if it's etymon view, which (a) doesn't allow sorting,
 			// and (b) does its own thing for adding language group headers
@@ -515,7 +607,7 @@ var setup = { // in the form setup.[tablename].[fieldname]
 			var t = $('lexicon_resulttable');
 			var hcell = t.select('th[id="languagegroups.grpno"]')[0];
 			if (!hcell) {
-				console.log('couldn\'t find grpno_index!');
+				window.console && console.log && console.log('couldn\'t find grpno_index!');
 				return;
 			}
 			var grpno_index = hcell.cellIndex;
@@ -635,7 +727,7 @@ var setup = { // in the form setup.[tablename].[fieldname]
 						link_tag = skipped_roots[t2[i]] ? '' : t2[i];
 					}
 					a += parseInt(link_tag,10)
-						? '<a href="#"' + ' class="elink ' + syl_class + '" title="Click to freeze the pane">'
+						? '<a href="#"' + ' class="elink ' + syl_class + '">'
 							+ s.escapeHTML() + '</a>' + delim
 						: '<span class="' + syl_class + '">' + s.escapeHTML() + '</span>' + delim;
 				}
