@@ -294,6 +294,7 @@ sub update_all : Runmode {
 	my $self = shift;
 	$self->require_privs(16);
 	my $q = $self->query;
+	die "runmode update_all called with no params!" unless $q->param;
 	my $uids = $self->dbh->selectcol_arrayref("SELECT uid FROM users");
 	for my $uid (@$uids) {
 		my ($password) = ($q->param("password_$uid"));
