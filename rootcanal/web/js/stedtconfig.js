@@ -405,10 +405,15 @@ var setup = { // in the form setup.[tablename].[fieldname]
 			size: 70,
 			hide: !(stedtuserprivs & 1),
 			transform : (stedtuserprivs & 1)
-				? function (v) {
-					return '<a href="' + baseRef + 'chap/' + v + '" target="stedt_chapters">' + v + '</a>';
+				? function (v, key, rec, n) {
+					return '<a href="' + baseRef + 'chap/' + v + '" target="stedt_chapters" title="'
+					+ rec[n+1].replace(/&/g,'&amp;') + '">' + v + '</a>';
 				  }
 				: null
+		},
+		'chaptertitle' : {
+			hide: true,
+			noedit: true
 		},
 		'etyma.protoform' : {
 			vert_show: true,
