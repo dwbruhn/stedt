@@ -46,7 +46,7 @@
 <br>
 [% FOREACH n IN footnotes -%]
 <div class="footnote[% IF n.super %] fnote-[% n.super %][% END %]" id="foot[% loop.count %]">
-<a href="#toof[% loop.count %]">^ [% loop.count %].</a> [% n.text %]</div>
+<a href="#toof[% loop.count %]" class="left">^ [% loop.count %].</a> <div class="notepreview">[% n.text %]</div></div>
 [% END -%]
 
 [% IF c.has_privs(8) -%]

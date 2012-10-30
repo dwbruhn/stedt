@@ -300,7 +300,7 @@ sub xml2html {
 	s/&lt;-+&gt;/⟷/g; # convert arrows
 	s/< /< /g; # no-break space after "comes from" sign
 	
-	s|<footnote>(.*?)</footnote>|push @$footnotes,{text=>$1,super=>$super_id}; qq(<a href="#foot$$i" id="toof$$i"><sup>) . $$i++ . "</sup></a>"|ge;
+	s|<footnote>(.*?)</footnote>|push @$footnotes,{text=>$1,super=>$super_id}; qq(<a href="#foot$$i" id="toof$$i" class="footlink"><sup>) . $$i++ . "</sup></a>"|ge;
 	s/^<p>//; # get rid of the first pair of (not the surrounding) <p> tags.
 	s|</p>||;
 	return $_;

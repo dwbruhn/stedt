@@ -201,6 +201,9 @@ if($('cheat_source') != undefined) {	// this doesn't exist for public users
 // fun with popovers
 $(document.body).on('mouseover', 'a.footlink', function (e) {
 	var elem = e.findElement();
+	if (elem.tagName === 'SUP') {	// deal with footnote links inside <sup> tags
+		elem = elem.up();
+	}
 	var footelem = $(elem.id.replace('toof', 'foot'));
 	footelem = footelem.up('div.lexnote') || footelem; // see edit.tt; the footnote text could be in two slightly different places depending on privileges
 	var foot = footelem.down('div.notepreview');
