@@ -88,6 +88,8 @@ sub table : StartRunmode {
 	  $hash{message} = $message;
 	}
 	# special case: include footnotes and list of users, etc., for lexicon table
+	# Note that collect_lex_notes appears to require that the last field in each row be num_notes
+	# Otherwise, the last field gets clobbered
 	elsif ($tbl eq 'lexicon') {
 		my @footnotes;
 		my $footnote_index = 1;

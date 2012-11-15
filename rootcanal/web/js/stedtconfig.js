@@ -818,6 +818,11 @@ var setup = { // in the form setup.[tablename].[fieldname]
 					+ '</a>';
 			}
 		},
+		'has_changes' : {
+			noedit: true,
+			size: 10,
+			hide: true
+		},
 		'lexicon.status' : {
 			label:'status',
 			noedit: false,

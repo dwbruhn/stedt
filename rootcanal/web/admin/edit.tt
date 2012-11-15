@@ -98,8 +98,12 @@ No records found. (WHERE [% result.debug %])
 <td>[% s | html %]</td>
 [%- END -%]
 [% IF c.has_privs(1) -%]
+[% IF t.table != 'lexicon' || row.-2 # in lexicon table, only show clock icon if has_changes field is 1 %]
 <td><a href="[% self_url %]/admin/changes?t=[% t.table %]&id=[% row.$key_index %]"><img src="[% self_base %]img/clock.png" width="16" height="16"></a></td>
-[% END -%]
+[% ELSE %]
+<td></td>
+[% END # check for changes %]
+[% END # has_privs1 -%]
 [% IF c.has_privs(16) -%]
 <td><a href="[% self_url %]/edit/[% t.table %]/[% row.$key_index %]"><img src="[% self_base %]img/b_edit.png" width="16" height="16"></a></td>
 [% END -%]

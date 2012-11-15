@@ -107,6 +107,8 @@ $t->fields(
 #	'lexicon.status',
 #	'lexicon.semcat',
 	'lexicon.semkey',
+	# this appears to be the fastest way to check whether a row exists in the changelog table:
+	'(SELECT EXISTS(SELECT 1 FROM changelog where `table`=\'lexicon\' and id=lexicon.rn LIMIT 1)) AS has_changes',
 	# if $privs is undefined (or 2), then it's a public user (or a user with a non-privileged account) and internal notes should be excluded from the note count
 	((defined $privs && ($privs & 1)) ? '(SELECT COUNT(*) FROM notes WHERE rn=lexicon.rn) AS num_notes' : '(SELECT COUNT(*) FROM notes WHERE rn=lexicon.rn AND notetype!=\'I\') AS num_notes'),
 );
