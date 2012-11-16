@@ -33,9 +33,8 @@
 }
 
 /* style the links */
-a:link {text-decoration:none;}    /* unvisited link */
-a:visited {text-decoration:none;} /* visited link */
-a:hover {color:#C8B133;}   /* mouse over link */
+a[href] {text-decoration:none;}  /* no underline on links */
+a[href]:hover {color:#C8B133;}   /* change color on link mouseover */
 
 div#info
 {
