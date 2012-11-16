@@ -29,9 +29,9 @@ $t->searchable(
 
 );
 $t->field_editable_privs(
-	'glosswords.word' => 1,
-	'glosswords.semkey' => 1,
-	'glosswords.subcat' => 1
+	'glosswords.word' => 8,
+	'glosswords.semkey' => 8,
+	'glosswords.subcat' => 8
 );
 
 # Stuff for searching

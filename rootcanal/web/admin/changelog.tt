@@ -48,7 +48,7 @@
 [% IF row.3 == 'mesoroots' # there's no editor for mesoroots yet, so don't make a link for it %]
 [% row.4 | html %]
 [% # if user is not approver or above, don't make a link for advanced tables %]
-[% ELSIF !c.has_privs(8) && (row.3 == 'morphemes' || row.3 == 'glosswords' || row.3 == 'hptb' || row.3 == 'chapters' || row.3 == 'projects') %]
+[% ELSIF !c.has_privs(8) && (row.3 == 'morphemes' || row.3 == 'hptb' || row.3 == 'chapters' || row.3 == 'projects') %]
 [% row.4 | html %]
 [% ELSE # otherwise, fine to make a link %]
 <a href="[% self_url %]/edit/[% row.3 %]?[% row.3 %].[% tbl_key %]=[% row.4 %]" target="change_viewer">[% row.4 | html %]</a>

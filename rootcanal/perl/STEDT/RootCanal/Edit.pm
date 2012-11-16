@@ -15,7 +15,7 @@ sub table : StartRunmode {
 	switch ($tbl) {
 		case 'chapters'		{ $self->require_privs(8) }
 		case 'hptb'		{ $self->require_privs(8) }
-		case 'glosswords'	{ $self->require_privs(8) }
+#		case 'glosswords'	{ $self->require_privs(8) }
 		case 'morphemes'	{ $self->require_privs(8) }
 		case 'projects'		{ $self->require_privs(8) }
 		else			{ $self->require_privs(1) }

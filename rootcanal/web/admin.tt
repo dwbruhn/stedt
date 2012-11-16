@@ -10,14 +10,16 @@ Edit/Browse tables:
 	<li><a href="[% self_url %]/edit/srcbib">srcbib</a></li>
 [% IF c.has_privs(8) %]	<li><a href="[% self_url %]/edit/chapters">chapters</a></li>[% END %]
 </ul></td>
-[% IF c.has_privs(8) -%]
 <td style="padding-right:1em;"><ul>
+	<li><a href="[% self_url %]/edit/glosswords">glosswords</a></li>
+[% IF c.has_privs(8) -%]
 	<li><a href="[% self_url %]/edit/hptb">hptb</a></li>
 	<li><a href="[% self_url %]/edit/morphemes">morphemes</a></li>
 	<li><a href="[% self_url %]/edit/soundlaws">soundlaws</a></li>
 	<li><a href="[% self_url %]/edit/projects">projects</a></li>
-	<li><a href="[% self_url %]/edit/glosswords">glosswords</a></li>
+[% END -%]
 </ul></td>
+[% IF c.has_privs(8) -%]
 <td><ul>
 	<li><a href="[% self_url %]/subgroups/view">language groups</a></li>
 	<li></li>

@@ -8,7 +8,7 @@ setup.glosswords = {
     },
     'glosswords.word' : {
 	label: 'gloss word',
-	noedit: false,
+	noedit: !(stedtuserprivs & 8),
 	size: 80,
 	transform : function (v) {
 	    return '<a href="' + baseRef + 'edit/lexicon?lexicon.gloss=' + v + '" target="stedt_lexicon">' + v + '</a>';
@@ -16,34 +16,34 @@ setup.glosswords = {
     },
     'glosswords.semkey' : {
 	label: 'semkey',
-	noedit: false,
+	noedit: !(stedtuserprivs & 8),
 	hide: false,
 	size: 200,
 	transform : function (v) {
-	    return '<a href="' + baseRef + 'edit/glosswords?glosswords.semkey=' + v + '" target="edit_glosswords">' + v + '</a>';
+	    return '<a href="' + baseRef + 'edit/glosswords?glosswords.semkey=' + v + '">' + v + '</a>';
 	}
     },
     'glosswords.subcat' : {
 	label: 'old categorization',
-	noedit: false,
+	noedit: !(stedtuserprivs & 8),
 	hide: false,
 	size: 120
     },
     'chapters.chaptertitle' : {
 	label: 'vfc heading',
-	noedit: false,
+	noedit: !(stedtuserprivs & 8),
 	hide: false,
 	size: 120
     },
     'num_recs' : {
 	label: 'words w this semkey',
-	noedit: false,
+	noedit: true,
 	hide: false,
 	size: 50
     },
     'glosswords.semcat' : {
 	label: 'semcat',
-	noedit: false,
+	noedit: !(stedtuserprivs & 8),
 	hide: false,
 	size: 80
     }
