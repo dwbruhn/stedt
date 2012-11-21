@@ -126,7 +126,7 @@ sub chapter : RunMode {
 	my $t = $self->load_table_module('etyma');
 	my $q = $self->query->new('');
 	$q->param('etyma.chapter'=>$chap);
-	$q->param('etyma.sequence'=>'>0'); # hide non-sequenced items from the chapter view
+#	$q->param('etyma.sequence'=>'>0'); # hide non-sequenced items from the chapter view
 	$q->param('etyma.public'=>1) unless $self->has_privs(1);
 	my $result = $t->search($q);
 	
