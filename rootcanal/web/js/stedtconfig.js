@@ -400,6 +400,10 @@ var setup = { // in the form setup.[tablename].[fieldname]
 			noedit: true,
 			size: 30
 		},
+		'chaptertitle' : {
+			hide: true,
+			noedit: true
+		},
 		'etyma.chapter' : {
 			label: 'ch.',
 			size: 70,
@@ -407,13 +411,9 @@ var setup = { // in the form setup.[tablename].[fieldname]
 			transform : (stedtuserprivs & 1)
 				? function (v, key, rec, n) {
 					return '<a href="' + baseRef + 'chap/' + v + '" target="stedt_chapters" title="'
-					+ rec[n+1].replace(/&/g,'&amp;') + '">' + v + '</a>';
+					+ rec[n-1].replace(/&/g,'&amp;') + '">' + v + '</a>';
 				  }
 				: null
-		},
-		'chaptertitle' : {
-			hide: true,
-			noedit: true
 		},
 		'etyma.protoform' : {
 			vert_show: true,
