@@ -98,6 +98,14 @@ div.lowerright {
     width: 40px;
 }
 
+div.footer {
+	position: fixed;
+	width:100%;
+	margin-left: auto;
+	margin-right: auto;
+	bottom: 10%;
+}
+
 td, .editable-cell-form textarea
 /* table cells and their editable versions should look the same */
 /* (looks like we're only using textareas, not text inputs) */

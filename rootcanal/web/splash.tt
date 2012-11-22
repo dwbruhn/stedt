@@ -7,59 +7,41 @@
 <br><br><br>
 <form id="simple_search" method="get" action="[% self_url %]/gnis">
 <table>
-<tr><td></td><th>form (etymon/reflex)</th><th>(proto)gloss</th><th>language</th><th>language group</th></tr>
-<tr><td></td><td><input type="text" title="Type a linguistic form" name="f" id="simple_searchform" size="20" maxlength="128"></td>
-<td><input type="text" title="Type an English word" name="t" id="simple_searchinput" size="20" maxlength="128"></td>
-<td><input type="text" title="Type a language name" name="lg" id="simple_searchlg" size="20" maxlength="96"></td>
-<td><select title="Choose a subgroup" name="lggrp" id="simple_searchlggrp"> 
-<option selected="selected" value=""></option>
-[% FOREACH row IN grps -%]
-<option value="[% row.0 %]">[% row.0 %] [% row.1 %]</option>
-[% END -%]
-</select>
-</td>
-<td><input type="submit" title="Click to search!" name="search" value="Search" ><input type="button" title="Click to clear the search form" name="clear" value="Clear" onclick="clear_splash()">
-</td></tr>
 <tr>
-	<td><a href="#" onclick="Effect.toggle('example_queries', 'blind', { duration: 0.5 }); return false;">Show/hide examples</a>&nbsp;</td>
+	<td></td>
+	<th>(proto)gloss</th>
+	<th>language</th>
+	<td rowspan=2 valign=middle><input type="submit" title="Click to search!" name="search" value="Search" >
+	<input type="button" title="Click to clear the search form" name="clear" value="Clear" onclick="clear_splash()">
+	<br><a href="[% self_url %]/gnis">More search options...</a></td>
+</tr>
+<tr>
+		<td></td>
+	<td><input type="text" title="Type an English word" name="t" id="simple_searchinput" size="25" maxlength="128" style="height:32px"></td>
+	<td><input type="text" title="Type a language name" name="lg" id="simple_searchlg" size="25" maxlength="96"></td>
+</tr>
+<tr>
+	<td><a href="#" onclick="Effect.multiple(['example1', 'example2'], function(el){Effect.toggle(el,'appear',{ duration: 0.25 });}); return false;">Show/hide examples</a>&nbsp;</td>
+</tr>
+<tr id="example1" style="display:none">
+	<td></td>
+	<td><b>dog</b></td>
+	<td>-</td>
+	<td><a href="#" onclick="clear_splash();
+		$('simple_searchinput').value='dog';return false">Try it!</a></td>
+</tr>
+<tr id="example2" style="display:none">
+	<td></td>
+	<td><b>hit</b></td>
+	<td>lotha</td>
+	<td><a href="#" onclick="clear_splash();
+		$('simple_searchinput').value='hit';
+		$('lg-auto').value='lotha';return false">Try it!</a></td></td>
 </tr>
 </table>
 </form>
-<div id="example_queries" style="display: none">
-<table>
-<tr>
-	<td width=119></td>[% # this width stuff will need to be improved in the future %]
-	<td width=141>-</td>
-	<td width=141><b>dog</b></td>
-	<td width=141>-</td>
-	<td width=222>-</td>
-	<td width=129><a href="#" onclick="clear_splash();
-		$('simple_searchinput').value='dog';return false">Try it!</a></td>
-</tr>
-<tr>
-	<td></td>
-	<td>-</td>
-	<td><b>smell</b></td>
-	<td>-</td>
-	<td><b>6.1 Lolo-Burmese</b></td>
-	<td><a href="#" onclick="clear_splash();
-		$('simple_searchinput').value='smell';
-		$('simple_searchlggrp').selectedIndex=49;return false">Try it!</a></td>
-</tr>
-<tr>
-	<td></td>
-	<td><b>tap</b></td>
-	<td><b>hit</b></td>
-	<td><b>lotha</b></td>
-	<td>-</td>
-	<td><a href="#" onclick="clear_splash();
-		$('simple_searchform').value='tap';
-		$('simple_searchinput').value='hit';
-		$('lg-auto').value='lotha';return false">Try it!</a></td>
-</tr>
-</table>
-</div>
 <div style="height:10ex"></div>
+<div class="footer">
 <a href="[% self_url %]/group/1" target="stedt_grps">Language Groups Browser</a>
 | <a href="[% self_url %]/source" target="_blank">Source Bibliography</a>
 | <a href="[% self_url %]/chapters" target="_blank">Chapter Browser</a>
@@ -73,6 +55,7 @@
 <a href="[% https_base _ self_url %]/account/gsarpa">Register</a>
 [% END # user -%]
 </small>
+</div>
 </center>
 </div>
 <script>
@@ -80,7 +63,7 @@ $('simple_searchinput').focus();
 $('simple_search').observe('submit',function(e){e.stop();
 var s = Form.serializeElements(this.select('input:not(:submit,:button,:reset)','select').findAll(Form.Element.getValue));
 if (s) document.location = document.location.pathname + '/gnis' + '?'+s;
-else if (!$('example_queries').visible()) Effect.toggle('example_queries', 'blind', { duration: 0.5 });
+else if (!$('example1').visible()) Effect.multiple(['example1', 'example2'], function(el){Effect.toggle(el,'appear',{ duration: 0.25 });});
 });
 jQuery('input[name=lg]').autoSuggest('[% self_url %]/autosuggest/lgs',{
 	asHtmlID:"lg-auto",

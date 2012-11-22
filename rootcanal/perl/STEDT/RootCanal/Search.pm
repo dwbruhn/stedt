@@ -84,10 +84,10 @@ sub searchresults_from_querystring {
 	$f =~ s/^\*//g;			# strip initial asterisk from form field, in case anyone tries it
 
 	# figure out the table and the search terms
-	# and make sure there's a (unicode) letter in there somewhere
+	# and make sure there's a (unicode) letter (or number, for the (proto)gloss field) in there somewhere
 	if ($tbl eq 'etyma') {
 		for my $token (split / /, $s) {
-			if ($token =~ /\p{Letter}/) {
+			if ($token =~ /\p{Letter}|\d/) {
 				$query->param('etyma.protogloss' => $token);
 				# print STDERR "Etyma protogloss is $token\n";	# debugging
 			}
@@ -102,11 +102,13 @@ sub searchresults_from_querystring {
 				$query->param('etyma.tag' => $token);
 			}
 		}	
-		if (!$s && !$f) {
-			$query->param('etyma.tag' => (300,1606)[int(rand 2)]); # which came first, the chicken or the egg?
-		} elsif (!$query->param) {
-			$query->param('etyma.tag' => 2436);
-		}
+
+# 		(commenting out these potentially-confusing random queries)
+#		if (!$s && !$f) {
+#			$query->param('etyma.tag' => (300,1606)[int(rand 2)]); # which came first, the chicken or the egg?
+#		} elsif (!$query->param) {
+#			$query->param('etyma.tag' => 2436);
+#		}
 	} elsif ($tbl eq 'lexicon') {
 		$query->param('languagenames.language' => $lg) if $lg =~ /\p{Letter}/;
 		
@@ -128,17 +130,19 @@ sub searchresults_from_querystring {
 			}
 		}
 		for my $token (split / /, $s) {
-			if ($token =~ /\p{Letter}/) {
+			if ($token =~ /\p{Letter}|\d/) {
 				$query->param('lexicon.gloss' => $token);
 				# print STDERR "Lexicon gloss is $token\n";	# debugging
 			}
 		}
-		if (!$s && !$lg && $lggrp eq '' && !$f) {
+		
+# 		(commenting out these potentially-confusing random queries)
+#		if (!$s && !$lg && $lggrp eq '' && !$f) {
 #			$query->param('analysis'=>1764);
-			$query->param('lexicon.rn'=>344986);
-		} elsif (!$query->param) {
-			$query->param('analysis'=>5035);
-		}
+#			$query->param('lexicon.rn'=>344986);
+#		} elsif (!$query->param) {
+#			$query->param('analysis'=>5035);
+#		}
 	}
 
 	# only show public etyma 
