@@ -10,8 +10,8 @@
 @media screen { 
 	div#etyma { position:fixed; overflow:auto; top:3em; height:12em; width:100%; left:0px; } 
 	div#lexicon { position:fixed; overflow:auto; top:15.6em; bottom: 0px; width:100%; left:0px; }
-	div#etyma.vert { height:auto; bottom:0px; width:24em; } 
-	div#lexicon.vert { width:auto; top:3em; right: 0px; left:24.6em; }
+	div#etyma.vert { height:auto; bottom:0px; width:27em; } 
+	div#lexicon.vert { width:auto; top:3em; right: 0px; left:27.6em; }
 	div#dragger { cursor:n-resize;
 		position:fixed; top: 15em; height: 0.5em;
 		background-color:silver;
@@ -22,7 +22,7 @@
 		width:100%; left: 0px; right: 0px;
 	}
 	div#dragger.vert {  cursor:e-resize; top:3em; bottom:0px;
-		height:auto; width:0.5em; left: 24em; right: auto;
+		height:auto; width:0.5em; left: 27em; right: auto;
 		background-image: url("gripper_vert.png");
 		border: 1px solid black;
 	 }
@@ -98,12 +98,23 @@ div.lowerright {
     width: 40px;
 }
 
+/* various sss style rules */
 div.footer {
+	background-color: white;
 	position: fixed;
 	width:100%;
 	margin-left: auto;
 	margin-right: auto;
-	bottom: 10%;
+	bottom: 0px;
+	padding-bottom: 5%;
+}
+
+div.panetitle {
+	float: left;
+	margin: 0pt 3pt 2pt 2pt;
+	font-size: larger;
+	font-weight: bold;
+	text-decoration: underline;
 }
 
 td, .editable-cell-form textarea
