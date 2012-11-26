@@ -3,7 +3,7 @@
 <center>
 <br>
 <a href="http://stedt.berkeley.edu/" title="STEDT Home Page">
-<img src="[% self_base %]img/stedt_rgb.jpg" alt="STEDT Logo" border="0" width="400" height="128"></a>
+<img src="[% self_base %]img/stedt_bw.jpg" alt="STEDT Logo" border="0" width="495" height="128"></a>
 <br><br><br>
 <form id="simple_search" method="get" action="[% self_url %]/gnis">
 <table>
