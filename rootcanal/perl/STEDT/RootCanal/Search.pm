@@ -83,25 +83,27 @@ sub searchresults_from_querystring {
 
 	$f =~ s/^\*//g;			# strip initial asterisk from form field, in case anyone tries it
 
+	# strip initial and trailing whitespace from search fields
+	$s =~ s/^\s+|\s+$//g;
+	$f =~ s/^\s+|\s+$//g;
+
 	# figure out the table and the search terms
 	# and make sure there's a (unicode) letter (or number, for the (proto)gloss field) in there somewhere
 	if ($tbl eq 'etyma') {
-		for my $token (split / /, $s) {
-			if ($token =~ /\p{Letter}|\d/) {
-				$query->param('etyma.protogloss' => $token);
-				# print STDERR "Etyma protogloss is $token\n";	# debugging
-			}
+		if ($s =~ /\p{Letter}|\d/) {
+			$query->param('etyma.protogloss' => $s);
+			# print STDERR "Etyma protogloss is $s\n";	# debugging
 		}
-		for my $token (split / /, $f) {		# allow user to enter proto-form OR tag num in form field
-			if ($token =~ /\p{Letter}/) {
-				# $token =~ s/^\*//;
-				$query->param('etyma.protoform' => $token);
-				# print STDERR "Etyma protoform is $token\n";	# debugging
-			}
-			elsif ($token =~ /^\d+$/) {
-				$query->param('etyma.tag' => $token);
-			}
-		}	
+		# allow user to enter proto-form OR single tag num in form field
+		if ($f =~ /\p{Letter}/) {
+			# $token =~ s/^\*//;
+			$query->param('etyma.protoform' => $f);
+			# print STDERR "Etyma protoform is $f\n";	# debugging
+		}
+		elsif ($f =~ /^\d+$/) {  # if searching by tag num, the tag num must be the sole search term
+			$query->param('etyma.tag' => $f);
+			# print STDERR "Etyma tag is $f\n";	# debugging
+		}
 
 # 		(commenting out these potentially-confusing random queries)
 #		if (!$s && !$f) {
@@ -112,7 +114,7 @@ sub searchresults_from_querystring {
 	} elsif ($tbl eq 'lexicon') {
 		$query->param('languagenames.language' => $lg) if $lg =~ /\p{Letter}/;
 		
-		# languagegroups param must match start with X or a digit and not go past 4 levels (first level is obligatory)
+		# languagegroups param must start with X or a digit and not go past 4 levels (first level is obligatory)
 		$query->param('languagegroups.grp' => $lggrp) if $lggrp =~ /^[\dX](\.\d((\.\d)(\.\d)?)?)?$/;
 		
 		# language code must be an integer
@@ -120,20 +122,21 @@ sub searchresults_from_querystring {
 			$query->param('languagenames.lgcode' => $lgcode) if $lgcode =~ /^\d+$/;
 		}
 
-		for my $token (split / /, $f) {		# allow user to query reflex or analysis in form field
-			if ($token =~ /^\d+$/) {
-				$query->param('analysis' => $token);
-			}
-			elsif ($token =~ /\p{Letter}/) {
-				$query->param('lexicon.reflex' => $token);
-				# print STDERR "Lexicon reflex is $token\n";	# debugging
-			}
+		# allow user to query reflex or analysis in form field
+		# note that the analysis must be the sole search term in the field for that feature to work
+		if ($f =~ /^\d+$/) {
+			$query->param('analysis' => $f);
 		}
-		for my $token (split / /, $s) {
-			if ($token =~ /\p{Letter}|\d/) {
-				$query->param('lexicon.gloss' => $token);
-				# print STDERR "Lexicon gloss is $token\n";	# debugging
-			}
+		# if there's a letter in the form field anywhere, send the whole thing to the reflex field search
+		elsif ($f =~ /\p{Letter}/) {
+			$query->param('lexicon.reflex' => $f);
+			# print STDERR "Lexicon reflex is $f\n";	# debugging
+		}
+
+		# if the gloss field has a letter or number anywhere, pass it along
+		if ($s =~ /\p{Letter}|\d/) {
+			$query->param('lexicon.gloss' => $s);
+			# print STDERR "Lexicon gloss is $s\n";	# debugging
 		}
 		
 # 		(commenting out these potentially-confusing random queries)
