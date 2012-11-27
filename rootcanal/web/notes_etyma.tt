@@ -4,6 +4,8 @@
 <input type="hidden" name="noteid" value="[% n.noteid %]">
 <input type="hidden" name="mod" value="[% n.lastmod %]">
 <input type="hidden" name="ord" value="[% n.ord %]">
+[% IF n.uid == c.param('uid') || c.has_privs(8) # check if user owns note or has approver privs %]
+[% # need to keep the hidden form inputs accessible even when the user doesn't own a note, so that adding a new note works %]
 notetype:<select name="notetype">
 <option [% IF n.type=='T' %]selected="selected" [% END %]value="T">Text</option>
 <option [% IF n.type=='I' %]selected="selected" [% END %]value="I">Internal</option>
@@ -26,6 +28,7 @@ user: <select name="uid">
 </select>
 [% END -%]
 <a href="#" class="cheatsheet_link">markup</a>
+[% END # check for note owner or privs %]
 </form>
 <div id="preview[% n.noteid %]" class="notepreview">
 [% IF n.type == 'I' %][Internal Note:] <i>[% END -%]

@@ -112,7 +112,7 @@ Reconstructed mesoroots below:
 [% IF c.has_privs(1) -%]
 <div id="allcomparanda[% e.tag %]" class="container">
 <p class="edit">
-<label><input type="checkbox" value="off" class="reordcheckbox"[% IF e.comparanda.size < 2 %] disabled[% END %]>Drag to reorder</label>
+[% IF c.has_privs(8) %]<label><input type="checkbox" value="off" class="reordcheckbox"[% IF e.comparanda.size < 2 %] disabled[% END %]>Drag to reorder</label>[% END %]
 <a href="#" onclick="return showaddform('F',[% e.tag %])">Add a Chinese comparandum...</a>
 </p>
 [% FOREACH n IN e.comparanda -%]

@@ -4,6 +4,8 @@
 <input type="hidden" name="mod" value="[% n.lastmod %]">
 <input type="hidden" name="ord" value="[% n.ord %]">
 <input type="hidden" name="notetype" value="F">
+[% IF n.uid == c.param('uid') || c.has_privs(8) # check if user owns note or has approver privs %]
+[% # need to keep the hidden form inputs accessible even when the user doesn't own a note, so that adding a new note works %]
 last modified: <span id="lastmod[% n.noteid %]">[% n.lastmod %]</span>
 <br>
 <textarea name="xmlnote" rows="[% n.num_lines %]" cols="54">
@@ -19,6 +21,7 @@ user: <select name="uid">
 </select>
 [% END -%]
 <a href="#" class="cheatsheet_link">markup</a>
+[% END # check for note owner or privs %]
 </form>
 <div id="preview[% n.noteid %]" class="notepreview">
 [% n.text -%]

@@ -4,7 +4,8 @@
 	div#lexicon { position: static; }
 	div#dragger { display: none; }
 	div#info { display:none; }
-	form#etyma_search, form#lexicon_search, .edit { display:none; }
+	form#etyma_search, form#lexicon_search, form.noteform, .edit { display:none; }
+	input.note_edit_toggle { display: none; }
 }
 
 @media screen { 

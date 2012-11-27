@@ -15,7 +15,7 @@ setup['lexicon']['notes.rn'] = {
 	noedit: true,
 	size: 80,
 	transform : function (v) {
-		var addlink = '<a href="#" class="lexadd">[+]</a>';
+		var addlink = '<a href="#" class="lexadd" title="Add a note to this lexical item">[+]</a>';
 		if (v === '0') return (stedtuserprivs & 1) ? addlink : '';
 		var a = v.match(/\d+/g).map(function (s) {
 			return '<a href="#foot' + s + '" id="toof' + s + '" class="footlink">' + s + '</a>';
@@ -130,7 +130,7 @@ for (var i = 1; i < num_tables; i++) {
 	tbody.on('click', 'a.meso_editlink', show_meso_editform);
 	var lastgrpno = '';
 	var visiblecols = $A(tbody.rows[0].cells).findAll(function (c) {return $(c).visible();}).length;
-	var addlink = ' <a href="#" class="et_grp_add">[+]</a>';
+	var addlink = ' <a href="#" class="et_grp_add" title="Add a note to this subgroup">[+]</a>';
 	var seen_grpnos = {};
 	var insert_parent_bands = function (next_grpno, row) {
 		var cell1, cell2, cell5;
