@@ -35,7 +35,7 @@ Semantic categorization stuff:
 <ul>
 <li><a href="[% self_url %]/chapters">chapter browser</a></li>
 <li><a href="[% self_url %]/chapters/tweak">semkeys and their glosswords</a></li>
-<li><a href="[% self_url %]/chapters/grid">grid view: volumes ⨉ fascicles</a></li>
+<li><a href="[% self_url %]/chapters/grid" style="font-family: Times, 'Times New Roman', 'Segoe UI Symbol', 'Cambria Math'">grid view: volumes ⨉ fascicles</a></li>
 </ul>
 
 Activity:

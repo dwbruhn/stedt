@@ -4,7 +4,7 @@
 
 <p>
 [%- IF etyma.0.allofams.size > 1 -%]
-<div class="right" style="border:1px solid gray; padding:1ex 1ex 0 1ex">
+<div class="right" id="allofambox">
 <b>Allofams:</b>
 <ul>
 [% FOREACH e2 IN etyma.0.allofams -%]

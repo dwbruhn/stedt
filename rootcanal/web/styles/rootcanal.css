@@ -1,3 +1,24 @@
+/* custom font for allofam symbol
+extracted from STEDTU.ttf, converted to various formats using:
+http://www.fontsquirrel.com/fontface/generator */
+@font-face {
+	font-family: myAllofam;
+	/* try local versions before providing one for download */
+	src: local("STEDTU"), local("Segoe UI Symbol");
+	src: url('allofam.eot');
+	src: url('allofam.eot?#iefix') format('embedded-opentype'),
+		url('allofam.woff') format('woff'),
+		url('allofam.ttf') format('truetype'),
+		url('allofam.svg#allofam') format('svg');
+	unicode-range: U+2AA4; /* restrict to allofam symbol codepoint */
+}
+
+/* make sure monospace allofam symbol shows up in notes editing text areas */
+textarea[name="xmlnote"] {
+	font-family: monospace, "Everson Mono", unifont, myAllofam;
+	font-size: smaller;
+}
+
 @media print {
 	thead { display: table-header-group; }
 	div#etyma { position: static; }
@@ -153,6 +174,9 @@ td, .editable-cell-form textarea
 
 .notepreview
 {
+	/* make sure allofam and IPA characters will appear correctly in notes;
+	note that listing Doulos and Charis SIL Compact first resolves some spacing issues in Chromium */
+	font-family: "Doulos SIL Compact", "Charis SIL Compact", Times, "Times New Roman", myAllofam;
 	overflow/**/: auto;
 	height: 1%;
 }
@@ -160,13 +184,19 @@ td, .editable-cell-form textarea
 1% is a hack for IE.
 see http://www.pupinc.com/boxflowhack/ */
 
+div#allofambox {
+	font-family: Times, "Times New Roman", "Doulos SIL Compact", "Charis SIL Compact", myAllofam;
+	border: 1px solid gray;
+	padding:1ex 1ex 0 1ex;
+}
+
 .footnote { font-size: smaller; }
 
 th {
 	text-align: left;
 	color: white;
 	background-color: navy;
-	font-family: "Gill Sans", Futura, Helvetica, Arial, sans;
+	font-family: "Gill Sans", Futura, Helvetica, Arial, sans-serif;
 	/*font-size: smaller;*/
 	font-weight: normal;
 	overflow: hidden;
@@ -182,7 +212,7 @@ th A:visited   		{ color: white; }
 th A:hover   		{ color: teal; text-decoration: underline; }
 
 h1 {
-     font-family: Helvetica, Arial, sans;
+     font-family: Helvetica, Arial, sans-serif, myAllofam;
      font-weight: bold; }
 
 h2 {
@@ -191,13 +221,13 @@ h2 {
      }
 
 h3 {
-     font-family: Arial, Helvetica, sans;
+     font-family: Arial, Helvetica, sans-serif;
      font-weight: bold;
      margin-left: 16pt;
 }
 
 h4 {
-     font-family: Arial, Helvetica, sans;
+     font-family: Arial, Helvetica, sans-serif;
      font-size: 10pt;
      font-weight: normal;
      margin-left: 18pt; }
