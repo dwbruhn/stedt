@@ -8,7 +8,7 @@ setup['lexicon']['num_notes'] = {
 	noedit: true,
 	size: 80,
 	transform : function (v) {
-		var addlink = '<a href="#" class="lexadd">[+]</a>';
+		var addlink = '<a href="#" class="lexadd" title="Add a note to this lexical item">[+]</a>';
 		if (v === '0') return (stedtuserprivs & 1) ? addlink : '';
 		var a = v.match(/\d+/g).map(function (s) {
 			return '<a href="#foot' + s + '" id="toof' + s + '" class="footlink">' + s + '</a>';
