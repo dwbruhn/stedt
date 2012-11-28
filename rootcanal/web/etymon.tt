@@ -58,7 +58,7 @@ Reconstructed mesoroots below:
 </ul>
 [%- END %]
 
-[% IF c.has_privs(1) -%]
+[% IF c.has_privs(1) # check for tagger privs -%]
 <div id="allnotes[% e.tag %]" class="container" style="clear:right">[%# clear the allofams list  %]
 <p class="edit">
 [% IF c.has_privs(8) %]<label><input type="checkbox" value="off" class="reordcheckbox"[% IF e.notes.size < 2 %] disabled[% END %]>Drag to reorder</label>[% END %]
@@ -68,9 +68,9 @@ Reconstructed mesoroots below:
 [% PROCESS notes_etyma.tt -%]
 [% END -%]
 </div>
-[% ELSE -%]
+[% ELSE # if user doesn't have tagger privs -%]
 [% FOREACH n IN e.notes -%]
-<p>[% n.text %]</p>
+<div class="notepreview"><p>[% n.text %]</p></div>
 [% END -%]
 [% END -%]
 
