@@ -291,7 +291,7 @@ var et_info_popup = function (e) {
 		else {
 			// otherwise, show the new info popup after a delay
 			// (the mouseout/mouseleave event will handle hiding the old info popup)
-			etShowTimer = window.setTimeout(show_tag, 600, e);		
+			etShowTimer = window.setTimeout(show_tag, 500, e);		
 		}
 	}
 	else if (e.type === 'mouseout' && $w(e.target.className)[0] === 'elink') {  // the user moused off an elink
@@ -299,7 +299,7 @@ var et_info_popup = function (e) {
 		window.clearTimeout(etShowTimer);
 		
 		// set a small delay before the info div hides
-		etHideTimer = window.setTimeout(function () { $('info').hide() }, 400);
+		etHideTimer = window.setTimeout(function () { $('info').hide() }, 375);
 	}
 	else if (e.type === 'mouseenter') {	// this event type is only associated with the info popup, so we don't have to check the target
 		// the user moused into the info popup
@@ -309,7 +309,7 @@ var et_info_popup = function (e) {
 	else if (e.type === 'mouseleave') {	// this event type is only associated with the info popup, so we don't have to check the target
 		// the user moused out of the info popup
 		// set a small delay before the info div hides
-		etHideTimer = window.setTimeout(function () { $('info').hide() }, 400);
+		etHideTimer = window.setTimeout(function () { $('info').hide() }, 375);
 	}
 };
 

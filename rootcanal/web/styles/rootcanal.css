@@ -69,6 +69,7 @@ div#info
 }
 div#info>div
 {
+	font-family: myAllofam, Times, "Times New Roman", "Doulos SIL Compact", "Charis SIL Compact";
 	margin-top: 15px;
 	background-color: white;
 	padding: 1ex 1ex 1ex 1ex;
@@ -176,7 +177,8 @@ td, .editable-cell-form textarea
 {
 	/* make sure allofam and IPA characters will appear correctly in notes;
 	note that listing Doulos and Charis SIL Compact first resolves some spacing issues in Chromium */
-	font-family: "Doulos SIL Compact", "Charis SIL Compact", Times, "Times New Roman", myAllofam;
+	font-family: myAllofam, "Doulos SIL Compact", "Charis SIL Compact", Times, "Times New Roman";
+	line-height: 1.25;
 	overflow/**/: auto;
 	height: 1%;
 }
@@ -185,9 +187,10 @@ td, .editable-cell-form textarea
 see http://www.pupinc.com/boxflowhack/ */
 
 div#allofambox {
-	font-family: Times, "Times New Roman", "Doulos SIL Compact", "Charis SIL Compact", myAllofam;
+	font-family: myAllofam, Times, "Times New Roman", "Doulos SIL Compact", "Charis SIL Compact";
 	border: 1px solid gray;
 	padding:1ex 1ex 0 1ex;
+	line-height: 1.25;
 }
 
 .footnote { font-size: smaller; }
