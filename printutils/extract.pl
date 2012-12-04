@@ -27,7 +27,7 @@ if ($ARGV[-1] =~ /^--i/) {
 	$INTERNAL_NOTES = 1;
 	$ETYMA_TAGS = 1;
 }
-my ($vol, $fasc, $chap) = map {/(\d+)/} @ARGV;
+my ($vol, $fasc, $chap) = map {/([\dxX]+)/} @ARGV;
 
 unless ($vol && $fasc) {
 	print <<USAGE;
@@ -42,34 +42,43 @@ my $dbh = STEDTUtil::connectdb();
 my $syls = SyllabificationStation->new();
 binmode(STDERR, ":utf8");
 
+my $semkey = "$vol.$fasc.$chap";
+$semkey    =~ s/\.x//g;
+my $texfilename = "$vol-$fasc-$chap.tex";
+$texfilename =~ tr/A-Z/a-z/;
+
 # add warning about unsequenced items
 my $hidden_etyma = $dbh->selectall_arrayref(
 	qq#SELECT e.tag, e.protoform, e.protogloss, languagegroups.plg 
 		FROM `etyma` AS `e` LEFT JOIN languagegroups ON e.grpid=languagegroups.grpid
-		WHERE e.uid=8 AND e.chapter = '$vol.$fasc.$chap' AND e.sequence < 1#);
+		WHERE e.uid=8 AND e.chapter LIKE '$semkey%' AND e.sequence < 1#);
 if (@$hidden_etyma) {
 	print STDERR "Warning: The following etyma have a sequence number of 0\nand will not be included:\n";
 	for my $e (@$hidden_etyma) {
 		print STDERR join("\t", map {decode_utf8($_)} @$e), "\n";
 	}
-	print "Do you want to continue? [Y/n] ";
-	if (<STDIN> =~ /^n/i) {
-		exit(1);
-	}
+	#print "Do you want to continue? [Y/n] ";
+	#if (<STDIN> =~ /^n/i) {
+	#	exit(1);
+	#}
 }
+undef $hidden_etyma; # no such thing anymore!
 
 # build etyma hash
 print STDERR "building etyma data...\n";
 my %tag2info; # this is (and should only be) used inside xml2tex, for looking up etyma refs
-$vol  = "\d+" if ($vol  eq "x");
-$fasc = "\d+" if ($fasc eq "x");
-$chap = "\d+" if ($chap eq "x");
-my $chapterkey = "^$vol.$fasc.$chap";
+$vol  = "\\d+" if ($vol  eq "x");
+$fasc = "\\d+" if ($fasc eq "x");
+$chap = "\\d+" if ($chap eq "x");
+my $chapterkey = "^$vol\.$fasc\.$chap";
+print ">>> $chapterkey $semkey\n";
 for (@{$dbh->selectall_arrayref("SELECT tag,chapter,sequence,protoform,protogloss FROM etyma")}) {
 	my ($tag,$chapter,@info) = map {decode_utf8($_)} @$_;
+	#print ">>> $tag $chapter\n";
 	if ($chapter =~ /^1.9.\d$/) {
 		push @info, 'TBRS'; # "volume" info to print for cross refs in the notes
 	} elsif ($chapter =~ /$chapterkey/) {
+	        #print ">>> $tag $chapter\n";
 		$info[0] = ''; # make sequence empty if not in the current extraction
 	}
 	$info[1] = '*' . $info[1];
@@ -89,22 +98,23 @@ my ($date, $shortdate);
 	$shortdate = sprintf "%04i%02i%02i", @date_items;
 }
 
-print STDERR "generating chapter $chap...\n";
-my $title = $dbh->selectrow_array(qq#SELECT chaptertitle FROM `chapters` WHERE `semkey` = '$vol.$fasc.$chap'#);
-my $flowchartids = $dbh->selectcol_arrayref("SELECT noteid FROM notes WHERE spec='C' AND id='$vol.$fasc.$chap' AND notetype='G'");
+print STDERR "generating VFC $semkey  ...\n";
+my $title = $dbh->selectrow_array(qq#SELECT chaptertitle FROM `chapters` WHERE `semkey` = '$semkey'#);
+my $flowchartids = $dbh->selectcol_arrayref("SELECT noteid FROM notes WHERE spec='C' AND id='$semkey' AND notetype='G'");
 print STDERR "title is '$title'...\n";
 my $chapter_notes = [map {xml2tex(decode_utf8($_))} @{$dbh->selectcol_arrayref(
-	"SELECT xmlnote FROM notes WHERE spec='C' AND id='$vol.$fasc.$chap' AND notetype = 'T' ORDER BY ord")}
+	"SELECT xmlnote FROM notes WHERE spec='C' AND id='$semkey' AND notetype = 'T' ORDER BY ord")}
 	];
 
 my @etyma; # array of infos to be passed on to the template
 my $etyma_in_chapter = $dbh->selectall_arrayref(
 	qq#SELECT e.tag, e.sequence, e.protoform, e.protogloss, languagegroups.plg
 		FROM `etyma` AS `e` LEFT JOIN languagegroups ON e.grpid=languagegroups.grpid
-		WHERE e.uid=8 AND e.chapter = '$vol.$fasc.$chap' AND e.sequence >= 1
+		WHERE e.uid=8 AND e.chapter LIKE '$semkey'
 		ORDER BY e.sequence#);
 
 print STDERR (scalar @$etyma_in_chapter) . " etyma in this chapter\n";
+exit 1 if 0 == scalar @$etyma_in_chapter;
 foreach (@$etyma_in_chapter) {
 	my %e; # hash of infos to be added to @etyma
 	push @etyma, \%e;
@@ -313,7 +323,7 @@ EndOfSQL
 
 # print rootlets
 # my $chapter_end_notes = $dbh->selectcol_arrayref(
-# 	"SELECT xmlnote FROM notes WHERE spec='C' AND id='$vol.$fasc.$chap' AND notetype = 'F' ORDER BY ord");
+# 	"SELECT xmlnote FROM notes WHERE spec='C' AND id='$semkey' AND notetype = 'F' ORDER BY ord");
 # if (@$chapter_end_notes) {
 # 	print "\\begin{center} * * * \\end{center}\n\n";
 # }
@@ -332,7 +342,7 @@ $tt->process("tt/chapter.tt", {
 	etyma    => \@etyma,
 	internal_notes => $INTERNAL_NOTES,
 	
-}, "tex/$vol-$fasc-$chap.tex", binmode => ':utf8' ) || die $tt->error(), "\n";
+}, "tex/${texfilename}", binmode => ':utf8' ) || die $tt->error(), "\n";
 
 
 $dbh->disconnect;
