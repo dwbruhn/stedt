@@ -162,11 +162,11 @@
 							break;
 						case 8:  // delete
 							if(input.val() == ""){							
-								var last = values_input.val().split(",");
+								var last = values_input.val().split(",");	// note that this is problematic if we have language names containing commas (dwbruhn)
 								last = last[last.length - 2];
 								selections_holder.children().not(org_li.prev()).removeClass("selected");
 								if(org_li.prev().hasClass("selected")){
-									values_input.val(values_input.val().replace(""+last.replace(specials, "\\$&")+",",""));
+									values_input.val(values_input.val().replace(""+last+",",""));
 									opts.selectionRemoved.call(this, org_li.prev());
 								} else {
 									opts.selectionClick.call(this, org_li.prev());
@@ -332,7 +332,7 @@
 							$(this).addClass("selected");
 						}).mousedown(function(){ input_focus = false; });
 					var close = $('<a class="as-close">&times;</a>').click(function(){
-							values_input.val(values_input.val().replace(""+data[opts.selectedValuesProp].replace(specials, "\\$&")+",",""));
+							values_input.val(values_input.val().replace(""+data[opts.selectedValuesProp]+",",""));
 							opts.selectionRemoved.call(this, item);
 							input_focus = true;
 							input.focus();
