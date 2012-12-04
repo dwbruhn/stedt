@@ -79,7 +79,7 @@ var stedtuserprivs = 0;
   <a href="http://stedt.berkeley.edu/documentation" target="_blank">help</a>
 <script src="[% self_base %]js/stedtconfig.js"></script>
 </span>
-<a href="[% self_url %]" title="Search Home"><img src="[% self_base %]img/STB32x32.gif" alt="STEDT Logo" width="32" height="32" class="left" border=0></a>
+<a href="[% self_url %]" title="Search Home"><img src="[% self_base %]img/splashy32x32.gif" alt="STEDT Logo" width="32" height="32" class="left" border=0></a>
 <b>[% title %]</b>
 <hr style="clear:both; margin-left:45px">
 </div>
