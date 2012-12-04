@@ -11,17 +11,19 @@
 	<td></td>
 	<th>(proto)gloss</th>
 	<th>language</th>
-	<td rowspan=2 valign=middle><input type="submit" title="Click to search!" name="search" value="Search" >
-	<input type="button" title="Click to clear the search form" name="clear" value="Clear" onclick="clear_splash()">
-	<br><a href="[% self_url %]/gnis">More search options...</a></td>
+	<td></td>
 </tr>
 <tr>
 		<td></td>
 	<td><input type="text" title="Type an English word" name="t" id="simple_searchinput" size="25" maxlength="128" style="height:32px"></td>
 	<td><input type="text" title="Type a language name" name="lg" id="simple_searchlg" size="25" maxlength="96"></td>
+	<td valign="middle"><input type="submit" title="Click to search!" name="search" value="Search" >
+	<input type="button" title="Click to clear the search form" name="clear" value="Clear" onclick="clear_splash()"></td>
 </tr>
 <tr>
 	<td><a href="#" onclick="Effect.multiple(['example1', 'example2'], function(el){Effect.toggle(el,'appear',{ duration: 0.25 });}); return false;">Show/hide examples</a>&nbsp;</td>
+	<td colspan=2></td>
+	<td><a href="[% self_url %]/gnis">More search options...</a></td>
 </tr>
 <tr id="example1" style="display:none">
 	<td></td>
