@@ -193,6 +193,11 @@ div#allofambox {
 	line-height: 1.25;
 }
 
+.mesolist {
+	font-family: myAllofam, Times, "Times New Roman", "Doulos SIL Compact", "Charis SIL Compact";
+	line-height: 1.25;
+}
+
 .footnote { font-size: smaller; }
 
 th {

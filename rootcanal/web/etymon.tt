@@ -51,7 +51,7 @@ Reflexes <span class="u[% etyma.0.tag %]">tagged by <select name="DDMenu" onchan
 [% END # e.plg -%]
 [%- IF e.mesoroots.size %]
 Reconstructed mesoroots below:
-<ul>
+<ul class="mesolist">
 [% FOREACH e2 IN e.mesoroots -%]
 <li><a href="#[% e2.grpno %]">[% e2.plg %] *[% e2.form %] [% e2.gloss %]</a></li>
 [% END -%]

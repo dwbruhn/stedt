@@ -9,36 +9,43 @@
 <table>
 <tr>
 	<td></td>
-	<th>(proto)gloss</th>
-	<th>language</th>
+	<th id="gloss_header"><span style="float: left">gloss</span><span id="gloss_help" style="float: right; cursor: help;">?&nbsp;</span></th>
+	<th><span style="float: left">language</span><span id="lg_help" style="float: right; cursor: help;">?&nbsp;</span></th>
 	<td></td>
 </tr>
 <tr>
-		<td></td>
-	<td><input type="text" title="Type an English word" name="t" id="simple_searchinput" size="25" maxlength="128" style="height:32px"></td>
-	<td><input type="text" title="Type a language name" name="lg" id="simple_searchlg" size="25" maxlength="96"></td>
+	<td></td>
+	<td><input type="text" name="t" id="simple_searchgloss" size="25" maxlength="128" style="height:32px"></td>
+	<td><input type="text" name="lg" id="simple_searchlg" size="25" maxlength="96"></td>
 	<td valign="middle"><input type="submit" title="Click to search!" name="search" value="Search" >
 	<input type="button" title="Click to clear the search form" name="clear" value="Clear" onclick="clear_splash()"></td>
 </tr>
 <tr>
-	<td><a href="#" onclick="Effect.multiple(['example1', 'example2'], function(el){Effect.toggle(el,'appear',{ duration: 0.25 });}); return false;">Show/hide examples</a>&nbsp;</td>
+	<td><a href="#" onclick="Effect.multiple(['example1', 'example2', 'example3'], function(el){Effect.toggle(el,'appear',{ duration: 0.25 });}); return false;">Show/hide examples</a>&nbsp;</td>
 	<td colspan=2></td>
 	<td><a href="[% self_url %]/gnis">More search options...</a></td>
 </tr>
-<tr id="example1" style="display:none">
-	<td></td>
+<tr id="example1" style="display: none; text-align: left;">
+	<td><i>gloss only:</i></td>
 	<td><b>dog</b></td>
 	<td>-</td>
 	<td><a href="#" onclick="clear_splash();
-		$('simple_searchinput').value='dog';return false">Try it!</a></td>
+		$('simple_searchgloss').value='dog';return false">Try it!</a></td>
 </tr>
-<tr id="example2" style="display:none">
-	<td></td>
-	<td><b>hit</b></td>
-	<td>lotha</td>
+<tr id="example2" style="display:none; text-align: left;">
+	<td><i>language only:</i></td>
+	<td>-</td>
+	<td>Paangkhua</td>
 	<td><a href="#" onclick="clear_splash();
-		$('simple_searchinput').value='hit';
-		$('lg-auto').value='lotha';return false">Try it!</a></td></td>
+		$('lg-auto').value='Paangkhua';return false">Try it!</a></td></td>
+</tr>
+<tr id="example3" style="display:none; text-align: left;">
+	<td><i>gloss &amp; lang:</i></td>
+	<td><b>hit</b></td>
+	<td>Lotha</td>
+	<td><a href="#" onclick="clear_splash();
+		$('simple_searchgloss').value='hit';
+		$('lg-auto').value='Lotha';return false">Try it!</a></td></td>
 </tr>
 </table>
 </form>
@@ -61,7 +68,14 @@
 </center>
 </div>
 <script>
-$('simple_searchinput').focus();
+$('simple_searchgloss').focus();
+
+// tooltip help for gloss field
+$('gloss_help').addTip('One or more English words. Multiple glosses can be entered, separated by commas, e.g. <i>frog, snail</i>', 'Gloss search field', {className:'standard', delay: 0.3, hideTrigger: 'closeButton', fixed: true, target: 'gloss_header', stem: true, targetJoint: ['left','top'], tipJoint: ['right','bottom'], stemSize: 20, autoOffset: true, offset: [17,7]});
+
+// tooltip help for language field
+$('lg_help').addTip('Values are from the "standardized" list of language names; type a few characters and the "autosuggest" feature will help you narrow down your selection.', 'Language search field', {className:'standard', delay: 0.3, hideTrigger: 'closeButton', fixed: true, target: true, stem: true, targetJoint: ['right','top'], tipJoint: ['left','bottom']});
+
 $('simple_search').observe('submit',function(e){e.stop();
 var s = Form.serializeElements(this.select('input:not(:submit,:button,:reset)','select').findAll(Form.Element.getValue));
 if (s) document.location = document.location.pathname + '/gnis' + '?'+s;
