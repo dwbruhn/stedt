@@ -1,6 +1,7 @@
 %!TEX TS-program = xelatex
 %!TEX encoding = UTF-8 Unicode
 \documentclass[12pt]{report}
+
 \makeatletter
 \renewcommand{\@makechapterhead}[1]{%
   %\vspace*{50\p@}%
@@ -13,7 +14,15 @@
     \Huge \bfseries #1\par\nobreak
     \vskip 40\p@
   }}
+\newcommand\etymon{\@startsection % special section cmd for etyma
+  {section}{1}{-1em} % name, level, indent
+  {-1ex}	% beforeskip
+  {1pt}		% afterskip
+  {\large}	% format
+}
+\newcommand\comparandum{\@startsection{subsection}{2}{0pt}{-1pt}{1pt}{\large\bfseries}}
 \makeatother
+
 \usepackage{fontspec}
 \usepackage{xunicode} % for real tildes with \textasciitilde
 \setmainfont{Charis SIL}
@@ -25,7 +34,6 @@
 \newcommand{\STEDTU}[1]{{\stedtfont #1}}
 \newcommand{\fascicletablebegin}{\begin{longtable}[l]{@{\hspace*{1.1em}}>{\hangindent=0.1in}p{1.7in}>{\hangindent=0.2in}p{1.2in}>{\hangindent=0.2in}p{1.3in}>{\hangindent=0.1in}p{1.5in}l}}
 \renewcommand \thechapter{\Roman{chapter}} % use cap roman numerals for chapter numbers
-\newcommand\comparandum{\@startsection{subsection}{2}{0pt}{-1pt}{1pt}{\large\bfseries}}
 
 \usepackage{fullpage}
 \usepackage{parskip}
@@ -46,10 +54,13 @@
 } 
 
 \begin{document}
+\pdfbookmark[1]{[% title %]}{titlepage}
+\setcounter{secnumdepth}{0} % don't number sections, just chapters
 \maketitle
+\pdfbookmark[1]{Table of Contents}{TOC}
 \tableofcontents
 \newpage
-\addcontentsline{toc}{section}{Introduction}
+\section{Introduction}
 % if fascicle... \chapter{}
 
 [% # semantic flowchart %]
@@ -68,11 +79,12 @@
 [% # insert actual content %]
 [% FOREACH etyma -%]
 [%- IF internal_notes %]\newpage[% END %]
+\etymon*{}	% just create section and let the following code add the bookmark, TOC entry, and heading
+\addcontentsline{toc}{section}{([% seq %]) [% plg %] [% protoform_text %] [% protogloss %]}
 \vspace{1em}
 {\large \parindent=-1em ([% seq %]) \hspace{\stretch{1}} [% plg %] [% protoform %]\hspace{\stretch{1}}\textbf{[% protogloss %]}
 \textit{\tiny[\#[% tag %]]}}
 \nopagebreak
-\addcontentsline{toc}{section}{([% seq %]) [% plg %] [% protoform_text %] [% protogloss %]}
 % \markright{([% seq %]) [\#[% tag %]] [% plg %] [% protoform %] [% protogloss %]}
 % \addcontentsline{toc}{subsection}{[% plg %] [% protoform_text %] [% protogloss %]}
 
@@ -87,8 +99,7 @@
 [% IF records %][% records %][% END -%]
 [% IF comparanda.size -%]
 [% label = 'Chinese comparand' _ (comparanda.size == 1 ? 'um' : 'a') -%]
-\addcontentsline{toc}{subsection}{\textit{[% label %]}}
-{\large \textbf{[% label %]}}
+\comparandum[\textit{[% label %]}]{[% label %]}
 [% END %]
 [% FOREACH note IN comparanda -%]
 [% note %]
