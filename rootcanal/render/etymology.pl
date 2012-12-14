@@ -1,4 +1,6 @@
 #!/usr/bin/perl
+# leaving this in for certain Mac OS X users...
+###!/opt/local/bin/perl
 use lib '../pm';
 # see printutils for latest SyllabificationStation.pm and STEDTUtil.pm
 
@@ -71,7 +73,8 @@ sub byKey {
 
   my ($volume,$fascicle,$inchapter) = split('\.',$key);
 
-  my ($voltitle) = $dbh->selectrow_array("SELECT chaptertitle FROM chapters WHERE v = $volume");
+  # semkey of the volume title (in "chapters") is always of the form V.0.0
+  my ($voltitle) = $dbh->selectrow_array("SELECT chaptertitle FROM chapters WHERE v = $volume AND f = 0 AND c = 0 ");
   print "\n<volume>\n<num>$volume</num>\n<title>$voltitle</title>\n";
 
   my $where = " v = $volume ";
@@ -91,11 +94,11 @@ sub byKey {
   my $n = 0;
   while ($sth->fetch()) {
     #print "$chapter $chaptertitle $v $f $c currf = $currf \n";
+    $chaptertitle = from_utf8_to_xml_entities($chaptertitle);
     next if ($f == 0);
     if ($c == 0) {
       # cache this fascicle info
       #print ">>> start: " . $chapter . "\n";
-      $chaptertitle = from_utf8_to_xml_entities($chaptertitle);
       $startf = "\n<fascicle><num>$chapter</num><title>" . $chaptertitle . "</title>\n" ;
       my $etyma;
       #my $tags = $dbh->selectall_arrayref("SELECT tag FROM etyma WHERE chapter = '$chapter' AND sequence > 0 ORDER BY sequence");
@@ -103,11 +106,10 @@ sub byKey {
       foreach my $tag (@$tags) {
 	#print "tag  ". $tag->[0] . "\n";
 	$etyma .= byTag($tag->[0]) ;
-      }	
+      }
       $startf .= "<chapter><chapternum>$chapter</chapternum><chaptertitle>$chaptertitle</chaptertitle>$etyma</chapter>\n" if $etyma;
     }
     elsif ($c == $inchapter+0 || $inchapter+0 == 0) {
-      $chaptertitle = from_utf8_to_xml_entities($chaptertitle);
       # get the etyma for this chapter or subchapter
       my $etyma;
       #my $tags = $dbh->selectall_arrayref("SELECT tag FROM etyma WHERE chapter = '$chapter' AND sequence > 0 ORDER BY sequence");

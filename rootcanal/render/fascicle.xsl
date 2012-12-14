@@ -15,7 +15,7 @@
 
 	    html { 
             font-family: "Arial Unicode MS", "Lucida Sans Unicode","Doulos SIL", "Charis SIL", "Gentium";
-	    font-size: medium;}
+	    font-size: small;}
 
 	    hr { 
 	    width: 100%;
