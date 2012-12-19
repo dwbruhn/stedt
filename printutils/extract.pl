@@ -107,10 +107,11 @@ my $chapter_notes = [map {xml2tex(decode_utf8($_))} @{$dbh->selectcol_arrayref(
 	];
 
 my @etyma; # array of infos to be passed on to the template
+my $extra_where = ($INTERNAL_NOTES ? "" : "AND e.sequence >= 1");  # extra condition to exclude unsequenced etyma when this is a non-draft version
 my $etyma_in_chapter = $dbh->selectall_arrayref(
 	qq#SELECT e.tag, e.sequence, e.protoform, e.protogloss, languagegroups.plg
 		FROM `etyma` AS `e` LEFT JOIN languagegroups ON e.grpid=languagegroups.grpid
-		WHERE e.uid=8 AND e.chapter LIKE '$semkey'
+		WHERE e.uid=8 AND e.chapter LIKE '$semkey' $extra_where
 		ORDER BY e.sequence#);
 
 print STDERR (scalar @$etyma_in_chapter) . " etyma in this chapter\n";

@@ -48,7 +48,9 @@
 \author{}
 \date{[% date %]}
 \usepackage[bookmarks]{hyperref}
-\hypersetup{% 
+\hypersetup{%
+	pdfborder={0 0 1},
+	pdfborderstyle={/S/U/W 1}, % make links underlined (instead of surrounded by red boxes)
 	pdftitle = {STEDT: [% title %]}, 
 	pdfauthor = {\textcopyright\ STEDT}, 
 } 
@@ -108,6 +110,7 @@
 [% END -%]
 
 \newpage
+\section{Bibliography}
 List of source abbreviations:
 
 \url{http://stedt.berkeley.edu/srcabbr}
