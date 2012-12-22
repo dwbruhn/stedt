@@ -41,7 +41,7 @@ sub group : Runmode {
 	my ($grpno, $grpname) = $self->dbh->selectrow_array(
 		"SELECT grpno, grp FROM languagegroups WHERE grpid=?", undef, $grpid);
 	my $lg_list = $self->dbh->selectall_arrayref(
-		"SELECT silcode, language, lgcode, srcabbr, citation, lgid, COUNT(lexicon.rn) AS num_recs FROM languagenames LEFT JOIN lexicon USING (lgid) LEFT JOIN srcbib USING (srcabbr) WHERE grpid=? AND lgcode != 0 GROUP BY lgid HAVING num_recs > 0 ORDER BY lgcode, language", undef, $grpid);
+		"SELECT silcode, language, lgcode, srcabbr, citation, lgid, COUNT(lexicon.rn) AS num_recs, pi_page FROM languagenames LEFT JOIN lexicon USING (lgid) LEFT JOIN srcbib USING (srcabbr) WHERE grpid=? AND lgcode != 0 GROUP BY lgid HAVING num_recs > 0 ORDER BY lgcode, language", undef, $grpid);
 
 	# do a linear search for the index of the record we're interested in
 	my $i;

@@ -21,6 +21,7 @@ from source <a href="[% self_url %]/source/[% row.3 %]" target="stedt_src">[% ro
 <tr><th>ISO 639-3</th><td>[% IF row.0 %]<a href="http://www.ethnologue.com/show_language.asp?code=[% row.0 %]" target="stedt_ethnologue">[% row.0 %]</a>[% ELSE %]n/a[% END %]</td></tr>
 <tr><th>Language Code</th><td>[% row.2 %]</td></tr>
 <tr><th>num. of records</th><td><a href="[% self_url %]/gnis?lexicon.lgid=[% row.5 %]" target="stedt_sss">[% row.6 %]</a></td></tr>
+[% IF row.7!=0 %]<tr><th title="from Namkung, ed. 1996 (STEDT Monograph #3)" style="cursor:help;">Phon. Inventory</th><td><a href="[% self_base %]phon_inv.html?page=[% row.7 + pi_pdf_offset %]" target="stedt_pi" title="Namkung, ed. 1996">p.[% row.7 %]</a></td></tr>[% END %]
 </table>
 [% CALL lgs.splice(lg_index, 1) -%]
 [% # now, collect all the languages with the same language code -%]
@@ -32,12 +33,13 @@ from source <a href="[% self_url %]/source/[% row.3 %]" target="stedt_src">[% ro
 <p>Other sources which include this language:</p>
 
 <table class="hangindent">
-<tr><th>Language Name</th><th>Source</th><th>num. of records</th></tr>
+<tr><th>Language Name</th><th>Source</th><th>num. of records</th><th title="from Namkung, ed. 1996 (STEDT Monograph #3)" style="cursor:help;">Phon. Inventory</th></tr>
 [% FOREACH row IN other_lgs -%]
 <tr>
 	<td>[% row.1 %]</td>
 	<td><a href="[% self_url %]/source/[% row.3 %]" target="stedt_src">[% row.4 %]</a></td>
 	<td><a href="[% self_url %]/gnis?lexicon.lgid=[% row.5 %]" target="stedt_sss">[% row.6 %]</a></td>
+	<td>[% IF row.7!=0 %]<a href="[% self_base %]phon_inv.html?page=[% row.7 + pi_pdf_offset %]" target="stedt_pi" title="Namkung, ed. 1996">p.[% row.7 %]</a>[% END %]</td>
 </tr>
 [% END -%]
 </table>
@@ -57,6 +59,7 @@ from source <a href="[% self_url %]/source/[% row.3 %]" target="stedt_src">[% ro
 	<th>Lg. Code</th>
 	<th>Source</th>
 	<th>num. of records</th>
+	<th title="from Namkung, ed. 1996 (STEDT Monograph #3)" style="cursor:help;">Phon. Inventory</th>
 </tr>
 [% FOREACH row IN lgs -%]
 [% NEXT IF row.2 == lg_code -%]
@@ -66,6 +69,7 @@ from source <a href="[% self_url %]/source/[% row.3 %]" target="stedt_src">[% ro
 	<td>[% row.2 %]</td>
 	<td><a href="[% self_url %]/source/[% row.3 %]" target="stedt_src">[% row.4 %]</a></td>
 	<td><a href="[% self_url %]/gnis?lexicon.lgid=[% row.5 %]" target="stedt_sss">[% row.6 %]</a></td>
+	<td>[% IF row.7!=0 %]<a href="[% self_base %]phon_inv.html?page=[% row.7 + pi_pdf_offset %]" target="stedt_pi" title="Namkung, ed. 1996">p.[% row.7 %]</a>[% END %]</td>
 </tr>
 [% END -%]
 [% ELSE -%]
