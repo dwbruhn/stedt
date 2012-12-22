@@ -1,3 +1,9 @@
+body
+{
+	font-family: myAllofam, Times, "Times New Roman", "Doulos SIL Compact", "Charis SIL Compact";
+	line-height: 1;
+}
+
 .allofam
 {
 	background-color: #EEE;

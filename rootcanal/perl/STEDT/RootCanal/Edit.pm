@@ -224,6 +224,8 @@ sub update : Runmode {
 	# and recording the field as "user_an" (or "analysis" if changing the stedt tags).
 	my ($tblname, $field, $id, $value) = ($q->param('tbl'), $q->param('field'),
 		$q->param('id'), decode_utf8($q->param('value')));
+
+	$value =~ s/\t//g;	# strip out any tab characters
 	
 	# restrict taggers from editing etyma not their own
 	# this just seemed like the best place to put this code
