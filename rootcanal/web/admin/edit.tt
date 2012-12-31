@@ -77,7 +77,7 @@ No records found. (WHERE [% result.debug %])
 [%- FOREACH col IN result.fields %]
 <th id="[% col %]">
 [%- IF manual %]
-<a href="[% sortlinks.$col %]">[% col.replace('^.*\.','') %]</a>
+<a href="[% sortlinks.$col %]" style="text-decoration:none; color:white;">[% col.replace('^.*\.','') %]</a>
 [%- ELSE %]
 [%- col.replace('^.*\.','') %]
 [%- END -%]
