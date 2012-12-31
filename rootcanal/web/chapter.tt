@@ -57,9 +57,20 @@
 <script>
 var footnote_counter = [% footnotes.size %];
 [% # hide some extraneous columns in chapter view -%]
-$w('u_recs o_recs etyma.exemplary etyma.chapter etyma.notes etyma.xrefs etyma.possallo etyma.allofams etyma.public users.username etyma.semkey etyma.status etyma.prefix etyma.initial etyma.rhyme etyma.tone').each(function (col) {
+$w('u_recs o_recs etyma.exemplary etyma.chapter etyma.notes etyma.xrefs etyma.possallo etyma.allofams users.username etyma.semkey etyma.status etyma.prefix etyma.initial etyma.rhyme etyma.tone').each(function (col) {
 	setup['etyma'][col].hide = true;
 });
+setup['etyma']['etyma.protoform'].transform = function (v, key, rec, n) {
+						// if public field is 1, don't add 'provisional' note
+						if (rec[$('etyma.public').cellIndex] === '1') return v;
+						return v + ' <span style="color:red;">[provisional]</span>';
+				  	};
+setup['etyma']['etyma.public'] = {
+	noedit: !(stedtuserprivs & 16),
+	hide: !(stedtuserprivs & 16),
+	size: 15,
+};
+
 [% IF result.data.size # can't init the table if there's no data -%]
 TableKit.Raw.init('etyma_resulttable', 'etyma', setup['etyma'][% IF c.has_privs(8) %], '[% self_url %]/update'[% END %]);
 TableKit.Rows.stripe('etyma_resulttable');

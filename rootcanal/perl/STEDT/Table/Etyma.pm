@@ -51,7 +51,7 @@ $t->field_visible_privs(
 	'etyma.sequence'  => 3,
 	'etyma.possallo'  => 1,
 	'etyma.allofams'  => 1,
-	'etyma.public' => 1,
+#	'etyma.public' => 1,
 	'u_recs' => 1,
 	'o_recs' => 1,
 	'users.username' => 1,
@@ -169,6 +169,7 @@ $t->wheres(
 		return "etyma.sequence > 0";
 	},
 	'etyma.semkey' => 'value',
+	'etyma.uid' => 'int',
 );
 
 $t->save_hooks(

@@ -6,16 +6,16 @@
 <thead><tr>
 	<th id="chapters.semkey">Ch.</th>
 	<th id="chapters.chaptertitle">Title</th>
-	<th>[% IF c.has_privs(1) %]public[% ELSE %]num. etyma[% END %]</th>
-	[%- IF c.has_privs(1) %]<th>etyma</th>[% END %]<th>notes</th><th>flowchart?</th>
+	[% IF c.has_privs(1) %]<th>public</th>[% END %]
+	<th>num. etyma</th><th>notes</th><th>flowchart?</th>
 	<th id="chapters.id">id</th>
 </tr></thead>
 <tbody>
 [% FOREACH r IN ch -%]
 <tr>
 <td><a target="notes" href="[% self_url %]/chap/[% r.0 | uri %]">[% r.0 %]</a></td>
-<td>[% r.1 | html %]</td><td>[% r.2 || '' %]</td>
-[%- IF c.has_privs(1) %]<td>[% IF r.3 %]<a target="edit_etyma" href="[% self_url %]/edit/etyma?etyma.chapter=[% r.0 | uri %]">[% r.3 %][% END %]</td>[% END -%]
+<td>[% r.1 | html %]</td>[%- IF c.has_privs(1) %]<td>[% r.2 || '' %]</td>[% END -%]
+<td>[% IF r.3 %][%- IF c.has_privs(1) %]<a target="edit_etyma" href="[% self_url %]/edit/etyma?etyma.chapter=[% r.0 | uri %]">[% r.3 %][% ELSE %][% r.3 %][% END # privs check %][% END # r.3 check %]</td>
 <td>[% r.4 || '' %]</td><td>[% IF r.5 %]✓[% END %]</td>
 <td>[% r.7 %]</td>
 </tr>

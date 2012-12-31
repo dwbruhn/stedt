@@ -3,6 +3,7 @@ use strict;
 use base 'STEDT::RootCanal::Base';
 use Encode;
 use Time::HiRes qw(time);
+use List::Util qw(first);	# used to find indices of seq num and public in etyma result array
 
 sub browser : StartRunMode {
 	my $self = shift;
@@ -11,15 +12,15 @@ sub browser : StartRunMode {
 	my $blessed = '';
 	my $public_ch = '';
 	unless ($self->has_privs(1)) {
-		$public = "AND etyma.public=1";
-		$blessed = 'AND etyma.uid=8';
+#		$public = "AND etyma.public=1";
+#		$blessed = 'AND etyma.uid=8';
 		$public_ch = 'HAVING num_public OR public_notes';
 	}
 	# from the chapters table
 	my $chapterquery = <<SQL;
 SELECT chapters.semkey, chapters.chaptertitle, 
-	(SELECT COUNT(*) FROM etyma WHERE chapter=chapters.semkey AND public=1 $blessed) AS num_public,
-	(SELECT COUNT(*) FROM etyma WHERE chapter=chapters.semkey $blessed),
+	(SELECT COUNT(*) FROM etyma WHERE chapter=chapters.semkey AND public=1 AND etyma.status != 'DELETE' $blessed) AS num_public,
+	(SELECT COUNT(*) FROM etyma WHERE chapter=chapters.semkey AND etyma.status != 'DELETE' $blessed),
 	COUNT(DISTINCT notes.noteid), MAX(notes.notetype = 'G'), MAX(notes.notetype != 'I') as public_notes, chapters.id
 FROM chapters LEFT JOIN notes ON (notes.id=chapters.semkey)
 GROUP BY 1 $public_ch ORDER BY v,f,c,s1,s2,s3
@@ -52,14 +53,14 @@ sub tweak : RunMode {
 	my $blessed = '';
 	my $public_ch = '';
 	unless ($self->has_privs(1)) {
-		$public = "AND etyma.public=1";
-		$blessed = 'AND etyma.uid=8';
+#		$public = "AND etyma.public=1";
+#		$blessed = 'AND etyma.uid=8';
 		$public_ch = 'HAVING num_public OR public_notes';
 	}
 	my $chapterquery = <<SQL;
 SELECT chapters.semkey, chapters.chaptertitle, 
-	(SELECT COUNT(*) FROM etyma WHERE chapter=chapters.semkey AND public=1 $blessed) AS num_public,
-	(SELECT COUNT(*) FROM etyma WHERE chapter=chapters.semkey $blessed),
+	(SELECT COUNT(*) FROM etyma WHERE chapter=chapters.semkey AND public=1 AND etyma.status != 'DELETE' $blessed) AS num_public,
+	(SELECT COUNT(*) FROM etyma WHERE chapter=chapters.semkey AND etyma.status != 'DELETE' $blessed),
 	COUNT(DISTINCT notes.noteid), MAX(notes.notetype = 'G'), MAX(notes.notetype != 'I') as public_notes,
 	chapters.semcat, chapters.old_chapter, chapters.old_subchapter, chapters.id,
 	COUNT(DISTINCT glosswords.word),
@@ -126,9 +127,31 @@ sub chapter : RunMode {
 	my $t = $self->load_table_module('etyma');
 	my $q = $self->query->new('');
 	$q->param('etyma.chapter'=>$chap);
+	$q->param('sortkey'=>'etyma.sequence');	# this should speed up the sort further down
 #	$q->param('etyma.sequence'=>'>0'); # hide non-sequenced items from the chapter view
-	$q->param('etyma.public'=>1) unless $self->has_privs(1);
+#	$q->param('etyma.public'=>1) unless $self->has_privs(1);
 	my $result = $t->search($q);
+	
+	# grab the indices of the etyma.sequence and etyma.public fields
+	# because they're different for public vs. logged-in users
+	my $seq_idx = first { $result->{fields}[$_] eq 'etyma.sequence' } 0..$#{$result->{fields}};
+	my $pub_idx = first { $result->{fields}[$_] eq 'etyma.public' } 0..$#{$result->{fields}};
+	
+	# sort the etyma in place by sequence number first (moving 0's to the end), then by reverse public value (1 first)
+	# involves de-referencing the array of etyma records (themselves arrays), sorting, and and reassigning the result
+	@{$result->{data}} = sort {
+			# if one of etyma under comparison has seq=0, move it to the end
+			if ($a->[$seq_idx] == 0 && $b->[$seq_idx] != 0) {
+				return 1;	# a comes after
+			}
+			elsif ($b->[$seq_idx] == 0 && $a->[$seq_idx] != 0) {
+				return -1; 	# b comes after
+			}
+			else {
+				# otherwise, sort by seq number ([$seq_idx]) then by reverse public value ([$pub_idx])
+				return ($a->[$seq_idx] <=> $b->[$seq_idx] || $b->[$pub_idx] <=> $a->[$pub_idx]);
+			}
+		} @{$result->{data}};
 	
 	return $self->tt_process("chapter.tt", {
 		chap => $chap, chaptitle=>$title,

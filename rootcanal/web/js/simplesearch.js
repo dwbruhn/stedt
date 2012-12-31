@@ -188,4 +188,6 @@ function show_advanced_search(tbl) {
 	return false;
 };
 
+setup['etyma']['etyma.public'].hide = true;
+
 document.observe("dom:loaded", stedt_simplesearch_init);
