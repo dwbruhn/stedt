@@ -145,7 +145,7 @@ td, .editable-cell-form textarea
 /* (looks like we're only using textareas, not text inputs) */
 {
 	font-family: "Doulos SIL", "Charis SIL", "Gentium", "SILDoulosUnicodeIPA", "Thryomanes",
-		"Cardo", "Lucida Grande", "Arial Unicode MS", "Lucida Sans Unicode","STEDTU";
+		"Cardo", "Lucida Grande", "Arial Unicode MS", "Lucida Sans Unicode","STEDTU", "myAllofam";
 	font-size: medium;
 }
 
