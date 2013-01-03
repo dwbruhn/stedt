@@ -69,7 +69,7 @@ div#info
 }
 div#info>div
 {
-	font-family: myAllofam, Times, "Times New Roman", "Doulos SIL Compact", "Charis SIL Compact";
+	font-family: myAllofam, Times, "Times New Roman", "Doulos SIL Compact", "Charis SIL Compact", STEDTU;
 	margin-top: 15px;
 	background-color: white;
 	padding: 1ex 1ex 1ex 1ex;
@@ -177,7 +177,7 @@ td, .editable-cell-form textarea
 {
 	/* make sure allofam and IPA characters will appear correctly in notes;
 	note that listing Doulos and Charis SIL Compact first resolves some spacing issues in Chromium */
-	font-family: myAllofam, "Doulos SIL Compact", "Charis SIL Compact", Times, "Times New Roman";
+	font-family: myAllofam, "Doulos SIL Compact", "Charis SIL Compact", Times, "Times New Roman", STEDTU;
 	line-height: 1.25;
 	overflow/**/: auto;
 	height: 1%;
@@ -187,14 +187,14 @@ td, .editable-cell-form textarea
 see http://www.pupinc.com/boxflowhack/ */
 
 div#allofambox {
-	font-family: myAllofam, Times, "Times New Roman", "Doulos SIL Compact", "Charis SIL Compact";
+	font-family: myAllofam, Times, "Times New Roman", "Doulos SIL Compact", "Charis SIL Compact", STEDTU;
 	border: 1px solid gray;
 	padding:1ex 1ex 0 1ex;
 	line-height: 1.25;
 }
 
 .mesolist {
-	font-family: myAllofam, Times, "Times New Roman", "Doulos SIL Compact", "Charis SIL Compact";
+	font-family: myAllofam, Times, "Times New Roman", "Doulos SIL Compact", "Charis SIL Compact", STEDTU;
 	line-height: 1.25;
 }
 
@@ -220,7 +220,7 @@ th A:visited   		{ color: white; }
 th A:hover   		{ color: teal; text-decoration: underline; }
 
 h1 {
-     font-family: Helvetica, Arial, sans-serif, myAllofam;
+     font-family: Helvetica, Arial, sans-serif, myAllofam, STEDTU;
      font-weight: bold; }
 
 h2 {
