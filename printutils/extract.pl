@@ -52,7 +52,7 @@ my $hidden_etyma = $dbh->selectall_arrayref(
 	qq#SELECT e.tag, e.protoform, e.protogloss, languagegroups.plg 
 		FROM `etyma` AS `e` LEFT JOIN languagegroups ON e.grpid=languagegroups.grpid
 		WHERE e.uid=8 AND e.chapter LIKE '$semkey%' AND e.sequence < 1#);
-if (@$hidden_etyma) {
+if (@$hidden_etyma && !$INTERNAL_NOTES) {
 	print STDERR "Warning: The following etyma have a sequence number of 0\nand will not be included:\n";
 	for my $e (@$hidden_etyma) {
 		print STDERR join("\t", map {decode_utf8($_)} @$e), "\n";
@@ -404,7 +404,7 @@ sub get_meso_notes {
 	if (@m) {
 		$meso_string = ": $m[0]{plg} ";
 	}
-	$meso_string .= join ', ', map {format_protoform($_->{form}) . ' ' . $_->{gloss}} @m;
+	$meso_string .= join ', ', map {format_protoform(escape_tex(decode_utf8($_->{form}))) . ' ' . escape_tex(decode_utf8($_->{gloss}))} @m;
 	my $notes_string = '';
 	while (@$notes && $notes->[0]{grpno} eq $grpno) {
 		my ($notetype, $note) = ($notes->[0]{type}, $notes->[0]{text});
