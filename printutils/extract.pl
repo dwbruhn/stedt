@@ -162,7 +162,7 @@ foreach (@$etyma_in_chapter) {
 	my $sql = <<EndOfSQL; # this order forces similar reflexes together, and helps group srcabbr's
 SELECT DISTINCT languagegroups.grpno, grp, language, lexicon.rn, 
    (SELECT GROUP_CONCAT(tag_str ORDER BY ind) FROM lx_et_hash WHERE rn=lexicon.rn AND uid=8) AS analysis,
-   reflex, gloss, languagenames.srcabbr, lexicon.srcid, notes.rn
+   reflex, gloss, gfn, languagenames.srcabbr, lexicon.srcid, notes.rn
 FROM lexicon LEFT JOIN notes ON notes.rn=lexicon.rn, languagenames, languagegroups, lx_et_hash
 WHERE (lx_et_hash.tag = $e{tag}
 AND lx_et_hash.rn=lexicon.rn AND lx_et_hash.uid=8
@@ -184,19 +184,21 @@ EndOfSQL
 		my $deletedforms = 0;
 		for (1..$#$recs) {
 			my ($grpno,$grp,  $lg,    $rn,   $an,   $form, $gloss,
-				$srcabbr,$srcid,$notern)        = @{$recs->[$_]};
+				$gfn,    $srcabbr,    $srcid,$notern)        = @{$recs->[$_]};
 			my (undef, undef, $oldlg, undef, undef, $oldform, $oldgloss,
-				$oldsrcabbr, $oldsrcid) = @$lastrec;
-			if ($lg eq $oldlg
+				$oldgfn, $oldsrcabbr, $oldsrcid) = @$lastrec;
+			$gfn =~ s/\.$//;	# remove any trailing period from gfn
+			$oldgfn =~ s/\.$//;
+			if ($lg eq $oldlg && $gfn eq $oldgfn # note: the gfn comparison needs to be made more sophisticated
 				&& eq_reflexes($oldform, $form)) {
 				$recs->[$_][2] = ''; # mark as empty for skipping later
 				$lastrec->[6] = merge_glosses($oldgloss,$gloss);
-				$lastrec->[7] .= ";$srcabbr";
-				$lastrec->[8] .= ";$srcid";
+				$lastrec->[8] .= ";$srcabbr";
+				$lastrec->[9] .= ";$srcid";
 				
 				if ($notern) {
-					$lastrec->[9] .= ',' if $lastrec->[9];
-					$lastrec->[9] .= $notern;
+					$lastrec->[10] .= ',' if $lastrec->[10];
+					$lastrec->[10] .= $notern;
 				}
 	
 				$deletedforms++;
@@ -215,7 +217,7 @@ EndOfSQL
 		my $lastlg = '';
 		my $group_space = '[0.5ex]';
 		for my $rec (@$recs) {
-			my ($grpno,$grp,$lg,$rn,$an,$form,$gloss,$srcabbr,$srcid,$notern)
+			my ($grpno,$grp,$lg,$rn,$an,$form,$gloss,$gfn,$srcabbr,$srcid,$notern)
 				= @$rec;
 			next unless $lg; # skip duplicate forms (see above)
 			
@@ -260,8 +262,10 @@ EndOfSQL
 			}
 			$lg = escape_tex($lg);
 			$lg = '{}' . $lg if $lg =~ /^\*/; # need curly braces to prevent \\* treated as a command!
+			$gfn =~ s/\.$//;	# remove any trailing period from gfn to avoid double periods
+			my $gloss_string = ($gfn) ? "$gloss ($gfn.)" : $gloss; # concatenate with gfn if it's not empty
 			$text .= join(' &', $lg, escape_tex(      $form      ,1),
-				$gloss, src_concat($srcabbr, $srcid), '');	# extra slot for footnotes...
+				$gloss_string, src_concat($srcabbr, $srcid), '');	# extra slot for footnotes...
 			
 			# footnotes, if any
 			if ($notern) {
