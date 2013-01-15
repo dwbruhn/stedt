@@ -343,7 +343,7 @@ sub collect_lex_notes {
 		if ($rec->[-1]) { # if there are any notes...
 			# only select notes which are generic (empty id) OR those that have specifically been marked as belonging to this etymon/reflex combination
 			my @results = @{$c->dbh->selectall_arrayref("SELECT noteid, notetype, datetime, xmlnote, id, uid, username FROM notes LEFT JOIN users USING (uid) "
-					. "WHERE notes.rn=? $tag_search $internal_note_search ORDER BY ord",
+					. "WHERE notes.rn=? AND notes.spec='L' $tag_search $internal_note_search ORDER BY ord",
 					undef, $rec->[0])};
 			$rec->[-1] = '';
 			# NB: these are footnotes, and they don't have footnotes inside them!
