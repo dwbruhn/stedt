@@ -3,7 +3,7 @@
 <table>
 [% FOREACH val IN result -%]
 [%- n = loop.index -%]
-<tr><th>[% cols.$n %]</th><td><input type="text" size="40" name="[% cols.$n %]" value="[% val | html %]"></td></tr>
+<tr><th>[% cols.$n %]</th><td><input type="text" size="40" name="[% cols.$n %]" value="[% val | html %]" [%IF cols.$n == key -%]disabled[%- END %]></td></tr>
 [% END -%]
 </table>
 <input name="rootcanal_btn" type="submit" value="Save">

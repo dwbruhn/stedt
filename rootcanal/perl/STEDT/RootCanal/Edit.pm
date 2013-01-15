@@ -345,7 +345,8 @@ sub single_record : Runmode {
 	return $self->tt_process("admin/single_record.tt", {
 		t=>$t, id=>$id,
 		result => $result,
-		cols => $cols
+		cols => $cols,
+		key => $key
 	});
 }
 
