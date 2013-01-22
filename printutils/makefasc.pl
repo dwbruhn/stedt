@@ -11,9 +11,11 @@ print header(-charset => "utf8"); # calls charset for free, so forms don't mangl
 if (param('semkey')) {
     my ($v,$f,$c) = split('\.',param('semkey'));
 
-    print "<h2>Running... makeFasc.sh \"$v\" \"$f\" \"$c\" --i</h2>";
+    param('final')) ? my $final = '' : my $final = '--i';
+
+    print "<h2>Running... makeFasc.sh \"$v\" \"$f\" \"$c\" $final</h2>";
     print '<pre>';
-    system("/home/stedt-cgi-ssl/rootcanals/makeFasc.sh \"$v\" \"$f\" \"$c\" --i 2>\&1");
+    system("/home/stedt-cgi-ssl/rootcanals/makeFasc.sh \"$v\" \"$f\" \"$c\" $final 2>\&1");
     print '</pre>';
     print "<h1>Done!</h1>";
 }
