@@ -11,7 +11,8 @@ print header(-charset => "utf8"); # calls charset for free, so forms don't mangl
 if (param('semkey')) {
     my ($v,$f,$c) = split('\.',param('semkey'));
 
-    param('final')) ? my $final = '' : my $final = '--i';
+    my $final = '--i'; 
+    $final = '' if param('final');
 
     print "<h2>Running... makeFasc.sh \"$v\" \"$f\" \"$c\" $final</h2>";
     print '<pre>';

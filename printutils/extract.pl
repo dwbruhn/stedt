@@ -49,9 +49,9 @@ $texfilename =~ tr/A-Z/a-z/;
 
 # add warning about unsequenced items
 my $hidden_etyma = $dbh->selectall_arrayref(
-	qq#SELECT e.tag, e.protoform, e.protogloss, languagegroups.plg 
+	qq#SELECT e.chapter,e.tag, e.protoform, e.protogloss, languagegroups.plg 
 		FROM `etyma` AS `e` LEFT JOIN languagegroups ON e.grpid=languagegroups.grpid
-		WHERE e.uid=8 AND e.chapter LIKE '$semkey%' AND e.sequence < 1#);
+		WHERE e.uid=8 AND concat(e.chapter,'.') LIKE '$semkey.%' AND e.sequence < 1#);
 if (@$hidden_etyma && !$INTERNAL_NOTES) {
 	print STDERR "Warning: The following etyma have a sequence number of 0\nand will not be included:\n";
 	for my $e (@$hidden_etyma) {
@@ -111,7 +111,7 @@ my $extra_where = ($INTERNAL_NOTES ? "" : "AND e.sequence >= 1");  # extra condi
 my $etyma_in_chapter = $dbh->selectall_arrayref(
 	qq#SELECT e.tag, e.sequence, e.protoform, e.protogloss, languagegroups.plg
 		FROM `etyma` AS `e` LEFT JOIN languagegroups ON e.grpid=languagegroups.grpid
-		WHERE e.uid=8 AND e.chapter LIKE '$semkey' $extra_where
+		WHERE e.uid=8 AND concat(e.chapter,'.') LIKE '$semkey.%' $extra_where
 		ORDER BY e.sequence#);
 
 print STDERR (scalar @$etyma_in_chapter) . " etyma in this chapter\n";
