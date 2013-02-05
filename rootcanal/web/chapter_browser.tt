@@ -3,13 +3,7 @@
 <h1>Chapters</h1>
 <p>[% ch.size %] nodes (took [% time_elapsed %] seconds to retrieve)</p>
 <table id="ch" class="sortable resizable hangindent" style="table-layout:fixed">
-<thead><tr>
-	<th id="chapters.semkey">Ch.</th>
-	<th id="chapters.chaptertitle">Title</th>
-	[% IF c.has_privs(1) %]<th>public</th>[% END %]
-	<th>num. etyma</th><th>notes</th><th>flowchart?</th>
-	<th id="chapters.id">id</th>
-</tr></thead>
+<thead></thead>
 <tbody>
 [% FOREACH r IN ch -%]
 <tr>
@@ -18,6 +12,7 @@
 <td>[% IF r.3 %][%- IF c.has_privs(1) %]<a target="edit_etyma" href="[% self_url %]/edit/etyma?etyma.chapter=[% r.0 | uri %]">[% r.3 %][% ELSE %][% r.3 %][% END # privs check %][% END # r.3 check %]</td>
 <td>[% r.4 || '' %]</td><td>[% IF r.5 %]✓[% END %]</td>
 <td>[% r.7 %]</td>
+<td><a target="notes" href="[% self_url %]/chap/pdf/[% r.0 | uri %]">PDF</a></td>
 </tr>
 [% END -%]
 </tbody>

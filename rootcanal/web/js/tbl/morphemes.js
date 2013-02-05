@@ -14,7 +14,7 @@ setup.morphemes = {
     },
     'morphemes.tag' : {
 	label: 'tag',
-	noedit: true,
+	noedit: false,
 	hide: false,
 	size: 30
     },
@@ -72,7 +72,7 @@ setup.morphemes = {
     'shortdisp' : {
 	label: 'lexical item',
 	noedit: true,
-	size: 120
+	size: 450
     },
     'morphemes.handle' : {
 	label: 'handle',

@@ -6,20 +6,30 @@ setup.chapters = {
     },
     'chapters.semkey' : {
 	label: 'semkey',
-	size: 80
+	size: 60
     },
     'chapters.chaptertitle' : {
 	label: 'title',
-	size: 200
+	size: 80
     },
     'etyma' : {
         noedit: true,
-        size: 60
+        size: 24
     },
     'wcount' : {
 	label: 'lexicon records',
 	noedit: true,
-	size: 60
+	size: 24
+    },
+    'haschart' : {
+	label: 'flow chart?',
+	noedit: true,
+	size: 24
+    },
+    'notecount' : {
+	label: 'notes',
+	noedit: true,
+	size: 24
     },
     'num_glosswords' : {
 	noedit: true,
@@ -90,5 +100,9 @@ setup.chapters = {
 	label: 'old subchapter',
 	noedit: true,
 	size: 80
-    }
+    },
+    'eDiss' : {
+	noedit: true,
+	size: 30
+    },
 };

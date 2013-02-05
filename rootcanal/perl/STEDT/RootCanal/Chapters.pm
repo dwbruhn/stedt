@@ -61,7 +61,7 @@ sub tweak : RunMode {
 SELECT chapters.semkey, chapters.chaptertitle, 
 	(SELECT COUNT(*) FROM etyma WHERE chapter=chapters.semkey AND public=1 AND etyma.status != 'DELETE' $blessed) AS num_public,
 	(SELECT COUNT(*) FROM etyma WHERE chapter=chapters.semkey AND etyma.status != 'DELETE' $blessed),
-	COUNT(DISTINCT notes.noteid), MAX(notes.notetype = 'G'), MAX(notes.notetype != 'I') as public_notes,
+	COUNT(DISTINCT notes.noteid) as notecount, MAX(notes.notetype = 'G') as haschart, MAX(notes.notetype != 'I') as public_notes,
 	chapters.semcat, chapters.old_chapter, chapters.old_subchapter, chapters.id,
 	COUNT(DISTINCT glosswords.word),
 	GROUP_CONCAT(DISTINCT glosswords.word SEPARATOR ', ') AS some_glosswords,
