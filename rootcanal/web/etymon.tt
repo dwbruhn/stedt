@@ -34,20 +34,23 @@ Reflexes <span class="u[% etyma.0.tag %]">tagged by <select name="DDMenu" onchan
 [% END # has_privs 1 %]
 
 [% FOREACH e IN etyma -%]
+<table><tr><td style="padding: 10px; ">
 <h1>[% IF c.has_privs(1) %]<a href="[% self_url %]/edit/etyma?etyma.tag=[% e.tag %]" target="edit_etyma">[% END %]
 #[% e.tag %][% IF c.has_privs(1) %]</a>[% END %] [% e.plg %] [% e.protoform %] [% e.protogloss %]
 [%- IF e.uid != 8 && c.has_privs(1) %] <span class="u[% etyma.0.tag %]">(proposed by [% e.username %])</span>[% END -%]
 [%- IF !e.public %] <span id="prov_heading" style="color:red; cursor:help; font-size:medium">(provisional)</span> [% END -%]
-</h1>
+</h1></td>
 [% IF c.has_privs(1) %]
 [% IF e.plg != '' && e.plg != 'PST' -%]
+<td style="background-color: lightgoldenrodyellow;  padding: 10px; vertical-align: middle; text-align: center;">
 <form action="[% self_url %]/tags/make_meso" method="post" onsubmit="if (!parseInt(this.newtag.value,10)) {alert('Please specify a tag number.'); return false};return confirm('Are you sure you want to migrate all tags to #' + this.newtag.value + '? This action cannot be undone!')">
-<input name="btn" type="submit" value="Move all tags and make this a mesoreconstruction of:">
+<input style="font-size:36pt" name="btn" type="submit" value="Move all tags and make this a mesoreconstruction of:"><br/>
 #<input type="text" name="newtag" id="make_meso_input" size="40" maxlength="80">
 <div id="autocomplete_choices" class="autocomplete"></div>
-<input type="hidden" name="oldtag" value="[% e.tag %]">
-</form>
+<inputtype="hidden" name="oldtag" value="[% e.tag %]">
+</form></td>
 [% END # has_privs 1 %]
+</tr></table>
 [% END # e.plg -%]
 [%- IF e.mesoroots.size %]
 Reconstructed mesoroots below:
