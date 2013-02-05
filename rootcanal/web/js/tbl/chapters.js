@@ -104,5 +104,5 @@ setup.chapters = {
     'eDiss' : {
 	noedit: true,
 	size: 30
-    },
+    }
 };
