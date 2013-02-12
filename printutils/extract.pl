@@ -265,7 +265,7 @@ EndOfSQL
 			$gfn =~ s/\.$//;	# remove any trailing period from gfn to avoid double periods
 			my $gloss_string = ($gfn) ? "$gloss ($gfn.)" : $gloss; # concatenate with gfn if it's not empty
 			$text .= join(' &', $lg, escape_tex(      $form      ,1),
-				$gloss_string, src_concat($srcabbr, $srcid), '');	# extra slot for footnotes...
+				escape_tex($gloss_string), src_concat($srcabbr, $srcid), '');	# extra slot for footnotes...
 			
 			# footnotes, if any
 			if ($notern) {
