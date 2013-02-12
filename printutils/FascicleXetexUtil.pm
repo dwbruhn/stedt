@@ -80,12 +80,13 @@ sub _tabularify {
 
 sub escape_tex {
 	my $s = shift;
-	my $ignore_curly_braces_dollars = shift; # second argument means "Don't escape curly braces or dollar signs"
-	$s =~ s/{/\\{/g unless $ignore_curly_braces_dollars;
-	$s =~ s/}/\\}/g unless $ignore_curly_braces_dollars;
+	my $ignore_curly_braces = shift; # second argument means "Don't escape curly braces"
+	my $ignore_dollar_signs = shift; # third argument means "Don't escape dollar signs"
+	$s =~ s/{/\\{/g unless $ignore_curly_braces;
+	$s =~ s/}/\\}/g unless $ignore_curly_braces;
 	$s =~ s/#/\\#/g;
 	$s =~ s/&/\\&/g;
-	$s =~ s/\$/\\\$/g unless $ignore_curly_braces_dollars; # for dollar signs in Na data
+	$s =~ s/\$/\\\$/g unless $ignore_dollar_signs; # for dollar signs in Na data
 	$s =~ s/~/\\textasciitilde\\ /g;
 #	$s =~ s/</\\textless\\ /g;
 #	$s =~ s/>/\\textgreater\\ /g;
@@ -163,7 +164,7 @@ sub xml2tex { # for the notes
 	for my $abbrev (@italicize_abbrevs) {
 		s/\b($abbrev)\b/\\textit{$1}/g;
 	}
-	$_ = escape_tex($_, 1); # pass 1 to mean don't escape curly braces or dollar signs, since we did that already
+	$_ = escape_tex($_, 1, 1); # pass 1, 1 to mean don't escape curly braces or dollar signs, since we did that already
 	
 	s/<-+>/\$\\longleftrightarrow\$/g; # convert arrows
 	s/< /<~/g; # no break after "comes from" sign
