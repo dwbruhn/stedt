@@ -29,7 +29,7 @@ Note: weird things may happen if you have more than 9 allofams in a word family.
 		<div class="etymon" id="etymon_[% e.tag %]">
 		<input type="checkbox" class="paf-btn" id="paf_[% e.tag %]" disabled />
 		(<span class="seq-str">0</span>)
-		#[% e.tag %] <b>[% e.form %]</b> [% e.gloss %]
+		#[% e.tag %] [% e.plg %] <b>[% e.form %]</b> [% e.gloss %] ([% e.num_recs %] reflexes)
 		</div>
 	[% END -%]
 	</div>
@@ -45,7 +45,7 @@ Note: weird things may happen if you have more than 9 allofams in a word family.
 		<div class="[% is_paf ? 'paf' : 'etymon' %]" id="etymon_[% e.tag %]">
 		<input type="checkbox" class="paf-btn" id="paf_[% e.tag %]" [% is_paf ? 'checked' : f.allofams.size==1 ? 'disabled' : '' %]/>
 		(<span class="seq-str">[% f.seq %][% e.seq %]</span>)
-		#[% e.tag %] <b>[% e.form %]</b> [% e.gloss %]
+		#[% e.tag %] [% e.plg %] <b>[% e.form %]</b> [% e.gloss %] ([% e.num_recs %] reflexes)
 		</div>
 	[% END %]
 	</div>
