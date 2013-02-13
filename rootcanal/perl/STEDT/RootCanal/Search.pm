@@ -8,7 +8,7 @@ sub splash : StartRunmode {
 	my $splash_info;
 	
 	# generate the list of language groups for the dropdown box:
-	$splash_info->{grps} = $self->dbh->selectall_arrayref("SELECT grpno, grp FROM languagegroups ORDER BY grpno");
+	$splash_info->{grps} = $self->dbh->selectall_arrayref("SELECT grpno, grp FROM languagegroups ORDER BY grp0,grp1,grp2,grp3,grp4");
 	
 	return $self->tt_process("splash.tt", $splash_info);
 }
@@ -57,7 +57,7 @@ sub group : Runmode {
 		grpid=>$grpid,
 		grpno=>$grpno,
 		grpname=>$grpname,
-		grps => $self->dbh->selectall_arrayref("SELECT grpid, grpno, grp FROM languagegroups ORDER BY grpno")
+		grps => $self->dbh->selectall_arrayref("SELECT grpid, grpno, grp FROM languagegroups ORDER BY grp0,grp1,grp2,grp3,grp4")
 	});
 }
 
@@ -114,8 +114,8 @@ sub searchresults_from_querystring {
 	} elsif ($tbl eq 'lexicon') {
 		$query->param('languagenames.language' => $lg) if $lg =~ /\p{Letter}/;
 		
-		# languagegroups param must start with X or a digit and not go past 4 levels (first level is obligatory)
-		$query->param('languagegroups.grp' => $lggrp) if $lggrp =~ /^[\dX](\.\d((\.\d)(\.\d)?)?)?$/;
+		# languagegroups param must start with X or positive integer and not go past 5 levels (first level is obligatory)
+		$query->param('languagegroups.grp' => $lggrp) if $lggrp =~ /^(X|\d+)(\.[\d]+(\.[\d]+(\.[\d]+(\.[\d]+)?)?)?)?$/;
 		
 		# language code must be an integer
 		if (defined($lgcode)) {		# include this test for now, since there's no js code yet to pass lgcode param via ajax
@@ -185,7 +185,7 @@ sub combo : Runmode {
 	}
 
 	# generate the list of language groups for the dropdown box:
-	$result->{grps} = $self->dbh->selectall_arrayref("SELECT grpno, grp FROM languagegroups ORDER BY grpno");
+	$result->{grps} = $self->dbh->selectall_arrayref("SELECT grpno, grp FROM languagegroups ORDER BY grp0,grp1,grp2,grp3,grp4");
 
 	return $self->tt_process("index.tt", $result);
 }

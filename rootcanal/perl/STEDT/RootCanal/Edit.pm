@@ -114,7 +114,7 @@ sub table : StartRunmode {
 		$hash{uid2} = $uid2;
 	}
 	elsif ($tbl eq 'etyma') {
-		my $plgs = $self->dbh->selectall_arrayref("SELECT plg, grpid FROM languagegroups WHERE plg != '' ORDER BY grpno");
+		my $plgs = $self->dbh->selectall_arrayref("SELECT plg, grpid FROM languagegroups WHERE plg != '' ORDER BY grp0,grp1,grp2,grp3,grp4");
 		# unshift @$plgs, ['(other)', '']; # not sure why this is here, because choosing 'other' causes a database error
 		push @$plgs, ['', 0];
 		require JSON;

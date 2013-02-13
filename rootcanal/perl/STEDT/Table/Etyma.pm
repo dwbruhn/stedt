@@ -122,7 +122,7 @@ $t->search_form_items(
 	},
 	'etyma.grpid' => sub {
 		my $cgi = shift;
-		my $a = $dbh->selectall_arrayref("SELECT CONCAT(grpno, ' - ', plg), grpid FROM languagegroups WHERE plg != '' ORDER BY grpno");
+		my $a = $dbh->selectall_arrayref("SELECT CONCAT(grpno, ' - ', plg), grpid FROM languagegroups WHERE plg != '' ORDER BY grp0,grp1,grp2,grp3,grp4");
 		unshift @$a, ['', ''];
 		push @$a, ['(undefined)', 0];
 		my @ids = map {$_->[1]} @$a;
@@ -223,7 +223,7 @@ $t->add_form_items(
 	},
 	'etyma.grpid' => sub {
 		my $cgi = shift;
-		my $a = $dbh->selectall_arrayref("SELECT CONCAT(grpno, ' - ', plg), grpid FROM languagegroups WHERE plg != '' ORDER BY grpno");
+		my $a = $dbh->selectall_arrayref("SELECT CONCAT(grpno, ' - ', plg), grpid FROM languagegroups WHERE plg != '' ORDER BY grp0,grp1,grp2,grp3,grp4");
 		push @$a, ['(undefined)', 0];
 		my @ids = map {$_->[1]} @$a;
 		my %labels;

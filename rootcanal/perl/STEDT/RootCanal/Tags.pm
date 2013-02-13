@@ -323,7 +323,7 @@ WHERE e.tag=? AND e.status != 'DELETE'#;
 		foreach (@{$self->dbh->selectall_arrayref("SELECT noteid, notetype, datetime, xmlnote, ord, uid, username, id, grpno FROM notes "
 				. "LEFT JOIN users USING (uid) "
 				. "LEFT JOIN languagegroups ON (notes.id = languagegroups.grpid) "
-				. "WHERE tag=$e{tag} AND notetype != 'F' ORDER BY grpno,ord")}) {
+				. "WHERE tag=$e{tag} AND notetype != 'F' ORDER BY grp0,grp1,grp2,grp3,grp4,ord")}) {
 			my $notetype = $_->[1];
 			my $xml = $_->[3];
 			my $grpid = $_->[7]; # id is grpid in spec=E context
@@ -357,7 +357,7 @@ WHERE e.tag=? AND e.status != 'DELETE'#;
 		# mesoroots
 		$e{mesoroots} = $self->dbh->selectall_arrayref("SELECT grpid,grpno,grp,plg,form,gloss,variant,genetic FROM mesoroots
 			LEFT JOIN languagegroups USING (grpid)
-			WHERE mesoroots.tag=$e{tag} ORDER BY grpno,variant", {Slice=>{}});
+			WHERE mesoroots.tag=$e{tag} ORDER BY grp0,grp1,grp2,grp3,grp4,variant", {Slice=>{}});
 		$e{mesorootsjson} = JSON::to_json($e{mesoroots});
 
 		# do entries
@@ -377,7 +377,7 @@ FROM lexicon
 WHERE (lx_et_hash.tag = $e{tag}
 )
 GROUP BY lexicon.rn
-ORDER BY languagegroups.grpno, languagenames.lgsort, reflex, languagenames.srcabbr, lexicon.srcid
+ORDER BY languagegroups.grp0, languagegroups.grp1, languagegroups.grp2, languagegroups.grp3, languagegroups.grp4, languagenames.lgsort, reflex, languagenames.srcabbr, lexicon.srcid
 EndOfSQL
 		if (@$recs) { # skip if no records
 			collect_lex_notes($self, $recs, $INTERNAL_NOTES, \@footnotes, \$footnote_index, $e{tag});

@@ -68,7 +68,7 @@ $t->field_editable_privs(
 $t->search_form_items(
 	'languagegroups.grp' => sub {
 		my $cgi = shift;
-		my $grps = $dbh->selectall_arrayref("SELECT grpno, CONCAT(grpno,' ',LEFT(grp,18),' (id:',grpid,')') FROM languagegroups ORDER BY grpno");
+		my $grps = $dbh->selectall_arrayref("SELECT grpno, CONCAT(grpno,' ',LEFT(grp,18),' (id:',grpid,')') FROM languagegroups ORDER BY grp0,grp1,grp2,grp3,grp4");
 		my @grp_nos = map {$_->[0]} @$grps;
 		my %grp_labels;
 		@grp_labels{@grp_nos} = map {$_->[1]} @$grps;
@@ -116,7 +116,7 @@ TableKit.Editable.selectInput('languagenames.grpid', {}, [|;
 # We query the database for the groups three times in this script,
 # which is kinda inefficient,
 # but there aren't that many groups, so it's OK.
-	my $grps = $dbh->selectall_arrayref("SELECT grpid, CONCAT(grpno,' ',grp) FROM languagegroups ORDER BY grpno");
+	my $grps = $dbh->selectall_arrayref("SELECT grpid, CONCAT(grpno,' ',grp) FROM languagegroups ORDER BY grp0,grp1,grp2,grp3,grp4");
 	print join ',',map {"['$_->[1]','$_->[0]']"} @$grps;
 print ']);</script>
 ';
@@ -148,7 +148,7 @@ $t->add_form_items(
 	},
 	'languagenames.grpid' => sub {
 		my $cgi = shift;
-		my $grps = $dbh->selectall_arrayref("SELECT grpid, CONCAT(grpno,' ',grp) FROM languagegroups ORDER BY grpno");
+		my $grps = $dbh->selectall_arrayref("SELECT grpid, CONCAT(grpno,' ',grp) FROM languagegroups ORDER BY grp0,grp1,grp2,grp3,grp4");
 		my @grp_ids = map {$_->[0]} @$grps;
 		my %grp_labels;
 		@grp_labels{@grp_ids} = map {$_->[1]} @$grps;

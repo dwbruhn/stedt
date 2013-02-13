@@ -88,7 +88,7 @@ my $t = $self->SUPER::new($dbh, 'lexicon', 'lexicon.rn', $privs); # dbh, table, 
 
 $t->query_from(q|lexicon LEFT JOIN languagenames USING (lgid) LEFT JOIN languagegroups USING (grpid)|);
 $t->default_where('lexicon.status != "HIDE" AND lexicon.status != "DELETED"');
-$t->order_by('languagegroups.grpno, languagenames.lgsort, lexicon.reflex, languagenames.srcabbr, lexicon.srcid');
+$t->order_by('languagegroups.grp0, languagegroups.grp1, languagegroups.grp2, languagegroups.grp3, languagegroups.grp4, languagenames.lgsort, lexicon.reflex, languagenames.srcabbr, lexicon.srcid');
 $t->fields(
 	'lexicon.rn',
 	($uid1 ? "(SELECT GROUP_CONCAT(tag_str ORDER BY ind) FROM lx_et_hash WHERE rn=lexicon.rn AND uid=$uid1) AS analysis" : () ),
@@ -139,7 +139,7 @@ $t->field_editable_privs(
 $t->search_form_items(
 	'languagegroups.grp' => sub {
 		my $cgi = shift;
-		my $grps = $dbh->selectall_arrayref("SELECT grpno, CONCAT(grpno,' ',LEFT(grp,18)) FROM languagegroups ORDER BY grpno");
+		my $grps = $dbh->selectall_arrayref("SELECT grpno, CONCAT(grpno,' ',LEFT(grp,18)) FROM languagegroups ORDER BY grp0,grp1,grp2,grp3,grp4");
 		my @grp_nos = map {$_->[0]} @$grps;
 		my %grp_labels;
 		@grp_labels{@grp_nos} = map {$_->[1]} @$grps;
