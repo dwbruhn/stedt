@@ -25,10 +25,10 @@
 [% END # FOREACH row -%]
 [% IF c.has_privs(8) -%]
 <tr>
-<td><input name="add_grpno" type="text" size="7" maxlength="7"></td>
-<td><input name="add_grp" type="text" size="25" maxlength="41"></td>
-<td><input name="add_plg" type="text" size="5" maxlength="7"></td>
-<td><input name="add_genetic" type="text" size="1" maxlength="1" value="0"></td>
+<td class="noedit"><input name="add_grpno" type="text" size="7" maxlength="15"></td>
+<td class="noedit"><input name="add_grp" type="text" size="25" maxlength="41"></td>
+<td class="noedit"><input name="add_plg" type="text" size="5" maxlength="7"></td>
+<td class="noedit"><input name="add_genetic" type="text" size="1" maxlength="1" value="0"></td>
 <td align="center" colspan="2"><input type="submit" value="Add Record"></td>
 </tr>
 [% END -%]
