@@ -45,7 +45,7 @@
 \setlength{\RaggedRightRightskip}{0pt plus 3em} % must be defined after fonts are loaded
 
 \title{STEDT Root Canal Extraction:\\[% title %]}
-\author{}
+\author{[% author %]}
 \date{[% date %]}
 \usepackage[bookmarks]{hyperref}
 \hypersetup{%

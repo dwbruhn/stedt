@@ -22,10 +22,12 @@ use Template;
 
 my $INTERNAL_NOTES = 0;
 my $ETYMA_TAGS = 0;
+my $author = '';
 if ($ARGV[-1] =~ /^--i/) {
 	pop @ARGV;
 	$INTERNAL_NOTES = 1;
 	$ETYMA_TAGS = 1;
+	$author = 'DRAFT';
 }
 my ($vol, $fasc, $chap) = map {/([\dxX]+)/} @ARGV;
 
@@ -140,14 +142,14 @@ foreach (@$etyma_in_chapter) {
 
 	$e{mesoroots} = $dbh->selectall_arrayref("SELECT grpno,grp,plg,form,gloss FROM mesoroots
 		LEFT JOIN languagegroups USING (grpid)
-		WHERE mesoroots.tag=$e{tag} ORDER BY grpno,variant", {Slice=>{}});
+		WHERE mesoroots.tag=$e{tag} ORDER BY grp0,grp1,grp2,grp3,grp4,variant", {Slice=>{}});
 
 	# etymon notes
 	$e{notes} = [];
 	$e{subgroupnotes} = [];
 	foreach (@{$dbh->selectall_arrayref("SELECT notetype, xmlnote, grpno, grp FROM notes
 			LEFT JOIN languagegroups ON (notes.id = languagegroups.grpid)
-			WHERE tag=$e{tag} AND notetype != 'F' ORDER BY grpno,ord")}) {
+			WHERE tag=$e{tag} AND notetype != 'F' ORDER BY grp0,grp1,grp2,grp3,grp4,ord")}) {
 		my ($notetype, $xmlnote, $grpno, $grp) = @$_;
 		next if $notetype eq 'I' && !$INTERNAL_NOTES; # skip internal notes if we're publishing
 		if ($grpno) {
@@ -168,7 +170,7 @@ WHERE (lx_et_hash.tag = $e{tag}
 AND lx_et_hash.rn=lexicon.rn AND lx_et_hash.uid=8
 AND languagenames.lgid=lexicon.lgid
 AND languagenames.grpid=languagegroups.grpid)
-ORDER BY languagegroups.grpno, languagenames.lgsort, reflex, languagenames.srcabbr, lexicon.srcid
+ORDER BY languagegroups.grp0, languagegroups.grp1, languagegroups.grp2, languagegroups.grp3, languagegroups.grp4, languagenames.lgsort, reflex, languagenames.srcabbr, lexicon.srcid
 EndOfSQL
 	my $recs = $dbh->selectall_arrayref($sql);
 	print STDERR "#$e{tag}: ";
@@ -342,11 +344,12 @@ $tt->process("tt/chapter.tt", {
 	chapter  => $chap,
 	date     => $date,
 	title    => $title,
+	author   => $author,
 	flowchartids => $flowchartids,
 	chapter_notes => $chapter_notes,
 	etyma    => \@etyma,
 	internal_notes => $INTERNAL_NOTES,
-	
+
 }, "tex/${texfilename}", binmode => ':utf8' ) || die $tt->error(), "\n";
 
 
