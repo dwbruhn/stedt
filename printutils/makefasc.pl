@@ -10,6 +10,10 @@ print header(-charset => "utf8"); # calls charset for free, so forms don't mangl
 
 if (param('semkey')) {
     my ($v,$f,$c) = split('\.',param('semkey'));
+    
+    if (!defined $c) {
+    	$c = 'x';
+    }
 
     my $final = '--i'; 
     $final = '' if param('final');
