@@ -191,6 +191,8 @@ sub save_seq {
 			
 			if ($oldval != $s) {
 				$t->save_value('etyma.sequence', $s, $tag);
+				my $seqlocked =  ($s == 0) ? 0 : 1; # lock or unlock the sequence number, as needed
+				$t->save_value('etyma.seqlocked', $seqlocked, $tag);
 				$self->dbh->do("INSERT changelog (uid, `table`, id, col, oldval, newval, time)
 								VALUES (?,?,?,?,?,?,NOW())", undef,
 					$self->param('uid'), 'etyma', $tag, 'sequence', $oldval || '', $s);

@@ -9,7 +9,7 @@
 
 <p>This is a list of all the roots in chapter [% c.query.param('c') %].
 Drag to reorder them and/or group them into word families.
-Items in the "n/a" box will not be included in PDF's, etc.
+Items in the "n/a" box will be included ONLY in <i>draft</i> PDF's not <i>final</i> PDF's, etc.
 Click on a checkbox to designate a root as that word family's pan-allofamic formula.
 Note: weird things may happen if you have more than 9 allofams in a word family.</p>
 
