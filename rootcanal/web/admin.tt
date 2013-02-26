@@ -26,7 +26,6 @@ Edit/Browse tables:
 	<li></li>
 	<li><a href="[% self_url %]/admin/updateprojects">update stats</a> (for "projects" - takes a while!)</li>
 	<li><a href="[% self_url %]/admin/updatesequence">update sequence numbers</a> (in etyma table)</li>
-	<li></li>
 </ul></td>
 [% END -%]
 </tr></table>

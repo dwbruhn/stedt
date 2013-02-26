@@ -18,18 +18,20 @@ sub main : StartRunmode {
 sub updatesequence : Runmode {
 	my $self = shift;
 	$self->require_privs(8);
+	my $t0 = time();
 	my @commands = ( 'update etyma set sequence = 0 where seqlocked = 0;',
 			 'UPDATE etyma SET refcount = 0;',
 			 'UPDATE etyma SET refcount = (SELECT COUNT(tag) FROM lx_et_hash WHERE lx_et_hash.tag = etyma.tag  AND uid = 8 GROUP by tag);',
 			 'UPDATE etyma SET refcount = 0 where refcount is NULL;',
 			 'update etyma set sequence = (select @rownum:=@rownum+1 rownum FROM (SELECT @rownum:=1000) r) where seqlocked = 0 order by refcount desc;' );
 	foreach my $cmd (@commands) {
-	  print $cmd;
 	  $self->dbh->do($cmd);
 	}
-	my %h;
-	$h{num_sessions} = 0;
-	return $self->tt_process("admin.tt", \%h);
+	
+	return $self->tt_process("admin/updatesequence.tt", {
+		time_elapsed=>time()-$t0,
+	});
+
 }
 
 sub changes : Runmode {
