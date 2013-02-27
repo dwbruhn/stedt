@@ -22,24 +22,24 @@ fi
 set -x
 cd ~stedt-cgi-ssl/rootcanals/
 cd tex/
-rm $1-$2-$3.*
+rm $1-$2-$3-*
 cd ..
 # exit on errors..
 set -e
 # generate the .tex file
 perl extract.pl $1 $2 $3 $4
 cd tex/
-texfile=`ls $1-$2-$3.tex` 
+texfile=`ls $1-$2-$3-master.tex` 
 # TeX it!     
 xelatex $texfile # > /dev/null
 xelatex $texfile # > /dev/null
 xelatex $texfile # > /dev/null
-pdffile=`ls $1-$2-$3.pdf`
-pdffile=${pdffile%.*}
+pdffile=`ls $1-$2-$3-master.pdf`
+pdf2copy=${pdffile%-master.*}
 DATETIME=`date '+%Y%m%d'`
 #DATETIME=`date '+%Y%m%d_%H%M%S'`
 # move the new pdf to the dissemination directory
-cp $pdffile.pdf ~stedt/public_html/dissemination/$pdffile-$DATETIME-1$DRAFT.pdf
+cp $pdffile ~stedt/public_html/dissemination/$pdf2copy-$DATETIME-1$DRAFT.pdf
 # update the ToC for the electronic etymologies
 if [ "$4" = '--i' ] ; then
 echo "done with *DRAFT* $texfile"
@@ -48,4 +48,4 @@ echo "done with $texfile"
 fi
 perl ~stedt-cgi-ssl/rootcanals/makeToC.pl > ~stedt/public_html/dissemination.html       
 echo "eDiss table of contents updated."
-echo "http://stedt.berkeley.edu/dissemination/$pdffile-$DATETIME-1$DRAFT.pdf"
+echo "http://stedt.berkeley.edu/dissemination/$pdf2copy-$DATETIME-1$DRAFT.pdf"

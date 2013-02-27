@@ -44,10 +44,53 @@ my $dbh = STEDTUtil::connectdb();
 my $syls = SyllabificationStation->new();
 binmode(STDERR, ":utf8");
 
-my $semkey = "$vol.$fasc.$chap";
+my ($date, $shortdate);
+{
+	my @date_items = (localtime)[3..5];
+	@date_items = reverse @date_items;
+	$date_items[0] += 1900;
+	$date_items[1]++;
+	$date = sprintf "%04i.%02i.%02i", @date_items;
+	$shortdate = sprintf "%04i%02i%02i", @date_items;
+}
+
+my %tag2info; # this is (and should only be) used inside xml2tex, for looking up etyma refs
+
+my @texfilenames;
+my $mastertexfilename = "$vol-$fasc-$chap-master.tex";
+$mastertexfilename =~ tr/A-Z/a-z/;
+
+my $query = "SELECT * FROM chapters WHERE ";
+$query .= " v = $vol ";
+$query .= $fasc eq 'x' ? '' : " AND  f = $fasc ";
+$query .= $chap eq 'x' ? '' : " AND  c = $chap ";
+
+$query .= ' ORDER BY v,f,c,s1,s2,s3';
+
+my $xtitle;
+my $sectioncount = 0;
+
+print "q: $query\n";
+for (@{$dbh->selectall_arrayref($query)}) {
+	my ($semkey,$chaptertitle,$v,$f,$c,$s1,$s2,$s3,@info) = map {decode_utf8($_)} @$_;
+	$sectioncount++;
+	print "== $sectioncount $semkey: $chaptertitle\n";
+
+
+$xtitle = $chaptertitle;
+
+my $vol  = $v == 0 ? 'x' : $v;
+my $fasc = $f == 0 ? 'x' : $f;
+my $chap = $c == 0 ? 'x' : $c;
+my $s1   = $s1 == 0 ? 'x' : $s1;
+my $s2   = $s2 == 0 ? 'x' : $s2;
+my $s3   = $s3 == 0 ? 'x' : $s3;
+
+my $semkey = "$vol.$fasc.$chap.$s1.$s2.$s3";
 $semkey    =~ s/\.x//g;
-my $texfilename = "$vol-$fasc-$chap.tex";
+my $texfilename = "$vol-$fasc-$chap-$s1-$s2-$s3";
 $texfilename =~ tr/A-Z/a-z/;
+$texfilename =~ s/\-x//g;
 
 # add warning about unsequenced items
 my $hidden_etyma = $dbh->selectall_arrayref(
@@ -68,18 +111,18 @@ undef $hidden_etyma; # no such thing anymore!
 
 # build etyma hash
 print STDERR "building etyma data...\n";
-my %tag2info; # this is (and should only be) used inside xml2tex, for looking up etyma refs
 $vol  = "\\d+" if ($vol  eq "x");
 $fasc = "\\d+" if ($fasc eq "x");
 $chap = "\\d+" if ($chap eq "x");
-my $chapterkey = "^$vol\.$fasc\.$chap";
-print ">>> $chapterkey $semkey\n";
+my $chapterkey = $semkey;
+print ">>> $semkey\n";
+my $nextseq = 0;
 for (@{$dbh->selectall_arrayref("SELECT tag,chapter,sequence,protoform,protogloss FROM etyma")}) {
 	my ($tag,$chapter,@info) = map {decode_utf8($_)} @$_;
 	#print ">>> $tag $chapter\n";
 	if ($chapter =~ /^1.9.\d$/) {
 		push @info, 'TBRS'; # "volume" info to print for cross refs in the notes
-	} elsif ($chapter =~ /$chapterkey/) {
+	} elsif ($chapter = $chapterkey) {
 	        #print ">>> $tag $chapter\n";
 		$info[0] = ''; # make sequence empty if not in the current extraction
 	}
@@ -89,21 +132,9 @@ for (@{$dbh->selectall_arrayref("SELECT tag,chapter,sequence,protoform,protoglos
 }
 $FascicleXetexUtil::tag2info = \&_tag2info;
 
-
-my ($date, $shortdate);
-{
-	my @date_items = (localtime)[3..5];
-	@date_items = reverse @date_items;
-	$date_items[0] += 1900;
-	$date_items[1]++;
-	$date = sprintf "%04i.%02i.%02i", @date_items;
-	$shortdate = sprintf "%04i%02i%02i", @date_items;
-}
-
-print STDERR "generating VFC $semkey  ...\n";
 my $title = $dbh->selectrow_array(qq#SELECT chaptertitle FROM `chapters` WHERE `semkey` = '$semkey'#);
 my $flowchartids = $dbh->selectcol_arrayref("SELECT noteid FROM notes WHERE spec='C' AND id='$semkey' AND notetype='G'");
-print STDERR "title is '$title'...\n";
+print STDERR "generating VFC $semkey :: '$title'...\n";
 my $chapter_notes = [map {xml2tex(decode_utf8($_))} @{$dbh->selectcol_arrayref(
 	"SELECT xmlnote FROM notes WHERE spec='C' AND id='$semkey' AND notetype = 'T' ORDER BY ord")}
 	];
@@ -113,11 +144,11 @@ my $extra_where = ($INTERNAL_NOTES ? "" : "AND e.sequence >= 1");  # extra condi
 my $etyma_in_chapter = $dbh->selectall_arrayref(
 	qq#SELECT e.tag, e.sequence, e.protoform, e.protogloss, languagegroups.plg
 		FROM `etyma` AS `e` LEFT JOIN languagegroups ON e.grpid=languagegroups.grpid
-		WHERE e.uid=8 AND concat(e.chapter,'.') LIKE '$semkey.%' $extra_where
+		WHERE e.uid=8 AND status != 'DELETE' AND e.chapter = '$semkey' $extra_where
 		ORDER BY e.sequence#);
 
 print STDERR (scalar @$etyma_in_chapter) . " etyma in this chapter\n";
-exit 1 if 0 == scalar @$etyma_in_chapter;
+next if 0 == scalar @$etyma_in_chapter;
 foreach (@$etyma_in_chapter) {
 	my %e; # hash of infos to be added to @etyma
 	push @etyma, \%e;
@@ -127,6 +158,9 @@ foreach (@$etyma_in_chapter) {
 		= map {escape_tex(decode_utf8($_))} @$_;
 
 	# prettify sequence number
+	$nextseq = $e{seq} if ($e{seq} < 1000);
+	#print "nextseq $nextseq :: $e{seq}\n";
+	$e{seq} = int($nextseq++) if $e{seq} >= 1000;
 	$e{seq} =~ s/\.0$//;
 	$e{seq} =~ s/\.(\d)/chr(96+$1)/e;
 
@@ -340,6 +374,8 @@ EndOfSQL
 
 my $tt = Template->new() || die "$Template::ERROR\n";
 $tt->process("tt/chapter.tt", {
+	semkey   => $semkey,
+	volume   => $vol,
 	fascicle => $fasc,
 	chapter  => $chap,
 	date     => $date,
@@ -350,12 +386,24 @@ $tt->process("tt/chapter.tt", {
 	etyma    => \@etyma,
 	internal_notes => $INTERNAL_NOTES,
 
-}, "tex/${texfilename}", binmode => ':utf8' ) || die $tt->error(), "\n";
+}, "tex/${texfilename}.tex", binmode => ':utf8' ) || die $tt->error(), "\n";
+push @texfilenames,$texfilename;
+}
+
+my $tt = Template->new() || die "$Template::ERROR\n";
+$tt->process("tt/master.tt", {
+	fascicle => $fasc,
+	chapter  => $chap,
+	date     => $date,
+	xtitle    => $xtitle,
+	author   => $author,
+	texfilenames => \@texfilenames,
+
+}, "tex/${mastertexfilename}", binmode => ':utf8' ) || die $tt->error(), "\n";
 
 
 $dbh->disconnect;
 print STDERR "done!\n";
-
 
 sub _tag2info {
 	my ($t, $s) = @_;

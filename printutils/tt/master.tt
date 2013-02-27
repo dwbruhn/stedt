@@ -1,0 +1,81 @@
+%!TEX TS-program = xelatex
+%!TEX encoding = UTF-8 Unicode
+\documentclass[12pt]{report}
+
+\makeatletter
+\renewcommand{\@makechapterhead}[1]{%
+  %\vspace*{50\p@}%
+  {\parindent \z@ \raggedright \normalfont
+    \ifnum \c@secnumdepth >\m@ne
+      \if@mainmatter
+        \huge\bfseries \thechapter. \space
+      \fi
+    \fi
+    \Huge \bfseries #1\par\nobreak
+    \vskip 40\p@
+  }}
+\newcommand\etymon{\@startsection % special section cmd for etyma
+  {section}{1}{-1em} % name, level, indent
+  {-1ex}	% beforeskip
+  {1pt}		% afterskip
+  {\large}	% format
+}
+\newcommand\comparandum{\@startsection{subsection}{2}{0pt}{-1pt}{1pt}{\large\bfseries}}
+\makeatother
+
+\usepackage{fontspec}
+\usepackage{xunicode} % for real tildes with \textasciitilde
+\setmainfont{Charis SIL}
+\newfontfamily\stedtfont{STEDTU Roman}
+\newfontfamily\tradchinesefont{LiSong Pro}
+\newfontfamily\simpchinesefont{STSong}
+\newcommand{\TC}[1]{{\tradchinesefont #1}}
+\newcommand{\SC}[1]{{\simpchinesefont #1}}
+\newcommand{\STEDTU}[1]{{\stedtfont #1}}
+\newcommand{\fascicletablebegin}{\begin{longtable}[l]{@{\hspace*{1.1em}}>{\hangindent=0.1in}p{1.7in}>{\hangindent=0.2in}p{1.2in}>{\hangindent=0.2in}p{1.3in}>{\hangindent=0.1in}p{1.5in}l}}
+\renewcommand \thechapter{\Roman{chapter}} % use cap roman numerals for chapter numbers
+
+\usepackage{fullpage}
+\usepackage{parskip}
+\usepackage{longtable}
+\setcounter{LTchunksize}{300} % use more memory for fewer compiles
+\usepackage{graphicx}
+\usepackage{array} % use array and ragged2e for raggedright inside tables
+\usepackage[document,raggedrightboxes]{ragged2e}
+\setlength{\RaggedRightRightskip}{0pt plus 3em} % must be defined after fonts are loaded
+
+\title{STEDT Root Canal Extraction:\\[% title %]}
+\author{[% author %]}
+\date{[% date %]}
+\usepackage[bookmarks]{hyperref}
+\hypersetup{%
+	pdfborder={0 0 1},
+	pdfborderstyle={/S/U/W 1}, % make links underlined (instead of surrounded by red boxes)
+	pdftitle = {STEDT: [% title %]}, 
+	pdfauthor = {\textcopyright\ STEDT}, 
+} 
+
+\begin{document}
+\pdfbookmark[1]{[% title %]}{titlepage}
+\setcounter{secnumdepth}{0} % don't number sections, just chapters
+\maketitle
+\pdfbookmark[1]{Table of Contents}{TOC}
+\tableofcontents
+\newpage
+
+[% FOREACH texfile IN texfilenames -%]
+\include{[% texfile %]}
+[% END -%]
+
+\newpage
+
+\section{Bibliography}
+List of source abbreviations:
+
+\url{http://stedt.berkeley.edu/srcabbr}
+
+List of other references:
+
+\url{http://stedt.berkeley.edu/refonly}
+
+\end{document}
