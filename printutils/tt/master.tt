@@ -44,19 +44,19 @@
 \usepackage[document,raggedrightboxes]{ragged2e}
 \setlength{\RaggedRightRightskip}{0pt plus 3em} % must be defined after fonts are loaded
 
-\title{STEDT Root Canal Extraction:\\[% title %]}
+\title{STEDT Root Canal Extraction:\\[% semkey %]. [% xtitle %]}
 \author{[% author %]}
 \date{[% date %]}
 \usepackage[bookmarks]{hyperref}
 \hypersetup{%
 	pdfborder={0 0 1},
 	pdfborderstyle={/S/U/W 1}, % make links underlined (instead of surrounded by red boxes)
-	pdftitle = {STEDT: [% title %]}, 
+	pdftitle = {STEDT:  [% semkey %]. [% xtitle %]}, 
 	pdfauthor = {\textcopyright\ STEDT}, 
 } 
 
 \begin{document}
-\pdfbookmark[1]{[% title %]}{titlepage}
+\pdfbookmark[1]{ [% semkey %]. [% xtitle %]}{titlepage}
 \setcounter{secnumdepth}{0} % don't number sections, just chapters
 \maketitle
 \pdfbookmark[1]{Table of Contents}{TOC}

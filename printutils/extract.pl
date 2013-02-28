@@ -59,6 +59,8 @@ my %tag2info; # this is (and should only be) used inside xml2tex, for looking up
 my @texfilenames;
 my $mastertexfilename = "$vol-$fasc-$chap-master.tex";
 $mastertexfilename =~ tr/A-Z/a-z/;
+my $mastertitle;
+my $masterVFC;
 
 my $query = "SELECT * FROM chapters WHERE ";
 $query .= " v = $vol ";
@@ -67,17 +69,13 @@ $query .= $chap eq 'x' ? '' : " AND  c = $chap ";
 
 $query .= ' ORDER BY v,f,c,s1,s2,s3';
 
-my $xtitle;
 my $sectioncount = 0;
 
-print "q: $query\n";
+print STDERR "q: $query\n";
 for (@{$dbh->selectall_arrayref($query)}) {
 	my ($semkey,$chaptertitle,$v,$f,$c,$s1,$s2,$s3,@info) = map {decode_utf8($_)} @$_;
 	$sectioncount++;
-	print "== $sectioncount $semkey: $chaptertitle\n";
-
-
-$xtitle = $chaptertitle;
+	print STDERR "== $sectioncount ::: $semkey: $chaptertitle\n";
 
 my $vol  = $v == 0 ? 'x' : $v;
 my $fasc = $f == 0 ? 'x' : $f;
@@ -91,6 +89,11 @@ $semkey    =~ s/\.x//g;
 my $texfilename = "$vol-$fasc-$chap-$s1-$s2-$s3";
 $texfilename =~ tr/A-Z/a-z/;
 $texfilename =~ s/\-x//g;
+
+if ($sectioncount == 1) {
+  $mastertitle = escape_tex($chaptertitle);
+  $masterVFC = $semkey;
+}
 
 # add warning about unsequenced items
 my $hidden_etyma = $dbh->selectall_arrayref(
@@ -116,7 +119,7 @@ $fasc = "\\d+" if ($fasc eq "x");
 $chap = "\\d+" if ($chap eq "x");
 my $chapterkey = $semkey;
 print ">>> $semkey\n";
-my $nextseq = 0;
+my $nextseq = 1;
 for (@{$dbh->selectall_arrayref("SELECT tag,chapter,sequence,protoform,protogloss FROM etyma")}) {
 	my ($tag,$chapter,@info) = map {decode_utf8($_)} @$_;
 	#print ">>> $tag $chapter\n";
@@ -133,6 +136,7 @@ for (@{$dbh->selectall_arrayref("SELECT tag,chapter,sequence,protoform,protoglos
 $FascicleXetexUtil::tag2info = \&_tag2info;
 
 my $title = $dbh->selectrow_array(qq#SELECT chaptertitle FROM `chapters` WHERE `semkey` = '$semkey'#);
+$title = escape_tex($title);
 my $flowchartids = $dbh->selectcol_arrayref("SELECT noteid FROM notes WHERE spec='C' AND id='$semkey' AND notetype='G'");
 print STDERR "generating VFC $semkey :: '$title'...\n";
 my $chapter_notes = [map {xml2tex(decode_utf8($_))} @{$dbh->selectcol_arrayref(
@@ -148,19 +152,22 @@ my $etyma_in_chapter = $dbh->selectall_arrayref(
 		ORDER BY e.sequence#);
 
 print STDERR (scalar @$etyma_in_chapter) . " etyma in this chapter\n";
-next if 0 == scalar @$etyma_in_chapter;
+next if 0 == scalar @$etyma_in_chapter; # skip entire chapter if it has no etyma.
 foreach (@$etyma_in_chapter) {
 	my %e; # hash of infos to be added to @etyma
-	push @etyma, \%e;
 
 	# heading stuff
 	@e{qw/tag seq protoform protogloss plg/}
 		= map {escape_tex(decode_utf8($_))} @$_;
 
+	# mess with sequence number if its an "autosequence" number...
+	#print STDERR "before nextseq $nextseq :: " . int($e{seq}) . "\n";
+	$nextseq = int($e{seq}) if (int($e{seq}) < 1000);
+	$e{seq} = $nextseq if (int($e{seq}) >= 1000);
+	$nextseq++;
+	#print STDERR "after nextseq $nextseq :: " . int($e{seq}) . "\n";
+
 	# prettify sequence number
-	$nextseq = $e{seq} if ($e{seq} < 1000);
-	#print "nextseq $nextseq :: $e{seq}\n";
-	$e{seq} = int($nextseq++) if $e{seq} >= 1000;
 	$e{seq} =~ s/\.0$//;
 	$e{seq} =~ s/\.(\d)/chr(96+$1)/e;
 
@@ -207,7 +214,7 @@ AND languagenames.grpid=languagegroups.grpid)
 ORDER BY languagegroups.grp0, languagegroups.grp1, languagegroups.grp2, languagegroups.grp3, languagegroups.grp4, languagenames.lgsort, reflex, languagenames.srcabbr, lexicon.srcid
 EndOfSQL
 	my $recs = $dbh->selectall_arrayref($sql);
-	print STDERR "#$e{tag}: ";
+	print STDERR "#$e{tag}: ($e{seq}) ";
 	if (@$recs) { # skip if no records
 		for my $rec (@$recs) {
 			$_ = decode_utf8($_) foreach @$rec; # do it here so we don't have to later
@@ -360,6 +367,8 @@ EndOfSQL
 		$note =~ s/(\[JAM\])/\\hfill $1/g;
 		push @{$e{comparanda}}, xml2tex($note,1); # don't convert curly braces
 	}
+# saving the best for last ... include this etymon if it has some reflexes, or if it's a draft (but has no reflexes)
+push @etyma, \%e if ((scalar(@$recs) > 0) || $INTERNAL_NOTES);
 }
 
 # print rootlets
@@ -392,10 +401,9 @@ push @texfilenames,$texfilename;
 
 my $tt = Template->new() || die "$Template::ERROR\n";
 $tt->process("tt/master.tt", {
-	fascicle => $fasc,
-	chapter  => $chap,
+	semkey   => $masterVFC,
 	date     => $date,
-	xtitle    => $xtitle,
+	xtitle    => $mastertitle,
 	author   => $author,
 	texfilenames => \@texfilenames,
 
@@ -439,7 +447,7 @@ sub format_protoform {
 	for ($s) {
 		s/⪤} +/⪤} */g;
 		s/ OR +/ or */g;
-		s/\\textasciitilde\\ +/\\textasciitilde\\ */g;
+		s/\\textasciitilde\\ +/\\textasciitilde */g;
 		s/ = +/ = */g;
 		s/^/*/;
 		s/(\*\S+)/\\textbf{$1}/g; # bold only the protoform, not allofam or "or"
