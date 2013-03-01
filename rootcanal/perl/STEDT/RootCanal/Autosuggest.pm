@@ -36,14 +36,14 @@ sub tags : Runmode {
 	}
 	my $a;
 	if ($s =~ /^\d+$/) {
-		$a = $self->dbh->selectall_arrayref("SELECT tag, protogloss, CONCAT('*',protoform) FROM etyma WHERE tag RLIKE '^$s' $skip ORDER BY tag LIMIT 11");
+		$a = $self->dbh->selectall_arrayref("SELECT tag, protogloss, CONCAT('*',protoform) FROM etyma WHERE tag RLIKE '^$s' AND status != 'DELETE' $skip ORDER BY tag LIMIT 11");
 	} else {
 		$s =~ s/(?<!\\)((?:\\\\)*)\\('|$)/$1$2/g;
 		$s =~ s/'/''/g;
 		$s =~ s/\\/\\\\/g;
-		$a = $self->dbh->selectall_arrayref("SELECT tag, protogloss, CONCAT('*',protoform) FROM etyma WHERE protogloss RLIKE '[[:<:]]$s' $skip ORDER BY tag LIMIT 30");
+		$a = $self->dbh->selectall_arrayref("SELECT tag, protogloss, CONCAT('*',protoform) FROM etyma WHERE protogloss RLIKE '[[:<:]]$s' AND status != 'DELETE' $skip ORDER BY tag LIMIT 30");
 		unless (@$a) {
-			$a = $self->dbh->selectall_arrayref("SELECT tag, protogloss, CONCAT('*',protoform) FROM etyma WHERE protoform RLIKE '$s' $skip ORDER BY tag LIMIT 30");
+			$a = $self->dbh->selectall_arrayref("SELECT tag, protogloss, CONCAT('*',protoform) FROM etyma WHERE protoform RLIKE '$s' AND status != 'DELETE' $skip ORDER BY tag LIMIT 30");
 		}
 	}
 	return '<ul>' . join('', map {"<li>$_->[0] - " . trunc($_->[1],20) . " <b>$_->[2]</b></li>"} @$a) . '</ul>';

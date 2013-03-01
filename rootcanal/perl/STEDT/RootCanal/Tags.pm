@@ -70,11 +70,11 @@ sub migrate_tag : Runmode {
 		return "Invalid tag/grpno!";
 	}
 	
-	# verify that an etymon exists with the new tag number
-	my ($etymon_exists) = $self->dbh->selectrow_array("SELECT COUNT(*) FROM etyma WHERE tag=$new_tag");
+	# verify that a non-deleted etymon exists with the new tag number
+	my ($etymon_exists) = $self->dbh->selectrow_array("SELECT COUNT(*) FROM etyma WHERE tag=$new_tag AND status != 'DELETE'");
 	if (!$etymon_exists) {
 		$self->header_add(-status => 400);
-		return "No etymon yet exists with tag #$new_tag";
+		return "No etymon exists with tag #$new_tag.";
 	}
 	
 	# GROUP_CONCAT has an upper limit (default 1024 bytes) which can be increased to the server max.
@@ -306,7 +306,7 @@ WHERE e.tag=? AND e.status != 'DELETE'#;
 		# PAFs and allofams
 		$e{allofams} = $self->dbh->selectall_arrayref(
 			"SELECT tag, sequence, protoform, protogloss FROM etyma
-			 WHERE chapter=? AND sequence != 0 AND FLOOR(sequence)=FLOOR(?) ORDER BY sequence", {Slice=>{}},
+			 WHERE chapter=? AND sequence != 0 AND FLOOR(sequence)=FLOOR(?) AND status != 'DELETE' ORDER BY sequence", {Slice=>{}},
 			$e{chap}, $e{sequence});
 		for (@{$e{allofams}}) {
 			my $s = $_->{sequence};

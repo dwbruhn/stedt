@@ -30,7 +30,7 @@ SQL
 	my $e_ghost_chaps = $self->dbh->selectall_arrayref(<<SQL);
 SELECT etyma.chapter, SUM(etyma.public), COUNT(*)
 FROM etyma LEFT JOIN chapters ON (etyma.chapter=chapters.semkey)
-WHERE chapter != ''  $public $blessed AND chapters.chaptertitle IS NULL GROUP BY 1 ORDER BY 1
+WHERE chapter != '' AND etyma.status != 'DELETE' $public $blessed AND chapters.chaptertitle IS NULL GROUP BY 1 ORDER BY 1
 SQL
 	# chapters that appear in notes but not in chapters table
 	my $n_ghost_chaps = $self->dbh->selectall_arrayref(<<SQL);
@@ -85,7 +85,7 @@ sub grid : RunMode {
 	my $chapterquery = <<SQL;
 SELECT v,f,
 	(SELECT chaptertitle FROM chapters WHERE v=chaps.v AND f=chaps.f AND c=0 AND s1=0 AND s2=0 AND s3=0 ) AS title,
-	(SELECT COUNT(*) FROM etyma WHERE chapter=CONCAT(v,'.',f) OR chapter LIKE CONCAT(v,'.',f,'.%')) AS num_etyma,
+	(SELECT COUNT(*) FROM etyma WHERE (chapter=CONCAT(v,'.',f) OR chapter LIKE CONCAT(v,'.',f,'.%')) AND etyma.status != 'DELETE') AS num_etyma,
 	COUNT(*) AS num_chapters
 FROM chapters AS chaps
 WHERE v<=10 AND f>0

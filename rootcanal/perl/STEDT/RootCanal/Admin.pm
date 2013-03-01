@@ -110,7 +110,7 @@ sub updateprojects : Runmode {
 						: '')
 			: "0.0"; # no dividing by zero!
 		
-		$row->[7] = $self->dbh->selectrow_array(qq#SELECT count(*) FROM etyma   WHERE protogloss RLIKE "[[:<:]]($words)[[:>:]]"#);
+		$row->[7] = $self->dbh->selectrow_array(qq#SELECT count(*) FROM etyma WHERE protogloss RLIKE "[[:<:]]($words)[[:>:]]" AND status != 'DELETE'#);
 		$self->dbh->do("UPDATE projects SET tagged_reflexes=?,ambig_reflexes=?,count_reflexes=?,count_etyma=? WHERE id=?", undef,
 			$tagged, $sorta_tagged, $total_found, $row->[7], $row->[0]);
 		shift @$row;
