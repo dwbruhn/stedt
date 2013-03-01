@@ -19,7 +19,7 @@ sub elink : Runmode {
 	for my $t ($self->query->param('t')) { # array context, so param returns the whole list!
 		next unless $t =~ /^\d+$/;
 		my %e;
-		@e{qw/plg pform pgloss/} = $self->dbh->selectrow_array("SELECT languagegroups.plg, protoform, protogloss FROM etyma LEFT JOIN languagegroups USING (grpid) WHERE tag=? AND status != 'DELETE'", undef, $t);
+		@e{qw/plg chap sequence pform pgloss/} = $self->dbh->selectrow_array("SELECT languagegroups.plg, chapter, sequence, protoform, protogloss FROM etyma LEFT JOIN languagegroups USING (grpid) WHERE tag=? AND status != 'DELETE'", undef, $t);
 		next unless $e{pform};
 		$e{tag} = $t;
 		$e{pform} =~ s/⪤ +/⪤ */g;
@@ -28,6 +28,20 @@ sub elink : Runmode {
 		$e{pform} =~ s/ = +/ = */g;
 		$e{pform} = '*' . $e{pform};
 		$e{mesoroots} = $self->dbh->selectall_arrayref("SELECT form,gloss,plg,grpno FROM mesoroots LEFT JOIN languagegroups USING (grpid) WHERE tag=$t", {Slice=>{}});
+		$e{allofams} = $self->dbh->selectall_arrayref(
+			"SELECT tag, sequence, languagegroups.plg, protoform, protogloss FROM etyma LEFT JOIN languagegroups USING (grpid)
+			 WHERE chapter=? AND sequence != 0 AND FLOOR(sequence)=FLOOR(?) AND status != 'DELETE' ORDER BY sequence", {Slice=>{}},
+			$e{chap}, $e{sequence});
+
+		# format sequence number of allofams
+		for (@{$e{allofams}}) {
+			my $s = $_->{sequence};
+			if (int($s) == $s) {
+				$_->{sequence} = int $s;
+				next;
+			}
+			$_->{sequence} =~ s/\.(\d)/chr(ord('a')-1+$1)/e;
+		}
 		push @etyma, \%e;
 	}
 	return "Error: no valid tag numbers!" unless @etyma;
