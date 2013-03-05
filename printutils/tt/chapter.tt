@@ -1,5 +1,4 @@
 
-\vspace{1em}
 {\large \parindent=-1em \textbf{[% semkey %]  [% title %]}}
 \addcontentsline{toc}{chapter}{[% semkey %]  [% title %]}
 
@@ -8,7 +7,7 @@
 \resizebox{\textwidth}{!}{\includegraphics{pdf/[% id %].pdf}}
 
 [% END -%]
-\vspace{1em}
+\vspace{.25em}
 
 [% # general discussion == chapter notes %]
 [% FOREACH note IN chapter_notes -%]
@@ -20,7 +19,7 @@
 % [% IF internal_notes %]\newpage[% END %]
 \etymon*{}	% just create section and let the following code add the bookmark, TOC entry, and heading
 \addcontentsline{toc}{section}{([% seq %]) [% plg %] [% protoform_text %] [% protogloss %]}
-\vspace{1em}
+\vspace{.25em}
 {\large \parindent=-1em ([% seq %]) \hspace{\stretch{1}} [% plg %] [% protoform %]\hspace{\stretch{1}}\textbf{[% protogloss %]}
 \textit{\tiny[\#[% tag %]]}}
 \nopagebreak
