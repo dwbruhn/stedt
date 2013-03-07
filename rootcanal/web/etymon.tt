@@ -47,7 +47,7 @@ Reflexes <span class="u[% etyma.0.tag %]">tagged by <select name="DDMenu" onchan
 <input style="font-size:18pt;" name="btn" type="submit" value="Move all tags and make this a mesoreconstruction of:"><br/>
 #<input type="text" name="newtag" id="make_meso_input" size="40" maxlength="80">
 <div id="autocomplete_choices" class="autocomplete"></div>
-<inputtype="hidden" name="oldtag" value="[% e.tag %]">
+<input type="hidden" name="oldtag" value="[% e.tag %]">
 </form></td>
 [% END # has_privs 1 %]
 </tr></table>
