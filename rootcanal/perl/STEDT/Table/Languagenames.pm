@@ -93,7 +93,7 @@ $t->wheres(
 			return "languagegroups.grpno='$v'";
 		}
 		$v =~ s/(\.0)+$//;
-		return "languagegroups.grpno LIKE '$v\%'" # make it search all subgroups as well
+		return "languagegroups.grpno='$v' OR languagegroups.grpno LIKE '$v.\%'" # make it search all subgroups as well
 	},
 	'languagenames.language' => sub {
 		my ($k,$v) = @_;
