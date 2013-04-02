@@ -213,7 +213,13 @@ sub seq : Runmode {
 		$msg = "Success!";
 	}
 
-	my $a = $self->dbh->selectall_arrayref("SELECT tag, plg, protoform, protogloss, sequence, COUNT(DISTINCT rn) AS num_recs FROM etyma LEFT JOIN languagegroups USING (grpid) LEFT JOIN lx_et_hash USING (tag) WHERE lx_et_hash.uid=8 AND chapter=? AND status != 'DELETE' GROUP BY tag ORDER BY sequence", undef, $chap);
+	my $a = $self->dbh->selectall_arrayref("SELECT etyma.tag, plg, protoform, protogloss, sequence, COUNT(DISTINCT rn) AS num_recs
+		FROM etyma
+		LEFT JOIN languagegroups USING (grpid)
+		LEFT JOIN lx_et_hash ON (etyma.tag=lx_et_hash.tag AND lx_et_hash.uid=8)
+		WHERE chapter=? AND status != 'DELETE'
+		GROUP BY tag
+		ORDER BY sequence", undef, $chap);
 	
 	# run through results and group allofams
 	my @fams;
