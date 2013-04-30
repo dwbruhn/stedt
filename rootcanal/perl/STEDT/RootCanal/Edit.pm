@@ -22,6 +22,9 @@ sub table : StartRunmode {
 	}
 	
 	my $q = $self->query;
+
+	my $download = $q->param('download');
+
 	# get 2 uids from edit.tt: the values selected in the two dropdowns.
 	# these will be passed in to the select for the analysis and user_an columns
 	# just in case bad values get passed in, we convert it to a number (by adding 0)
@@ -121,8 +124,22 @@ sub table : StartRunmode {
 		$hash{plgs} = JSON::to_json($plgs);
 	}
 
-	# pass to tt: searchable fields, results, addable fields, etc.
-	return $self->tt_process("admin/edit.tt", \%hash);
+	if ($download) {
+	  # start with header
+	  my $dwnld = join("\t",@{$result->{fields}}) . "\n";
+	  # add query results
+	  for my $row (@{$result->{data}}) {
+	    $dwnld .= join("\t", @$row) . "\n";
+	  }
+	  $self->header_add(-type => 'text/csv',
+			    -attachment => "$tbl.csv",
+			    -Content_length => length(encode_utf8($dwnld)));
+	  return $dwnld;
+	}
+	else {
+	  # pass to tt: searchable fields, results, addable fields, etc.
+	  return $self->tt_process("admin/edit.tt", \%hash);
+	}
 }
 
 
