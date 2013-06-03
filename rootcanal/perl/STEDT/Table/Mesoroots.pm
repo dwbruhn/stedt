@@ -32,7 +32,7 @@ $t->searchable('mesoroots.id',
 	'mesoroots.uid',
 );
 $t->field_editable_privs(
-	# none are editable: can edit them using the edit/etymon view or (if admin) single-record view
+	# none are editable: can edit them using the etymon view or (if admin) single-record view
 );
 
 # Stuff for searching
