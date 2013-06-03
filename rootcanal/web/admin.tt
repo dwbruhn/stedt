@@ -22,7 +22,7 @@ Edit/Browse tables:
 [% IF c.has_privs(8) -%]
 <td><ul>
 	<li><a href="[% self_url %]/subgroups/view">language groups</a></li>
-	<li></li>
+	<li><a href="[% self_url %]/edit/mesoroots">mesoroots</a> ("Dependent Mesoroots" only)</li>
 	<li><a href="[% self_url %]/admin/updateprojects">update stats</a> (for "projects" - takes a while!)</li>
 	<li><a href="[% self_url %]/admin/updatesequence">update sequence numbers</a> (in etyma table)</li>
 	<li><a href="[% self_base %]dev/rootcanal-dev.pl/admin">switch to the test environment</a></li>

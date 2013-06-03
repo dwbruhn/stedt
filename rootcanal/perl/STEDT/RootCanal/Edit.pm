@@ -14,6 +14,7 @@ sub table : StartRunmode {
 	# restrict particular tables from tagger-level users
 	switch ($tbl) {
 		case 'chapters'		{ $self->require_privs(8) }
+		case 'mesoroots'	{ $self->require_privs(8) }
 		case 'hptb'		{ $self->require_privs(8) }
 #		case 'glosswords'	{ $self->require_privs(8) }
 		case 'morphemes'	{ $self->require_privs(8) }
