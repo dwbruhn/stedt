@@ -56,6 +56,7 @@ logged in as <b>[% user %]</b>
 [% IF c.has_privs(8) -%]
 <option value="[% self_url %]/edit/projects">Projects</option>
 <option value="[% self_url %]/edit/chapters">Chapters</option> 
+<option value="[% self_url %]/edit/mesoroots">Mesoroots</option> 
 <option value="[% self_url %]/edit/morphemes">Morphemes</option> 
 <option value="[% self_url %]/edit/soundlaws">Sound Laws</option> 
 <option value="[% self_url %]/edit/glosswords">Glosses</option> 
