@@ -57,6 +57,7 @@ Tools:
 <li><a href="[% self_url %]/admin/deviants">view records with deviant glosses (violating gloss conventions)</a></li>
 [% IF c.has_privs(16) -%]
 <li><a href="[% self_url %]/admin/expire_sessions">expire sessions older than 1 month</a> ([% num_sessions %] currently in sessions table)</li>
+<li><a href="https://corpus.linguistics.berkeley.edu/~stedt-cgi-ssl/phpmyadmin/">DB admin</a></li>
 [% END -%]
 </ul>
 [% END -%]
