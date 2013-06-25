@@ -5,22 +5,19 @@ use Encode;
 use utf8;
 use Time::HiRes qw(time);
 use CGI::Application::Plugin::Redirect;
-use Switch;
 
 sub table : StartRunmode {
 	my $self = shift;
 	my $t0 = time();
 	my $tbl = $self->param('tbl');
 	# restrict particular tables from tagger-level users
-	switch ($tbl) {
-		case 'chapters'		{ $self->require_privs(8) }
-		case 'mesoroots'	{ $self->require_privs(8) }
-		case 'hptb'		{ $self->require_privs(8) }
-#		case 'glosswords'	{ $self->require_privs(8) }
-		case 'morphemes'	{ $self->require_privs(8) }
-		case 'projects'		{ $self->require_privs(8) }
-		else			{ $self->require_privs(1) }
-	}
+	if    ($tbl eq  'projects')	{ $self->require_privs(8) }
+#	elsif ($tbl eq  'mesoroots')	{ $self->require_privs(8) }
+#	elsif ($tbl eq  'hptb')		{ $self->require_privs(8) }
+#	elsif ($tbl eq  'glosswords')	{ $self->require_privs(8) }
+#	elsif ($tbl eq  'morphemes')	{ $self->require_privs(8) }
+#	elsif ($tbl eq  'chapters')	{ $self->require_privs(8) }
+	else			        { $self->require_privs(2) }
 	
 	my $q = $self->query;
 
