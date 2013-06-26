@@ -14,7 +14,7 @@ setup.morphemes = {
     },
     'morphemes.tag' : {
 	label: 'tag',
-	noedit: false,
+	noedit: !(stedtuserprivs & 16),
 	hide: false,
 	size: 30
     },
@@ -46,7 +46,7 @@ setup.morphemes = {
 	label: 'stedt',
 //	noedit: !(stedtuserprivs & 8),
 	noedit: true,
-	hide: !(stedtuserprivs & 1),
+	hide: !(stedtuserprivs & 16),
 	size: 30,
 	transform: function (v) {
 	    return v.replace(/, */g,', ');
@@ -55,7 +55,6 @@ setup.morphemes = {
     'morphemes.reflex' : {
 	label: 'form',
 	noedit: true,
-	noedit: !(stedtuserprivs & 1),
 	size: 60
     },
     'morphemes.morpheme' : {

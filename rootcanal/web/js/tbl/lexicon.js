@@ -18,11 +18,30 @@ setup['lexicon']['num_notes'] = {
 	}
 };
 
-setup['lexicon']['analysis'].label =
-	$("uid1").options[$("uid1").selectedIndex].text + '\'s analysis';
+// setup['lexicon']['analysis'].label =
+//	$("uid1").options[$("uid1").selectedIndex].text + '\'s analysis';
+	
+setup['lexicon']['analysis'] = {
+	label: $("uid1").options[$("uid1").selectedIndex].text + '\'s analysis',
+	noedit: !(stedtuserprivs & 8),
+	hide: false,
+	size: 80,
+	transform: function (v) {
+		return v.replace(/, */g,', ');
+	}
+};
 
-setup['lexicon']['user_an'].label =
-	$("uid2").options[$("uid2").selectedIndex].text  + '\'s analysis';
+setup['lexicon']['user_an'] = {
+	label: $("uid2").options[$("uid2").selectedIndex].text  + '\'s analysis',
+	noedit: !(stedtuserprivs & 1),
+	hide: false,
+	size: 80,
+	transform: function (v) {
+		return v.replace(/, */g,', ');
+	}
+};
+//setup['lexicon']['user_an'].label =
+//	$("uid2").options[$("uid2").selectedIndex].text  + '\'s analysis';
 
 // citation field in edit/lexicon links to edit/srcbib
 setup['lexicon']['citation'] = {

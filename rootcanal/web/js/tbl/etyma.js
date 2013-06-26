@@ -1,4 +1,5 @@
-setup['etyma']['etyma.grpid'].noedit = false;
+// restrict casual users from editing plg field
+setup['etyma']['etyma.grpid'].noedit = !(stedtuserprivs & 1);
 
 // add delete button for approvers
 if (stedtuserprivs & 8) {

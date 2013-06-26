@@ -407,8 +407,9 @@ var setup = { // in the form setup.[tablename].[fieldname]
 		'etyma.chapter' : {
 			label: 'ch.',
 			size: 70,
-			hide: !(stedtuserprivs & 1),
-			transform : (stedtuserprivs & 1)
+			noedit: !(stedtuserprivs & 1),
+			hide: !(stedtuserprivs & 2),
+			transform : (stedtuserprivs & 2)
 				? function (v, key, rec, n) {
 					return '<a href="' + baseRef + 'chap/' + v + '" target="stedt_chapters" title="'
 					+ rec[n-1].replace(/&/g,'&amp;') + '">' + v + '</a>';
@@ -417,11 +418,13 @@ var setup = { // in the form setup.[tablename].[fieldname]
 		},
 		'etyma.protoform' : {
 			vert_show: true,
+			noedit: !(stedtuserprivs & 1),
 			label: 'protoform',
 			size: 120
 		},
 		'etyma.protogloss' : {
 			vert_show: true,
+			noedit: !(stedtuserprivs & 1),
 			label: 'protogloss',
 			size: 200
 		},
@@ -445,12 +448,14 @@ var setup = { // in the form setup.[tablename].[fieldname]
 		},
 		'etyma.notes' : {
 			label: 'tagging note',
+			hide: !(stedtuserprivs & 2),
+			noedit: !(stedtuserprivs & 1),
 			size: 160
 		},
 		'num_notes' : {
 			label: 'notes',
 			noedit: true,
-			hide: !(stedtuserprivs & 1),
+			hide: !(stedtuserprivs & 2),
 			size: 30,
 			transform: function (v,k,rec,n) {
 				if (rec[n+1] === '0') return v;
@@ -468,6 +473,8 @@ var setup = { // in the form setup.[tablename].[fieldname]
 		},
 		'etyma.status' : {
 			label: 'status',
+			hide: !(stedtuserprivs & 2),
+			noedit: !(stedtuserprivs & 1),
 			size: 20
 		},
 		'etyma.exemplary' : {
@@ -477,7 +484,7 @@ var setup = { // in the form setup.[tablename].[fieldname]
 		'etyma.sequence'  : {
 			label: 'seq',
 			noedit: true,
-			hide: !(stedtuserprivs & 1),
+			hide: !(stedtuserprivs & 2),
 			size: 50,
 			transform: function (v,k,rec,n) {
 				if (v !== '0.0') {
@@ -536,8 +543,9 @@ var setup = { // in the form setup.[tablename].[fieldname]
 		},
 		'users.username' : {
 			label: 'owner',
+			hide: !(stedtuserprivs & 2),
 			size: 60,
-			noedit: true
+			noedit: true,
 		},
 		'etyma.uid' : { // this is just a search field
 			label: 'owner'
@@ -635,7 +643,7 @@ var setup = { // in the form setup.[tablename].[fieldname]
 		'lexicon.rn' : {
 			label: 'rn',
 			noedit: true,
-			hide: !(stedtuserprivs & 1),
+			hide: !(stedtuserprivs & 2),
 			size: 70
 		},
 		'analysis' : {

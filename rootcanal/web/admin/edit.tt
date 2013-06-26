@@ -19,7 +19,7 @@
 <input name="search" type="submit" value="Search">
 <input type="button" value="Clear [Esc]" onclick="clear_form(this.form)">
 <input type="reset" value="Reset [Esc]²">
-<input name="download" type="submit" value="Download">
+<input name="download" type="submit" value="Download" title="By clicking this button you agree to use the downloaded data for non-commercial, research purposes only.">
 [% IF t.table == "lexicon" %]
 View tagging by <select id="uid1" name="uid1" onchange="document.location = '?' + Form.serializeElements(this.up('form').select('input:not(:button,:submit,:reset),select').findAll(Form.Element.getValue));">
 <option value=""[% IF uid1 == 8 %] selected[% END %]>stedt</option>

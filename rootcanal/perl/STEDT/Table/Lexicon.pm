@@ -121,7 +121,7 @@ $t->searchable('lexicon.rn', 'analysis', 'user_an', 'lexicon.reflex',
 	'languagenames.lgcode',
 );
 $t->field_visible_privs(
-	'user_an' => 1,
+#	'user_an' => 1,
 );
 $t->field_editable_privs(
 	'analysis' => 8,

@@ -31,10 +31,15 @@ $t->searchable(
 	'hptb.tags'
 );
 
-$t->editable(
-	'hptb.pages',
-	'hptb.mainpage'
-); # NB: the key is never editable
+#$t->editable(
+#	'hptb.pages',
+#	'hptb.mainpage'
+#); # NB: the key is never editable
+
+$t->field_editable_privs(
+	'hptb.pages' => 16,
+	'hptb.mainpage' => 16,
+);
 
 # Stuff for searching
 $t->search_form_items(

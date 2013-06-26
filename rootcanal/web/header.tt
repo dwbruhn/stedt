@@ -43,6 +43,7 @@ var rootcanal_t0 = Date.now();
 [% END -%]
 </script>
 logged in as <b>[% user %]</b>
+[%- IF c.has_privs(16) %] <i>(superuser)</i>[% ELSIF c.has_privs(8) %] <i>(approver)</i>[% ELSIF c.has_privs(1) %] <i>(tagger)</i>[% END %]
 [%- IF c.has_privs(2) %]. &nbsp; <a href="[% self_url %]/admin">tools</a>&nbsp;[% END %]
 <form name="dropdown" method="POST" style="display:inline">
 <select name="DDMenu" onchange="location.href=(form.DDMenu.options[form.DDMenu.selectedIndex].value)">

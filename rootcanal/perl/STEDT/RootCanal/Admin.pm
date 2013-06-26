@@ -6,7 +6,7 @@ use Time::HiRes qw(time);
 
 sub main : StartRunmode {
 	my $self = shift;
-	$self->require_privs(1);
+	$self->require_privs(2);
 	
 	my %h;
 	if ($self->has_privs(16)) {

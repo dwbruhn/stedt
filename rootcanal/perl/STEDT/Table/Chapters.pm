@@ -37,9 +37,14 @@ $t->searchable(
 	'chapters.old_chapter',
 	'chapters.old_subchapter'
 );
-$t->editable(
-	'chapters.semkey',
-	'chapters.chaptertitle',
+#$t->editable(
+#	'chapters.semkey',
+#	'chapters.chaptertitle',
+#);
+
+$t->field_editable_privs(
+	'chapters.semkey' => 8,
+	'chapters.chaptertitle' => 8,
 );
 
 # Stuff for searching

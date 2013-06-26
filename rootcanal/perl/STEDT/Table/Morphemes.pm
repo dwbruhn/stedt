@@ -69,9 +69,9 @@ $t->field_visible_privs(
 	'morphemes.tag' => 1,
 );
 $t->field_editable_privs(
-	'morphemes.tag' => 8,
-	'morphemes.reflex' => 1,
-	'morphemes.morpheme' => 1,
+	'morphemes.tag' => 16,
+	'morphemes.reflex' => 16,
+	'morphemes.morpheme' => 16,
 	'morphemes.gloss' => 16,
 	'morphemes.gfn' => 16,
 	'morphemes.srcid' => 16,

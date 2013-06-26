@@ -65,6 +65,9 @@ Otherwise the whole row will be ignored.</p>
 <ul>
 	<li>all users should have priv 2 'user' set to true</li>
 	<li>download data by source on each source page</li>
+	<li>see (limited) admin page</li>
+	<li>see some of the edit/&lt;TABLE&gt; interfaces</li>
+	<li>see other people's tags</li>
 </ul>
 
 <h3>1 - tagger</h3>

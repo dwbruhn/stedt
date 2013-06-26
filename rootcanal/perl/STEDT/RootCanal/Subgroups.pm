@@ -6,7 +6,7 @@ use Encode;
 
 sub view: StartRunmode {
 	my $self = shift;
-	$self->require_privs(1);
+	$self->require_privs(2);
 	my $a = $self->dbh->selectall_arrayref("SELECT grpid, grpno, grp, COUNT(lgid) AS num_lgs, plg, genetic
 		FROM languagegroups LEFT JOIN languagenames USING (grpid)
 		GROUP BY grpid

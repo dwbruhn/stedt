@@ -6,10 +6,12 @@ setup.chapters = {
     },
     'chapters.semkey' : {
 	label: 'semkey',
+	noedit: !(stedtuserprivs & 8),
 	size: 60
     },
     'chapters.chaptertitle' : {
 	label: 'title',
+	noedit: !(stedtuserprivs & 8),
 	size: 80
     },
     'etyma' : {

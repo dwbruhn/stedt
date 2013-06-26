@@ -81,7 +81,7 @@ SQL
 
 sub grid : RunMode {
 	my $self = shift;
-	$self->require_privs(1); # since this provides links to edit/etyma and edit/chapters, for now we restrict this to "tagger" privileges until we sort out if/how to present this to the public
+	$self->require_privs(2);
 	my $chapterquery = <<SQL;
 SELECT v,f,
 	(SELECT chaptertitle FROM chapters WHERE v=chaps.v AND f=chaps.f AND c=0 AND s1=0 AND s2=0 AND s3=0 ) AS title,

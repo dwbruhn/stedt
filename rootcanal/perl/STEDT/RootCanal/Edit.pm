@@ -10,7 +10,7 @@ sub table : StartRunmode {
 	my $self = shift;
 	my $t0 = time();
 	my $tbl = $self->param('tbl');
-	# restrict particular tables from tagger-level users
+	# restrict particular tables from users without approver privs
 	if    ($tbl eq  'projects')	{ $self->require_privs(8) }
 #	elsif ($tbl eq  'mesoroots')	{ $self->require_privs(8) }
 #	elsif ($tbl eq  'hptb')		{ $self->require_privs(8) }
