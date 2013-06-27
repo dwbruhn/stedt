@@ -545,7 +545,7 @@ var setup = { // in the form setup.[tablename].[fieldname]
 			label: 'owner',
 			hide: !(stedtuserprivs & 2),
 			size: 60,
-			noedit: true,
+			noedit: true
 		},
 		'etyma.uid' : { // this is just a search field
 			label: 'owner'

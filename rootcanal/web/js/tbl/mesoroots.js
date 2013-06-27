@@ -35,7 +35,7 @@ setup.mesoroots = {
       		transform: function (v,k,rec,n) {
       			if (v === '0') return '';
       			return rec[n+1] || v;
-      		},
+      		}
       	},
       	'languagegroups.plg': {
 		noedit: true,
@@ -47,7 +47,7 @@ setup.mesoroots = {
       	},
  	'mesoroots.old_tag': {
 		noedit: true,
-      		hide: true,
+      		hide: true
       	},
  	'mesoroots.old_note': {
  		label: 'old note',
