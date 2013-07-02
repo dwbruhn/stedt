@@ -34,6 +34,147 @@ sub updatesequence : Runmode {
 
 }
 
+sub uploadFile {
+  my ($file,$fh) = @_;
+  my $upload_dir = '/tmp';
+
+  open (UPLOADFILE, ">$upload_dir/$file" ) or die "$!";
+  binmode UPLOADFILE;
+  
+  while ( <$fh> )
+    {
+      print UPLOADFILE;
+    } 
+  close UPLOADFILE;
+  seek($fh,0,0);
+}
+
+
+sub load2db {
+  my (%metadata,$file) = @_;
+  my $upload_dir = '/tmp';
+
+  open (INPUTFILE, "$upload_dir/$file" ) or die "$!";
+  binmode INPUTFILE;
+  
+  while ( <INPUTFILE> )
+    {
+      # read line, insert into lexicon
+    } 
+  close INPUTFILE;
+}
+
+sub validateContribution {
+  my $fh = shift;
+  my @messages;
+  my %results;
+  my $lines;
+  my $show_stopper = 0;
+  while ( <$fh> ) {
+    $lines++;
+    #check each line
+  }
+  push(@messages, $lines . ' lines read');
+  $results{'status'}   = $show_stopper ? "Sorry, your file doesn't meet standards." : "File content OK!";
+  $results{'messages'} = \@messages;
+  seek($fh,0,0);
+  return %results;
+}
+
+sub validateMetadata {
+  my (%metadata) = @_;
+  my @messages;
+  my %results;
+  my $lines;
+  my $show_stopper = 0;
+  foreach my $key (keys %metadata) {
+    #check metadata elements
+    print STDERR "$key:  $metadata{$key}\n";
+    #$show_stopper = 1;
+    $lines++;
+  }
+  push(@messages, $lines . ' parameters seen');
+  $results{'status'}   = $show_stopper ? "Sorry, metadata insufficient." : "Metadata OK!";
+  $results{'messages'} = \@messages;
+  return %results;
+}
+
+sub contribution : Runmode {
+  # "contribution wizard" has 3 steps:
+  # upload file - uses standard CGI file upload
+  # metadata - if file validates, ask user for metadata
+  # thanks - if metadata is ok, do the right thing with all the data, thank user
+  # (file|metadata)failure - send user back a step if there is a problem.
+  my $self = shift;
+  $self->require_privs(8);
+  my $step = $self->query->param('step');
+  my $file = $self->query->param('contribution');
+  my %metadata;
+  my %results;
+  my @validation;
+  if ($step eq 'upload') {
+    if ($file) {
+      # upload file
+      my $fh = $self->query->upload('contribution');
+      uploadFile($file,$fh);
+      # validate it
+      %results = validateContribution($fh);
+      @validation = @{$results{'messages'}};
+      if ($results{'status'} =~ /Sorry/) {
+	# oops try again!
+	$step = 'filefailure';
+      }
+      else {
+	# on to metadata!
+	$step = 'metadata';
+      }
+    }
+    else {
+      # user did not give us a file. keep asking!
+      $step = 'upload';
+      $results{'status'} = 'No file provided!';
+    }
+  }
+  elsif ($step eq 'metadata') {
+    # process & validate metadata
+    foreach my $element ($self->query->param) {
+      next if $element =~ /^(btn|step)$/; # skip these
+      $metadata{$element} = $self->query->param($element) if $self->query->param($element);
+    }
+    # check metadata
+    %results = validateMetadata(%metadata);
+    @validation = @{$results{'messages'}};
+    if ($results{'status'} =~ /Sorry/) {
+      # oops try again!
+      $step = 'metadatafailure';
+    }
+    else {
+      # load to database
+      load2db(%results,$file);
+      $step = 'thanks';
+    }
+  }
+  else {
+    # $step not set, must be first pass through: set current step to upload.
+    $step = 'upload';
+  }
+  
+
+  foreach my $v (@validation) {
+    print STDERR "v:  $v\n";
+  }
+  return $self->tt_process("admin/contribution.tt", {
+		step=>$step,
+		file=>$file,
+		message=>$results{'status'},
+		provided=>\%metadata,
+		validation=>\@validation,
+		metadata=> ['language','language abbreviation','source','author','year','contributor','email']
+		});
+
+}
+
+
 sub changes : Runmode {
 	my $self = shift;
 	$self->require_privs(1);
