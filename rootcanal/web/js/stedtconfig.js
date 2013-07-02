@@ -658,6 +658,7 @@ var setup = { // in the form setup.[tablename].[fieldname]
 		'user_an' : {
 		        label: 'your analysis',
 			size: 80,
+			hide: !(stedtuserprivs & 1),
 			transform: function (v) {
 				return v.replace(/, */g,', ');
 			}

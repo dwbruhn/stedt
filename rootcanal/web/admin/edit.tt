@@ -21,7 +21,7 @@
 <input type="reset" value="Reset [Esc]²">
 <input name="download" type="submit" value="Download" title="By clicking this button you agree to use the downloaded data for non-commercial, research purposes only.">
 [% IF t.table == "lexicon" %]
-View tagging by <select id="uid1" name="uid1" onchange="document.location = '?' + Form.serializeElements(this.up('form').select('input:not(:button,:submit,:reset),select').findAll(Form.Element.getValue));">
+View tagging by <select id="uid1" name="uid1" onchange="document.location = '?' + Form.serializeElements(this.up('form').select('input:not(:button,:submit,:reset),select').findAll(Form.Element.getValue));" [% IF !c.has_privs(1) %]style="display:none;"[% END %]>
 <option value=""[% IF uid1 == 8 %] selected[% END %]>stedt</option>
 [% FOREACH u IN users -%]
 [% UNLESS u.uid == 8 -%]
@@ -29,7 +29,9 @@ View tagging by <select id="uid1" name="uid1" onchange="document.location = '?' 
 [% END -%]
 [% END -%]
 </select>
-and <select id="uid2" name="uid2" onchange="document.location = '?' + Form.serializeElements(this.up('form').select('input:not(:button,:submit,:reset),select').findAll(Form.Element.getValue));">
+[% # if user is not a tagger, the uid1 box is hidden and 'and' is not necessary %]
+[% IF c.has_privs(1) %]and[% END %]
+<select id="uid2" name="uid2" onchange="document.location = '?' + Form.serializeElements(this.up('form').select('input:not(:button,:submit,:reset),select').findAll(Form.Element.getValue));">
 <option value=""[% IF uid2 == c.param('uid') %] selected[% END %]>[% c.param('user') %]</option>
 [% FOREACH u IN users -%]
 [% UNLESS u.uid == c.param('uid') -%]
