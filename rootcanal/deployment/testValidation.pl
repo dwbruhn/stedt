@@ -6,10 +6,19 @@ sub validateContribution {
   my $lines;
   my $show_stopper = 0;
   while ( <$fh> ) {
+    chomp;
     $lines++;
-    #check each line
+    # check header
+    if ($lines == 0) {
+      $header = split "\t";
+    }
+    # check for missing values
+    # check for "excrescences"
+    # check well-formedness of gloss
+    # check reflex
+    # check POS if present
   }
-  push(@messages, $lines . ' lines read');
+  push(@messages, $lines . ' lines read, including header');
   $results{'status'}   = $show_stopper ? "Sorry, your file doesn't meet standards." : "File content OK!";
   $results{'messages'} = \@messages;
   seek($fh,0,0);
@@ -35,9 +44,11 @@ sub validateMetadata {
 }
 
 my $file = shift @ARGV;
-my $fh = open $file || die "no file given!\n";
+open(my $fh, "<:encoding(UTF-8)",$file) || die "no file given!\n";
  
-my %results = validateContribution($fn);
+my %results = validateContribution($fh);
+print 'x' x 80;
+print "\nchecking $file\n";
 print 'x' x 80;
 print "\nstatus: " . $results{'status'} . "\n";
 foreach my $r (@{$results{'messages'}}) {
