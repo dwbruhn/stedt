@@ -9,8 +9,11 @@ sub validateContribution {
     chomp;
     $lines++;
     # check header
-    if ($lines == 0) {
-      $header = split "\t";
+    if ($lines == 1) {
+      my @header = split "\t";
+      foreach my $h (@header) {
+        $show_stopper = 1 unless $h =~ /(gloss|reflex|pos)/;
+      }
     }
     # check for missing values
     # check for "excrescences"
