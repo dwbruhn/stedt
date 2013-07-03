@@ -5,17 +5,32 @@ sub validateContribution {
   my %results;
   my $lines;
   my $show_stopper = 0;
+  my $header_length;
+  my $row_length;
   while ( <$fh> ) {
     chomp;
     $lines++;
     # check header
     if ($lines == 1) {
       my @header = split "\t";
+      $header_length = scalar(@header);
       foreach my $h (@header) {
         $show_stopper = 1 unless $h =~ /(gloss|reflex|pos)/;
       }
     }
     # check for missing values
+    my @columns = split "\t";
+    $row_length = scalar(@columns);
+    foreach $column (@columns) {
+      if ($column eq "") {
+		$show_stopper = 1;
+		push(@messages, "Empty cell found. line $lines");
+      }
+      if ($row_length != $header_length) {
+        $show_stopper = 1;
+		push(@messages, "Empty cell found. line $lines");
+      }
+    }
     # check for "excrescences"
     # check well-formedness of gloss
     # check reflex
