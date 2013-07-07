@@ -7,34 +7,57 @@ sub validateContribution {
   my $show_stopper = 0;
   my $header_length;
   my $row_length;
+  my @header; 
   while ( <$fh> ) {
     chomp;
     $lines++;
     # check header
+    my %headerindex;
     if ($lines == 1) {
-      my @header = split "\t";
-      $header_length = scalar(@header);
-      foreach my $h (@header) {
-        $show_stopper = 1 unless $h =~ /(gloss|reflex|pos)/;
+      @header = split "\t";
+      for (my $i = 0; $i < scalar @header; $i++) {
+        if ($header[$i] !~ /(gloss|reflex|pos)/) {
+	  $show_stopper = 1;
+	  push(@messages, $header[$i]. ' unexpected header column found.');
+	}
+	else {
+	  push(@messages, $header[$i]. ' header column found.');
+	}
+        $headerindex{$header[$i]} = $i;
       }
     }
+    # So in the case of the test files, $headerindex{'gloss'} is 1.
+    # Now you can test the columns in the rest of the file:
+    
     # check for missing values
     my @columns = split "\t";
-    $row_length = scalar(@columns);
-    foreach $column (@columns) {
-      if ($column eq "") {
-		$show_stopper = 1;
-		push(@messages, "Empty cell found. line $lines");
+    for (my $i = 0; $i < scalar @header; $i++) {
+      my $column = $columns[$i];
+      print "$column %i \n";
+      if ($i == $headerindex{'gloss'}) {
+	# do gloss tests
+	# check if gloss exists
+	if ($column eq '') {
+	  push(@messages, 'no gloss.');
+	  $show_stopper = 1 ;
+	}
+	# check well-formedness of gloss
       }
-      if ($row_length != $header_length) {
-        $show_stopper = 1;
-		push(@messages, "Empty cell found. line $lines");
+      if ($i == $headerindex{'reflex'}) {
+	# do reflex tests
+	# check if reflex exists
+	if ($column eq '') {
+	  push(@messages, 'no reflex.');
+	  $show_stopper = 1 ;
+	}
+	# check for "excrescences"
       }
+      if ($i == $headerindex{'pos'}) {
+	# do pos tests
+	# it is OK if pos field is empty!
+      }
+      # check POS if present
     }
-    # check for "excrescences"
-    # check well-formedness of gloss
-    # check reflex
-    # check POS if present
   }
   push(@messages, $lines . ' lines read, including header');
   $results{'status'}   = $show_stopper ? "Sorry, your file doesn't meet standards." : "File content OK!";
