@@ -11,11 +11,11 @@ sub browser : StartRunMode {
 	my $public = '';
 	my $blessed = '';
 	my $public_ch = '';
-	unless ($self->has_privs(1)) {
+#	unless ($self->has_privs(1)) {
 #		$public = "AND etyma.public=1";
 #		$blessed = 'AND etyma.uid=8';
-		$public_ch = 'HAVING num_public OR public_notes';
-	}
+#		$public_ch = 'HAVING num_public OR public_notes';
+#	}
 	# from the chapters table
 	my $chapterquery = <<SQL;
 SELECT chapters.semkey, chapters.chaptertitle, 
