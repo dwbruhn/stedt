@@ -35,7 +35,8 @@ sub validateContribution {
       my $column = $columns[$i];
       if ($i == $headerindex{'gloss'}) {
         print "@columns[$i]\n";
-	# do gloss tests --- right now, checks for non-word characters in gloss; perhaps can be refined later
+	# do gloss tests 
+		# check well-formedness of gloss --- right now, checks for non-word characters in gloss; perhaps can be refined later
         if ($columns[$i] =~ /\W/) {
           push(@messages, "unusual character in column 'gloss', line $lines");
           $show_stopper = 1 ;
@@ -45,7 +46,6 @@ sub validateContribution {
 	  push(@messages, 'no gloss.');
 	  $show_stopper = 1 ;
 	}
-	# check well-formedness of gloss
       }
       if ($i == $headerindex{'reflex'}) {
 	# do reflex tests
