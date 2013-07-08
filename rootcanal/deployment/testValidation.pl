@@ -8,11 +8,11 @@ sub validateContribution {
   my $header_length;
   my $row_length;
   my @header; 
+  my %headerindex;
   while ( <$fh> ) {
     chomp;
     $lines++;
     # check header
-    my %headerindex;
     if ($lines == 1) {
       @header = split "\t";
       for (my $i = 0; $i < scalar @header; $i++) {
@@ -21,7 +21,7 @@ sub validateContribution {
 	  push(@messages, $header[$i]. ' unexpected header column found.');
 	}
 	else {
-	  push(@messages, $header[$i]. ' header column found.');
+	  push(@messages, $header[$i]. " header column found: $i");
 	}
         $headerindex{$header[$i]} = $i;
       }
@@ -33,8 +33,8 @@ sub validateContribution {
     my @columns = split "\t";
     for (my $i = 0; $i < scalar @header; $i++) {
       my $column = $columns[$i];
-      print "$column %i \n";
       if ($i == $headerindex{'gloss'}) {
+        print "$columns[$i], [$i]\n";
 	# do gloss tests
 	# check if gloss exists
 	if ($column eq '') {
