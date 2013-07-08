@@ -295,7 +295,7 @@ WHERE e.tag=? AND e.status != 'DELETE'#;
 	
 		# heading stuff
 		@e{qw/tag chap sequence protoform protogloss plg uid username public/} = @$_;
-		$e{plg} = $e{plg} eq 'PTB' ? '' : "$e{plg}";
+		# $e{plg} = $e{plg} eq 'PTB' ? '' : "$e{plg}";
 	
 		$e{protoform} =~ s/⪤ +/⪤ */g;
 		$e{protoform} =~ s/OR +/OR */g;
