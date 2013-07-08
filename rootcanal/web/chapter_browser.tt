@@ -1,6 +1,14 @@
 ﻿[% PROCESS header.tt title="STEDT Chapter Browser" -%]
 
 <h1>Chapters</h1>
+
+Volumes:
+<ul class="">
+[% FOREACH v IN vols -%]
+<li><a href="#[% v.0 | uri %]">[% v.0 %] [% v.1 %]</a></li>
+[% END -%]
+</ul>
+
 <p>[% ch.size %] nodes (took [% time_elapsed %] seconds to retrieve)</p>
 <table id="ch" class="sortable resizable hangindent" style="table-layout:fixed">
 <thead><tr>
@@ -13,7 +21,7 @@
 <tbody>
 [% FOREACH r IN ch -%]
 <tr>
-<td><a target="notes" href="[% self_url %]/chap/[% r.0 | uri %]">[% r.0 %]</a></td>
+<td><a name="[% r.0 | uri %]"></a><a target="notes" href="[% self_url %]/chap/[% r.0 | uri %]">[% r.0 %]</a></td>
 <td>[% r.1 | html %]</td>[%- IF c.has_privs(1) %]<td>[% r.2 || '' %]</td>[% END -%]
 <td>[% IF r.3 %][%- IF c.has_privs(1) %]<a target="edit_etyma" href="[% self_url %]/edit/etyma?etyma.chapter=[% r.0 | uri %]">[% r.3 %][% ELSE %][% r.3 %][% END # privs check %][% END # r.3 check %]</td>
 <td>[% r.4 || '' %]</td><td>[% IF r.5 %]✓[% END %]</td>

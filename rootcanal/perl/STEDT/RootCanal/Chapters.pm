@@ -39,8 +39,14 @@ FROM notes LEFT JOIN chapters ON (notes.id=chapters.semkey) LEFT JOIN etyma ON (
 WHERE notes.spec='C' AND chapters.chaptertitle IS NULL GROUP BY 1 ORDER BY 1
 SQL
 
+	# volumes for table of contents
+	my $volumes = $self->dbh->selectall_arrayref(<<SQL);
+SELECT chapters.semkey, chapters.chaptertitle
+FROM chapters WHERE chapters.f=0 AND chapters.v<11 ORDER BY chapters.v
+SQL
+
 	return $self->tt_process('chapter_browser.tt', {
-		ch=>$chapters, e=>$e_ghost_chaps, n=>$n_ghost_chaps, time_elapsed=>sprintf("%0.3g", time()-$t0)
+		vols=> $volumes, ch=>$chapters, e=>$e_ghost_chaps, n=>$n_ghost_chaps, time_elapsed=>sprintf("%0.3g", time()-$t0)
 	});
 }
 
