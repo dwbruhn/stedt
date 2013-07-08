@@ -34,8 +34,12 @@ sub validateContribution {
     for (my $i = 0; $i < scalar @header; $i++) {
       my $column = $columns[$i];
       if ($i == $headerindex{'gloss'}) {
-        print "$columns[$i], [$i]\n";
-	# do gloss tests
+        print "@columns[$i]\n";
+	# do gloss tests --- right now, checks for non-word characters in gloss; perhaps can be refined later
+        if ($columns[$i] =~ /\W/) {
+          push(@messages, "unusual character in column 'gloss', line $lines");
+          $show_stopper = 1 ;
+          }
 	# check if gloss exists
 	if ($column eq '') {
 	  push(@messages, 'no gloss.');
