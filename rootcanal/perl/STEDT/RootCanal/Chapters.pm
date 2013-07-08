@@ -21,7 +21,8 @@ sub browser : StartRunMode {
 SELECT chapters.semkey, chapters.chaptertitle, 
 	(SELECT COUNT(*) FROM etyma WHERE chapter=chapters.semkey AND public=1 AND etyma.status != 'DELETE' $blessed) AS num_public,
 	(SELECT COUNT(*) FROM etyma WHERE chapter=chapters.semkey AND etyma.status != 'DELETE' $blessed),
-	COUNT(DISTINCT notes.noteid), MAX(notes.notetype = 'G'), MAX(notes.notetype != 'I') as public_notes, chapters.id
+	COUNT(DISTINCT notes.noteid), MAX(notes.notetype = 'G'), MAX(notes.notetype != 'I') as public_notes,
+	chapters.id, IF(chapters.f=0, 1, 0) as isVOL, IF(chapters.c=0, 1, 0) as isFASC
 FROM chapters LEFT JOIN notes ON (notes.id=chapters.semkey)
 GROUP BY 1 $public_ch ORDER BY v,f,c,s1,s2,s3
 SQL
