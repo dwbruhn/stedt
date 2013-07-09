@@ -43,6 +43,7 @@ Activity:
 
 Accounts:
 <ul>
+<li><a href="[% self_url %]/account">my account</a></li>
 <li><a href="[% self_url %]/account/gsarpa">create new account</a></li>
 [% IF c.has_privs(1) -%]
 <li><a href="[% self_url %]/account/users">view/edit users</a></li>
