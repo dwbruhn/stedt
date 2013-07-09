@@ -32,7 +32,7 @@ on [% USE date %][% date.format(date.now, '%F') %].
 <tr>
 	<th>ISO 639-3</th>
 	<th>Language Name</th>
-	<th>LgName in Source</th>
+	<th title="Language name from source OR abbreviated name" style="cursor:help;">Short Lg Name</th>
 	<th>Group</th>
 	<th>num. of records</th>
 	<th title="from Namkung, ed. 1996 (STEDT Monograph #3)" style="cursor:help;">Phon. Inventory</th>

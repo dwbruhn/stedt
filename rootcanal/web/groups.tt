@@ -18,7 +18,7 @@
 <p>Language information for <b>[% row.1 %]</b>
 from source <a href="[% self_url %]/source/[% row.3 %]" target="stedt_src">[% row.4 %]</a>:</p>
 <table>
-<tr><th>Language Name in Source</th><td>[% row.8 %]</td></tr>
+<tr><th title="Language name from source OR abbreviated name" style="cursor:help;">Short Lg Name</th><td>[% row.8 %]</td></tr>
 <tr><th>ISO 639-3</th><td>[% IF row.0 %]<a href="http://www.ethnologue.com/show_language.asp?code=[% row.0 %]" target="stedt_ethnologue">[% row.0 %]</a>[% ELSE %]n/a[% END %]</td></tr>
 <tr><th>num. of records</th><td><a href="[% self_url %]/gnis?lexicon.lgid=[% row.5 %]" target="stedt_sss">[% row.6 %]</a></td></tr>
 [% IF row.7!=0 %]<tr><th title="from Namkung, ed. 1996 (STEDT Monograph #3)" style="cursor:help;">Phon. Inventory</th><td><a href="[% self_base %]phon_inv.html?page=[% row.7 + pi_pdf_offset %]" target="stedt_pi" title="Namkung, ed. 1996">p.[% row.7 %]</a></td></tr>[% END %]
@@ -33,7 +33,7 @@ from source <a href="[% self_url %]/source/[% row.3 %]" target="stedt_src">[% ro
 <p>Other sources which include this language:</p>
 
 <table class="hangindent">
-<tr><th>Language Name</th><th>Source</th><th>LgName in Source</th><th>num. of records</th><th title="from Namkung, ed. 1996 (STEDT Monograph #3)" style="cursor:help;">Phon. Inventory</th></tr>
+<tr><th>Language Name</th><th>Source</th><th title="Language name from source OR abbreviated name" style="cursor:help;">Short Lg Name</th><th>num. of records</th><th title="from Namkung, ed. 1996 (STEDT Monograph #3)" style="cursor:help;">Phon. Inventory</th></tr>
 [% FOREACH row IN other_lgs -%]
 <tr>
 	<td>[% row.1 %]</td>
@@ -58,7 +58,7 @@ from source <a href="[% self_url %]/source/[% row.3 %]" target="stedt_src">[% ro
 	<th>ISO 639-3</th>
 	<th>Language Name</th>
 	<th>Source</th>
-	<th>LgName in Source</th>
+	<th title="Language name from source OR abbreviated name" style="cursor:help;">Short Lg Name</th>
 	<th>num. of records</th>
 	<th title="from Namkung, ed. 1996 (STEDT Monograph #3)" style="cursor:help;">Phon. Inventory</th>
 </tr>
