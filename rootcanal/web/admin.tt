@@ -1,5 +1,5 @@
 ﻿[% PROCESS header.tt title="STEDT Database: Tools Page" %]
-<!-- svnversion -->
+[% IF c.has_privs(1) %]<!-- svnversion -->[% END %]
 Edit/Browse tables:
 <table border="0">
 <tr>
