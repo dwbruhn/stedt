@@ -618,6 +618,7 @@ var setup = { // in the form setup.[tablename].[fieldname]
 		},
 		_add_lggrp_headers: function () {
 			var t = $('lexicon_resulttable');
+			if (!t.tBodies[0].rows.length) return; // if result table is empty, there's nothing to do
 			var hcell = t.select('th[id="languagegroups.grpno"]')[0];
 			if (!hcell) {
 				window.console && console.log && console.log('couldn\'t find grpno_index!');

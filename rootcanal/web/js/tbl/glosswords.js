@@ -11,7 +11,7 @@ setup.glosswords = {
 	noedit: !(stedtuserprivs & 8),
 	size: 80,
 	transform : function (v) {
-	    return '<a href="' + baseRef + 'edit/lexicon?lexicon.gloss=' + v + '" target="stedt_lexicon">' + v + '</a>';
+	    return '<a href="' + baseRef + 'edit/lexicon?lexicon.gloss=' + v + '" target="stedt_lexicon" title="Search the lexicon for this gloss">' + v + '</a>';
 	}
     },
     'glosswords.semkey' : {
@@ -20,7 +20,7 @@ setup.glosswords = {
 	hide: false,
 	size: 200,
 	transform : function (v) {
-	    return '<a href="' + baseRef + 'edit/glosswords?glosswords.semkey=' + v + '">' + v + '</a>';
+	    return '<a href="' + baseRef + 'edit/glosswords?glosswords.semkey=' + v + '" title="See all glosswords in this semkey">' + v + '</a>';
 	}
     },
     'glosswords.subcat' : {
@@ -41,7 +41,7 @@ setup.glosswords = {
 	hide: false,
 	size: 50,
 	transform : function (v, key, rec, n) {
-		return '<a href="' + baseRef + 'edit/lexicon?lexicon.semkey=' + rec[n-3] + '" target="stedt_lexicon">' + v + '</a>';	
+		return '<a href="' + baseRef + 'edit/lexicon?lexicon.semkey=' + rec[n-3] + '" target="stedt_lexicon" title="See all ' + v + ' lexical item(s) with this semkey">' + v + '</a>';	
 	}
     },
     'glosswords.semcat' : {
