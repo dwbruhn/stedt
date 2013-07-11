@@ -8,8 +8,8 @@ setup['lexicon']['num_notes'] = {
 	noedit: true,
 	size: 80,
 	transform : function (v) {
-		var addlink = '<a href="#" class="lexadd" title="Add a note to this lexical item">[+]</a>';
-		if (v === '0') return (stedtuserprivs & 1) ? addlink : '';
+		var addlink = (stedtuserprivs & 1) ? '<a href="#" class="lexadd" title="Add a note to this lexical item">[+]</a>' : '';
+		if (v === '0') return addlink;
 		var a = v.match(/\d+/g).map(function (s) {
 			return '<a href="#foot' + s + '" id="toof' + s + '" class="footlink">' + s + '</a>';
 		});
@@ -38,6 +38,16 @@ setup['lexicon']['user_an'] = {
 	size: 80,
 	transform: function (v) {
 		return v.replace(/, */g,', ');
+	}
+};
+
+setup['lexicon']['lexicon.semkey'] = {
+	label: 'semkey',
+	noedit: !(stedtuserprivs & 16),
+	size: 50,
+	hide: false,
+	transform : function (v, key, rec, n) {
+		return '<a href="' + baseRef + 'edit/glosswords' + '?glosswords.semkey=' + v + '" target="edit_glosswords" title="' + rec[n+1].replace(/&/g,'&amp;') + '">' + v + '</a>';
 	}
 };
 //setup['lexicon']['user_an'].label =

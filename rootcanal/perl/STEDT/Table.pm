@@ -189,7 +189,7 @@ sub search {
 	my $ary = $sth->fetchall_arrayref();
 
 	my $result = {table => $self->{table}, fields => [$self->fields_for_priv()], data => $ary};
-	$result->{debug} = $where if $self->{privs} & 1;
+	$result->{debug} = $where; # if $self->{privs} & 1;
 	return $result;
 }
 

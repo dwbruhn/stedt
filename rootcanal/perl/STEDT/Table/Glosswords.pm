@@ -14,14 +14,11 @@ $t->fields(
 	'glosswords.semkey',
 	'chapters.chaptertitle',
 	'glosswords.subcat',
-	'(SELECT COUNT(*) FROM lexicon WHERE lexicon.semkey=glosswords.semkey) AS num_recs'
+	'(SELECT COUNT(*) FROM lexicon WHERE lexicon.semkey=glosswords.semkey AND lexicon.status != "HIDE" AND lexicon.status != "DELETED") AS num_recs'
 );
 $t->field_visible_privs(
-	'glosswords.id' => 1,
-	'glosswords.word' => 1,
-	'glosswords.semkey' => 1,
-	'glosswords.subcat' => 1
 );
+
 $t->searchable(
 	'glosswords.word',
 	'glosswords.semkey',

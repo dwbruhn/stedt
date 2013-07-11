@@ -812,9 +812,13 @@ var setup = { // in the form setup.[tablename].[fieldname]
 			noedit: false,
 			size: 50,
 			hide: !(stedtuserprivs & 1),
-			transform : function (v) {
-				return '<a href="' + baseRef + 'edit/glosswords' + '?glosswords.semkey=' + v + '" target="edit_glosswords">' + v + '</a>';
+			transform : function (v, key, rec, n) {
+				return '<a href="' + baseRef + 'edit/glosswords' + '?glosswords.semkey=' + v + '" target="edit_glosswords" title="' + rec[n+1].replace(/&/g,'&amp;') + '">' + v + '</a>';
 			}
+		},
+		'chapters.chaptertitle' : {
+			noedit: true,
+			hide: true
 		},
 		'num_notes' : {
 			label: 'notes',

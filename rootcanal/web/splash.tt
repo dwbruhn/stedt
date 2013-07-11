@@ -37,7 +37,7 @@
 	<td>-</td>
 	<td>Paangkhua</td>
 	<td><a href="#" onclick="clear_splash();
-		$('lg-auto').value='Paangkhua';return false">Try it!</a></td></td>
+		$('lg-auto').value='Paangkhua';return false">Try it!</a></td>
 </tr>
 <tr id="example3" style="display:none; text-align: left;">
 	<td><i>gloss &amp; lang:</i></td>
@@ -45,7 +45,7 @@
 	<td>Lotha</td>
 	<td><a href="#" onclick="clear_splash();
 		$('simple_searchgloss').value='hit';
-		$('lg-auto').value='Lotha';return false">Try it!</a></td></td>
+		$('lg-auto').value='Lotha';return false">Try it!</a></td>
 </tr>
 </table>
 </form>

@@ -86,7 +86,7 @@ my ($self, $dbh, $privs, $uid2, $uid1) = @_;
 
 my $t = $self->SUPER::new($dbh, 'lexicon', 'lexicon.rn', $privs); # dbh, table, key, privs
 
-$t->query_from(q|lexicon LEFT JOIN languagenames USING (lgid) LEFT JOIN languagegroups USING (grpid)|);
+$t->query_from(q|lexicon LEFT JOIN languagenames USING (lgid) LEFT JOIN languagegroups USING (grpid) LEFT JOIN chapters USING (semkey)|);
 $t->default_where('lexicon.status != "HIDE" AND lexicon.status != "DELETED"');
 $t->order_by('languagegroups.grp0, languagegroups.grp1, languagegroups.grp2, languagegroups.grp3, languagegroups.grp4, languagenames.lgsort, lexicon.reflex, languagenames.srcabbr, lexicon.srcid');
 $t->fields(
@@ -107,6 +107,7 @@ $t->fields(
 #	'lexicon.status',
 #	'lexicon.semcat',
 	'lexicon.semkey',
+	'chapters.chaptertitle',
 	# if $privs is undefined (or 2), then it's a public user (or a user with a non-privileged account) and internal notes should be excluded from the note count
 	((defined $privs && ($privs & 1)) ? '(SELECT COUNT(*) FROM notes WHERE rn=lexicon.rn) AS num_notes' : '(SELECT COUNT(*) FROM notes WHERE rn=lexicon.rn AND notetype!=\'I\') AS num_notes'),
 );

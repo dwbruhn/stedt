@@ -39,7 +39,10 @@ setup.glosswords = {
 	label: 'words w this semkey',
 	noedit: true,
 	hide: false,
-	size: 50
+	size: 50,
+	transform : function (v, key, rec, n) {
+		return '<a href="' + baseRef + 'edit/lexicon?lexicon.semkey=' + rec[n-3] + '" target="stedt_lexicon">' + v + '</a>';	
+	}
     },
     'glosswords.semcat' : {
 	label: 'semcat',
