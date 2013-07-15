@@ -49,9 +49,11 @@ Reflexes <span class="u[% etyma.0.tag %]">tagged by <select name="DDMenu" onchan
 <div id="autocomplete_choices" class="autocomplete"></div>
 <input type="hidden" name="oldtag" value="[% e.tag %]">
 </form></td>
-[% END # has_privs 8 %]
+[% END # e.plg %]
 </tr></table>
-[% END # e.plg -%]
+[% ELSIF c.has_privs(2) # if no make_meso button, read-only users and taggers need some vertical space here %]
+<br><br>
+[% END # has_privs 8 -%]
 [%- IF e.mesoroots.size %]
 Reconstructed mesoroots below:
 <ul class="mesolist">
