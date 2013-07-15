@@ -814,7 +814,11 @@ var setup = { // in the form setup.[tablename].[fieldname]
 			size: 50,
 			hide: !(stedtuserprivs & 2),
 			transform : function (v, key, rec, n) {
-				return '<a href="' + baseRef + 'edit/glosswords' + '?glosswords.semkey=' + v + '" target="edit_glosswords" title="' + rec[n+1].replace(/&/g,'&amp;') + '">' + v + '</a>';
+				// if chaptertitle (rec[n+1]) is blank, then the replace function makes the javascript just stop without errors (strange)
+				// when the ajax search is performed
+				// so only do this transform if rec[n+1] is not blank
+				if (rec[n+1]) { return '<a href="' + baseRef + 'edit/glosswords' + '?glosswords.semkey=' + v + '" target="edit_glosswords" title="' + rec[n+1].replace(/&/g,'&amp;') + '">' + v + '</a>'; }
+				else return v;
 			}
 		},
 		'chapters.chaptertitle' : {
