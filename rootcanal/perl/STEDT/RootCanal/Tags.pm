@@ -193,7 +193,7 @@ sub etymon : Runmode {
 		$self->header_add(-status => 400);
 		return "Invalid uid requested!"; # non-numeric, or 0, or the stedt uid
 	}
-	if ($selected_uid && !$self->has_privs(1)) {
+	if ($selected_uid && !$self->has_privs(2)) {
 		return $self->redirect($self->query->url(-absolute=>1) . "/etymon/$tag");
 	}
 	
@@ -216,7 +216,7 @@ WHERE e.tag=? AND e.status != 'DELETE'#;
 	my $self_uid = $self->param('uid');
 	my $stedt_count = 0;
 	my $selected_username;
-	if ($self->has_privs(1)) {
+	if ($self->has_privs(2)) {
 		my $self_count = 0;
 		my $mosttagged_uid;
 		my $userrecs = $self->dbh->selectall_arrayref("SELECT users.uid,username,COUNT(DISTINCT rn) as num_forms, users.uid=8 AS not_stedt FROM users JOIN lx_et_hash USING (uid) WHERE tag=? GROUP BY uid ORDER BY not_stedt, num_forms DESC",undef,$tag);

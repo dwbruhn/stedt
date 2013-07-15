@@ -18,7 +18,7 @@
 [% FOREACH b IN breadcrumbs %][% IF loop.last %]<a href=[% self_url %]/chap/[% b.0 %]>[% b.0 %] <b>[% b.1 %]</b></a>
 [%- ELSE %][% b.0 %] <b>[% b.1 %]</b> &gt; [% END #IF %][% END #FOREACH %]</p>
 
-[% IF c.has_privs(1) %]
+[% IF c.has_privs(2) %]
 [% stedt_count %] records <span class="r[% etyma.0.tag %]">tagged by <b>stedt</b></span> under this etymon.
 [% IF selected_uid %]
 <form name="selectuser" method="POST" style="display:inline">
@@ -31,16 +31,16 @@ Reflexes <span class="u[% etyma.0.tag %]">tagged by <select name="DDMenu" onchan
 [% ELSE %]
 (No user tagging for this etymon.)
 [% END # selected_uid %]
-[% END # has_privs 1 %]
+[% END # has_privs 2 %]
 
 [% FOREACH e IN etyma -%]
 <table><tr><td style="padding: 10px; ">
-<h1>[% IF c.has_privs(1) %]<a href="[% self_url %]/edit/etyma?etyma.tag=[% e.tag %]" target="edit_etyma">[% END %]
-#[% e.tag %][% IF c.has_privs(1) %]</a>[% END %] [% e.plg %] [% e.protoform %] [% e.protogloss %]
-[%- IF e.uid != 8 && c.has_privs(1) %] <span class="u[% etyma.0.tag %]">(proposed by [% e.username %])</span>[% END -%]
+<h1>[% IF c.has_privs(2) %]<a href="[% self_url %]/edit/etyma?etyma.tag=[% e.tag %]" target="edit_etyma">[% END %]
+#[% e.tag %][% IF c.has_privs(2) %]</a>[% END %] [% e.plg %] [% e.protoform %] [% e.protogloss %]
+[%- IF e.uid != 8 && c.has_privs(2) %] <span class="u[% etyma.0.tag %]">(proposed by [% e.username %])</span>[% END -%]
 [%- IF !e.public %] <span id="prov_heading" style="color:red; cursor:help; font-size:medium">(provisional)</span> [% END -%]
 </h1></td>
-[% IF c.has_privs(1) %]
+[% IF c.has_privs(8) # make_meso button for approvers only %]
 [% IF e.plg != '' && e.plg != 'PST' -%]
 <td style="background-color: lightgoldenrodyellow;  padding: 10px; vertical-align: middle; text-align: center;">
 <form action="[% self_url %]/tags/make_meso" method="post" onsubmit="if (!parseInt(this.newtag.value,10)) {alert('Please specify a tag number.'); return false};return confirm('Are you sure you want to migrate all tags to #' + this.newtag.value + '? This action cannot be undone!')">
@@ -49,7 +49,7 @@ Reflexes <span class="u[% etyma.0.tag %]">tagged by <select name="DDMenu" onchan
 <div id="autocomplete_choices" class="autocomplete"></div>
 <input type="hidden" name="oldtag" value="[% e.tag %]">
 </form></td>
-[% END # has_privs 1 %]
+[% END # has_privs 8 %]
 </tr></table>
 [% END # e.plg -%]
 [%- IF e.mesoroots.size %]

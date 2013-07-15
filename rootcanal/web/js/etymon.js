@@ -3,7 +3,7 @@ if($('prov_heading') != undefined) {
 }
 
 setup['lexicon']['lexicon.rn'].transform = function (v) {
-	if (stedtuserprivs & 1) {
+	if (stedtuserprivs & 2) {
 		return '<a href="' + baseRef + 'edit/lexicon' + '?lexicon.rn=' + v + '" target="stedt_lexicon">' + v + '</a>';
 	}
 	else return v;

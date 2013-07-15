@@ -650,7 +650,7 @@ var setup = { // in the form setup.[tablename].[fieldname]
 		'analysis' : {
 			label: 'analysis',
 			noedit: !(stedtuserprivs & 8),
-			hide: !(stedtuserprivs & 1),
+			hide: !(stedtuserprivs & 2),
 			size: 80,
 			transform: function (v) {
 				return v.replace(/, */g,', ');
@@ -659,7 +659,7 @@ var setup = { // in the form setup.[tablename].[fieldname]
 		'user_an' : {
 		        label: 'your analysis',
 			size: 80,
-			hide: !(stedtuserprivs & 1),
+			hide: !(stedtuserprivs & 2),
 			transform: function (v) {
 				return v.replace(/, */g,', ');
 			}
@@ -812,7 +812,7 @@ var setup = { // in the form setup.[tablename].[fieldname]
 		    label: 'semkey',
 			noedit: false,
 			size: 50,
-			hide: !(stedtuserprivs & 1),
+			hide: !(stedtuserprivs & 2),
 			transform : function (v, key, rec, n) {
 				return '<a href="' + baseRef + 'edit/glosswords' + '?glosswords.semkey=' + v + '" target="edit_glosswords" title="' + rec[n+1].replace(/&/g,'&amp;') + '">' + v + '</a>';
 			}
