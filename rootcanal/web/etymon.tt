@@ -41,7 +41,7 @@ Reflexes <span class="u[% etyma.0.tag %]">tagged by <select name="DDMenu" onchan
 [%- IF !e.public %] <span id="prov_heading" style="color:red; cursor:help; font-size:medium">(provisional)</span> [% END -%]
 </h1></td>
 [% IF c.has_privs(8) # make_meso button for approvers only %]
-[% IF e.plg != '' && e.plg != 'PST' -%]
+[% IF e.plg != '' && e.plg != 'PTB' && e.plg != 'PST' -%]
 <td style="background-color: lightgoldenrodyellow;  padding: 10px; vertical-align: middle; text-align: center;">
 <form action="[% self_url %]/tags/make_meso" method="post" onsubmit="if (!parseInt(this.newtag.value,10)) {alert('Please specify a tag number.'); return false};return confirm('Are you sure you want to migrate all tags to #' + this.newtag.value + '? This action cannot be undone!')">
 <input style="font-size:18pt;" name="btn" type="submit" value="Move all tags and make this a mesoreconstruction of:"><br/>
