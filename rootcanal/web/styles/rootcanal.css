@@ -214,6 +214,13 @@ th {
 .srcbib_edit_table th { background-color: gray; }
 .languagenames_edit_table th { background-color: black; }
 .hptb_edit_table th { background-color: green; }
+.mesoroots_edit_table th { background-color: maroon; }
+.chapters_edit_table th { background-color: purple; }
+.glosswords_edit_table th { background-color: olive; }
+
+/* highlight the lexicon and etyma side of the etymologies viewer with different colors */
+.etymologies_edit_table th[id^="etyma"] { background-color: #C93; }
+.etymologies_edit_table th#Egrps\.plg { background-color: #C93; }
 
 th A:link     		{ color: white; }
 th A:visited   		{ color: white; }

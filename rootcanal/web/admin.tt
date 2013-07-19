@@ -19,6 +19,7 @@ Edit/Browse tables:
 </ul></td>
 <td><ul>
 	<li><a href="[% self_url %]/edit/mesoroots">mesoroots</a> ("Dependent Mesoroots" only)</li>
+	<li><a href="[% self_url %]/edit/etymologies">etymologies</a> (STEDT-tagged etymologies only)</li>
 	[% IF c.has_privs(16) -%]<li><a href="[% self_url %]/admin/contribution">contributions</a></li>[% END %]
 	[% IF c.has_privs(8) -%]<li><a href="[% self_url %]/edit/projects">projects</a></li>[% END -%]
 </ul></td>

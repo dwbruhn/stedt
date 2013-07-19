@@ -1,7 +1,7 @@
 ﻿[% PROCESS header.tt title="Edit " _ t.table _ " - STEDT Database" -%]
 <form id="search_form">
 <table class="[% t.table %]_edit_table" width="100%">
-<tr>[% FOREACH col IN t.searchable %]<th>[% col %]</th>[% END -%]</tr>
+<tr>[% FOREACH col IN t.searchable %]<th id="[% col %]_search">[% col %]</th>[% END -%]</tr>
 <tr>
 [% FOREACH col IN t.searchable -%]
 <td style="padding-left:0px;padding-right:5px;text-indent:0px;">
@@ -86,7 +86,7 @@ No records found. (WHERE [% result.debug %])
 [%- END -%]
 </th>
 [%- END %]
-[% IF c.has_privs(1) -%]
+[% IF c.has_privs(1) && t.table != 'etymologies' -%]
 <th width="16">HIST.</th>
 [% END -%]
 [% IF c.has_privs(16) -%]
@@ -100,7 +100,7 @@ No records found. (WHERE [% result.debug %])
 [%- FOREACH s IN row -%]
 <td>[% s | html %]</td>
 [%- END -%]
-[% IF c.has_privs(1) -%]
+[% IF c.has_privs(1) && t.table != 'etymologies' -%]
 <td><a href="[% self_url %]/admin/changes?t=[% t.table %]&id=[% row.$key_index %]"><img src="[% self_base %]img/clock.png" width="16" height="16"></a></td>
 [% END -%]
 [% IF c.has_privs(16) -%]
@@ -125,7 +125,7 @@ Displaying items [% a %]-[% b %] of [% result.data.size %].
 </form>
 [%- END -%]
 
-[% IF c.has_privs(t.table == 'etyma' ? 1 : 16) && t.table != 'hptb' && t.table != 'mesoroots' %]
+[% IF c.has_privs(t.table == 'etyma' ? 1 : 16) && t.table != 'hptb' && t.table != 'mesoroots' && t.table != 'etymologies' %]
 <a href="#" onclick="$('add_form_span').toggle(); scrollEnd(); return false;">Add a record...</a>
 <span id="add_form_span" style="display:none">
 <form id="add_form" onsubmit="add_record(); return false;">
