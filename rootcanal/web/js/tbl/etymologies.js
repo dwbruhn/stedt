@@ -76,7 +76,7 @@ setup.etymologies = {
 		label: 'rn',
 		noedit: true,
 		hide: false,
-		size: 30,
+		size: 70,
 		transform: function (v) {
 			return '<a href="' + baseRef + 'edit/lexicon' + '?lexicon.rn=' + v
 			 + '" target="stedt_lexicon" title="Open lexicon record">' + v + '</a>';
