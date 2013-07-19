@@ -39,13 +39,14 @@ $t->fields(
 	# if $privs is undefined (or 2), then it's a public user (or a user with a non-privileged account) and internal notes should be excluded from the note count
 #	((defined $privs && ($privs & 1)) ? '(SELECT COUNT(*) FROM notes WHERE rn=etymologies.rn) AS num_notes' : '(SELECT COUNT(*) FROM notes WHERE rn=etymologies.rn AND notetype!=\'I\') AS num_notes'),
 	'etyma.tag', # could use etymologies.tag, but using this identical field gets the style highlighting correct
-	'Egrps.plg',
 	'etyma.protoform',
 	'etyma.protogloss',
 	'etyma.grpid',
+	'Egrps.plg',
 	'Egrps.grpno',
 );
-$t->searchable('etymologies.rn', 'etymologies.ind',
+$t->searchable('etymologies.rn',
+#	'etymologies.ind',
 #	'analysis',
 	'lexicon.reflex', 'lexicon.gloss', 'lexicon.gfn',
 	'languagenames.language', 'Lgrps.grp',
