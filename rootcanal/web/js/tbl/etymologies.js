@@ -215,6 +215,5 @@ setup.etymologies = {
       	},
       	'Egrps.grpno': {
       		hide: true
-      	},
-
+      	}
 };
