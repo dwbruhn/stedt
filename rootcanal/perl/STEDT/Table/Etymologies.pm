@@ -6,7 +6,7 @@ use strict;
 # It purports to allow access to the 'etymologies' table, which is actually a VIEW based on lx_et_hash,
 # created with RnIndTag as a unique key (combination of rn, index, and tag):
 #
-#	CREATE VIEW etymologies AS
+#	CREATE SQL SECURITY INVOKER VIEW etymologies AS
 #	SELECT CONCAT_WS(':',rn,ind,tag) AS RnIndTag, rn,ind,tag,tag_str
 #	FROM lx_et_hash
 #	WHERE uid=8 AND tag!=0
@@ -23,7 +23,7 @@ $t->query_from(q|etymologies LEFT JOIN lexicon USING (rn)
 	LEFT JOIN etyma USING (tag)
 	LEFT JOIN languagegroups AS Egrps ON (etyma.grpid=Egrps.grpid)|);
 $t->default_where('');
-$t->order_by('Lgrps.grp0, Lgrps.grp1, Lgrps.grp2, Lgrps.grp3, Lgrps.grp4, languagenames.lgsort, etymologies.rn, etymologies.ind');
+$t->order_by('Lgrps.grp0, Lgrps.grp1, Lgrps.grp2, Lgrps.grp3, Lgrps.grp4, languagenames.lgsort, etyma.tag, lexicon.reflex');
 $t->fields(
 	'etymologies.RnIndTag',
 	'etymologies.rn',
