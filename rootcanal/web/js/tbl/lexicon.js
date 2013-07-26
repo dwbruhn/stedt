@@ -22,7 +22,7 @@ setup['lexicon']['num_notes'] = {
 //	$("uid1").options[$("uid1").selectedIndex].text + '\'s analysis';
 	
 setup['lexicon']['analysis'] = {
-	label: $("uid1").options[$("uid1").selectedIndex].text + '\'s analysis',
+	label: ((stedtuserprivs & 1) ? '(A) ' : '') + $("uid1").options[$("uid1").selectedIndex].text + '\'s analysis',
 	noedit: !(stedtuserprivs & 8),
 	hide: false,
 	size: 80,
@@ -32,7 +32,7 @@ setup['lexicon']['analysis'] = {
 };
 
 setup['lexicon']['user_an'] = {
-	label: $("uid2").options[$("uid2").selectedIndex].text  + '\'s analysis',
+	label: ((stedtuserprivs & 1) ? '(B) ' : '') + $("uid2").options[$("uid2").selectedIndex].text  + '\'s analysis',
 	noedit: !(stedtuserprivs & 1),
 	hide: false,
 	size: 80,
