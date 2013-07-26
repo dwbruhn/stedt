@@ -55,15 +55,16 @@ SQL
 # for now it means "show all the glosswords and not the other columns"
 sub tweak : RunMode {
 	my $self = shift;
+	$self->require_privs(2);
 	my $t0 = time();
 	my $public = '';
 	my $blessed = '';
 	my $public_ch = '';
-	unless ($self->has_privs(1)) {
+#	unless ($self->has_privs(1)) {
 #		$public = "AND etyma.public=1";
 #		$blessed = 'AND etyma.uid=8';
-		$public_ch = 'HAVING num_public OR public_notes';
-	}
+#		$public_ch = 'HAVING num_public OR public_notes';
+#	}
 	my $chapterquery = <<SQL;
 SELECT chapters.semkey, chapters.chaptertitle, 
 	(SELECT COUNT(*) FROM etyma WHERE chapter=chapters.semkey AND public=1 AND etyma.status != 'DELETE' $blessed) AS num_public,
@@ -72,7 +73,8 @@ SELECT chapters.semkey, chapters.chaptertitle,
 	chapters.semcat, chapters.old_chapter, chapters.old_subchapter, chapters.id,
 	COUNT(DISTINCT glosswords.word),
 	GROUP_CONCAT(DISTINCT glosswords.word SEPARATOR ', ') AS some_glosswords,
-	(SELECT COUNT(*) FROM lexicon WHERE lexicon.semkey=chapters.semkey) AS wcount
+	(SELECT COUNT(*) FROM lexicon WHERE lexicon.semkey=chapters.semkey) AS wcount,
+	IF(chapters.f=0, 1, 0) as isVOL, IF(chapters.c=0, 1, 0) as isFASC
 FROM chapters LEFT JOIN notes ON (notes.id=chapters.semkey) LEFT JOIN glosswords ON (chapters.semkey=glosswords.semkey)
 GROUP BY 1 $public_ch ORDER BY v,f,c,s1,s2,s3
 SQL
@@ -81,8 +83,14 @@ SQL
 	die "oops couldn't get max_allowed_packet from mysql" unless $max_len;
 	$self->dbh->do("SET SESSION group_concat_max_len = $max_len");
 	my $chapters = $self->dbh->selectall_arrayref($chapterquery);
+
+	# volumes for table of contents
+	my $volumes = $self->dbh->selectall_arrayref(<<SQL);
+SELECT chapters.semkey, chapters.chaptertitle
+FROM chapters WHERE chapters.f=0 AND chapters.v<11 ORDER BY chapters.v
+SQL
 	return $self->tt_process('chapter_tweaker.tt', {
-		ch=>$chapters, time_elapsed=>sprintf("%0.3g", time()-$t0)
+		vols=> $volumes, ch=>$chapters, time_elapsed=>sprintf("%0.3g", time()-$t0)
 	});
 }
 
