@@ -104,8 +104,10 @@ $t->wheres(
 			STEDT::Table::prep_regex $v;
 			return "$k RLIKE '^$v'";
 		}
-		$v =~ s/\(/\\\(/g;
+		$v =~ s/\(/\\\(/g; # escape parens
 		$v =~ s/\)/\\\)/g;
+		$v =~ s/\[/\\\[/g; # escape square brackets
+		$v =~ s/\]/\\\]/g;
 		STEDT::Table::prep_regex $v;
 		$v =~ s/(\w)/[[:<:]]$1/;
 		return "$k RLIKE '$v'";
