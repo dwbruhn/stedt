@@ -97,7 +97,7 @@ sub table : StartRunmode {
 		require STEDT::RootCanal::Notes;
 		STEDT::RootCanal::Notes::collect_lex_notes($self,
 			# only collect notes for the records on this page
-			[@{$result->{data}}[($a-1)..($b-1)]], $self->has_privs(1),
+			[@{$result->{data}}[($a-1)..($b-1)]], $self->has_privs(2),
 			\@footnotes, \$footnote_index);
 		$hash{footnotes} = \@footnotes;
 

@@ -86,10 +86,17 @@ function showaddform (spec, id, e) {
 	var labels = {O:'Orig/src-DON\'T MODIFY', T:'Text', I:'Internal',
 					N:'New', G:'Graphic', F:'Final', H:'HPTB'};
 	var f = $('addnoteform');
+
 	// constrain notetypes
-	var types = spec === 'L' ? ['N','I','O'] : spec === 'F' ? ['F'] :
-		spec === 'E' ? ['T','I','H','N'] : spec === 'C' ? ['T','I','N','G','F'] :
-		spec === 'M' ? ['T','I'] : ['I','N'];
+	// if approver or above, can enter the full range of notetypes, otherwise limit to internal notes
+	if (stedtuserprivs & 8) {
+		var types = spec === 'L' ? ['N','I','O'] : spec === 'F' ? ['F'] :
+			spec === 'E' ? ['T','I','H','N'] : spec === 'C' ? ['T','I','N','G','F'] :
+			spec === 'M' ? ['T','I'] : ['I','N'];
+	} else {
+		types = ['I'];
+	}
+
 	// set spec, id
 	f.spec.value = spec;
 	f.id.value = id;
@@ -167,8 +174,20 @@ if($('addnoteform') != undefined) {	// doesn't exist for public users
 					// if it's a lex or subgroup note, stick it in at the bottom, and add the footnotemark in the table
 					f.up('body').insert(note);
 					++footnote_counter;
-					var cell = $(addform_fullid).childElements().last();
-					cell.innerHTML = cell.innerHTML + ' <a href="#foot' + footnote_counter + '" id="toof' + footnote_counter + '" class="footlink">' + footnote_counter + '</a>';
+					var add_link_obj;
+					// if this is a lexicon record note, the 'add note' link has class = lexadd
+					if(addform_fullid.substr(0,2) === 'le') {
+						add_link_obj = $(addform_fullid).select('.lexadd')[0]; // get the object with 'add note' link
+					// otherwise, this is a subgroup note, so the 'add note' link has class = et_grp_add
+					} else {
+						add_link_obj = $(addform_fullid).select('.et_grp_add')[0]; // get the object with 'add note' link
+					}
+					// get the cell with footnote links, remove the 'add note link',
+					// add the new footnote link, and re-insert the 'add note' link at the end
+					var cell = add_link_obj.parentNode;
+					add_link_obj.remove();
+					cell.innerHTML = cell.innerHTML + ' <a href="#foot' + footnote_counter + '" id="toof' + footnote_counter + '" class="footlink">' + footnote_counter + '</a> ';
+					cell.appendChild(add_link_obj);
 				}
 				f.xmlnote.value = ''; // reset the textarea
 				f.hide();

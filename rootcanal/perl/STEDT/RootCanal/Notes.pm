@@ -87,7 +87,7 @@ sub save : RunMode {
 	my ($mod_time, $note_uid) = $dbh->selectrow_array("SELECT datetime,uid FROM notes WHERE noteid=?", undef, $noteid);
 	my $xml;
 
-	# only allow taggers to modify their own notes
+	# allow taggers to modify only their own notes
 	if ($self->param('uid') != $note_uid && !$self->has_privs(8)) {
 		$self->header_add(-status => 403);
 		return "User not allowed to modify someone else's note.";
@@ -311,7 +311,7 @@ sub notes_for_rn : Runmode {
 	my $rn = $self->query->param('rn');
 	return 'Error: not a number' unless $rn =~ /^\d+$/;
 	
-	my $INTERNAL_NOTES = $self->has_privs(1);
+	my $INTERNAL_NOTES = $self->has_privs(2); # only registered users can see internal notes
 	my $internal_note_search = '';
 	$internal_note_search = "AND notetype != 'I'" unless $INTERNAL_NOTES;
 
@@ -321,7 +321,7 @@ sub notes_for_rn : Runmode {
 	for (@$notes) {
 		 my $xml = $_->[0];
 		 my $uid = $_->[1];
-		 $xml .= " [$_->[2]]" unless $uid == 8; # append the username
+		 $xml .= " [$_->[2]]" unless ($uid == 8 || !$self->has_privs(2)); # append the username unless note author is stedt or user is public
 		 push @notes, xml2html($xml, $self, \@dummy, \$dummy);
 	}
 	return join '<p>', @notes;
@@ -336,7 +336,7 @@ sub notes_for_rn : Runmode {
 sub collect_lex_notes {
 	my ($c, $r, $internal, $a, $i, $tag) = @_;
 	my $internal_note_search = '';
-	$internal_note_search = "AND notetype != 'I' AND notetype != 'O'" unless $internal;
+	$internal_note_search = "AND notetype != 'I'" unless $internal;
 	my $tag_search = '';
 	$tag_search = "AND (`id`=$tag OR `id`='')" if $tag;
 	for my $rec (@$r) {

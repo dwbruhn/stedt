@@ -3,6 +3,7 @@
 <input type="hidden" name="noteid" value="[% n.noteid %]">
 <input type="hidden" name="mod" value="[% n.lastmod %]">
 <input type="hidden" name="ord" value="[% n.ord %]">
+[% IF c.has_privs(8) # only approvers can edit source notes %]
 notetype:<select name="notetype">
 <option [% IF n.type=='I' %]selected="selected" [% END %]value="I">Internal</option>
 <option [% IF n.type=='N' %]selected="selected" [% END %]value="N">New</option>
@@ -21,6 +22,8 @@ user: <select name="uid">
 <option selected="selected" value="[% n.uid %]">[% n.username %]</option>
 </select>
 [% END -%]
+<a href="#" class="cheatsheet_link">markup</a>
+[% END # check for approver privs -%]
 </form>
 <div id="preview[% n.noteid %]" class="notepreview">
 [% IF n.type == 'I' %][Internal Note:] <i>[% END -%]

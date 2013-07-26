@@ -5,7 +5,7 @@
 <input type="hidden" name="noteid" value="[% n.noteid %]">
 <input type="hidden" name="mod" value="[% n.lastmod %]">
 notetype:<select name="notetype">
-<option [% IF n.type=='T' %]selected="selected" [% END %]value="T">Text</option>
+[% IF c.has_privs(8) %]<option [% IF n.type=='T' %]selected="selected" [% END %]value="T">Text</option>[% END %]
 <option [% IF n.type=='I' %]selected="selected" [% END %]value="I">Internal</option>
 </select>
 last mod: <span id="lastmod[% n.noteid %]">[% n.lastmod %]</span>

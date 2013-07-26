@@ -64,21 +64,21 @@ Reconstructed mesoroots below:
 </ul>
 [%- END %]
 
-[% IF c.has_privs(1) # check for tagger privs -%]
+[% IF c.has_privs(2) # if registered user, show note properties -%]
 <div id="allnotes[% e.tag %]" class="container" style="clear:right">[%# clear the allofams list  %]
 <p class="edit">
 [% IF c.has_privs(8) %]<label><input type="checkbox" value="off" class="reordcheckbox"[% IF e.notes.size < 2 %] disabled[% END %]>Drag to reorder</label>[% END %]
-<a href="#" onclick="return showaddform('E',[% e.tag %])">Add a note...</a>
+[% IF c.has_privs(1) %]<a href="#" onclick="return showaddform('E',[% e.tag %])">Add a note...</a>[% END %]
 </p>
 [% FOREACH n IN e.notes -%]
 [% PROCESS notes_etyma.tt -%]
 [% END -%]
 </div>
-[% ELSE # if user doesn't have tagger privs -%]
+[% ELSE # if user is not registered, just show text of note -%]
 [% FOREACH n IN e.notes -%]
 <div class="notepreview"><p>[% n.text %]</p></div>
-[% END -%]
-[% END -%]
+[% END # foreach -%]
+[% END # registered user privs check -%]
 
 [% IF e.records -%]
 [% IF selected_uid && c.has_privs(8) %]
@@ -112,23 +112,25 @@ Reconstructed mesoroots below:
 </table>
 [% END -%]
 
-[% IF e.comparanda.size || c.has_privs(1) -%]
+[% IF e.comparanda.size || c.has_privs(8) -%]
 [% label = 'Chinese comparand' _ (e.comparanda.size == 1 ? 'um' : 'a') -%]
 <h2>[% label %]</h2>
-[% IF c.has_privs(1) -%]
+[% IF c.has_privs(8) # can edit comparanda notes -%]
 <div id="allcomparanda[% e.tag %]" class="container">
 <p class="edit">
-[% IF c.has_privs(8) %]<label><input type="checkbox" value="off" class="reordcheckbox"[% IF e.comparanda.size < 2 %] disabled[% END %]>Drag to reorder</label>[% END %]
+[% IF c.has_privs(8) # can reorder/add comparanda notes %]
+<label><input type="checkbox" value="off" class="reordcheckbox"[% IF e.comparanda.size < 2 %] disabled[% END %]>Drag to reorder</label>
 <a href="#" onclick="return showaddform('F',[% e.tag %])">Add a Chinese comparandum...</a>
+[% END # reordering/adding notes %]
 </p>
 [% FOREACH n IN e.comparanda -%]
 [% PROCESS notes_comparanda.tt -%]
 [% END -%]
-</div>[% ELSE # if has_privs(1) -%]
+</div>[% ELSE # if user is less than approver -%]
 [% FOREACH n IN e.comparanda -%]
 <p>[% n.text %]</p>
 [% END -%]
-[% END # if has_privs(1) -%]
+[% END # if has_privs(8) -%]
 [% END # if comparanda -%]
 [% END # foreach etyma %]
 
@@ -139,7 +141,7 @@ Reconstructed mesoroots below:
 [% fncounter = fncounter+1 -%]
 <div class="footnote[% IF n.super %] fnote-[% n.super %][% END %]" id="foot[% fncounter %]">
 <a href="#toof[% fncounter %]" class="left">^ [% fncounter %].</a>
-<div class="notepreview">[% n.text %]</div></div>
+<div class="notepreview">[% n.text %][% IF c.has_privs(2) && !n.super && n.uid!=8 %] [[% n.username %]][% END %]</div></div>
 [% ELSIF n.spec == 'E' -%]
 [% PROCESS notes_et_subgroup.tt -%]
 [% ELSE -%]

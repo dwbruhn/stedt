@@ -114,7 +114,7 @@ sub chapter : RunMode {
 	my $title = $self->dbh->selectrow_array("SELECT chaptertitle FROM chapters WHERE semkey=?", undef, $chap);
 	$title ||= '[chapter does not exist in chapters table!]';
 	
-	my $INTERNAL_NOTES = $self->has_privs(1);
+	my $INTERNAL_NOTES = $self->has_privs(2);
 	my $internal_note_search = '';
 	$internal_note_search = "AND notetype != 'I'" unless $INTERNAL_NOTES;
 	my (@notes, @footnotes);

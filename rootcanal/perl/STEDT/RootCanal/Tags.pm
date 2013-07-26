@@ -197,7 +197,7 @@ sub etymon : Runmode {
 		return $self->redirect($self->query->url(-absolute=>1) . "/etymon/$tag");
 	}
 	
-	my $INTERNAL_NOTES = $self->has_privs(1);
+	my $INTERNAL_NOTES = $self->has_privs(2); # hide internal notes from public
 	my (@etyma, @footnotes, @users);
 	my $footnote_index = 1;
 

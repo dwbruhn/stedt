@@ -1,17 +1,17 @@
 ﻿[% PROCESS header.tt title="STEDT Chapter " _ chap -%]
 <p>[Back to the <a href="[% self_url %]/chapters">Chapter Browser</a>]</p>[% # eventually replace this with links to as yet nonexistent "Volume Browser" and "Fascicle Browser" %]
 <h1>[% chap %] [% chaptitle %]</h1>
-[% IF c.has_privs(8) -%]
+[% IF c.has_privs(2) # if registered user, show note properties -%]
 <div id="allnotes" class="container">
 <p class="edit">
-<label><input type="checkbox" value="off" class="reordcheckbox"[% IF notes.size < 2 %] disabled[% END %]>Drag to reorder</label>
-<a href="#" onclick="return showaddform('C','[% chap %]')">Add a note...</a>
+[% IF c.has_privs(8) %]<label><input type="checkbox" value="off" class="reordcheckbox"[% IF notes.size < 2 %] disabled[% END %]>Drag to reorder</label>
+<a href="#" onclick="return showaddform('C','[% chap %]')">Add a note...</a>[% END %]
 </p>
 [% FOREACH n IN notes -%]
 [% PROCESS notes_chapter.tt -%]
 [% END -%]
 </div>
-[% ELSE -%]
+[% ELSE # public user -%]
 [% FOREACH n IN notes -%]
 [% IF n.type == 'G' -%]
 <div><img src="[% self_base %]gif/[% n.noteid %].gif"></div>
@@ -19,7 +19,7 @@
 <p>[% n.text %]</p>
 [% END # notetype -%]
 [% END # foreach -%]
-[% END # if has_privs(8) -%]
+[% END # registered user privs check -%]
 
 [% IF result.data.size -%]
 <h2>Etyma in this chapter</h2>

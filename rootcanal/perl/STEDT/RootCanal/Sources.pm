@@ -19,7 +19,7 @@ sub source : StartRunmode {
 		"SELECT silcode, language, lgcode, grpid, grpno, grp, COUNT(lexicon.rn), lgid AS num_recs, pi_page, lgabbr FROM languagenames NATURAL LEFT JOIN languagegroups LEFT JOIN lexicon USING (lgid) WHERE srcabbr=? AND lgcode != 0 GROUP BY lgid HAVING num_recs > 0 ORDER BY lgcode, language", undef, $srcabbr);
 
 	require STEDT::RootCanal::Notes;
-	my $INTERNAL_NOTES = $self->has_privs(1);
+	my $INTERNAL_NOTES = $self->has_privs(2);
 	my $internal_note_search = '';
 	$internal_note_search = "AND notetype != 'I'" unless $INTERNAL_NOTES;
 	my (@notes, @footnotes);

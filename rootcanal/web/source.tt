@@ -7,21 +7,21 @@ Accessed via STEDT database <tt>&lt;http://stedt.berkeley.edu/search/&gt;</tt>
 on [% USE date %][% date.format(date.now, '%F') %].
 </p>
 
-[% IF c.has_privs(16) -%]
+[% IF c.has_privs(2) # if registered user, show note properties -%]
 <div id="allnotes" class="container">
 <p class="edit">
-<label><input type="checkbox" value="off" class="reordcheckbox"[% IF notes.size < 2 %] disabled[% END %]>Drag to reorder</label>
-<a href="#" onclick="return showaddform('S','[% srcabbr %]')">Add a note...</a>
+[% IF c.has_privs(8) # only approvers can add/edit source notes %]<label><input type="checkbox" value="off" class="reordcheckbox"[% IF notes.size < 2 %] disabled[% END %]>Drag to reorder</label>
+<a href="#" onclick="return showaddform('S','[% srcabbr %]')">Add a note...</a>[% END %]
 </p>
 [% FOREACH n IN notes -%]
 [% PROCESS notes_source.tt -%]
 [% END -%]
 </div>
-[% ELSE -%]
+[% ELSE # public user, so just show note text -%]
 [% FOREACH n IN notes -%]
 <p>[% n.text %]</p>
 [% END # foreach -%]
-[% END # if has_privs(16) -%]
+[% END # registered user check -%]
 [% IF c.has_privs(2) && srcabbr != "SIL-Nuosu" -%]
 <p><a href="[% self_url %]/sources/ddata?srcabbr=[% srcabbr %]">Download data for [% srcabbr %]</a></p>
 [% END -%]
