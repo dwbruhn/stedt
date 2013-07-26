@@ -86,7 +86,7 @@ $t->field_editable_privs(
 	'etyma.initial' => 1,
 	'etyma.rhyme' => 1,
 	'etyma.tone' => 1,
-	'etyma.status' => 1,
+	'etyma.status' => 8,
 	#'etyma.xrefs' => 16,
 	'etyma.possallo' => 16,
 	'etyma.semkey' => 16,

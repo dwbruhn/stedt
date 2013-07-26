@@ -474,7 +474,7 @@ var setup = { // in the form setup.[tablename].[fieldname]
 		'etyma.status' : {
 			label: 'status',
 			hide: !(stedtuserprivs & 2),
-			noedit: !(stedtuserprivs & 1),
+			noedit: !(stedtuserprivs & 8),
 			size: 20
 		},
 		'etyma.exemplary' : {
