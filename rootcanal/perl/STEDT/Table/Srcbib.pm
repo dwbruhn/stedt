@@ -39,8 +39,9 @@ $t->fields(
 	'(SELECT COUNT(*) FROM notes WHERE id=srcbib.srcabbr AND spec=\'S\') AS num_notes'	#added by DWB to support notes editing feature for srcbib entries
 );
 $t->searchable(	'srcbib.srcabbr',
-	'srcbib.citation',
+#	'srcbib.citation',
 	'srcbib.author',
+	'srcbib.year',
 	'srcbib.title',
 );
 
