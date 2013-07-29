@@ -87,7 +87,7 @@ sub create : Runmode {
 	my $self = shift;
 	my $q = $self->query;
 	if (!$q->cookie('stsec')) {
-		return "You must be using a secure connection to do this. Try changing your URL to https...";
+		return $self->tt_process("admin/https_warning.tt");
 	}
 	require CGI::Application::Plugin::ValidateRM;
 	import CGI::Application::Plugin::ValidateRM;
