@@ -59,7 +59,8 @@ setup['lexicon']['citation'] = {
 	noedit: true,
 	size: 140,
 	transform : function (v, key, rec, n) {
-		return '<a href="' + baseRef + 'edit/srcbib?srcbib.srcabbr=' + rec[n+1] + '" target="edit_src">' + (v||rec[n+1]) + '</a>';
+		return '<a href="' + baseRef + 'edit/srcbib?srcbib.srcabbr=' + rec[n+1] + '" target="edit_src" title="srcabbr: ' + 
+		rec[n+1] + '">' + (v||rec[n+1]) + '</a>';
 		// show srcabbr if citation is blank
 	}
 };
