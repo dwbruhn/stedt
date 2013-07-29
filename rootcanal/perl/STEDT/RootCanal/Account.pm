@@ -24,7 +24,7 @@ sub account : StartRunmode {
 sub gsarpa : Runmode {
 	my $self = shift;
 	if (!$self->query->cookie('stsec')) {
-		return "You must be using a secure connection to do this. Try changing your URL to https...";
+		return $self->tt_process("admin/https_warning.tt");
 	}
 	my $errs = shift;
 	return $self->tt_process("admin/create_account.tt", { err => $errs });
