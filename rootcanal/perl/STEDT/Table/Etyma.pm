@@ -133,6 +133,11 @@ $t->search_form_items(
   								-default=>'',
   								-labels=>\%labels);
 	},
+	'etyma.public' => sub {
+		my $cgi = shift;
+		my %labels = ('0'=>'No (0)', '1'=>'Yes (1)');
+		return $cgi->popup_menu('etyma.public', ['','0','1'], '',\%labels);
+	},
 	'etyma.uid' => sub {
 		my $cgi = shift;
 		# get list of users who own etyma
