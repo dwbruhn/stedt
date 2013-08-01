@@ -35,7 +35,7 @@ my %glossesWithNoSemkeys;
 my %semkeys;
 my %longGloss;
 
-my $debug;
+my $debug = 1;
 
 sub incrementStats {
   my ($stat) = @_;
@@ -43,12 +43,12 @@ sub incrementStats {
 }
 
 sub updateLexiconSemkey {
-  my ($dbh,$table,$semkey,$rn) = @_;
-  $rn = $rn + 0; # make rn have correct type for mysql
-  my $column = $table eq 'lexicon' ? 'rn' : 'tag'; 
-  my $command = "UPDATE $table SET semkey = ? WHERE $column = ? AND $column != ''";
+  my ($dbh,$table,$semkey,$gloss) = @_;
+  #$rn = $rn + 0; # make rn have correct type for mysql
+  my $column = $table eq 'lexicon' ? 'gloss' : 'protogloss'; 
+  my $command = "UPDATE $table SET semkey = ? WHERE $column = ? and semkey = ''";
   my $sth = $dbh->prepare($command);
-  $sth->execute($semkey, $rn);
+  $sth->execute($semkey, $gloss);
 }
 
 sub checkWord {
@@ -74,6 +74,7 @@ sub tokenizeGloss {
 
 for (@{$dbh->selectall_arrayref("SELECT word,semkey FROM glosswords")}) {
   my ($word,$semkey) = map {decode_utf8($_)} @$_;
+  next if $semkey =~ /x.x/;
   next if $semkey eq 'x/';
   next if $semkey eq '/';
   incrementStats('number of words in glosswords');
@@ -84,22 +85,23 @@ for (@{$dbh->selectall_arrayref("SELECT word,semkey FROM glosswords")}) {
 
 #  3. Read, sequentially, each Lexicon record. (NB: allow, eventually, for a range of rns to be specified, for AddSource purposes)
 
-my $command = $table eq 'lexicon' ? "SELECT gloss,gfn,rn,semcat FROM lexicon" : "SELECT protogloss,tag,tag,semkey FROM etyma";
+my $command = $table eq 'lexicon' ? "SELECT distinct(gloss) FROM lexicon" : "SELECT distinct(protogloss) FROM etyma";
 
 for (@{$dbh->selectall_arrayref($command)}) {
-  my ($gloss,$gfn,$rn,$semkey) = map {decode_utf8($_)} @$_;
-  $debug && printf "lexicon: %30s ***%s***\n",$rn,$gloss;
+  my ($gloss) = map {decode_utf8($_)} @$_;
+  $debug && printf "lexicon: %30s\n",$gloss;
   incrementStats('number of lexicon records processed');
   #  4. Check for the whole gloss in the word-semkey hash. if found, skip to step 7.
   #  5. Tokenize the gloss. Make an empty hash for semkey values for this gloss
   #  6. For each word in gloss:
   $gloss =~ tr/a-z/A-Z/;
   my $semkey = checkWord($gloss);
-  my %tempSemkeys;
+  my %semkeylist;
+  my $tempSemkey;
   if ($semkey) {
-    $tempSemkeys{$semkey->[0]}++;
+    $tempSemkey = $semkey->[0];
     incrementUsedGlosswords($gloss);
-    $debug && printf "\tfull gloss found: %30s %10s\n",$gloss,$rn;
+    $debug && printf "\tfull gloss found: %30s\n",$gloss;
     incrementStats('number of full glosses found as glosswords');
     incrementStats("records composed of  1 found gloss");
   }
@@ -107,16 +109,17 @@ for (@{$dbh->selectall_arrayref($command)}) {
     my $numWords = 0;
     foreach my $word (tokenizeGloss($gloss)) {
       $numWords++;
+      my $semkey = checkWord($word);
       $debug && printf "\ttoken: %40s ",$word;
       incrementStats('number of words in all glosses');
       # look for it in word-semkey hash
-      my $semkey = checkWord($word);
       # if found, add semkey to gloss hash
       # if not found, make a note, for final report
       if ($semkey) {
-	$tempSemkeys{$semkey->[0]}++;
+	$semkeylist{$semkey->[0]}+=0.5 if $numWords == 1;
+	$semkeylist{$semkey->[0]}+=1.0;
 	incrementUsedGlosswords($word);
-	$debug && printf "\tfound: %30s %20s\n",$word,$semkey->[0];
+	$debug && printf "\t    found: %30s %20s\n",$word,$semkey->[0];
 	incrementStats('number of gloss words which matched a glossword');
       }
       else {
@@ -128,19 +131,27 @@ for (@{$dbh->selectall_arrayref($command)}) {
     }
     my $distrib = "records w glosses composed of " . sprintf("%2d",$numWords) . ' word(s)';
     incrementStats($distrib);
-    ($numWords > 20) && ($longGloss{$gloss} = $rn);
+    ($numWords > 20) && ($longGloss{$gloss} = $numWords);
   }
-# 7. Add a record to sem_hash table for this rn, for each semkey value
-  my $distrib = "records having " . sprintf("%2d",scalar keys %tempSemkeys) . ' semkey(s) assigned';
-  (scalar keys %tempSemkeys > 10) && ($glossesWithManySemkeys{$gloss} = $rn);
-  incrementStats($distrib);
-  if (scalar keys %tempSemkeys > 0) {
-    incrementStats('number of records assigned a semkey');
-    foreach my $tempsemkey (keys %tempSemkeys) {
-      updateLexiconSemkey($dbh,$table,$tempsemkey,$rn);
-      $debug && print "\tassigning ",$tempsemkey," to ",$rn,"\n";
-      incrementStats('number of semkeys assigned in total');
+# 7. Add a record to sem_hash table for each semkey value
+  unless ($tempSemkey) {
+    my $distrib = "records having " . sprintf("%2d",scalar keys %semkeylist) . ' semkey(s) assigned';
+    (scalar keys %semkeylist > 10) && ($glossesWithManySemkeys{$gloss} = %semkeylist);
+    if (scalar keys %semkeylist > 0) {
+      my @x = sort {$semkeylist{$b} cmp $semkeylist{$a}} keys %semkeylist;
+      $tempSemkey = @x[0];
+      $debug && print "\tbest key $tempSemkey\n";
     }
+    else {
+      $debug && print "\tno keys found $gloss\n";
+    }
+    incrementStats($distrib);
+  }
+  if ($tempSemkey) {
+    incrementStats('number of records assigned a semkey');
+    updateLexiconSemkey($dbh,$table,$tempSemkey,$gloss);
+    $debug && print "\tassigning $tempSemkey to words with gloss '$gloss'\n";
+    incrementStats('number of semkeys assigned in total');
   }
   else {
     # no semkeys assigned! (nb: already counted in stats)
