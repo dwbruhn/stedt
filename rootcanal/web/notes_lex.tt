@@ -17,7 +17,7 @@ last mod: <span id="lastmod[% n.noteid %]">[% n.lastmod %]</span>
 <br>
 <input type="submit" value="Save Note">
 <input type="button" name="delete_btn" value="Delete Note">
-(tag: <input name="id" type="text" value="[% n.id %]" size="4">)
+[% IF c.has_privs(8) %](tag: <input name="id" type="text" value="[% n.id %]" size="4">)[% END %]
 [% IF c.has_privs(8) && n.uid != 8 -%]
 user: <select name="uid">
 <option value="8">stedt</option>
