@@ -50,11 +50,14 @@ sub validateContribution {
       if ($i == $headerindex{'reflex'}) {
 	# do reflex tests
 	# check if reflex exists
-	if ($column eq '') {
-	  push(@messages, 'no reflex.');
-	  $show_stopper = 1 ;
+	    if ($column eq '') {
+	      push(@messages, 'no reflex.');
+	      $show_stopper = 1 ;
 	}
-	# check for "excrescences"
+        if ($columns[$i] =~ /[,'";.?]/) {
+          push(@messages, "unusual entry in column 'reflex', line $lines");
+          $show_stopper = 1;
+        }
       }
       if ($i == $headerindex{'pos'}) {
 	# do pos tests
