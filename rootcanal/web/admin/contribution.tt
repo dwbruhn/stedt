@@ -13,6 +13,12 @@
 <input type="hidden" name="step" value="[% step %]">
 [%- IF step == 'upload' || step == 'filefailure' -%]
 <p>[% message %]</p>
+<table>
+<tr><th>Item</th></tr>
+[% FOREACH v IN validation -%]
+<tr><td>[% v %]</td></tr>
+[% END %]
+</table>
 <p>Please select your delimited file to upload: <input type="file" name="contribution" /></p>
 
 [% ELSIF step == 'metadatafailure' || step == 'metadata' -%]
