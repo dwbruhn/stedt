@@ -102,8 +102,8 @@ sub validateContribution {
         #print "@columns[$i]\n";
 	# do gloss tests 
 		# check well-formedness of gloss --- right now, checks for non-word characters in gloss; perhaps can be refined later
-        if ($columns[$i] =~ /[^\w\s]/) {
-          push(@messages, "non- character in column 'gloss', line $lines");
+        if ($columns[$i] =~ /[^\w\s;\,\(\)\.]/) {
+          push(@messages, "unusual character(s) in column 'gloss' <i>$columns[$i]</i>, line $lines");
           $show_stopper = 1 ;
           }
 	# check if gloss exists
@@ -120,7 +120,7 @@ sub validateContribution {
 	      $show_stopper = 1 ;
 	}
         if ($columns[$i] =~ /[,'";.?]/) {
-          push(@messages, "unusual entry in column 'reflex', line $lines");
+          push(@messages, "unusual characters in column 'reflex' ($columns[$i]), line $lines");
           $show_stopper = 1;
         }
       }

@@ -13,10 +13,13 @@
 <input type="hidden" name="step" value="[% step %]">
 [%- IF step == 'upload' || step == 'filefailure' -%]
 <p>[% message %]</p>
+[%- IF step == 'filefailure' -%]
+<p>[% length(validation) %]</p>
 <table>
 <tr><th>Item</th></tr>
 [% FOREACH v IN validation -%]
 <tr><td>[% v %]</td></tr>
+[% END %]
 [% END %]
 </table>
 <p>Please select your delimited file to upload: <input type="file" name="contribution" /></p>
