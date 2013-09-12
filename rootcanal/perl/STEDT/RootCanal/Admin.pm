@@ -4,6 +4,11 @@ use base 'STEDT::RootCanal::Base';
 use utf8;
 use Time::HiRes qw(time);
 
+my @messages;
+my $show_stopper = 0;
+my @header; 
+my %headerindex;
+
 sub main : StartRunmode {
 	my $self = shift;
 	$self->require_privs(2);
@@ -50,11 +55,11 @@ sub uploadFile {
 }
 
 
-sub load2db {
+sub loaddbna {
   my (%metadata,$file) = @_;
   my $upload_dir = '/tmp';
 
-  open (INPUTFILE, "$upload_dir/$file" ) or die "$!";
+  open (INPUTFILE, "<:encoding(UTF-8)", "$upload_dir/$file" ) or die "$!";
   binmode INPUTFILE;
   
   while ( <INPUTFILE> )
@@ -64,21 +69,8 @@ sub load2db {
   close INPUTFILE;
 }
 
-sub validateContribution {
-  my $fh = shift;
-  my @messages;
-  my %results;
-  my $lines;
-  my $show_stopper = 0;
-  my $header_length;
-  my $row_length;
-  my @header; 
-  my %headerindex;
-  while ( <$fh> ) {
-    chomp;
-    $lines++;
-    # check header
-    if ($lines == 1) {
+sub getheader {
+      $_ = shift;
       @header = split "\t";
       for (my $i = 0; $i < scalar @header; $i++) {
         if ($header[$i] !~ /(gloss|reflex|pos)/) {
@@ -90,6 +82,20 @@ sub validateContribution {
 	}
         $headerindex{$header[$i]} = $i;
       }
+}
+
+sub validateContribution {
+  my $fh = shift;
+  my %results;
+  my $lines;
+  my $header_length;
+  my $row_length;
+  while ( <$fh> ) {
+    chomp;
+    $lines++;
+    # check header
+    if ($lines == 1) {
+      getheader($_);
     }
     # So in the case of the test files, $headerindex{'gloss'} is 1.
     # Now you can test the columns in the rest of the file:
@@ -102,7 +108,7 @@ sub validateContribution {
         #print "@columns[$i]\n";
 	# do gloss tests 
 		# check well-formedness of gloss --- right now, checks for non-word characters in gloss; perhaps can be refined later
-        if ($columns[$i] =~ /[^\w\s;\,\(\)\.]/) {
+        if ($columns[$i] =~ /[^\w\s;\,\(\)\.\'\"\/\-]/) {
           push(@messages, "unusual character(s) in column 'gloss' <i>$columns[$i]</i>, line $lines");
           $show_stopper = 1 ;
           }
@@ -135,6 +141,35 @@ sub validateContribution {
   $results{'status'}   = $show_stopper ? "Sorry, your file doesn't meet standards." : "File content OK!";
   $results{'messages'} = \@messages;
   seek($fh,0,0);
+  return %results;
+}
+
+sub load2db {
+  my (%metadata,$file) = @_;
+  my $upload_dir = '/tmp';
+
+  open (INPUTFILE, "<:encoding(UTF-8)", "$upload_dir/$file" ) or die "$!";
+  binmode INPUTFILE;
+
+  my %results;
+  my $lines;
+  my $header_length;
+  my $row_length;
+  while (<INPUTFILE> ) {
+    chomp;
+    $lines++;
+    # check header
+    if ($lines == 1) {
+      getheader($_);
+    }
+
+    my @columns = split "\t";
+    push(@columns, $metadata{'language'}, $metadata{'source'});
+
+  }
+  push(@messages, $lines-1 . ' lines loaded');
+  $results{'status'} = "file loaded.";
+#  $results{'messages'} = \@messages;
   return %results;
 }
 
@@ -181,8 +216,8 @@ sub contribution : Runmode {
       $metadata{$element} = $self->query->param($element) if $self->query->param($element);
     }
     # check metadata
-    %results = validateMetadata(%metadata);
-    @validation = @{$results{'messages'}};
+#    %results = validateMetadata(%metadata);
+#    @validation = @{$results{'messages'}};
     if ($results{'status'} =~ /Sorry/) {
       # oops try again!
       $step = 'metadatafailure';
