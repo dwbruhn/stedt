@@ -1,6 +1,6 @@
 setup.etymologies = {
-	_key: 'etymologies.RnIndTag',
-	'etymologies.RnIndTag': {
+	_key: 'etymologies.RnUidIndTag',
+	'etymologies.RnUidIndTag': {
 		noedit: true,
 		hide: true,
 		size: 20
@@ -82,6 +82,11 @@ setup.etymologies = {
 			 + '" target="stedt_lexicon" title="Open lexicon record">' + v + '</a>';
 		}
 	},
+	'etymologies.uid': {
+		label: 'tagger',
+		noedit: true,
+		size: 25
+	},
 	'etymologies.ind': {
 		label: 'ind',
 		noedit: true,
@@ -89,7 +94,7 @@ setup.etymologies = {
 		size: 20
 	},
 	'analysis': {
-		label: 'stedt\'s analysis',
+		label: 'analysis',
 		noedit: true,
 		hide: false,
 		size: 80,
@@ -103,8 +108,8 @@ setup.etymologies = {
   		size: 160,
   		transform: function (v,key,rec) {
   			if (!v) return '';
-  			var analysis = rec[3] || ''; // might be NULL from the SQL query
-  			var index = parseInt(rec[2],10); // index indicates which syllable is tagged with the etymon on the same row
+  			var analysis = rec[4] || ''; // might be NULL from the SQL query
+  			var index = parseInt(rec[3],10); // index indicates which syllable is tagged with the etymon on the same row
 
   			var tags = analysis.split(',');
   			var result = SYLSTATION.syllabify(v.unescapeHTML());

@@ -4,18 +4,18 @@ use strict;
 
 # This module allows users to view and search all STEDT-tagged etymologies (associations of lexicon records with etyma).
 # It purports to allow access to the 'etymologies' table, which is actually a VIEW based on lx_et_hash,
-# created with RnIndTag as a unique key (combination of rn, index, and tag):
+# created with RnUidIndTag as a unique key (concatenation of rn, uid, index, and tag):
 #
 #	CREATE SQL SECURITY INVOKER VIEW etymologies AS
-#	SELECT CONCAT_WS(':',rn,ind,tag) AS RnIndTag, rn,ind,tag,tag_str
+#	SELECT CONCAT_WS(':',rn,uid,ind,tag) AS RnUidIndTag, rn,uid,ind,tag,tag_str
 #	FROM lx_et_hash
-#	WHERE uid=8 AND tag!=0
-#	ORDER BY rn,ind,tag
+#	WHERE tag!=0
+#	ORDER BY rn,uid,ind,tag
 
 sub new {
 
 my ($self, $dbh, $privs, $uid) = @_;
-my $t = $self->SUPER::new($dbh, 'etymologies', 'etymologies.RnIndTag', $privs); # dbh, table, key, privs
+my $t = $self->SUPER::new($dbh, 'etymologies', 'etymologies.RnUidIndTag', $privs); # dbh, table, key, privs
 
 $t->query_from(q|etymologies LEFT JOIN lexicon USING (rn)
 	LEFT JOIN languagenames USING (lgid)
@@ -23,12 +23,13 @@ $t->query_from(q|etymologies LEFT JOIN lexicon USING (rn)
 	LEFT JOIN etyma USING (tag)
 	LEFT JOIN languagegroups AS Egrps ON (etyma.grpid=Egrps.grpid)|);
 $t->default_where('');
-$t->order_by('Lgrps.grp0, Lgrps.grp1, Lgrps.grp2, Lgrps.grp3, Lgrps.grp4, languagenames.lgsort, etyma.tag, lexicon.reflex');
+$t->order_by('Lgrps.grp0, Lgrps.grp1, Lgrps.grp2, Lgrps.grp3, Lgrps.grp4, languagenames.lgsort, etyma.tag, lexicon.reflex, etymologies.uid');
 $t->fields(
-	'etymologies.RnIndTag',
+	'etymologies.RnUidIndTag',
 	'etymologies.rn',
+	'etymologies.uid',
 	'etymologies.ind',
-	'(SELECT GROUP_CONCAT(tag_str ORDER BY ind) FROM lx_et_hash WHERE rn=etymologies.rn AND uid=8) AS analysis',
+	'(SELECT GROUP_CONCAT(tag_str ORDER BY ind) FROM lx_et_hash WHERE rn=etymologies.rn AND uid=etymologies.uid) AS analysis',
 	'lexicon.reflex',
 	'lexicon.gloss',
 	'lexicon.gfn',
@@ -46,6 +47,7 @@ $t->fields(
 	'Egrps.grpno',
 );
 $t->searchable('etymologies.rn',
+	'etymologies.uid',
 #	'etymologies.ind',
 #	'analysis',
 	'lexicon.reflex', 'lexicon.gloss', 'lexicon.gfn',
@@ -85,6 +87,17 @@ $t->search_form_items(
 		return $cgi->popup_menu(-name => 'etyma.grpid', -values=>[@ids],
   								-default=>'',
   								-labels=>\%labels);
+	},
+	'etymologies.uid' => sub {
+		my $cgi = shift;
+		# get list of users who have tagged items
+		my $users = $dbh->selectall_arrayref("SELECT DISTINCT uid, username FROM lx_et_hash LEFT JOIN users USING (uid) ORDER BY uid");
+		my @uids = map {$_->[0]} @$users;
+		my %usernames;
+		@usernames{@uids} = map {$_->[1] . ' (uid:' . $_->[0] . ')'} @$users;
+		return $cgi->popup_menu(-name => 'etymologies.uid', -values=>['', @uids],
+							-labels=>\%usernames,
+							-default=>'');
 	},
 );
 
