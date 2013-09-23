@@ -136,6 +136,7 @@ $t->wheres(
 
 	'etyma.protogloss' => 'word',
 	'etyma.grpid'	=> 'int',
+	'etymologies.uid' => 'int',
 );
 
 
