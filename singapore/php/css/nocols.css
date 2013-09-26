@@ -5,13 +5,14 @@ body { margin:10px 10px 0px 10px;
        }
 
 #banner { background:#fff;
-          height:70px;
+          height:54px;
         }
 
 h1 { font-size:32px;
      float:left;
-     padding:10px;
+     padding:2px;
      margin:0px;
+     margin-left: 10px;
      border-bottom: none;
    }
 
@@ -23,13 +24,14 @@ h2 { font-size:12px;
 
 img#logo { 
     float:left;
-    height:50px; 
-    padding:10px 10px 10px 10px;
+    height:48px; 
+    padding:2px;
 }
 
 p { 
     padding:10px 10px 10px 10px;
   }
+
 
 #instructions li { padding:10px 10px 10px 10px; }
 
@@ -40,25 +42,31 @@ p {
 	   height:100%;
          }
 
-#content td,th { width: 20%; vertical-align: top; }
+#content td,th { width: 20%; vertical-align: middle; }
 
 #content p,li,h1,h2 { margin-right:10px }
 
 #content table { width:100%; padding:0px 10px 10px 10px; }
 
 #button {
-    margin-top: 10px;
+    margin-top: 4px;
     float:right;
     width:90px;
     height:100%;
 }
 
-#data {
+#thesaurusTop {
+    margin-top: 10px;
     float:left;
-    width: 1000px;
-    height:100%;
-    background: #fff;
+    width:100%;
+    height:40px;
 }
+
+#data {
+    width: 1000px;
+}
+
+.short { width: 100px; text-align: left }
 
 /* override jQuery #tabs css a little */
 .ui-tabs .ui-tabs-panel { padding: 0px; min-height:120px; }
