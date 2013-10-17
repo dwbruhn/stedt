@@ -26,7 +26,7 @@
 
 [% ELSIF step == 'metadatafailure' || step == 'metadata' -%]
 <h2>Validation Results</h2>
-<input type="hidden" name="file" value="[% file %]">
+<input type="hidden" name="contribution" value="[% file %]">
 <h3>[% file %]</h3>
 <p>[% message %]</p>
 <table>
@@ -39,6 +39,7 @@
 
 [% IF step == 'metadata' -%]
 <hr/>
+<input type="hidden" name="contribution" value="[% file %]">
 <table>
 <tr><th>Description</th><th>Value</th></tr>
 [% FOREACH k IN metadata -%]

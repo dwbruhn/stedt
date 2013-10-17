@@ -84,6 +84,17 @@ sub getheader {
       }
 }
 
+sub validateMetadata {
+  my $fh = shift;
+  my %results;
+  my @messages;
+    push(@messages, ' everything is fine for now');
+  $show_stopper = 1;
+  $results{'status'}   = $show_stopper ? "Your metadata is no good." : "Metadata OK!";
+  $results{'messages'} = \@messages;
+  return %results;
+  }
+
 sub validateContribution {
   my $fh = shift;
   my %results;
@@ -145,8 +156,11 @@ sub validateContribution {
 }
 
 sub load2db {
-  my (%metadata,$file) = @_;
+#  my (%metadata) = shift;
+  my ($file,$dbh) = @_;
   my $upload_dir = '/tmp';
+  
+  print STDERR 'file', $file;
 
   open (INPUTFILE, "<:encoding(UTF-8)", "$upload_dir/$file" ) or die "$!";
   binmode INPUTFILE;
@@ -155,6 +169,7 @@ sub load2db {
   my $lines;
   my $header_length;
   my $row_length;
+  my @messages;
   while (<INPUTFILE> ) {
     chomp;
     $lines++;
@@ -162,14 +177,22 @@ sub load2db {
     if ($lines == 1) {
       getheader($_);
     }
+    my @columns = split "\t";
+    my $gloss  = @columns[ $headerindex{'gloss'} ];
+    my $reflex = @columns[ $headerindex{'reflex'} ];
+    my $pos    = @columns[ $headerindex{'pos'} ];
+    my $semkey = '';
+    my $lgid = 3000;
+    $dbh->do("INSERT lexicon (reflex, gloss, gfn, lgid, semkey) values (?,?,?,?,?)", undef, $reflex,$gloss,$pos,$lgid,$semkey);
+
 
     my @columns = split "\t";
-    push(@columns, $metadata{'language'}, $metadata{'source'});
+#    push(@columns, $metadata{'language'}, $metadata{'source'});
 
   }
   push(@messages, $lines-1 . ' lines loaded');
   $results{'status'} = "file loaded.";
-#  $results{'messages'} = \@messages;
+  $results{'messages'} = \@messages;
   return %results;
 }
 
@@ -216,15 +239,16 @@ sub contribution : Runmode {
       $metadata{$element} = $self->query->param($element) if $self->query->param($element);
     }
     # check metadata
-#    %results = validateMetadata(%metadata);
-#    @validation = @{$results{'messages'}};
+    %results = validateMetadata(%metadata);
+    @validation = @{$results{'messages'}};
     if ($results{'status'} =~ /Sorry/) {
       # oops try again!
       $step = 'metadatafailure';
     }
     else {
       # load to database
-      load2db(%results,$file);
+      %results = load2db($file,$self->dbh);
+      @validation = @{$results{'messages'}};
       $step = 'thanks';
     }
   }
@@ -245,8 +269,10 @@ sub contribution : Runmode {
 		validation=>\@validation,
 		metadata=> ['language','language abbreviation','source','author','year','contributor','email']
 		});
-
+		
 }
+
+
 
 
 sub changes : Runmode {
