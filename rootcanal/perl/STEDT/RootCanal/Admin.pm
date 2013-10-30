@@ -89,8 +89,8 @@ sub validateMetadata {
   my %results;
   my @messages;
     push(@messages, ' everything is fine for now');
-  $show_stopper = 1;
-  $results{'status'}   = $show_stopper ? "Your metadata is no good." : "Metadata OK!";
+  my $show_stopper = 1;
+  $results{'status'}   = $show_stopper ? "Sorry, your metadata has some problems." : "Metadata OK!";
   $results{'messages'} = \@messages;
   return %results;
   }
@@ -185,12 +185,11 @@ sub load2db {
     my $lgid = 3000;
     $dbh->do("INSERT lexicon (reflex, gloss, gfn, lgid, semkey) values (?,?,?,?,?)", undef, $reflex,$gloss,$pos,$lgid,$semkey);
 
-
-    my @columns = split "\t";
 #    push(@columns, $metadata{'language'}, $metadata{'source'});
 
   }
   push(@messages, $lines-1 . ' lines loaded');
+  #print STDERR  $lines-1 . ' lines loaded';
   $results{'status'} = "file loaded.";
   $results{'messages'} = \@messages;
   return %results;
@@ -272,7 +271,13 @@ sub contribution : Runmode {
 		
 }
 
-
+sub bulkapproval : Runmode {
+  my $self = shift;
+  # takes a list of tags and "approves" all non-STEDT tags for the selected user.
+  # everything is done via AJAX in the template. Nothing else to do here!
+  my $users = $self->dbh->selectall_arrayref("SELECT username,uid FROM users ORDER BY username LIMIT 500");
+  return $self->tt_process("admin/bulkapproval.tt", {users => $users });
+}
 
 
 sub changes : Runmode {
