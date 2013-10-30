@@ -44,7 +44,7 @@
 	<th>protoform</th>
 	<th>protogloss</th>
 	<th>reflexes</th>
-	<th>approve?</th>
+	[% IF c.has_privs(8) -%]<th class="nosort">approve?</th>[% END %]
 </tr>
 [% FOREACH row IN tagging -%]
 <tr>
@@ -54,7 +54,7 @@
 <td>[% row.4 | html %]</td>
 <td>[% row.5 | html %]</td>
 <td>[% row.6 | html %]</td>
-<td><a href="[% self_url %]/tags/accept?tag=[% row.2 %]&uid=[% row.1 %]" target="stedt_etymon">approve</a></td>
+[% IF c.has_privs(8) -%]<td><a href="[% self_url %]/tags/accept?tag=[% row.2 %]&uid=[% row.1 %]" target="stedt_etymon">approve</a></td>[% END %]
 </tr>
 [% END -%]
 </table>

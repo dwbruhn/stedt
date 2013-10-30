@@ -273,6 +273,7 @@ sub contribution : Runmode {
 
 sub bulkapproval : Runmode {
   my $self = shift;
+  $self->require_privs(8);
   # takes a list of tags and "approves" all non-STEDT tags for the selected user.
   # everything is done via AJAX in the template. Nothing else to do here!
   my $users = $self->dbh->selectall_arrayref("SELECT username,uid FROM users ORDER BY username LIMIT 500");

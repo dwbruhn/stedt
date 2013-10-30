@@ -39,7 +39,7 @@ Activity:
 <li><a href="[% self_url %]/admin/changes">change log</a></li>
 <li><a href="[% self_url %]/admin/queries">recent queries (public interface)</a></li>
 <li><a href="[% self_url %]/admin/progress">progress report, tagging awaiting approval, etc.</a></li>
-<li><a href="[% self_url %]/admin/bulkapproval">bulk approval of tagging</a></li>
+[% IF c.has_privs(8) -%]<li><a href="[% self_url %]/admin/bulkapproval">bulk approval of tagging</a></li>[% END -%]
 </ul>
 [% END %]
 
