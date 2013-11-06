@@ -326,7 +326,10 @@ sub bulkapproval : Runmode {
   $self->require_privs(8);
   # takes a list of tags and "approves" all non-STEDT tags for the selected user.
   # everything is done via AJAX in the template. Nothing else to do here!
-  my $users = $self->dbh->selectall_arrayref("SELECT username,uid FROM users ORDER BY username LIMIT 500");
+  my $users = $self->dbh->selectall_arrayref("SELECT distinct username,uid FROM lx_et_hash
+  	LEFT JOIN users USING (uid)
+  	WHERE uid!=8
+  	ORDER BY username LIMIT 500");
   return $self->tt_process("admin/bulkapproval.tt", {users => $users });
 }
 
