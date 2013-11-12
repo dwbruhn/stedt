@@ -106,5 +106,15 @@ setup.chapters = {
     'eDiss' : {
 	noedit: true,
 	size: 30
+    },
+    'tagged' : {
+	label: 'tagged forms',
+	noedit: true,
+	size: 24
+    },
+    'pct' : {
+	label: 'pct tagged',
+	noedit: true,
+	size: 24
     }
 };

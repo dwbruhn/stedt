@@ -64,8 +64,9 @@ Click <b>Undo</b> below to erase your data if you feel you need to try again.</i
 <tr><td>[% k %]</td><td><input type="text" size="40" name="[% k %]" maxlength="200"></td></tr>
 [% END %]
 </table>
+<p>Please select a language group, if you can:</p>
 <select id="grpid" name="grpid">
-<option value="0.0">Please select a language group (OK leave unspecified).</option>
+<option value="X.2">Default, i.e. "Unevaluated"</option>
 [% FOREACH g IN grpids %]
 <option value="[% g.0 %]">[% g.1 %] [% g.2 %]</option>[% END -%]
 </select>

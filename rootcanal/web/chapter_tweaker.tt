@@ -16,6 +16,8 @@ Volumes:
 	<th id="chapters.chaptertitle">Title</th>
 	<th id="etyma">etyma</th>
 	<th id="wcount">forms</th>
+	<th id="tagged">tagged</th>
+	<th id="pct">pct</th>
 	<th id="notecount">notes</th>
 	<th id="haschart">flowchart?</th>
 	<th id="num_glosswords">#</th>
@@ -33,7 +35,10 @@ Volumes:
 <td>[% IF r.14 %]<b>[% ELSIF r.15 %]<i>[% END %][% r.1 | html %][% IF r.14 %]</b>[% ELSIF r.15 %]</i>[% END %]</td>
 <td>[% IF r.3 %]<a target="centerstage" href="[% self_url %]/edit/etyma?etyma.chapter=[% r.0 | uri %]">[% r.3 %][% END %]</td>
 <td>[% IF r.13 %]<a target="centerstage" href="[% self_url %]/edit/lexicon?lexicon.semkey=[% r.0 | uri %]">[% r.13 %][% END %]</td>
-<td>[% r.4 || '' %]</td><td>[% IF r.5 %]✓[% END %]</td>
+<td>[% IF r.16 %]<a target="centerstage" href="[% self_url %]/edit/etyma?etyma.chapter=[% r.0 | uri %]">[% r.16 %][% END %]</td>
+<td>[% r.17 %]</td>
+<td>[% r.4 || '' %]</td>
+<td>[% IF r.5 %]✓[% END %]</td>
 <td>[% r.11 %]</td>
 <td>[% r.12 | html %]</td>
 [%- IF c.has_privs(8) # restrict eDiss functions to approvers %]

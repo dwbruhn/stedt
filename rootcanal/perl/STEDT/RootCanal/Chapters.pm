@@ -65,15 +65,16 @@ sub tweak : RunMode {
 #		$blessed = 'AND etyma.uid=8';
 #		$public_ch = 'HAVING num_public OR public_notes';
 #	}
+	my %semkeycounts = @{$self->dbh->selectcol_arrayref("select semkey,count(*) from (SELECT distinct rn,semkey FROM lexicon JOIN lx_et_hash USING (rn) WHERE  lexicon.status != 'HIDE' AND lexicon.status != 'DELETED') as sel group by semkey",{Columns=>[1,2]})};
 	my $chapterquery = <<SQL;
 SELECT chapters.semkey, chapters.chaptertitle, 
 	(SELECT COUNT(*) FROM etyma WHERE chapter=chapters.semkey AND public=1 AND etyma.status != 'DELETE' $blessed) AS num_public,
-	(SELECT COUNT(*) FROM etyma WHERE chapter=chapters.semkey AND etyma.status != 'DELETE' $blessed),
+	(SELECT COUNT(*) FROM etyma WHERE chapter=chapters.semkey AND etyma.status != 'DELETE' $blessed) as etycount,
 	COUNT(DISTINCT notes.noteid) as notecount, MAX(notes.notetype = 'G') as haschart, MAX(notes.notetype != 'I') as public_notes,
 	chapters.semcat, chapters.old_chapter, chapters.old_subchapter, chapters.id,
 	COUNT(DISTINCT glosswords.word),
 	GROUP_CONCAT(DISTINCT glosswords.word SEPARATOR ', ') AS some_glosswords,
-	(SELECT COUNT(*) FROM lexicon WHERE lexicon.semkey=chapters.semkey) AS wcount,
+	(SELECT COUNT(*) FROM lexicon WHERE lexicon.semkey=chapters.semkey AND lexicon.status != "HIDE" AND lexicon.status != "DELETED") AS wcount,
 	IF(chapters.f=0, 1, 0) as isVOL, IF(chapters.c=0, 1, 0) as isFASC
 FROM chapters LEFT JOIN notes ON (notes.id=chapters.semkey) LEFT JOIN glosswords ON (chapters.semkey=glosswords.semkey)
 GROUP BY 1 $public_ch ORDER BY v,f,c,s1,s2,s3
@@ -89,6 +90,19 @@ SQL
 SELECT chapters.semkey, chapters.chaptertitle
 FROM chapters WHERE chapters.f=0 AND chapters.v<11 ORDER BY chapters.v
 SQL
+	foreach my $row (@$chapters){
+	  my $semkey = $row->[0];
+	  my $denominator = $row->[13] + 0.00;
+	  my $result = 0.00;
+	  if ($denominator > 0) { 
+	    my $numerator = $semkeycounts{$semkey} + 0.00;
+	    $result =  $numerator /  $denominator 
+	  }
+	  $result = int($result * 100);
+	  #print STDERR "$semkey:  $semkeycounts{$semkey}\n";
+	  push @$row, $semkeycounts{$semkey}, $result;
+	}
+
 	return $self->tt_process('chapter_tweaker.tt', {
 		vols=> $volumes, ch=>$chapters, time_elapsed=>sprintf("%0.3g", time()-$t0)
 	});
