@@ -36,7 +36,7 @@ Volumes:
 <td>[% IF r.3 %]<a target="centerstage" href="[% self_url %]/edit/etyma?etyma.chapter=[% r.0 | uri %]">[% r.3 %][% END %]</td>
 <td>[% IF r.13 %]<a target="centerstage" href="[% self_url %]/edit/lexicon?lexicon.semkey=[% r.0 | uri %]">[% r.13 %][% END %]</td>
 <td>[% IF r.16 %]<a target="centerstage" href="[% self_url %]/edit/etyma?etyma.chapter=[% r.0 | uri %]">[% r.16 %][% END %]</td>
-<td>[% r.17 %]</td>
+<td>[% r.17 %]%</td>
 <td>[% r.4 || '' %]</td>
 <td>[% IF r.5 %]✓[% END %]</td>
 <td>[% r.11 %]</td>
