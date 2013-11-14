@@ -1,0 +1,44 @@
+\documentclass[10pt]{article}
+\usepackage[polutonikogreek,latin,english]{babel}
+\def\linesparpage$\#$1{
+\baselineskip=\textheight
+\divide\baselineskip by $\#$1} % lineheight = textheight / line$\#$
+\usepackage{fancyhdr}
+%\usepackage[margin=.25in]{geometry}
+\pagestyle{plain}
+\usepackage{microtype}
+\usepackage{lineno}
+\usepackage{acronym}
+\usepackage{amsmath,amssymb}
+\exhyphenpenalty=25000
+%\renewcommand\familydefault{\sfdefault}
+\usepackage{fullpage}
+\usepackage{titlesec}
+\usepackage{hyperref}
+\usepackage{tikz}
+\usepackage{color,colortbl}
+\usetikzlibrary{decorations.pathreplacing,calc}
+\usepackage{tikz-qtree}
+\newcommand{\tikzmark}[1]{\tikz[overlay,remember picture] \node ($\#$1) {};}
+\usepackage[T1]{fontenc}
+%\usepackage[osf]{libertine}
+\usepackage{makeidx}
+\usepackage{graphicx}
+\usepackage{setspace}
+\usepackage{covington}
+\def\citeapos$\#$1{\citeauthor{$\#$1}'s (\citeyear{$\#$1})}
+\usepackage{natbib}
+\Roman{section}
+\pagestyle{empty}
+\bibpunct[:]{(}{)}{,}{a}{}{,}
+\usepackage{tipa}
+%\makeindex
+\begin{document}
+
+\section{Grant Support}
+Research on the Sino-Tibetan Etymological Dictionary and 
+Thesaurus (STEDT) Project has been supported in part by grants 
+from: The National Science Foundation (NSF), Division of Behavioral \& Cognitive Sciences, Linguistics, Grant Nos. BNS-86-17726, BNS-90-11918, DBS-92-09481, FD-95-11034, SBR-9808952 and BCS-9904950.
+The National Endowment for the Humanities (NEH), Preservation and Access, Grant Nos. RT-20789-87, RT-21203-90, RT-21420-92, PA-22843-96, PA-23353-99, and PA-24168-02.
+
+\end{document}
