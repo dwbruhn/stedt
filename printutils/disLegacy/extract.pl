@@ -10,6 +10,7 @@
 #
 # also, should synonym sets, multiple sections, etc. go in here?
 
+use lib '..';
 
 use strict;
 use utf8;

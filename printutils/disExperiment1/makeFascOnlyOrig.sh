@@ -34,18 +34,3 @@ texfile=`ls $1-$2-$3-master.tex`
 xelatex $texfile # > /dev/null
 xelatex $texfile # > /dev/null
 xelatex $texfile # > /dev/null
-pdffile=`ls $1-$2-$3-master.pdf`
-pdf2copy=${pdffile%-master.*}
-DATETIME=`date '+%Y%m%d'`
-#DATETIME=`date '+%Y%m%d_%H%M%S'`
-# move the new pdf to the dissemination directory
-cp $pdffile ~stedt/public_html/dissemination/$pdf2copy-$DATETIME-1$DRAFT.pdf
-# update the ToC for the electronic etymologies
-if [ "$4" = '--i' ] ; then
-echo "done with *DRAFT* $texfile"
-else 
-echo "done with $texfile" 
-fi
-perl ~stedt-cgi-ssl/rootcanals/makeToC.pl > ~stedt/public_html/dissemination.html       
-echo "eDiss table of contents updated."
-echo "http://stedt.berkeley.edu/dissemination/$pdf2copy-$DATETIME-1$DRAFT.pdf"

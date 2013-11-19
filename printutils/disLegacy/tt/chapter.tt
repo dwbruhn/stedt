@@ -4,7 +4,7 @@
 
 [% # semantic flowchart %]
 [% FOREACH id IN flowchartids -%]
-\resizebox{\textwidth}{!}{\includegraphics{pdf/[% id %].pdf}}
+\resizebox{\textwidth}{!}{\includegraphics{../../pdf/[% id %].pdf}}
 
 [% END -%]
 \vspace{.25em}
