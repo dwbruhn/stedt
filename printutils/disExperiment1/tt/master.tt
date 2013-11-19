@@ -46,17 +46,6 @@
 \usepackage[document,raggedrightboxes]{ragged2e}
 \setlength{\RaggedRightRightskip}{0pt plus 3em} % must be defined after fonts are loaded
 
-\usepackage{fancyhdr}
-\setlength{\headheight}{15pt}
-\pagestyle{fancy}
-
-\lhead{Sino-Tibetan Etymological}
-\rhead{Dictionary and Thesaurus}
-\chead{}
-\lfoot{}
-\cfoot{\thepage}
-\rfoot{}
-\renewcommand{\headrulewidth}{0.4pt}
 
 \title{STEDT Root Canal Extraction:\\[% semkey %]. [% xtitle %]}
 \author{[% author %]}
@@ -68,6 +57,10 @@
 	pdftitle = {STEDT:  [% semkey %]. [% xtitle %]}, 
 	pdfauthor = {\textcopyright\ STEDT}, 
 } 
+
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd{\chapter}{\if@openright\cleardoublepage\else\clearpage\fi}{}{}{}
 
 \begin{document}
 \pdfpageheight=22in
