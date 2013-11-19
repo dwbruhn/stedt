@@ -1,0 +1,42 @@
+
+{\large \parindent=-1em \textbf{[% semkey %]  [% title %]}}
+\addcontentsline{toc}{chapter}{[% semkey %]  [% title %]}
+[% # semantic flowchart %]
+[% FOREACH id IN flowchartids -%]
+\resizebox{\columnwidth}{!}{\includegraphics{../../pdf/[% id %].pdf}}
+[% END -%]
+\vspace{0.25em}
+[% # general discussion == chapter notes %]
+[% FOREACH note IN chapter_notes -%]
+[% note %]
+[% END -%]
+
+[% # insert actual content %]
+[% FOREACH etyma -%]
+% [% IF internal_notes %]\newpage[% END %]
+\etymon*{}	% just create section and let the following code add the bookmark, TOC entry, and heading
+\addcontentsline{toc}{section}{([% seq %]) [% plg %] [% protoform_text %] [% protogloss %]}
+\vspace{0.25em}
+% {\large \parindent=-1em ([% seq %]) \hspace{\stretch{1}} [% plg %] [% protoform %]\hspace{\stretch{1}}\textbf{[% protogloss %]}
+{\large \parindent=-1em ([% seq %]) [% plg %] [% protoform %] \textbf{[% protogloss %]}
+\hspace{\stretch{1}}\textit{\tiny[\#[% tag %]]}}
+\nopagebreak
+
+[% FOREACH notes -%]
+[% IF type == 'I' %][Internal Note:]\textit{[% END -%]
+[% IF type == 'O' && internal_notes %][Orig/Source][% END -%]
+[% text -%]
+[% IF type == 'I' %]}[% END -%]
+
+
+[% END -%]
+[% IF records %][% records %][% END -%]
+[% IF comparanda.size -%]
+[% label = 'Chinese comparand' _ (comparanda.size == 1 ? 'um' : 'a') -%]
+\comparandum[\textit{[% label %]}]{[% label %]}
+[% END %]
+[% FOREACH note IN comparanda -%]
+[% note %]
+
+[% END -%]
+[% END -%]

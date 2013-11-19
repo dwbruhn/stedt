@@ -1,0 +1,102 @@
+%!TEX TS-program = xelatex
+%!TEX encoding = UTF-8 Unicode
+% \documentclass[12pt]{report}
+\documentclass[11pt,twoside,twocolumn]{book}
+
+\makeatletter
+\renewcommand{\@makechapterhead}[1]{%
+  %\vspace*{50\p@}%
+  {\parindent \z@ \raggedright \normalfont
+    \ifnum \c@secnumdepth >\m@ne
+      \if@mainmatter
+        \huge\bfseries \thechapter. \space
+      \fi
+    \fi
+    \Huge \bfseries #1\par\nobreak
+    \vskip 40\p@
+  }}
+\newcommand\etymon{\@startsection % special section cmd for etyma
+  {section}{1}{-1em} % name, level, indent
+  {-1ex}	% beforeskip
+  {1pt}		% afterskip
+  {\large}	% format
+}
+\newcommand\comparandum{\@startsection{subsection}{2}{0pt}{-1pt}{1pt}{\large\bfseries}}
+\makeatother
+
+\usepackage{fontspec}
+\usepackage{xunicode} % for real tildes with \textasciitilde
+\setmainfont{Charis SIL}
+\newfontfamily\stedtfont{STEDTU Roman}
+\newfontfamily\tradchinesefont{LiSong Pro}
+\newfontfamily\simpchinesefont{STSong}
+\newcommand{\TC}[1]{{\tradchinesefont #1}}
+\newcommand{\SC}[1]{{\simpchinesefont #1}}
+\newcommand{\STEDTU}[1]{{\stedtfont #1}}
+\newcommand{\fascicletablebegin}{\begin{supertabular}[l]{@{\hspace*{1.1em}}>{\hangindent=0.1in}p{1.3in}>{\hangindent=0.1in}p{1.2in}>{\hangindent=0.1in}p{1.3in}>{\hangindent=0.1in}p{1.5in}l}}
+\renewcommand \thechapter{\Roman{chapter}} % use cap roman numerals for chapter numbers
+
+\usepackage{fullpage}
+\usepackage{parskip}
+\usepackage[toc]{multitoc}
+\usepackage{supertabular,ltxtable,booktabs}
+\setcounter{LTchunksize}{300} % use more memory for fewer compiles
+\usepackage{graphicx}
+\usepackage{array} % use array and ragged2e for raggedright inside tables
+\usepackage[document,raggedrightboxes]{ragged2e}
+\setlength{\RaggedRightRightskip}{0pt plus 3em} % must be defined after fonts are loaded
+
+
+\title{STEDT Root Canal Extraction:\\[% semkey %]. [% xtitle %]}
+\author{[% author %]}
+\date{[% date %]}
+\usepackage[bookmarks]{hyperref}
+\hypersetup{%
+	pdfborder={0 0 1},
+	pdfborderstyle={/S/U/W 1}, % make links underlined (instead of surrounded by red boxes)
+	pdftitle = {STEDT:  [% semkey %]. [% xtitle %]}, 
+	pdfauthor = {\textcopyright\ STEDT}, 
+} 
+
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd{\chapter}{\if@openright\cleardoublepage\else\clearpage\fi}{}{}{}
+
+\begin{document}
+\pdfpageheight=22in
+\pdfpagewidth=16in
+\pdfbookmark[1]{ [% semkey %]. [% xtitle %]}{titlepage}
+\setcounter{secnumdepth}{0} % don't number sections, just chapters
+\setlength{\columnsep}{3em}
+\setlength{\columnseprule}{0.1pt}
+\setlength\textwidth{14in}
+\setlength\textheight{20in}
+\setlength\columnwidth{7in}
+% \setlength\columnheight{18in}
+
+%\the\textwidth
+%
+%\the\columnwidth
+%
+%\the\columnsep
+
+\maketitle
+\thispagestyle{empty}
+
+\pdfbookmark[1]{Table of Contents}{TOC}
+\tableofcontents
+\newpage
+
+[% FOREACH texfile IN texfilenames -%]
+\include{[% texfile %]}
+[% END -%]
+
+\newpage
+
+\phantomsection
+\addcontentsline{toc}{chapter}{References}
+\bibliographystyle{amsalpha}
+\renewcommand{\bibname}{References}
+\bibliography{thesis}
+
+\end{document}
