@@ -20,9 +20,9 @@ Edit/Browse tables:
 <td><ul>
 	<li><a href="[% self_url %]/edit/mesoroots">mesoroots</a> ("Dependent Mesoroots" only)</li>
 	<li><a href="[% self_url %]/edit/etymologies">etymologies</a> (including all user-tagged etymologies)</li>
-	[% IF c.has_privs(16) -%]<li><a href="[% self_url %]/admin/contribution">contributions</a></li>[% END %]
-	[% IF c.has_privs(8) -%]<li><a href="[% self_url %]/admin/deletedata">delete source and/or language data</a></li>[% END %]
 	[% IF c.has_privs(8) -%]<li><a href="[% self_url %]/edit/projects">projects</a></li>[% END -%]
+	[% IF c.has_privs(16) -%]<li><a href="[% self_url %]/admin/contribution">contributions</a></li>[% END %]
+	[% IF c.has_privs(16) -%]<li><a href="[% self_url %]/admin/deletedata">delete source and/or language data</a></li>[% END %]
 </ul></td>
 </tr></table>
 

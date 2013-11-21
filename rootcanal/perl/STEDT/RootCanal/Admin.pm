@@ -351,7 +351,7 @@ sub bulktag : Runmode {
 
 sub deletedata : Runmode {
   my $self = shift;
-  $self->require_privs(8);
+  $self->require_privs(16);
   my $msg;
   # Deletes the data specified
   my $srcabbrs = $self->dbh->selectall_arrayref("SELECT distinct srcabbr FROM srcbib ORDER BY srcabbr LIMIT 500");
