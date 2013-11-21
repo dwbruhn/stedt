@@ -200,10 +200,10 @@ sub load2db {
     my @columns = split "\t";
     my $gloss  = @columns[ $headerindex{'gloss'} ];
     my $reflex = @columns[ $headerindex{'reflex'} ];
-    my $srcid  = @columns[ $headerindex{'id'} ];
+    my $srcid  = $headerindex{'id'} ? @columns[ $headerindex{'id'} ] : '';
     my $pos    = $headerindex{'pos'} ? @columns[ $headerindex{'pos'} ] : '';
     my $semkey = '';
-    $dbh->do("INSERT lexicon (reflex, gloss, gfn, lgid, semkey, srcid) values (?,?,?,?,?,?)", undef, $reflex,$gloss,$pos,$lgid,$semkey,$srcid);
+    $dbh->do("INSERT lexicon (reflex, gloss, gfn, lgid, semkey, srcid) values (?,?,?,?,?,?)", undef, $reflex,$gloss,$pos || '',$lgid,$semkey,$srcid || '');
   }
   push(@messages, $lines-1 . ' lines loaded');
   #print STDERR  $lines-1 . ' lines loaded';
