@@ -209,6 +209,7 @@ sub load2db {
   #print STDERR  $lines-1 . ' lines loaded';
   $results{'status'} = "name of file is: $file";
   $results{'language id'} = $lgid;
+  $results{'source abbr'} = $m[2];
   $results{'messages'} = \@messages;
   return %results;
 }
@@ -225,18 +226,19 @@ sub contribution : Runmode {
   my $filename = $self->query->param('filename');
   my $file = $self->query->param('contribution');
   my $lgid;
+  my $srcabbrsave;
   my $upload_dir = '/tmp';
   my $metadatafields = ['language', 'lgabbr', 'srcabbr', 'author', 'year', 'title', 'citation', 'contributor', 'email'];
   my %metadata;
   my %results;
   my @validation;
   if ($step eq 'thanks') {
-    my $srcabbr = $self->query->param('srcabbr');
-    my $lgid = $self->query->param('lgid');
+    $srcabbrsave = $self->query->param('srcabbrsave');
+    $lgid = $self->query->param('lgid');
     # ...but no thanks; if we are here, user must want to delete their data..
     $self->dbh->do("DELETE FROM lexicon WHERE lgid=?", undef, $lgid);
-    $self->dbh->do("DELETE FROM srcbib WHERE srcabbr=?", undef, $srcabbr);
-    $self->dbh->do("DELETE FROM languagenames WHERE lgabbr=?", undef, $lgid);
+    $self->dbh->do("DELETE FROM srcbib WHERE srcabbr=?", undef, $srcabbrsave);
+    $self->dbh->do("DELETE FROM languagenames WHERE lgid=?", undef, $lgid);
     $step = 'upload';
   }
   elsif ($step eq 'upload') {
@@ -292,6 +294,7 @@ sub contribution : Runmode {
       # load to database
       %results = load2db($filename,$self->dbh,$upload_dir,@m);
       $lgid = $results{'language id'};
+      $srcabbrsave = $results{'source abbr'};
       @validation = @{$results{'messages'}};
       $step = 'thanks';
     }
@@ -311,7 +314,8 @@ sub contribution : Runmode {
 		step=>$step,
 		filename=>$filename,
 		file=>$file,				     
-		lgid=>$lgid,
+		lgid=>$lgid,			     
+		srcabbrsave=>$srcabbrsave,
 		grpids=>$grpids,
 		messages=>$results{'status'},
 		provided=>\%metadata,
@@ -333,6 +337,61 @@ sub bulkapproval : Runmode {
   return $self->tt_process("admin/bulkapproval.tt", {users => $users });
 }
 
+sub bulktag : Runmode {
+  my $self = shift;
+  $self->require_privs(8);
+  # takes a list of rns and a tag and tags all the specified rns for the selected user.
+  # everything is done via AJAX in the template. Nothing else to do here!
+  my $users = $self->dbh->selectall_arrayref("SELECT distinct username,uid FROM lx_et_hash
+  	LEFT JOIN users USING (uid)
+  	WHERE uid!=8
+  	ORDER BY username LIMIT 500");
+  return $self->tt_process("admin/bulktag.tt", {users => $users });
+}
+
+sub deletedata : Runmode {
+  my $self = shift;
+  $self->require_privs(8);
+  my $msg;
+  # Deletes the data specified
+  my $srcabbrs = $self->dbh->selectall_arrayref("SELECT distinct srcabbr FROM srcbib ORDER BY srcabbr LIMIT 500");
+
+  if ($self->query->param('srcabbr') ne "") {
+    my $srcabbr = $self->query->param('srcabbr');
+    my $lgid = $self->query->param('lgid');
+    if ($lgid ne '') {
+      my $checksrcabbr = $self->dbh->selectrow_array("SELECT srcabbr FROM `languagenames` WHERE lgid=?", undef, $lgid);
+      if ($checksrcabbr ne $srcabbr) {
+	$msg = "source abbreviation for $lgid is '$checksrcabbr', not '$srcabbr'; no deleting done";
+	return $self->tt_process("admin/deletedata.tt", {srcabbrs => $srcabbrs, msg => $msg });
+      }
+    }
+    else {
+      my $checklgid = $self->dbh->selectrow_array("SELECT lgid FROM `languagenames` WHERE srcabbr=? LIMIT 1", undef, $srcabbr);
+      if ($lgid ne $checklgid) {
+	$msg = "lgid for $srcabbr is '$checklgid', not '$lgid'; no deleting done";
+	return $self->tt_process("admin/deletedata.tt", {srcabbrs => $srcabbrs, msg => $msg });
+      }
+    }
+    my $count = $self->dbh->selectrow_array("SELECT count(*) FROM `lexicon` WHERE lgid=?", undef, $lgid);
+    $self->dbh->do("DELETE FROM lexicon WHERE lgid=?", undef, $lgid);
+    $self->dbh->do("DELETE FROM languagenames WHERE lgid=?", undef, $lgid);
+    $msg = "Deleting source: '$srcabbr', lgid=$lgid";
+    $msg .= "<br>$count lexicon records deleted.";
+    if ($self->query->param('delsrc')) {
+      my $lgcount = $self->dbh->selectrow_array("SELECT count(*) FROM `languagenames` WHERE srcabbr=?", undef, $srcabbr);
+      if ($lgcount == 0) {
+	$msg .= '<br>Deleted source bibliography entry as well.';
+	$self->dbh->do("DELETE FROM srcbib WHERE srcabbr=?", undef, $srcabbr);
+      }
+      else {
+	$msg .= "<br>Source bibliography entry not deleted! $lgcount language record(s) remain which refer to this source!";
+      }
+    }
+  }
+
+  return $self->tt_process("admin/deletedata.tt", {srcabbrs => $srcabbrs, msg => $msg });
+}
 
 sub changes : Runmode {
 	my $self = shift;

@@ -73,7 +73,7 @@ SELECT chapters.semkey, chapters.chaptertitle,
 	COUNT(DISTINCT notes.noteid) as notecount, MAX(notes.notetype = 'G') as haschart, MAX(notes.notetype != 'I') as public_notes,
 	chapters.semcat, chapters.old_chapter, chapters.old_subchapter, chapters.id,
 	COUNT(DISTINCT glosswords.word),
-	GROUP_CONCAT(DISTINCT glosswords.word SEPARATOR ', ') AS some_glosswords,
+	GROUP_CONCAT(DISTINCT glosswords.word SEPARATOR '; ') AS some_glosswords,
 	(SELECT COUNT(*) FROM lexicon WHERE lexicon.semkey=chapters.semkey AND lexicon.status != "HIDE" AND lexicon.status != "DELETED") AS wcount,
 	IF(chapters.f=0, 1, 0) as isVOL, IF(chapters.c=0, 1, 0) as isFASC
 FROM chapters LEFT JOIN notes ON (notes.id=chapters.semkey) LEFT JOIN glosswords ON (chapters.semkey=glosswords.semkey)

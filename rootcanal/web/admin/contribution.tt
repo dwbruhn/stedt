@@ -2,6 +2,7 @@
 <form action="[% self_url %]/admin/contribution" method="post" enctype="multipart/form-data">
 <input type="hidden" name="filename" value="[% filename %]">
 <input type="hidden" name="lgid" value="[% lgid %]">
+<input type="hidden" name="srcabbrsave" value="[% srcabbrsave %]">
 <input type="hidden" name="step" value="[% step %]">
 [%- IF step == 'thanks' -%]
 <h2>Step 3: Your file has been uploaded!</h2>
