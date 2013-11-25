@@ -43,7 +43,7 @@ sub validateContribution {
           }
 	# check if gloss exists
 	if ($column eq '') {
-	  push(@messages, 'no gloss.');
+	  push(@messages, "no gloss, line $lines");
 	  $show_stopper = 1 ;
 	}
       }
@@ -51,10 +51,10 @@ sub validateContribution {
 	# do reflex tests
 	# check if reflex exists
 	    if ($column eq '') {
-	      push(@messages, 'no reflex.');
+	      push(@messages, "no reflex, line $lines");
 	      $show_stopper = 1 ;
 	}
-        if ($columns[$i] =~ /[,'";.?]/) {
+        if ($columns[$i] =~ /[m]/) {
           push(@messages, "unusual entry in column 'reflex', line $lines");
           $show_stopper = 1;
         }
