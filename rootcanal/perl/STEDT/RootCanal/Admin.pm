@@ -118,7 +118,7 @@ sub validateContribution {
           }
 	# check if gloss exists
 	if ($column eq '') {
-	  push(@messages, 'no gloss.');
+	  push(@messages, 'no gloss, lines $lines');
 	  $show_stopper = 1 ;
 	  $problems++;
 	}
@@ -127,7 +127,7 @@ sub validateContribution {
 	# do reflex tests
 	# check if reflex exists
 	    if ($column eq '') {
-	      push(@messages, 'no reflex.');
+	      push(@messages, 'no reflex, lines $lines');
 	      $show_stopper = 1 ;
 	      $problems++;
 	}
