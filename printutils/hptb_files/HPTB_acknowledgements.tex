@@ -1,0 +1,62 @@
+\documentclass[12pt]{article}
+\usepackage[polutonikogreek,latin,english]{babel}
+\def\linesparpage$\#$1{
+\baselineskip=\textheight
+\divide\baselineskip by $\#$1} % lineheight = textheight / line$\#$
+\usepackage{fancyhdr}
+%\usepackage[margin=.25in]{geometry}
+\pagestyle{plain}
+\usepackage{microtype}
+\usepackage{lineno}
+\usepackage{acronym}
+\usepackage{amsmath,amssymb}
+\exhyphenpenalty=25000
+%\renewcommand\familydefault{\sfdefault}
+\usepackage{fullpage}
+\usepackage{titlesec}
+\usepackage{hyperref}
+\usepackage{tikz}
+\usepackage{color,colortbl}
+\usetikzlibrary{decorations.pathreplacing,calc}
+\usepackage{tikz-qtree}
+\newcommand{\tikzmark}[1]{\tikz[overlay,remember picture] \node ($\#$1) {};}
+\usepackage[T1]{fontenc}
+%\usepackage[osf]{libertine}
+\usepackage{makeidx}
+\usepackage{graphicx}
+\usepackage{setspace}
+\usepackage{covington}
+\def\citeapos$\#$1{\citeauthor{$\#$1}'s (\citeyear{$\#$1})}
+\usepackage{natbib}
+\Roman{section}
+\pagestyle{empty}
+\bibpunct[:]{(}{)}{,}{a}{}{,}
+\usepackage{tipa}
+%\makeindex
+\begin{document}
+
+\doublespacing
+
+\section{Acknowledgements}
+I am deeply grateful to the National Science Foundation and the National Endowment for the Humanities for their unswerving support of the {\it Sino-Tibetan Etymological Dictionary and Thesaurus} (STEDT) Project since 1987, even through times of budgetary stringency. I would especially like to thank Dr. Paul G. Chapin, of the Language, Cognition, and Social Behavior division of NSF; and Dr. Guinevere Greist, Dr. Helen Ag\"uera and Dr. Martha Bohachevsky-Chomiak of the Research Tools Division of NEH. I can only hope that the fruits of this project will repay their confidence and patience. I would also like to thank Anthony Meadow, founder of the Bear River Associates software development firm, now in Oakland, who generously gave many hours of his time during 1986-87 in {\it pro bono} consultations about how to formulate the computer needs of the project in our original grant proposals to NSF and NEH. Several Organized Research Units and academic departments of the Berkeley campus have given their moral or practical support to the STEDT project, including the Center for Southeast Asia Studies, the Center for Chinese Studies, the Department of Linguistics, the Department of South and Southeast Asian Studies, the Department of East Asian Languages and Cultures, and especially the Institute of International and Area Studies, to whose administrative staff I am deeply obliged: Karin Beros, Management Services Officer and all-around trouble-shooter, who was instrumental in solving the practical problems of getting the project started back in 1987; Jerilyn C. Foush\'ee, who has handled our budget and helped with our grant proposals and reports since 1987; and Nell Haskell (1987-95) and Kerttu K. McCray (1995-2002), who have kept track of personnel matters. The STEDT project has been greatly enriched by the specialized expertise, unpublished data, and intellectual stimulation provided by a succession of visiting scholars, who have spent anywhere from a few weeks to more than two years at the project headquarters: Martine Mazaudon and Boyd M. Michailovsky (1987-89, 1990-91) Centre National de la Recherche Scientifique (Paris), Himalayan languages ; {\sc Dai} Qingxia and {\sc Xu} Xijian (Oct.-Nov. 1989) Nationalities University (Beijing), TB languages of China ; {\sc Zhang} Jichuan (Nov. 1990) Chinese Academy of Social Sciences (Beijing), Tibetan dialects ; the late Rev. George Kraft (1990-99), Khams Tibetan ; Nicolas Tournadre (Feb. 1991) University of Paris III, Tibetan ; {\sc Sun} Hongkai and {\sc Liu} Guangkun (April-May, 1991) Chinese Academy of Social Sciences (Beijing), TB languages of China ; {\sc Yabu} Shiro (April-Aug. 1994) Osaka Foreign Languages University, Burmish languages and Xixia ; William H. Baxter III (May, 1995) University of Michigan, Old Chinese ; Balthasar Bickel (Sept.-Oct. 1996; Feb.-Mar. 1997) University of Z\"urich and Johann Gutenberg University (Mainz), Kiranti languages ; {\sc Lin} Ying-chin (1997-98) Academia Sinica, Taipei (Xixia, Muya); David B. Solnit (1998-) STEDT, Karenic ; {\sc Wu} Sheng-hsiung (spring, 2002) Taiwan Normal University, Chinese phonology ; {\sc Ikeda} Takumi (2002-03) Kyoto University, Qiangic languages . Most of all, I am indebted to the phalanges of talented students, past and present, who have been working at STEDT anywhere from five to 20 or 30 hours per week, performing a host of vital tasks such as the inputting and proofreading of hundreds of thousands of lexical records, the development of special fonts and relational database software, computer maintenance and troubleshooting, formatting articles for our journal {\it Linguistics of the Tibeto-Burman Area}, and editing the publications in the STEDT Monograph Series. At least 50 researchers have been employed at STEDT since 1987, mostly graduate students in the Berkeley Linguistics and East Asian Languages and Cultures Departments, but also including several undergraduate volunteers and non-enrolled or former students. Here they are, in an alphabetical honor roll:\footnote{Names with asterisks belong to students who have received their doctorates since their STEDT stint.} Madeleine Adkins, Jocelyn Ahlers, Shelley Axmaker, Stephen P. Baron, *Leela Bilmes (Goldstein), Michael Brodhead, Jeff Chan, Patrick Chew, Melissa Chin, Richard S. Cook, Jeff Dale, Amy Dolcourt, Julia Elliott, *Jonathan P. Evans, Cynthia Gould, Daniel Granville, *Joshua Guenter, *Kira Hall, *Zev J. Handel, Annie Jaisser, *Matthew Juge, Nina Keefer, Jean Kim, *Aim\'ee Lahaussois (Bartosik), *Randy J. LaPolla, *Jennifer Leehey, Anita Liang, Liberty Lidz, *John B. Lowe, Jean McAneny, *Pamela Morgan, David Mortensen, Karin Myrhe, Ju Namkung, *Toshio Ohori, *Weera Ostapirat, *Jeong-Woon Park, Jason Patent, Chris Redfearn, S. Ruffin, Keith Sanders, Marina Shawver, Elizabeth Shriberg, Helen Singmaster, Tanya Smith, Gabriella Solomon, Silvia Sotomayor, *Jackson Tianshin Sun, Laurel Sutton, *Prashanta Tripura, Nancy Urban, Kenneth VanBik, Blong Xiong, *Liansheng Zhang. It is a pleasure to single out several ``Stedtniki''  whose contributions to this project and the present volume have been particularly outstanding, and all of whose computorial expertise infinitely outstrips my own:
+\begin{itemize}
+\item John B. (``J.B.'' ) Lowe, the only researcher who has been continuously working at STEDT since its inception in 1987, designed our initial computer environment and has been fine-tuning it ever since, creating original database software adapted to the highly specialized needs of the project and breaking new conceptual ground in the use of the computer for etymological research.\footnote{J.B.'s work at STEDT has already spun off into several other etymological projects on which he has consulted here and abroad: M. Mazaudon and Boyd Michailovsky's {\it Reconstruction Engine} (Paris) for testing putative cognate sets in Himalayan languages; L. M. Hyman's {\it Comparative Bantu On-line Dictionary} (CBOLD, Berkeley); Sjors van Driem and K.B. Kepping's {\it Tangut Dictionary Project} (Leiden), and Sharon Inkelas'  {\it Turkish Electronic Living Lexicon}.}
+\item Randy J. LaPolla, now teaching at the City University of Hongkong, has also been affiliated with STEDT since the beginning. Until receiving his doctorate in 1990, he played a vital part in our activities, including the preparation of STEDT Monographs and the processing of fieldworkers' questionnaires. His superb knowledge of Chinese has been a prime asset to the project.
+\item Zev J. Handel (``Z as in {\it zebra}, V as in {\it violin}'', as he explains over the telephone), is a specialist in Chinese historical phonology, now teaching at the University of Washington. He was active at STEDT in the 1990's, and had a major role in the formatting of our prototype ``fascicle''  on the {\it Reproductive System} for our projected {\item Bodyparts} volume, adding bells and whistles like the program to insert notes at various points in the etymologies, and transforming my hand-scrawled semantic diagrams into elegant computer graphics. I am especially grateful to him for producing the concise comparison of three of the most influential systems for reconstructing Old Chinese that appears as an Appendix to this {\it Handbook}.
+\end{itemize}
+
+When I went off on sabbatical to Taiwan during 1995-96, I left the day-to-day running of STEDT in the capable hands of J.B. and Zev. One day I e-mailed them from Taipei, referring to them as the ``duumvirate'' . Back came an aggrieved message from J.B., protesting that they really would rather be called the ``smart-virate'' . No argument there.
+
+\begin{itemize}
+\item Kenneth VanBik is a native speaker of Lai Chin and a graduate of Rangoon University. Possessing an intimate knowledge of languages from two branches of Tibeto- Burman, he was able to identify a number of new Burmese/Chin cognates that are thus reconstructible at the PTB level. His etymologies are included in this volume, marked ``KVB''.
+\item Richard S. Cook, currently producing a mammoth dissertation on the Eastern Han ``Grammaticon''  {\it Shu\=o W\'en Ji\v{e} Z\`i} , has been the chief architect of the formatting of this Handbook  during 2002-3. It was his idea to transfer the whole MS from Microsoft Word 5.1a to Adobe FrameMaker\textsuperscript{TM}, an arduous process that has paid off in the end, as the attractive appearance of the book testifies. Richard wrote Appendix B  (in consultation with Zev Handel), and extracted the etymologies from the electronic  Dictionary of Lahu  files to supplement the Index of Proto-Forms . He wrote the computer programs to format the Index of Proto-Forms  and to generate and format the indexes of {\it Proto-Glosses}, {\it Proto-Root-Syllables}, {\it Proper Names}, and {\it Chinese Character}s. He produced the kerned version of the STEDT PostScript font family, as well as the font for the rare Chinese characters found in this book.
+\item David Mortensen, a linguistics graduate student specializing in Hmong-Mien, has contributed equally to the production of this {\it Handbook}. An accomplished computorial troubleshooter, he did much formatting work, and has carried out such vital tasks as assuring the integrity of the {\it Handbook's} innumerable internal cross-references.
+\end{itemize}
+Both Richard and David have spent endless gruelling hours with me in the compilation of the various Indexes which greatly increase the utility and accessibility of this book.
+      
+\section*{}
+We usually have a pretty good time at STEDT, sometimes wearing our project T-shirts, and communicating in a strange polysyllabic jargon composed of items like {\it semcat}, {\it pan-allofamic formulas}, {\it extra-fascicular etyma}, {\it supporting forms}, {\it add-sourcing}. There is a certain {\it esprit de corps} and air of intellectual excitement, which has seen us through stressful experiences like the break-ins and thefts of our computer equipment (April 1989). To all Stedtniki, past and present, my love and appreciation.
+
+Finally, my sincere thanks to the Editors of the {\it University of California Publications in Linguistics} series, first to Rose Anne White, former UCPL Series Editor, with whom I had a happy working relationship since 1972; to the current UCPL Editor, Katherine Warne; to Michelle Echenique, Electronic Publishing Manager; to John Lynch, Production Editior; and to the Director of U.C. Press, Lynne Withey. Their support and encouragement in the final stages of the editorial process has made it a thoroughly pleasant experience. Last but not least in love, I thank my wife Susan for sustaining me in this effort from start to finish, as she has in all things for over 40 years.
+
+\end{document}
