@@ -354,40 +354,65 @@ sub deletedata : Runmode {
   $self->require_privs(16);
   my $msg;
   # Deletes the data specified
-  my $srcabbrs = $self->dbh->selectall_arrayref("SELECT distinct srcabbr FROM srcbib ORDER BY srcabbr LIMIT 500");
-
-  if ($self->query->param('srcabbr') ne "") {
-    my $srcabbr = $self->query->param('srcabbr');
-    my $lgid = $self->query->param('lgid');
-    if ($lgid ne '') {
+  my $srcabbrs = $self->dbh->selectall_arrayref("SELECT distinct srcabbr FROM srcbib ORDER BY srcabbr LIMIT 1000");
+  my $srcabbr = $self->query->param('srcabbr');
+  my $lgid = $self->query->param('lgid');
+    
+  if ($srcabbr) { 
+    if ($lgid) {
       my $checksrcabbr = $self->dbh->selectrow_array("SELECT srcabbr FROM `languagenames` WHERE lgid=?", undef, $lgid);
       if ($checksrcabbr ne $srcabbr) {
-	$msg = "source abbreviation for $lgid is '$checksrcabbr', not '$srcabbr'; no deleting done";
+	$msg = "Source abbreviation for lgid $lgid is '$checksrcabbr', not '$srcabbr'<br>No deleting done.";
 	return $self->tt_process("admin/deletedata.tt", {srcabbrs => $srcabbrs, msg => $msg });
       }
     }
-    else {
+    else { #user left lgid blank
       my $checklgid = $self->dbh->selectrow_array("SELECT lgid FROM `languagenames` WHERE srcabbr=? LIMIT 1", undef, $srcabbr);
+      my $checkcount = $self->dbh->selectrow_array("SELECT count(*) FROM `lexicon` WHERE lgid=?", undef, $checklgid);
       if ($lgid ne $checklgid) {
-	$msg = "lgid for $srcabbr is '$checklgid', not '$lgid'; no deleting done";
+	$msg = "Language id for $srcabbr is '$checklgid' (with $checkcount lexicon records), not '$lgid'<br>No deleting done.";
 	return $self->tt_process("admin/deletedata.tt", {srcabbrs => $srcabbrs, msg => $msg });
       }
     }
     my $count = $self->dbh->selectrow_array("SELECT count(*) FROM `lexicon` WHERE lgid=?", undef, $lgid);
-    $self->dbh->do("DELETE FROM lexicon WHERE lgid=?", undef, $lgid);
-    $self->dbh->do("DELETE FROM languagenames WHERE lgid=?", undef, $lgid);
+    if ($count) { # if lexicon records exist, check for tags
+      my @tagged_recs = @{$self->dbh->selectcol_arrayref("SELECT rn FROM lx_et_hash LEFT JOIN `lexicon` USING (rn) WHERE lgid=?", undef, $lgid)};
+      my $num_tags = scalar @tagged_recs;
+      if ($num_tags) { # if there are tags, abort the deletion
+        $msg .= "No deleting done. Lgid $lgid in $srcabbr has $num_tags records tagged.<br>Please untag these records before deleting the source: ";
+        $msg .= join(", ", @tagged_recs);
+        return $self->tt_process("admin/deletedata.tt", {srcabbrs => $srcabbrs, msg => $msg });
+      }
+    }
     $msg = "Deleting source: '$srcabbr', lgid=$lgid";
-    $msg .= "<br>$count lexicon records deleted.";
-    if ($self->query->param('delsrc')) {
+    if ($lgid) { # if lgid is defined, delete its lexicon records and languagenames entry
+      if ($count) { # if there are lexicon records
+        $self->dbh->do("DELETE FROM lexicon WHERE lgid=?", undef, $lgid);
+        $msg .= "<br>$count lexicon records associated with lgid $lgid deleted.";
+      }
+      $self->dbh->do("DELETE FROM languagenames WHERE lgid=?", undef, $lgid);
+      $msg .= "<br>Entry for lgid $lgid deleted.";
+
+    }
+    else { # otherwise, this source doesn't have any lgid entries 
+      $msg .= "<br>$srcabbr has no lgid entries to delete.";
+    }
+    if ($self->query->param('delsrc')) { # if user checked 'delete source bib entry'
       my $lgcount = $self->dbh->selectrow_array("SELECT count(*) FROM `languagenames` WHERE srcabbr=?", undef, $srcabbr);
       if ($lgcount == 0) {
-	$msg .= '<br>Deleted source bibliography entry as well.';
+	$msg .= '<br>Deleted source bibliography entry.';
 	$self->dbh->do("DELETE FROM srcbib WHERE srcabbr=?", undef, $srcabbr);
       }
       else {
 	$msg .= "<br>Source bibliography entry not deleted! $lgcount language record(s) remain which refer to this source!";
       }
     }
+    else { # user didn't check 'delete source bib entry'
+      $msg .= "<br>Source bibliography entry not deleted."
+    }
+  }
+  else { # initial view, or user didn't select source abbreviation
+    $msg = "Please select a source abbreviation.";
   }
 
   return $self->tt_process("admin/deletedata.tt", {srcabbrs => $srcabbrs, msg => $msg });
