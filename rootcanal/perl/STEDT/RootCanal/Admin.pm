@@ -94,6 +94,7 @@ sub validateContribution {
   my $row_length;
   my $problems = 0;
   while ( <$fh> ) {
+    s/\r//g;
     chomp;
     $lines++;
     # check header
@@ -189,6 +190,7 @@ sub load2db {
   $dbh->do("INSERT languagenames (language, lgabbr, lgsort, srcabbr, lgcode, grpid) values (?,?,?,?,?,?)", undef, $m[0],$m[1],$lgsort,$m[2],$lgcode, $m[9]);
   my $lgid = $dbh->selectrow_array("SELECT LAST_INSERT_ID();");
   while (<INPUTFILE> ) {
+    s/\r//g;
     chomp;
     $lines++;
     # check header
@@ -196,14 +198,14 @@ sub load2db {
       getheader($_);
       next;
     }
-    #print STDERR  $lines . ' lines read.';
     my @columns = split "\t";
     my $gloss  = @columns[ $headerindex{'gloss'} ];
     my $reflex = @columns[ $headerindex{'reflex'} ];
-    my $srcid  = $headerindex{'id'} ? @columns[ $headerindex{'id'} ] : '';
-    my $pos    = $headerindex{'pos'} ? @columns[ $headerindex{'pos'} ] : '';
+    my $srcid  = @columns[ $headerindex{'id'} ] || '';
+    my $pos    = @columns[ $headerindex{'pos'} ] || '';
     my $semkey = '';
-    $dbh->do("INSERT lexicon (reflex, gloss, gfn, lgid, semkey, srcid) values (?,?,?,?,?,?)", undef, $reflex,$gloss,$pos || '',$lgid,$semkey,$srcid || '');
+    $dbh->do("INSERT lexicon (reflex, gloss, gfn, lgid, semkey, srcid) values (?,?,?,?,?,?)", undef, $reflex,$gloss,$pos,$lgid,$semkey,$srcid);
+    #print STDERR "$lines lines read :: $reflex,$gloss,$pos,$lgid,$semkey,$srcid\n";
   }
   push(@messages, $lines-1 . ' lines loaded');
   #print STDERR  $lines-1 . ' lines loaded';
