@@ -1,0 +1,8 @@
+The stuff required to generate a TeX bibliography from the STEDT database (srcbib table) lives here.
+
+To extract the data and generate the .bbl file needed, type:
+
+./makeRef.sh
+
+This does everything, including copything the .bbl file up one directory level so the dissemination 
+programs can use it.
