@@ -1,5 +1,5 @@
 [% PROCESS header.tt title="STEDT Database: Contribution" %]
-<form action="[% self_url %]/admin/contribution" method="post" enctype="multipart/form-data">
+<form action="[% self_url %]/contribution" method="post" enctype="multipart/form-data">
 <input type="hidden" name="filename" value="[% filename %]">
 <input type="hidden" name="lgid" value="[% lgid %]">
 <input type="hidden" name="srcabbrsave" value="[% srcabbrsave %]">
