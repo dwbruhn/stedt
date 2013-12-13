@@ -1,5 +1,7 @@
 
 while (<>) {
+s/#/\\#/g;
+s/&/\\@/g;
 my ( $srcabbr    ,
  $citation   ,
  $author     ,
