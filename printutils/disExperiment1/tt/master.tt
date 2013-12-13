@@ -62,15 +62,18 @@
 \makeatletter
 \patchcmd{\chapter}{\if@openright\cleardoublepage\else\clearpage\fi}{}{}{}
 
+\usepackage{acronym}
+\usepackage{natbib}
+
 \begin{document}
 \pdfpageheight=22in
 \pdfpagewidth=16in
 \pdfbookmark[1]{ [% semkey %]. [% xtitle %]}{titlepage}
 \setcounter{secnumdepth}{0} % don't number sections, just chapters
 \setlength{\columnsep}{3em}
-\setlength{\columnseprule}{0.1pt}
-\setlength\textwidth{14in}
-\setlength\textheight{20in}
+\setlength{\columnseprule}{0.05pt}
+\setlength\textwidth{15in}
+\setlength\textheight{21in}
 \setlength\columnwidth{7in}
 % \setlength\columnheight{18in}
 
@@ -95,8 +98,8 @@
 
 \phantomsection
 \addcontentsline{toc}{chapter}{References}
-\bibliographystyle{amsalpha}
+\bibliographystyle{apalike}
 \renewcommand{\bibname}{References}
-\bibliography{thesis}
+\bibliography{stedtreferences}
 
 \end{document}

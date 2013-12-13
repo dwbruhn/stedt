@@ -25,9 +25,11 @@ rm tex/$1-$2-$3-*
 set -e
 perl extract.pl $1 $2 $3 $4
 cd tex/
-texfile=`ls $1-$2-$3-master.tex` 
+#texfile=`ls $1-$2-$3-master` 
+texfile="$1-$2-$3-master" 
 # TeX it!     
-xelatex $texfile # > /dev/null
-xelatex $texfile # > /dev/null
-xelatex $texfile # > /dev/null
-xelatex $texfile # > /dev/null
+xelatex ${texfile}.tex # > /dev/null
+bibtex ${texfile}.aux
+xelatex ${texfile}.tex # > /dev/null
+xelatex ${texfile}.tex # > /dev/null
+xelatex ${texfile}.tex # > /dev/null

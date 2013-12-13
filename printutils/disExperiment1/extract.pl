@@ -5,6 +5,7 @@
 # 2011.02.03
 #
 # ...thoroughly hacked in details to support two-column output, and other features.
+# jbl 2013
 #
 # see USAGE, below.
 #
@@ -236,7 +237,7 @@ EndOfSQL
 				&& eq_reflexes($oldform, $form)) {
 				$recs->[$_][2] = ''; # mark as empty for skipping later
 				$lastrec->[6] = merge_glosses($oldgloss,$gloss);
-				$lastrec->[8] .= ";$srcabbr";
+				$lastrec->[8] .= ";\\citealt{$srcabbr}";
 				$lastrec->[9] .= ";$srcid";
 				
 				if ($notern) {
@@ -309,7 +310,7 @@ EndOfSQL
 			$gfn =~ s/\.$//;	# remove any trailing period from gfn to avoid double periods
 			my $gloss_string = ($gfn) ? "$gloss ($gfn.)" : $gloss; # concatenate with gfn if it's not empty
 			$text .= join(' &', $lg, escape_tex(      $form      ,1),
-				escape_tex($gloss_string), src_concat($srcabbr, $srcid), '');	# extra slot for footnotes...
+				escape_tex($gloss_string), src_concat("\\citealt{$srcabbr}", $srcid), '');	# extra slot for footnotes...
 			
 			# footnotes, if any
 			if ($notern) {
