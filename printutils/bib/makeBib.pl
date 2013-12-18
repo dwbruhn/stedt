@@ -31,11 +31,11 @@ my ( $srcabbr    ,
 $year =~ s/\.//;
 $imprint =~ s/^ +//g;
 my ($address, $publisher) = split ':',$imprint;
-$publisher = 'unknown' unless $publisher;
+$publisher = '' unless $publisher;
 $publisher =~ s/^ +//g;
 
 my $type = 'book';
-my $publisher = 'unknown';
+my $publisher = '';
 my $journal;
 my $pages;
 if ($imprint =~ /:\d/) {
@@ -53,8 +53,12 @@ print "year     = {$year},\n";
 if ($imprint ne "") { print "imprint  = {$imprint},\n"; }
 if ($address ne "") { print "address  = {$address},\n"; }
 if ($publisher ne "") { print "publisher  = {$publisher},\n"; }
-if ($journal ne "") { print "journal  = {$journal},\n"; }
-print "title    = {$title}\n";
+if ($journal ne "") { print "journal  = {},\n"; }
+if ($imprint eq "") { print "imprint  = {},\n"; }
+if ($address eq "") { print "address  = {},\n"; }
+if ($publisher eq "") { print "publisher  = {},\n"; }
+if ($journal eq "") { print "journal  = {},\n"; }
+print "title    = {{$title}}\n";
 #print "status   = {$status},\n";
 #print "location = {$location},\n";
 #print "notes    = {$notes },\n";
