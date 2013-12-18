@@ -48,7 +48,7 @@ if ($imprint =~ /:\d/) {
 
 print '@' . $type . '{' . $srcabbr . ",\n";
 #print "citation = {$citation},\n";
-print "author   = {$author},\n";
+print "author   = {{$author}},\n";
 print "year     = {$year},\n";
 if ($imprint ne "") { print "imprint  = {$imprint},\n"; }
 if ($address ne "") { print "address  = {$address},\n"; }
