@@ -30,6 +30,7 @@ my ( $srcabbr    ,
 
 $year =~ s/\.//;
 $imprint =~ s/^ +//g;
+$imprint =~ s/\\n//g; #trying to get rid of '\n' in ' \nAnne O. Yue and Mitsuaki Endo (eds.)'
 my ($address, $publisher) = split ':',$imprint;
 $publisher = '' unless $publisher;
 $publisher =~ s/^ +//g;
