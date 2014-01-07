@@ -21,12 +21,21 @@ sub browser : StartRunMode {
 SELECT chapters.semkey, chapters.chaptertitle, 
 	(SELECT COUNT(*) FROM etyma WHERE chapter=chapters.semkey AND public=1 AND etyma.status != 'DELETE' $blessed) AS num_public,
 	(SELECT COUNT(*) FROM etyma WHERE chapter=chapters.semkey AND etyma.status != 'DELETE' $blessed),
-	COUNT(DISTINCT notes.noteid), MAX(notes.notetype = 'G'), MAX(notes.notetype != 'I') as public_notes,
-	chapters.id, IF(chapters.f=0, 1, 0) as isVOL, IF(chapters.c=0, 1, 0) as isFASC
+	COUNT(DISTINCT notes.noteid), MAX(notes.notetype = 'G'), MAX(notes.notetype != 'I') AS public_notes,
+	chapters.id, IF(chapters.f=0, 1, 0) AS isVOL, IF(chapters.c=0, 1, 0) AS isFASC, 0 AS indent
 FROM chapters LEFT JOIN notes ON (notes.id=chapters.semkey)
 GROUP BY 1 $public_ch ORDER BY v,f,c,s1,s2,s3
 SQL
 	my $chapters = $self->dbh->selectall_arrayref($chapterquery);
+
+	# set indentation level
+	foreach my $row (@$chapters) {
+		my $str = $row->[0];
+		$str =~ s/\.0//g;
+		my $indent_level = $str =~ tr/.//;
+		$row->[10] = $indent_level;
+	}
+
 	# chapters that appear in etyma but not in chapters table
 	my $e_ghost_chaps = $self->dbh->selectall_arrayref(<<SQL);
 SELECT etyma.chapter, SUM(etyma.public), COUNT(*)
@@ -69,13 +78,13 @@ sub tweak : RunMode {
 	my $chapterquery = <<SQL;
 SELECT chapters.semkey, chapters.chaptertitle, 
 	(SELECT COUNT(*) FROM etyma WHERE chapter=chapters.semkey AND public=1 AND etyma.status != 'DELETE' $blessed) AS num_public,
-	(SELECT COUNT(*) FROM etyma WHERE chapter=chapters.semkey AND etyma.status != 'DELETE' $blessed) as etycount,
-	COUNT(DISTINCT notes.noteid) as notecount, MAX(notes.notetype = 'G') as haschart, MAX(notes.notetype != 'I') as public_notes,
+	(SELECT COUNT(*) FROM etyma WHERE chapter=chapters.semkey AND etyma.status != 'DELETE' $blessed) AS etycount,
+	COUNT(DISTINCT notes.noteid) AS notecount, MAX(notes.notetype = 'G') AS haschart, MAX(notes.notetype != 'I') AS public_notes,
 	chapters.semcat, chapters.old_chapter, chapters.old_subchapter, chapters.id,
 	COUNT(DISTINCT glosswords.word),
 	GROUP_CONCAT(DISTINCT glosswords.word SEPARATOR '; ') AS some_glosswords,
 	(SELECT COUNT(*) FROM lexicon WHERE lexicon.semkey=chapters.semkey AND lexicon.status != "HIDE" AND lexicon.status != "DELETED") AS wcount,
-	IF(chapters.f=0, 1, 0) as isVOL, IF(chapters.c=0, 1, 0) as isFASC
+	IF(chapters.f=0, 1, 0) AS isVOL, IF(chapters.c=0, 1, 0) AS isFASC
 FROM chapters LEFT JOIN notes ON (notes.id=chapters.semkey) LEFT JOIN glosswords ON (chapters.semkey=glosswords.semkey)
 GROUP BY 1 $public_ch ORDER BY v,f,c,s1,s2,s3
 SQL
@@ -101,6 +110,14 @@ SQL
 	  $result = int($result * 100);
 	  #print STDERR "$semkey:  $semkeycounts{$semkey}\n";
 	  push @$row, $semkeycounts{$semkey}, $result;
+	}
+	
+	# set indentation level
+	foreach my $row (@$chapters) {
+		my $str = $row->[0];
+		$str =~ s/\.0//g;
+		my $indent_level = $str =~ tr/.//;
+		push @$row, $indent_level;
 	}
 
 	return $self->tt_process('chapter_tweaker.tt', {

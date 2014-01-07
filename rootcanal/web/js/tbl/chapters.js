@@ -4,6 +4,10 @@ setup.chapters = {
 	noedit: true,
 	hide: true
     },
+    'chapters.indent': {
+	noedit: true,
+	hide: true
+    },
     'chapters.semkey' : {
 	label: 'semkey',
 	noedit: !(stedtuserprivs & 8),
@@ -12,11 +16,11 @@ setup.chapters = {
     'chapters.chaptertitle' : {
 	label: 'title',
 	noedit: !(stedtuserprivs & 8),
-	size: 80
+	size: 100
     },
     'etyma' : {
         noedit: true,
-        size: 24
+        size: 12
     },
     'wcount' : {
 	label: 'lexicon records',
@@ -26,7 +30,7 @@ setup.chapters = {
     'haschart' : {
 	label: 'flow chart?',
 	noedit: true,
-	size: 24
+	size: 12
     },
     'notecount' : {
 	label: 'notes',

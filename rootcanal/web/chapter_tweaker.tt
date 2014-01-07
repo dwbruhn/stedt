@@ -26,6 +26,7 @@ Volumes:
 	<th id="eDiss">eDiss</th>
 	<th id="eDiss">eDiss</th>
 [% END # privs check -%]
+	<th id="chapters.indent">indent</th>
 	<th id="chapters.id">id</th>
 </tr></thead>
 <tbody>
@@ -45,6 +46,7 @@ Volumes:
 <td><a target="eDiss" href="https://corpus.linguistics.berkeley.edu/~stedt-cgi-ssl/makefasc.pl?semkey=[% r.0 | uri %]">Draft</a></td>
 <td><a target="eDiss" href="https://corpus.linguistics.berkeley.edu/~stedt-cgi-ssl/makefasc.pl?semkey=[% r.0 | uri %]&final=true">Final</a></td>
 [% END # approver privs check -%]
+<td id='indent_[% r.10 %]'>[% r.18 %]</td>
 <td>[% r.10 %]</td>
 </tr>
 [% END -%]
@@ -54,6 +56,31 @@ Volumes:
 <script src="[% self_base %]js/tbl/chapters.js"></script>
 <script>
 TableKit.Raw.init('ch', 'chapters', setup['chapters'][% IF c.has_privs(8) %], '[% self_url %]/update'[% END %]);
+
+// indentation of semkey and title
+var tweak_table = $('ch').getElementsByTagName('tbody')[0];
+
+// get value of indent level and setup spaces
+for (var i = 0, row; row = tweak_table.rows[i]; i++) {
+	var row_id = $('ch').getElementsByTagName('tbody')[0].rows[i].cells[$('ch').getElementsByTagName('tbody')[0].rows[i].cells.length-1].innerText;
+	var indent_level = $('indent_'+row_id).innerText;
+	var spaces = '';
+	for (var j = 0; j < indent_level; j++) {
+		spaces += '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+	}
+
+// don't indent x.x row
+if ($('ch_'+row_id).children[0].lastChild.innerHTML === 'x.x') {
+	spaces = '';
+}
+
+// indent semkey
+$('ch_'+row_id).children[0].lastChild.innerHTML = spaces + $('ch_'+row_id).children[0].lastChild.innerHTML;
+
+// indent title
+$('ch_'+row_id).children[1].innerHTML = spaces + $('ch_'+row_id).children[1].innerHTML;
+
+}
 </script>
 </body>
 </html>
