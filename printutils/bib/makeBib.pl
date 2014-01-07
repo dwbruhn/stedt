@@ -49,7 +49,10 @@ if ($imprint =~ /:\d/) {
 
 print '@' . $type . '{' . $srcabbr . ",\n";
 #print "citation = {$citation},\n";
-print "author   = {{$author}},\n";
+#if ($author =~ "Dai") { print "author   = {{$author}},\n"; } elsif { print "author  = {$author},\n"; }
+#if ($author =~ "Hongkai") { print "author   = {{$author}},\n"; } elsif { print "author  = {$author},\n"; }
+if ($author =~ ",") { print "author  = {$author},\n"; } else { print "author   = {{$author}},\n"; }
+#print "author   = {{$author}},\n";
 print "year     = {$year},\n";
 if ($imprint ne "") { print "imprint  = {$imprint},\n"; }
 if ($address ne "") { print "address  = {$address},\n"; }
