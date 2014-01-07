@@ -22,7 +22,7 @@ Volumes:
 <tbody>
 [% FOREACH r IN ch -%]
 <tr>
-<td><a name="[% r.0 | uri %]"></a><a target="notes" href="[% self_url %]/chap/[% r.0| uri %]">[% r.0 %]</a></td>
+<td><a name="[% r.0 | uri %]"></a><a target="notes" href="[% self_url %]/chap/[% r.0 | uri %]">[% r.0 %]</a></td>
 <td>[% IF r.8 %]<b>[% ELSIF r.9 %]<i>[% END %][% r.1 | html %][% IF r.8 %]</b>[% ELSIF r.9 %]</i>[% END %]</td>
 [%- IF c.has_privs(1) %]<td>[% r.2 || '' %]</td>[% END -%]
 <td>[% IF r.3 %][%- IF c.has_privs(1) %]<a target="edit_etyma" href="[% self_url %]/edit/etyma?etyma.chapter=[% r.0 | uri %]">[% r.3 %][% ELSE %][% r.3 %][% END # privs check %][% END # r.3 check %]</td>
