@@ -11,12 +11,12 @@ setup.chapters = {
     'chapters.semkey' : {
 	label: 'semkey',
 	noedit: !(stedtuserprivs & 8),
-	size: 60
+	size: 140
     },
     'chapters.chaptertitle' : {
 	label: 'title',
 	noedit: !(stedtuserprivs & 8),
-	size: 100
+	size: 250
     },
     'etyma' : {
         noedit: true,

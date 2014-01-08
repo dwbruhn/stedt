@@ -62,8 +62,8 @@ var tweak_table = $('ch').getElementsByTagName('tbody')[0];
 
 // get value of indent level and setup spaces
 for (var i = 0, row; row = tweak_table.rows[i]; i++) {
-	var row_id = $('ch').getElementsByTagName('tbody')[0].rows[i].cells[$('ch').getElementsByTagName('tbody')[0].rows[i].cells.length-1].innerText;
-	var indent_level = $('indent_'+row_id).innerText;
+	var row_id = $('ch').getElementsByTagName('tbody')[0].rows[i].cells[$('ch').getElementsByTagName('tbody')[0].rows[i].cells.length-1].textContent;
+	var indent_level = $('indent_'+row_id).textContent;
 	var spaces = '';
 	for (var j = 0; j < indent_level; j++) {
 		spaces += '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
