@@ -2,7 +2,8 @@
 <p>Cite as follows:</p>
 
 <p align="center" style="width:50%">
-[% author %] [% year %] <cite>[% doc_title %]</cite> [% imprint %]
+[% # only insert periods if fields don't already contain punctuation (e.g. period following middle initial) %]
+[% author %][% author.search('\.$') ? '' : '.' %] [% year %][% year.search('\.$') ? '' : '.' %] <cite>[% doc_title %]</cite>[% doc_title.search('[\.\?]$') ? '' : '.' %][% IF imprint %] [% imprint %][% imprint.search('\.$') ? '' : '.' %][% END %]
 Accessed via STEDT database <tt>&lt;http://stedt.berkeley.edu/search/&gt;</tt>
 on [% USE date %][% date.format(date.now, '%F') %].
 </p>

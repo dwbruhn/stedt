@@ -6,7 +6,7 @@
 <tr><th>Reference</tr>
 [% FOREACH sources -%]
 <tr>
-	<td>[% author %] [% year %] <cite>[% title %]</cite> [% imprint %]</td>
+	<td>[% author %][% author.search('\.$') ? '' : '.' %] [% year %][% year.search('\.$') ? '' : '.' %] <cite>[% title %]</cite>[% title.search('[\.\?]$') ? '' : '.' %][% IF imprint %] [% imprint %][% imprint.search('\.$') ? '' : '.' %][% END %]</td>
 </tr>
 [% END -%]
 </table>

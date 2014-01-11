@@ -9,7 +9,7 @@
 	<td><a href="[% self_url %]/source/[% srcabbr %]" target="stedt_src">[% citation %]</a></td>
 	<td>[% num_lgs %]</td>
 	<td>[% num_recs %]</td>
-	<td>[% author %] [% year %] <cite>[% title %]</cite> [% imprint %]</td>
+	<td>[% author %][% author.search('\.$') ? '' : '.' %] [% year %][% year.search('\.$') ? '' : '.' %] <cite>[% title %]</cite>[% title.search('[\.\?]$') ? '' : '.' %][% IF imprint %] [% imprint %][% imprint.search('\.$') ? '' : '.' %][% END %]</td>
 </tr>
 [% END -%]
 </table>
