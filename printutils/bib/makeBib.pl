@@ -32,6 +32,7 @@ $year =~ s/\.//;
 $imprint =~ s/^ +//g;
 $imprint =~ s/\\n//g; #trying to get rid of '\n' in ' \nAnne O. Yue and Mitsuaki Endo (eds.)'
 my ($address, $publisher) = split ':',$imprint;
+my @names = split(/[\s\.]/, $author);
 $publisher = '' unless $publisher;
 $publisher =~ s/^ +//g;
 
@@ -51,7 +52,8 @@ print '@' . $type . '{' . $srcabbr . ",\n";
 #print "citation = {$citation},\n";
 #if ($author =~ "Dai") { print "author   = {{$author}},\n"; } elsif { print "author  = {$author},\n"; }
 #if ($author =~ "Hongkai") { print "author   = {{$author}},\n"; } elsif { print "author  = {$author},\n"; }
-if ($author =~ ",") { print "author  = {$author},\n"; } else { print "author   = {{$author}},\n"; }
+if ($author =~ ",") { print "author  = {$author},\n"; } else { print "author   = {{{\\sc @names[0]} @names[1]}},\n"; } #small-capped non-Western author; still overgeneralizes (e.g., to "anonymous," "unknown")
+#if ($author =~ ",") { print "author  = {$author},\n"; } else { print "author = {{$author}},\n";} #normal non-Western author
 #print "author   = {{$author}},\n";
 print "year     = {$year},\n";
 if ($imprint ne "") { print "imprint  = {$imprint},\n"; }
