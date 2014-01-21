@@ -49,11 +49,9 @@ if ($imprint =~ /:\d/) {
 }
 
 print '@' . $type . '{' . $srcabbr . ",\n";
-#print "citation = {$citation},\n";
-#if ($author =~ "Dai") { print "author   = {{$author}},\n"; } elsif { print "author  = {$author},\n"; }
-#if ($author =~ "Hongkai") { print "author   = {{$author}},\n"; } elsif { print "author  = {$author},\n"; }
+#print "citation = {$citation},\n";}
 
-if (@names[0] =~ ",") {
+if ($author =~ /,/) {
   # do nothing
 }
 else {
