@@ -59,7 +59,7 @@ if (@names[0] =~ ",") {
 else {
   # author's name assumed to be chinese
   #small-capped non-Western author; still overgeneralizes (e.g., to "anonymous," "unknown")
-  $author =~ s/^(.*?) (.*)$/{\\textsc{ \1} \2}/;
+  $author =~ s/^(.*?) (.*)$/{\\textsc{\1} \2}/;
 }
 print "author = {$author},\n";
 
