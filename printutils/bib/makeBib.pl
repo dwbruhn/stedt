@@ -52,7 +52,7 @@ print '@' . $type . '{' . $srcabbr . ",\n";
 #print "citation = {$citation},\n";
 #if ($author =~ "Dai") { print "author   = {{$author}},\n"; } elsif { print "author  = {$author},\n"; }
 #if ($author =~ "Hongkai") { print "author   = {{$author}},\n"; } elsif { print "author  = {$author},\n"; }
-if ($author =~ ",") { print "author  = {$author},\n"; } else { print "author   = {{{\\sc @names[0]} @names[1]}},\n"; } #small-capped non-Western author; still overgeneralizes (e.g., to "anonymous," "unknown")
+if (@names[0] =~ ",") { print "author = {$author},\n"; } else { print "author = {{{\\sc @names[0]} @names[1 .. -1}},\n"; } #small-capped non-Western author; still overgeneralizes (e.g., to "anonymous," "unknown")
 #if ($author =~ ",") { print "author  = {$author},\n"; } else { print "author = {{$author}},\n";} #normal non-Western author
 #print "author   = {{$author}},\n";
 print "year     = {$year},\n";
