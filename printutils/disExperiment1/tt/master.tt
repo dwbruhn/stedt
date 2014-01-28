@@ -98,19 +98,19 @@
 \thispagestyle{empty}
 
 \pdfbookmark[1]{Acknowledgements}{acknowledgements}
-\include{../../frontmatter/acknowledgements}{acknowledgements}
+\include{acknowledgements}{acknowledgements}
 \newpage
 
 \pdfbookmark[1]{Preface}{preface}
-\include{../../frontmatter/preface}{preface}
+\include{preface}{preface}
 \newpage
 
 \pdfbookmark[1]{Introduction}{introduction}
-\include{../../frontmatter/introduction}{introduction}
+\include{introduction}{introduction}
 \newpage
 
 \pdfbookmark[1]{Terminology}{terminology}
-\include{../../frontmatter/terminology}{terminology}
+\include{terminology}{terminology}
 \newpage
 
 \pdfbookmark[1]{Table of Contents}{TOC}

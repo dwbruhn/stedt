@@ -21,6 +21,7 @@ rm tex/$1-$2-$3-*
 set -e
 perl extract.pl $1 $2 $3 $4
 cd tex/
+cp ../../frontmatter/*.tex .
 #texfile=`ls $1-$2-$3-master` 
 texfile="$1-$2-$3-master" 
 # TeX it!     
