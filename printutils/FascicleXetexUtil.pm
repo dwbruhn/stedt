@@ -262,7 +262,8 @@ sub merge_glosses {
 sub src_concat {
 	my @abbrs = split /;/, $_[0];
 	my @ids   = split /;/, $_[1];
-	my $result = "\\mbox{$abbrs[0]}";
+	#my $result = "\\mbox{$abbrs[0]}";
+	my $result = "{$abbrs[0]}";
 	$result .= ":" . escape_tex($ids[0]) if $ids[0]; # escape the pound symbols in the srcid
 	
 	my $lastabbr = $abbrs[0];
@@ -270,7 +271,8 @@ sub src_concat {
 		if ($abbrs[$i] eq $lastabbr) {
 			$result .= "," . escape_tex($ids[$i]) if $ids[$i];
 		} else {
-			$result .= "; \\mbox{$abbrs[$i]}";
+			#$result .= "; \\mbox{$abbrs[$i]}";
+			$result .= "; {$abbrs[$i]}";
 			$result .= ":" . escape_tex($ids[$i]) if $ids[$i];
 			$lastabbr = $abbrs[$i];
 		}

@@ -33,7 +33,7 @@
 \newcommand{\TC}[1]{{\tradchinesefont #1}}
 \newcommand{\SC}[1]{{\simpchinesefont #1}}
 \newcommand{\STEDTU}[1]{{\stedtfont #1}}
-\newcommand{\fascicletablebegin}{\begin{supertabular}[l]{@{\hspace*{1.1em}}>{\hangindent=0.1in}p{1.3in}>{\hangindent=0.1in}p{1.2in}>{\hangindent=0.1in}p{1.3in}>{\hangindent=0.1in}p{1.5in}l}}
+\newcommand{\fascicletablebegin}{\begin{supertabular}[l]{@{\hspace*{1.1em}}>{\hangindent=0.1in}p{1.3in}>{\hangindent=0.1in}p{1.2in}>{\hangindent=0.1in}p{1.4in}>{\hangindent=0.1in}p{2.5in}l}}
 \renewcommand \thechapter{\Roman{chapter}} % use cap roman numerals for chapter numbers
 
 \usepackage{fullpage}
@@ -42,6 +42,8 @@
 \usepackage{supertabular,ltxtable,booktabs}
 \setcounter{LTchunksize}{300} % use more memory for fewer compiles
 \usepackage{graphicx}
+% \usepackage{microtype} % only works in pdftex
+\usepackage{tablefootnote}
 \usepackage{array} % use array and ragged2e for raggedright inside tables
 \usepackage[document,raggedrightboxes]{ragged2e}
 \setlength{\RaggedRightRightskip}{0pt plus 3em} % must be defined after fonts are loaded
@@ -64,18 +66,27 @@
 
 \usepackage{acronym}
 \usepackage{natbib}
+\usepackage[margin=0.5in]{geometry}
 
-\begin{document}
-\pdfpageheight=22in
-\pdfpagewidth=16in
-\pdfbookmark[1]{ [% semkey %]. [% xtitle %]}{titlepage}
-\setcounter{secnumdepth}{0} % don't number sections, just chapters
+% \pdfpageheight=22in
+% \pdfpagewidth=16in
+
+\setlength\paperwidth{16in}
+\setlength\paperheight{22in}
+
 \setlength{\columnsep}{3em}
 \setlength{\columnseprule}{0.05pt}
+
 \setlength\textwidth{15in}
-\setlength\textheight{21in}
-\setlength\columnwidth{7in}
+\setlength\textheight{20in}
+
+\setlength\columnwidth{8in}
 % \setlength\columnheight{18in}
+
+\begin{document}
+\setcounter{secnumdepth}{0} % don't number sections, just chapters
+
+\pdfbookmark[1]{ [% semkey %]. [% xtitle %]}{titlepage}
 
 %\the\textwidth
 %

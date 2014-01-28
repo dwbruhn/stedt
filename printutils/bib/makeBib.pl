@@ -1,7 +1,7 @@
 
 while (<>) {
 s/#/\\#/g;
-s/&/\\@/g;
+s/[^\\]&/\&/g;
 my ( $srcabbr    ,
  $citation   ,
  $author     ,
@@ -30,11 +30,12 @@ my ( $srcabbr    ,
 
 $year =~ s/\.//;
 $imprint =~ s/^ +//g;
-$imprint =~ s/\\n//g; #trying to get rid of '\n' in ' \nAnne O. Yue and Mitsuaki Endo (eds.)'
 my ($address, $publisher) = split ':',$imprint;
 my @names = split(/[\s\.]/, $author);
 $publisher = '' unless $publisher;
 $publisher =~ s/^ +//g;
+
+$author =~ s/, and\b/ and/g;
 
 my $type = 'book';
 my $publisher = '';
