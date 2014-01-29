@@ -80,7 +80,7 @@
 \setlength\textwidth{15in}
 \setlength\textheight{20in}
 
-\setlength\columnwidth{8in}
+\setlength\columnwidth{7.5in}
 % \setlength\columnheight{18in}
 
 \begin{document}
