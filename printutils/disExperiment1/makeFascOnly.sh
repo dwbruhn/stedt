@@ -25,9 +25,9 @@ cp ../../frontmatter/*.tex .
 #texfile=`ls $1-$2-$3-master` 
 texfile="$1-$2-$3-master" 
 # TeX it!     
-xelatex ${texfile}.tex # > /dev/null
-bibtex ${texfile}.aux
+xelatex ${texfile}.tex > ${texfile}.stdout.log
+bibtex ${texfile}.aux  >> ${texfile}.stdout.log
 perl -i -pe 's/1989\{/1989/'  ${texfile}.bbl
-xelatex ${texfile}.tex # > /dev/null
-xelatex ${texfile}.tex # > /dev/null
-xelatex ${texfile}.tex # > /dev/null
+xelatex ${texfile}.tex >> ${texfile}.stdout.log
+xelatex ${texfile}.tex >> ${texfile}.stdout.log
+xelatex ${texfile}.tex >> ${texfile}.stdout.log

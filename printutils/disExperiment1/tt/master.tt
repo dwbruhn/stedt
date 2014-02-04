@@ -26,6 +26,7 @@
 
 \usepackage{fontspec}
 \usepackage{xunicode} % for real tildes with \textasciitilde
+\usepackage{xltxtra} % for xelatex logo
 \setmainfont{Charis SIL}
 \newfontfamily\stedtfont{STEDTU Roman}
 \newfontfamily\tradchinesefont{LiSong Pro}
@@ -33,7 +34,7 @@
 \newcommand{\TC}[1]{{\tradchinesefont #1}}
 \newcommand{\SC}[1]{{\simpchinesefont #1}}
 \newcommand{\STEDTU}[1]{{\stedtfont #1}}
-\newcommand{\fascicletablebegin}{\begin{supertabular}[l]{@{\hspace*{1.1em}}>{\hangindent=0.1in}p{1.3in}>{\hangindent=0.1in}p{1.2in}>{\hangindent=0.1in}p{1.4in}>{\hangindent=0.1in}p{2.5in}l}}
+\newcommand{\fascicletablebegin}{\begin{mpsupertabular}[l]{@{\hspace*{1.1em}}>{\hangindent=0.1in}p{1.3in}>{\hangindent=0.1in}p{1.2in}>{\hangindent=0.1in}p{1.4in}>{\hangindent=0.1in}p{2.5in}l}}
 \renewcommand \thechapter{\Roman{chapter}} % use cap roman numerals for chapter numbers
 
 \usepackage{fullpage}
@@ -42,12 +43,15 @@
 \usepackage{supertabular,ltxtable,booktabs}
 \setcounter{LTchunksize}{300} % use more memory for fewer compiles
 \usepackage{graphicx}
-% \usepackage{microtype} % only works in pdftex
-\usepackage{tablefootnote}
-\usepackage{array} % use array and ragged2e for raggedright inside tables
-\usepackage[document,raggedrightboxes]{ragged2e}
-\setlength{\RaggedRightRightskip}{0pt plus 3em} % must be defined after fonts are loaded
+% \usepackage{microtype} % only works in pdftex, which we are not using...
+% \usepackage{tablefootnote}
+% \usepackage{array} % use array and ragged2e for raggedright inside tables
+% \usepackage[document,raggedrightboxes]{ragged2e}
+% \setlength{\RaggedRightRightskip}{0pt plus 3em} % must be defined after fonts are loaded
 
+\usepackage{layout}
+
+\usepackage{fancyhdr}
 
 \title{STEDT Root Canal Extraction:\\[% semkey %]. [% xtitle %]}
 \author{[% author %]}
@@ -62,11 +66,11 @@
 
 \usepackage{etoolbox}
 \makeatletter
-\patchcmd{\chapter}{\if@openright\cleardoublepage\else\clearpage\fi}{}{}{}
+% \patchcmd{\chapter}{\if@openright\cleardoublepage\else\clearpage\fi}{}{}{}
 
 \usepackage{acronym}
 \usepackage{natbib}
-\usepackage[margin=0.5in]{geometry}
+\usepackage[margin=0.8in]{geometry}
 
 % \pdfpageheight=22in
 % \pdfpagewidth=16in
@@ -74,19 +78,44 @@
 \setlength\paperwidth{16in}
 \setlength\paperheight{22in}
 
-\setlength{\columnsep}{3em}
+\setlength{\columnsep}{5em}
 \setlength{\columnseprule}{0.05pt}
 
-\setlength\textwidth{15in}
+\setlength\textwidth{14in}
 \setlength\textheight{20in}
 
-\setlength\columnwidth{7.5in}
+\setlength\columnwidth{7in}
 % \setlength\columnheight{18in}
+
+\setlength{\headheight}{20pt}
+\setlength{\topmargin}{0pt}
+\setlength{\marginparwidth}{0pt}
+
+\pagestyle{fancy}
+
+\fancyhead{}
+\fancyhead[LE]{Dictionary and Thesaurus \vspace{0.5em}}
+\fancyhead[RO]{Sino-Tibetan Etymological \vspace{0.5em}}
+
+\makeatletter
+    \def\headrule{{\if@fancyplain\let\headrulewidth\plainheadrulewidth\fi
+        \hrule\@height\headrulewidth\@width 4in \vskip-\headrulewidth}}
+\makeatother
+
+% \lhead{Dictionary and Thesaurus}
+% \rhead{Sino-Tibetan Etymological}
+% \chead{}
+\lfoot{}
+\cfoot{\thepage}
+\rfoot{}
+\renewcommand{\headrulewidth}{0.4pt}
 
 \begin{document}
 \setcounter{secnumdepth}{0} % don't number sections, just chapters
 
 \pdfbookmark[1]{ [% semkey %]. [% xtitle %]}{titlepage}
+
+\layout
 
 %\the\textwidth
 %
@@ -97,21 +126,13 @@
 \maketitle
 \thispagestyle{empty}
 
-\pdfbookmark[1]{Acknowledgements}{acknowledgements}
-\include{acknowledgements}{acknowledgements}
-\newpage
+\include{acknowledgements}
 
-\pdfbookmark[1]{Preface}{preface}
-\include{preface}{preface}
-\newpage
+\include{preface}
 
-\pdfbookmark[1]{Introduction}{introduction}
-\include{introduction}{introduction}
-\newpage
+\include{introduction}
 
-\pdfbookmark[1]{Terminology}{terminology}
-\include{terminology}{terminology}
-\newpage
+\include{terminology}
 
 \pdfbookmark[1]{Table of Contents}{TOC}
 \tableofcontents
