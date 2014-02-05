@@ -1,6 +1,7 @@
 ﻿[% # PROCESS, don't INCLUDE this file to keep these variables defined -%]
 [% self_url = c.query.url('-absolute',1).remove('/$') -%]
 [% self_base = self_url.replace('[^/]+$', '') -%]
+[% https_base = c.query.url('-base',1).replace('^http:', 'https:') -%]
 [% user = c.param('user') -%]
 [% pi_pdf_offset = 26 # page offset for linking inventories to PI monograph %]
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
@@ -72,7 +73,7 @@ logged in as <b>[% user %]</b>
 </form>
 &nbsp;&nbsp;<a href="[% self_url %]/logout">log out</a>
 [% ELSE # user not logged in -%]
-<form style="display:none;" id="guest_tools_header" method="post" action="[% self_url %]/account/login"><input type="hidden" name="user" value="guest"><input type="hidden" name="pwd" value="guest"><input type="hidden" name="url" value="[% self_url %]/admin"></form>
+<form style="display:none;" id="guest_tools_header" method="post" action="[% https_base _ self_url %]/account/login"><input type="hidden" name="user" value="guest"><input type="hidden" name="pwd" value="guest"><input type="hidden" name="url" value="[% https_base _ self_url %]/admin"></form>
 &nbsp;<a href="#" onclick="$('guest_tools_header').submit();">tools</a>
 [% IF c.param('https') -%]
 &nbsp;&nbsp;<a href="[% self_url %]/account/login?url=[% c.query.url('-path',1,'-query',1) | url %]">log in</a>

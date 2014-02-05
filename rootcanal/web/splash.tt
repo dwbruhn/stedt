@@ -51,7 +51,6 @@
 </form>
 <div style="height:10ex"></div>
 <div class="footer">
-[% https_base = c.query.url('-base',1).replace('^http:', 'https:') -%]
 <a href="[% self_url %]/group/1" target="stedt_grps">Language Groups Browser</a>
 | <a href="[% self_url %]/source" target="_blank">Source Bibliography</a>
 | <a href="[% self_url %]/chapters" target="_blank">Chapter Browser</a>
