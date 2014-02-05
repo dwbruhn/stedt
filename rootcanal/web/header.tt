@@ -35,7 +35,7 @@
 $.noConflict();[% # tell jquery to set $ back to the prototype $ %]
 var baseRef = '[% self_url %]/';
 </script>
-[% IF user -%]
+[% IF user # check for logged-in user -%]
 <script>
 var stedtuserprivs = [% c.param('userprivs') %];
 [% IF c.has_privs(16) -%]
@@ -67,22 +67,24 @@ logged in as <b>[% user %]</b>
 <option value="[% self_url %]/edit/projects">Projects</option>
 <option value="[% self_url %]/admin/progress">Progress</option> 
 [% END # has_privs(8) -%]
-<option value="[% self_url %]/account">My Account</option>
+[% IF user!="guest" # don't allow users to edit the guest account %]<option value="[% self_url %]/account">My Account</option>[% END %]
 </select>
 </form>
-  <a href="[% self_url %]/logout">log out</a>
-[% ELSE # user -%]
+&nbsp;&nbsp;<a href="[% self_url %]/logout">log out</a>
+[% ELSE # user not logged in -%]
+<form style="display:none;" id="guest_tools_header" method="post" action="[% self_url %]/account/login"><input type="hidden" name="user" value="guest"><input type="hidden" name="pwd" value="guest"><input type="hidden" name="url" value="[% self_url %]/admin"></form>
+<a href="#" onclick="$('guest_tools_header').submit();">tools</a>
 [% IF c.param('https') -%]
-<a href="[% self_url %]/account/login?url=[% c.query.url('-path',1,'-query',1) | url %]">log in</a>
+&nbsp;&nbsp;<a href="[% self_url %]/account/login?url=[% c.query.url('-path',1,'-query',1) | url %]">log in</a>
 [% END -%]
 <script>
 var stedtuserprivs = 0;
 [% UNLESS suppress_header %]$('header').show();
 [% END -%]
 </script>
-[% END # user -%]
+[% END # user check -%]
 ﻿[% # by including a zero-width no-break space (U+FEFF) here, and saving this file with a utf-8 BOM, we can force Template Toolkit to generate all pages as utf-8 instead of latin-whatever. I think we could also try using {binmode=>':utf8'} in the Template::process() call, but since for our purposes that's wrapped up inside the C::A::P::TT module there's no easy way to access that. -%]
-  <a href="http://stedt.berkeley.edu/documentation" target="_blank">help</a>
+&nbsp;&nbsp;<a href="http://stedt.berkeley.edu/documentation" target="_blank">help</a>
 <script src="[% self_base %]js/stedtconfig.js"></script>
 </span>
 <a href="[% self_url %]" title="Search Home"><img src="[% self_base %]img/splashy32x32.gif" alt="STEDT Logo" width="32" height="32" class="left" border=0></a>

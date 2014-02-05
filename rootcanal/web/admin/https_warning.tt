@@ -16,6 +16,14 @@ password: <input type="password" size="10" name="pwd">
 <input type="submit" value="log in">
 <p><a href="[% self_url %]/account/gsarpa">create account</a></p>
 </form>
+<p><b>OR</b></p>
+<form method="post" action="[% self_url %]/account/login">
+<input type="hidden" name="user" value="guest">
+<input type="hidden" name="pwd" value="guest">
+<input type="hidden" name="url" value="[% c.query.url('-path',1,'-query',1) %]">
+<input type="submit" value="Click here to proceed as a guest">&nbsp;&nbsp;
+<span style="color:red; font-weight:bold; font-size:large;">(NEW)</span>
+</form>
 [% END %]
 </body>
 </html>

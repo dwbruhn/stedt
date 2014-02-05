@@ -13,6 +13,12 @@ sub account : StartRunmode {
 	if (defined(my $uid = $self->param('uid'))) {
 		($username, $email) = $self->dbh->selectrow_array("SELECT username, email FROM users WHERE uid=?", undef, $uid);
 	}
+	
+	# don't let guest users edit the guest account
+	if ($username eq 'guest') {
+		$self->header_add(-status => 403);
+		die "You do not have sufficient privileges to perform that operation.\n";
+	}
 
 	return $self->tt_process("account.tt", {
 		err => $errs,

@@ -54,6 +54,8 @@
 <a href="[% self_url %]/group/1" target="stedt_grps">Language Groups Browser</a>
 | <a href="[% self_url %]/source" target="_blank">Source Bibliography</a>
 | <a href="[% self_url %]/chapters" target="_blank">Chapter Browser</a>
+| <form style="display:none;" id="guest_tools_footer" method="post" action="[% self_url %]/account/login"><input type="hidden" name="user" value="guest"><input type="hidden" name="pwd" value="guest"><input type="hidden" name="url" value="[% self_url %]/admin"></form>
+<a href="#" onclick="$('guest_tools_footer').submit();">All Tools (guest access)</a>
 <hr>
 <small>
 <a href="http://stedt.berkeley.edu/">STEDT Home Page</a> | 
