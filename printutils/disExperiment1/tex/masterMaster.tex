@@ -1,6 +1,7 @@
 %!TEX TS-program = xelatex
 %!TEX encoding = UTF-8 Unicode
-\documentclass[12pt]{report}
+% \documentclass[12pt]{report}
+\documentclass[11pt,twoside,twocolumn]{book}
 
 \makeatletter
 \renewcommand{\@makechapterhead}[1]{%
@@ -25,6 +26,7 @@
 
 \usepackage{fontspec}
 \usepackage{xunicode} % for real tildes with \textasciitilde
+\usepackage{xltxtra} % for xelatex logo
 \setmainfont{Charis SIL}
 \newfontfamily\stedtfont{STEDTU Roman}
 \newfontfamily\tradchinesefont{LiSong Pro}
@@ -32,68 +34,112 @@
 \newcommand{\TC}[1]{{\tradchinesefont #1}}
 \newcommand{\SC}[1]{{\simpchinesefont #1}}
 \newcommand{\STEDTU}[1]{{\stedtfont #1}}
-\newcommand{\fascicletablebegin}{\begin{supertabular}[l]{@{\hspace*{1.1em}}>{\hangindent=0.1in}p{1.7in}>{\hangindent=0.2in}p{1.2in}>{\hangindent=0.2in}p{1.3in}>{\hangindent=0.1in}p{1.5in}l}}
+\newcommand{\fascicletablebegin}{\begin{mpsupertabular}[l]{@{\hspace*{1.1em}}>{\hangindent=0.1in}p{1.3in}>{\hangindent=0.1in}p{1.2in}>{\hangindent=0.1in}p{1.4in}>{\hangindent=0.1in}p{2.5in}l}}
 \renewcommand \thechapter{\Roman{chapter}} % use cap roman numerals for chapter numbers
 
 \usepackage{fullpage}
 \usepackage{parskip}
-\usepackage{supertabular}
+\usepackage[toc]{multitoc}
+\usepackage{supertabular,ltxtable,booktabs}
 \setcounter{LTchunksize}{300} % use more memory for fewer compiles
 \usepackage{graphicx}
-\usepackage{array} % use array and ragged2e for raggedright inside tables
-\usepackage[document,raggedrightboxes]{ragged2e}
-\setlength{\RaggedRightRightskip}{0pt plus 3em} % must be defined after fonts are loaded
+% \usepackage{microtype} % only works in pdftex, which we are not using...
+% \usepackage{tablefootnote}
+% \usepackage{array} % use array and ragged2e for raggedright inside tables
+% \usepackage[document,raggedrightboxes]{ragged2e}
+% \setlength{\RaggedRightRightskip}{0pt plus 3em} % must be defined after fonts are loaded
+
+\usepackage{layout}
+
+\usepackage{fancyhdr}
 
 \title{STEDT: The Whole Shebang}
 \author{DRAFT}
 \date{2013.02.27}
 \usepackage[bookmarks]{hyperref}
 \hypersetup{%
-	pdfborder={0 0 1},
-	pdfborderstyle={/S/U/W 1}, % make links underlined (instead of surrounded by red boxes)
-	pdftitle = {STEDT:  The Whole Shebang}, 
-	pdfauthor = {\textcopyright\ STEDT}, 
+        pdfborder={0 0 1},
+        pdfborderstyle={/S/U/W 1}, % make links underlined (instead of surrounded by red boxes)
+        pdftitle = {STEDT:  The Whole Shebang}, 
+        pdfauthor = {\textcopyright\ STEDT}, 
 } 
 
+\makeatletter
+% \patchcmd{\chapter}{\if@openright\cleardoublepage\else\clearpage\fi}{}{}{}
+
+\usepackage{acronym}
+\usepackage{natbib}
+\usepackage[margin=0.8in]{geometry}
+
+% \pdfpageheight=22in
+% \pdfpagewidth=16in
+
+\setlength\paperwidth{16in}
+\setlength\paperheight{22in}
+
+\setlength{\columnsep}{5em}
+\setlength{\columnseprule}{0.05pt}
+
+\setlength\textwidth{14in}
+\setlength\textheight{20in}
+
+\setlength\columnwidth{7in}
+% \setlength\columnheight{18in}
+
+\setlength{\headheight}{20pt}
+\setlength{\topmargin}{0pt}
+\setlength{\marginparwidth}{0pt}
+
+\pagestyle{fancy}
+
+\fancyhead{}
+\fancyhead[LE]{Dictionary and Thesaurus \vspace{0.5em}}
+\fancyhead[RO]{Sino-Tibetan Etymological \vspace{0.5em}}
+
+\makeatletter
+    \def\headrule{{\if@fancyplain\let\headrulewidth\plainheadrulewidth\fi
+        \hrule\@height\headrulewidth\@width 4in \vskip-\headrulewidth}}
+\makeatother
+
+\lfoot{}
+\cfoot{\thepage}
+\rfoot{}
+\renewcommand{\headrulewidth}{0.4pt}
+
 \begin{document}
-\pdfbookmark[1]{STEDT}{titlepage}
 \setcounter{secnumdepth}{0} % don't number sections, just chapters
+
+\layout
+
+%\the\textwidth
+%
+%\the\columnwidth
+%
+%\the\columnsep
+
 \maketitle
+\thispagestyle{empty}
+
+\include{acknowledgements}
+
+\include{preface}
+
+\include{introduction}
+
+\include{terminology}
+
 \pdfbookmark[1]{Table of Contents}{TOC}
 \tableofcontents
 \newpage
 
-\include{1-5-1}
-\include{1-5-1-1-1}
-\include{1-5-2}
-\include{1-5-2-1}
-\include{1-5-2-5}
-\include{1-5-3-1}
-\include{1-5-4}
-\include{1-5-5}
-\include{1-5-6}
-\include{1-5-6-1}
-\include{1-5-7-1}
-\include{1-5-7-2}
-\include{1-5-7-3}
-\include{1-5-8}
-\include{1-5-8-3}
-\include{1-5-8-4}
-\include{1-5-9-4}
-\include{1-5-10}
-\include{1-5-10-4}
-\include{1-5-11}
-\include{1-5-12}
+% insert includes here
 
 \newpage
 
-\section{Bibliography}
-List of source abbreviations:
-
-\url{http://stedt.berkeley.edu/srcabbr}
-
-List of other references:
-
-\url{http://stedt.berkeley.edu/refonly}
+\phantomsection
+\addcontentsline{toc}{chapter}{References}
+\bibliographystyle{apalike}
+\renewcommand{\bibname}{References}
+\bibliography{stedtreferences}
 
 \end{document}
