@@ -73,7 +73,7 @@ logged in as <b>[% user %]</b>
 &nbsp;&nbsp;<a href="[% self_url %]/logout">log out</a>
 [% ELSE # user not logged in -%]
 <form style="display:none;" id="guest_tools_header" method="post" action="[% self_url %]/account/login"><input type="hidden" name="user" value="guest"><input type="hidden" name="pwd" value="guest"><input type="hidden" name="url" value="[% self_url %]/admin"></form>
-<a href="#" onclick="$('guest_tools_header').submit();">tools</a>
+&nbsp;<a href="#" onclick="$('guest_tools_header').submit();">tools</a>
 [% IF c.param('https') -%]
 &nbsp;&nbsp;<a href="[% self_url %]/account/login?url=[% c.query.url('-path',1,'-query',1) | url %]">log in</a>
 [% END -%]
