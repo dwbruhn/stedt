@@ -254,7 +254,7 @@ EndOfSQL
 		# 2. print the forms
 		print STDERR "  " . ((scalar(@$recs)-$deletedforms) . " distinct forms.") if $deletedforms;
 		my $text;
-		$text .= "{\\footnotesize\n";
+		$text .= "{\\small\n";
 		$text .= "\\fascicletablebegin\n";
 		
 		my $lastgrpno = '';
@@ -321,8 +321,9 @@ EndOfSQL
 				for my $rec (@results) {
 					my ($notetype, $note) = @$rec;
 					next if $notetype eq 'I' && !$INTERNAL_NOTES; # skip internal notes if we're publishing
-					$text .= "\\raisebox{-0.5ex}{\\footnotemark}";	# lower footnotes so they're less ambiguous about being on its line
-					$text .= '\\footnotetext{';
+					#$text .= "\\raisebox{-0.5ex}{\\footnotemark}";	# lower footnotes so they're less ambiguous about being on its line
+					#$text .= '\\footnotetext{';
+					$text .= '\\footnote{';
 					$text .= '\\textit{' if $notetype eq 'I'; # [Internal] 
 					$text .= '[Orig/Source] ' if $notetype eq 'O';
 					$text .= xml2tex(decode_utf8($note));
@@ -342,6 +343,7 @@ EndOfSQL
 		}
 		$text .= "\\end{mpsupertabular}\n" unless $lastgrpno eq ''; # if there were no forms, skip this
 		$text .= "}\n\n";
+		#$text .= "\n\n";
 		$e{records} = $text;
 		print STDERR "\n";
 	} else {
@@ -475,8 +477,9 @@ sub get_meso_notes {
 		my ($notetype, $note) = ($notes->[0]{type}, $notes->[0]{text});
 		shift @$notes;
 		next if $notetype eq 'I' && !$INTERNAL_NOTES;
-		$notes_string .= "\\raisebox{-0.5ex}{\\footnotemark}";
-		$notes_string .= '\\footnotetext{';
+		#$notes_string .= "\\raisebox{-0.5ex}{\\footnotemark}";
+		#$notes_string .= '\\footnotetext{';
+		$notes_string .= '\\footnote{';
 		$notes_string .= '\\textit{' if $notetype eq 'I';
 		$notes_string .= $note;
 		$notes_string .= '}' if $notetype eq 'I';

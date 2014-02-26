@@ -3,10 +3,13 @@
 % \documentclass[12pt]{report}
 \documentclass[11pt,twoside,twocolumn]{book}
 
+\usepackage{etoolbox}
+
 \makeatletter
-\renewcommand{\@makechapterhead}[1]{%
-  %\vspace*{50\p@}%
-  {\parindent \z@ \raggedright \normalfont
+\renewcommand{\@makechapterhead}[1]{
+  %\vspace*{50\p@}
+  % {\parindent \z@ \raggedright \normalfont
+  {\parindent \z@ \normalfont
     \ifnum \c@secnumdepth >\m@ne
       \if@mainmatter
         \huge\bfseries \thechapter. \space
@@ -15,6 +18,7 @@
     \Huge \bfseries #1\par\nobreak
     \vskip 40\p@
   }}
+
 \newcommand\etymon{\@startsection % special section cmd for etyma
   {section}{1}{-1em} % name, level, indent
   {-1ex}	% beforeskip
@@ -41,13 +45,13 @@
 \usepackage{parskip}
 \usepackage[toc]{multitoc}
 \usepackage{supertabular,ltxtable,booktabs}
-\setcounter{LTchunksize}{300} % use more memory for fewer compiles
+\setcounter{LTchunksize}{600} % use more memory for fewer compiles
 \usepackage{graphicx}
 % \usepackage{microtype} % only works in pdftex, which we are not using...
-% \usepackage{tablefootnote}
-% \usepackage{array} % use array and ragged2e for raggedright inside tables
-% \usepackage[document,raggedrightboxes]{ragged2e}
-% \setlength{\RaggedRightRightskip}{0pt plus 3em} % must be defined after fonts are loaded
+\usepackage{tablefootnote}
+\usepackage{array} % use array and ragged2e for raggedright inside tables
+\usepackage[document,raggedrightboxes]{ragged2e}
+\setlength{\RaggedRightRightskip}{0pt plus 3em} % must be defined after fonts are loaded
 
 \usepackage{layout}
 
@@ -64,9 +68,9 @@
 	pdfauthor = {\textcopyright\ STEDT}, 
 } 
 
-\usepackage{etoolbox}
 \makeatletter
-% \patchcmd{\chapter}{\if@openright\cleardoublepage\else\clearpage\fi}{}{}{}
+\patchcmd{\chapter}{\if@openright\cleardoublepage\else\clearpage\fi}{}{}{}
+\makeatother
 
 \usepackage{acronym}
 \usepackage{natbib}
@@ -84,12 +88,14 @@
 \setlength\textwidth{14in}
 \setlength\textheight{20in}
 
-\setlength\columnwidth{67in}
+\setlength\columnwidth{6.7in}
 % \setlength\columnheight{18in}
 
 \setlength{\headheight}{20pt}
 \setlength{\topmargin}{0pt}
 \setlength{\marginparwidth}{0pt}
+
+\setlength{\headsep}{10pt}
 
 \pagestyle{fancy}
 
@@ -97,10 +103,13 @@
 \fancyhead[LE]{Dictionary and Thesaurus \vspace{0.5em}}
 \fancyhead[RO]{Sino-Tibetan Etymological \vspace{0.5em}}
 
-\makeatletter
-    \def\headrule{{\if@fancyplain\let\headrulewidth\plainheadrulewidth\fi
-        \hrule\@height\headrulewidth\@width 4in \vskip-\headrulewidth}}
-\makeatother
+\renewcommand{\thefootnote}{\roman{footnote}}
+\renewcommand{\headrulewidth}{0.4pt}
+
+%\makeatletter
+%    \def\headrule{{\if@fancyplain\let\headrulewidth\plainheadrulewidth\fi
+%        \hrule\@height\headrulewidth\@width 4in \vskip-\headrulewidth}}
+%\makeatother
 
 % \lhead{Dictionary and Thesaurus}
 % \rhead{Sino-Tibetan Etymological}
@@ -108,7 +117,6 @@
 \lfoot{}
 \cfoot{\thepage}
 \rfoot{}
-\renewcommand{\headrulewidth}{0.4pt}
 
 \begin{document}
 \setcounter{secnumdepth}{0} % don't number sections, just chapters
@@ -139,7 +147,7 @@
 \newpage
 
 [% FOREACH texfile IN texfilenames -%]
-\include{[% texfile %]}
+\input{[% texfile %]}
 [% END -%]
 
 \newpage

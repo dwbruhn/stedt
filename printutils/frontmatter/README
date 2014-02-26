@@ -1,0 +1,17 @@
+The files in this directory constitute the "front matter" for the STEDT.  They are copied by the other fascicle building scripts 
+to the working directory where they are "compiled" by LaTeX into the final product.
+
+The versions here are the ones that should be edited!
+
+A helper script to make a PDF of just the front matter lives here, and generates two types of "realistic" output,
+(i.e. including everything that would be included in the final product -- the images (tree diagrams, flowcharts), etc.)
+
+So, to generate a "one column PDF", more easily proofread, enter:
+
+$ ./makeFrontMatter.sh 1col
+
+To generate a "2 column PDF", more like what we think the final product will look like, enter:
+
+$ ./makeFrontMatter.sh 2col
+
+In either case, a pdf named "frontmatter1col.pdf" or "frontmatter2col.pdf" is created in the disExperiment1/tex directory (where, for now, all such fascicular pdfs are created).
