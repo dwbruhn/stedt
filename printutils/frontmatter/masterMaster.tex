@@ -3,10 +3,13 @@
 % \documentclass[12pt]{report}
 \documentclass[11pt,twoside,twocolumn]{book}
 
+\usepackage{etoolbox}
+
 \makeatletter
-\renewcommand{\@makechapterhead}[1]{%
-  %\vspace*{50\p@}%
-  {\parindent \z@ \raggedright \normalfont
+\renewcommand{\@makechapterhead}[1]{
+  %\vspace*{50\p@}
+  % {\parindent \z@ \raggedright \normalfont
+  {\parindent \z@ \normalfont
     \ifnum \c@secnumdepth >\m@ne
       \if@mainmatter
         \huge\bfseries \thechapter. \space
@@ -15,6 +18,7 @@
     \Huge \bfseries #1\par\nobreak
     \vskip 40\p@
   }}
+
 \newcommand\etymon{\@startsection % special section cmd for etyma
   {section}{1}{-1em} % name, level, indent
   {-1ex}	% beforeskip
@@ -34,22 +38,20 @@
 \newcommand{\TC}[1]{{\tradchinesefont #1}}
 \newcommand{\SC}[1]{{\simpchinesefont #1}}
 \newcommand{\STEDTU}[1]{{\stedtfont #1}}
-\newcommand{\fascicletablebegin}{\begin{mpsupertabular}[l]{@{\hspace*{1.1em}}>{\hangindent=0.1in}p{1.3in}>{\hangindent=0.1in}p{1.2in}>{\hangindent=0.1in}p{1.4in}>{\hangindent=0.1in}p{2.5in}l}}
-\renewcommand \thechapter{} % use cap roman numerals for chapter numbers
+\newcommand{\fascicletablebegin}{\begin{mpsupertabular}[l]{@{\hspace*{1.1em}}>{\hangindent=0.1in}p{1.3in}>{\hangindent=0.1in}p{1.2in}>{\hangindent=0.1in}p{1.4in}>{\hangindent=0.1in}p{2.1in}l}}
+\renewcommand\thechapter{} % use cap roman numerals for chapter numbers
 
 \usepackage{fullpage}
 \usepackage{parskip}
 \usepackage[toc]{multitoc}
 \usepackage{supertabular,ltxtable,booktabs}
-\setcounter{LTchunksize}{300} % use more memory for fewer compiles
+\setcounter{LTchunksize}{600} % use more memory for fewer compiles
 \usepackage{graphicx}
 % \usepackage{microtype} % only works in pdftex, which we are not using...
-% \usepackage{tablefootnote}
-% \usepackage{array} % use array and ragged2e for raggedright inside tables
-% \usepackage[document,raggedrightboxes]{ragged2e}
-% \setlength{\RaggedRightRightskip}{0pt plus 3em} % must be defined after fonts are loaded
-
-\usepackage{layout}
+\usepackage{tablefootnote}
+\usepackage{array} % use array and ragged2e for raggedright inside tables
+\usepackage[document,raggedrightboxes]{ragged2e}
+\setlength{\RaggedRightRightskip}{0pt plus 3em} % must be defined after fonts are loaded
 
 \usepackage{fancyhdr}
 
@@ -58,14 +60,15 @@
 \date{2013.02.27}
 \usepackage[bookmarks]{hyperref}
 \hypersetup{%
-        pdfborder={0 0 1},
-        pdfborderstyle={/S/U/W 1}, % make links underlined (instead of surrounded by red boxes)
-        pdftitle = {STEDT:  The Whole Shebang}, 
-        pdfauthor = {\textcopyright\ STEDT}, 
+	pdfborder={0 0 1},
+	pdfborderstyle={/S/U/W 1}, % make links underlined (instead of surrounded by red boxes)
+	pdftitle = {STEDT:  [% semkey %]. [% xtitle %]}, 
+	pdfauthor = {\textcopyright\ STEDT}, 
 } 
 
 \makeatletter
-% \patchcmd{\chapter}{\if@openright\cleardoublepage\else\clearpage\fi}{}{}{}
+\patchcmd{\chapter}{\if@openright\cleardoublepage\else\clearpage\fi}{}{}{}
+\makeatother
 
 \usepackage{acronym}
 \usepackage{natbib}
@@ -83,12 +86,14 @@
 \setlength\textwidth{14in}
 \setlength\textheight{20in}
 
-\setlength\columnwidth{7in}
+\setlength\columnwidth{6.7in}
 % \setlength\columnheight{18in}
 
 \setlength{\headheight}{20pt}
 \setlength{\topmargin}{0pt}
 \setlength{\marginparwidth}{0pt}
+
+\setlength{\headsep}{10pt}
 
 \pagestyle{fancy}
 
@@ -96,20 +101,24 @@
 \fancyhead[LE]{Dictionary and Thesaurus \vspace{0.5em}}
 \fancyhead[RO]{Sino-Tibetan Etymological \vspace{0.5em}}
 
-\makeatletter
-    \def\headrule{{\if@fancyplain\let\headrulewidth\plainheadrulewidth\fi
-        \hrule\@height\headrulewidth\@width 4in \vskip-\headrulewidth}}
-\makeatother
+\renewcommand{\thefootnote}{\roman{footnote}}
+\renewcommand{\headrulewidth}{0.4pt}
 
+%\makeatletter
+%    \def\headrule{{\if@fancyplain\let\headrulewidth\plainheadrulewidth\fi
+%        \hrule\@height\headrulewidth\@width 4in \vskip-\headrulewidth}}
+%\makeatother
+
+% \lhead{Dictionary and Thesaurus}
+% \rhead{Sino-Tibetan Etymological}
+% \chead{}
 \lfoot{}
 \cfoot{\thepage}
 \rfoot{}
-\renewcommand{\headrulewidth}{0.4pt}
 
 \begin{document}
 \setcounter{secnumdepth}{0} % don't number sections, just chapters
 
-\layout
 
 %\the\textwidth
 %
