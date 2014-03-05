@@ -1,5 +1,6 @@
 
-{\large \parindent=-1em \textbf{[% semkey %]  [% title %]}}
+\vspace{1em}
+{\LARGE \parindent=-1em \textbf{[% semkey %]  [% title %]}}
 \addcontentsline{toc}{chapter}{[% semkey %]  [% title %]}
 [% # semantic flowchart %]
 [% FOREACH id IN flowchartids -%]
@@ -27,7 +28,6 @@
 [% IF type == 'O' && internal_notes %][Orig/Source][% END -%]
 [% text -%]
 [% IF type == 'I' %]}[% END -%]
-
 
 [% END -%]
 [% IF records %][% records %][% END -%]

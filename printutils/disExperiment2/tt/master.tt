@@ -3,10 +3,13 @@
 % \documentclass[12pt]{report}
 \documentclass[11pt,twoside,twocolumn]{book}
 
+\usepackage{etoolbox}
+
 \makeatletter
-\renewcommand{\@makechapterhead}[1]{%
-  %\vspace*{50\p@}%
-  {\parindent \z@ \raggedright \normalfont
+\renewcommand{\@makechapterhead}[1]{
+  %\vspace*{50\p@}
+  % {\parindent \z@ \raggedright \normalfont
+  {\parindent \z@ \normalfont
     \ifnum \c@secnumdepth >\m@ne
       \if@mainmatter
         \huge\bfseries \thechapter. \space
@@ -15,17 +18,20 @@
     \Huge \bfseries #1\par\nobreak
     \vskip 40\p@
   }}
+
 \newcommand\etymon{\@startsection % special section cmd for etyma
   {section}{1}{-1em} % name, level, indent
   {-1ex}	% beforeskip
   {1pt}		% afterskip
   {\large}	% format
 }
+
 \newcommand\comparandum{\@startsection{subsection}{2}{0pt}{-1pt}{1pt}{\large\bfseries}}
 \makeatother
 
 \usepackage{fontspec}
 \usepackage{xunicode} % for real tildes with \textasciitilde
+\usepackage{xltxtra} % for xelatex logo
 \setmainfont{Charis SIL}
 \newfontfamily\stedtfont{STEDTU Roman}
 \newfontfamily\tradchinesefont{LiSong Pro}
@@ -33,19 +39,24 @@
 \newcommand{\TC}[1]{{\tradchinesefont #1}}
 \newcommand{\SC}[1]{{\simpchinesefont #1}}
 \newcommand{\STEDTU}[1]{{\stedtfont #1}}
-\newcommand{\fascicletablebegin}{\begin{supertabular}[l]{@{\hspace*{1.1em}}>{\hangindent=0.1in}p{1.3in}>{\hangindent=0.1in}p{1.2in}>{\hangindent=0.1in}p{1.3in}>{\hangindent=0.1in}p{1.5in}l}}
-\renewcommand \thechapter{\Roman{chapter}} % use cap roman numerals for chapter numbers
+\newcommand{\fascicletablebegin}{\begin{mpsupertabular}[l]{@{\hspace*{1.1em}}>{\hangindent=0.1in}p{1.3in}>{\hangindent=0.1in}p{1.2in}>{\hangindent=0.1in}p{1.4in}>{\hangindent=0.1in}p{2.1in}l}}
+\renewcommand\thechapter{} % use cap roman numerals for chapter numbers
 
 \usepackage{fullpage}
 \usepackage{parskip}
 \usepackage[toc]{multitoc}
 \usepackage{supertabular,ltxtable,booktabs}
-\setcounter{LTchunksize}{300} % use more memory for fewer compiles
+\setcounter{LTchunksize}{600} % use more memory for fewer compiles
 \usepackage{graphicx}
+% \usepackage{microtype} % only works in pdftex, which we are not using...
+\usepackage{tablefootnote}
 \usepackage{array} % use array and ragged2e for raggedright inside tables
 \usepackage[document,raggedrightboxes]{ragged2e}
 \setlength{\RaggedRightRightskip}{0pt plus 3em} % must be defined after fonts are loaded
 
+\usepackage{layout}
+
+\usepackage{fancyhdr}
 
 \title{STEDT Root Canal Extraction:\\[% semkey %]. [% xtitle %]}
 \author{[% author %]}
@@ -58,21 +69,63 @@
 	pdfauthor = {\textcopyright\ STEDT}, 
 } 
 
-\usepackage{etoolbox}
 \makeatletter
 \patchcmd{\chapter}{\if@openright\cleardoublepage\else\clearpage\fi}{}{}{}
+\makeatother
+
+\usepackage{acronym}
+\usepackage{natbib}
+\usepackage[margin=0.8in]{geometry}
+\geometry{bindingoffset=0.6in}
+
+% \pdfpageheight=26in
+% \pdfpagewidth=16in
+
+\setlength\paperwidth{17in}
+\setlength\paperheight{26in}
+
+\setlength{\columnsep}{5em}
+\setlength{\columnseprule}{0.05pt}
+
+\setlength\textwidth{15in}
+\setlength\textheight{23.5in}
+
+\setlength\columnwidth{7.2in}
+% \setlength\columnheight{18in}
+
+\setlength{\headheight}{32pt}
+\setlength{\topmargin}{0pt}
+\setlength{\marginparwidth}{0pt}
+
+\setlength{\headsep}{10pt}
+
+\pagestyle{fancy}
+
+\fancyhead{}
+\fancyhead[RO]{\Large{Sino-Tibetan Etymological} \vspace{0.5em}}
+\fancyhead[LE]{\Large{Dictionary and Thesaurus} \vspace{0.5em}}
+
+\renewcommand{\thefootnote}{\roman{footnote}}
+\renewcommand{\headrulewidth}{0.4pt}
+
+%\makeatletter
+%    \def\headrule{{\if@fancyplain\let\headrulewidth\plainheadrulewidth\fi
+%        \hrule\@height\headrulewidth\@width 4in \vskip-\headrulewidth}}
+%\makeatother
+
+% \rhead{\LARGE{Sino-Tibetan Etymological}}
+% \lhead{\LARGE{Dictionary and Thesaurus}}
+% \chead{}
+\lfoot{}
+\cfoot{\thepage}
+\rfoot{}
 
 \begin{document}
-\pdfpageheight=22in
-\pdfpagewidth=16in
-\pdfbookmark[1]{ [% semkey %]. [% xtitle %]}{titlepage}
 \setcounter{secnumdepth}{0} % don't number sections, just chapters
-\setlength{\columnsep}{3em}
-\setlength{\columnseprule}{0.1pt}
-\setlength\textwidth{14in}
-\setlength\textheight{20in}
-\setlength\columnwidth{7in}
-% \setlength\columnheight{18in}
+
+\pdfbookmark[1]{ [% semkey %]. [% xtitle %]}{titlepage}
+
+\layout
 
 %\the\textwidth
 %
@@ -83,20 +136,29 @@
 \maketitle
 \thispagestyle{empty}
 
+\include{acknowledgements}
+
+\include{preface}
+
+\include{introduction}
+
+\include{terminology}
+
 \pdfbookmark[1]{Table of Contents}{TOC}
 \tableofcontents
-\newpage
+\clearpage
 
+% we use \input here to prevent page breaks between sections
 [% FOREACH texfile IN texfilenames -%]
-\include{[% texfile %]}
+\input{[% texfile %]}
 [% END -%]
 
-\newpage
+\clearpage
 
 \phantomsection
 \addcontentsline{toc}{chapter}{References}
-\bibliographystyle{amsalpha}
+\bibliographystyle{apalike}
 \renewcommand{\bibname}{References}
-\bibliography{thesis}
+\bibliography{stedtreferences}
 
 \end{document}

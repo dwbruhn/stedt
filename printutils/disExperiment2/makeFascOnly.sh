@@ -1,13 +1,9 @@
 #
-# script to generate a "fascicle chunk" and make it public"
-# needs to be run as user stedt-cgi-ssl 
+# script to generate a "fascicle chunk"
 #
 # syntax:
 #
-# ./makeFasc.sh 1 7 2 [--i]
-#
-# if --i is specified, the draft format is created and moved to the site, 
-# but the ToC is not updated.
+# ./makeFasc.sh 1 7 2
 #
 if [ -z $1 ] ; then echo need a value for V; exit ; fi
 if [ -z $2 ] ; then echo need a value for F; exit ; fi
@@ -25,9 +21,13 @@ rm tex/$1-$2-$3-*
 set -e
 perl extract.pl $1 $2 $3 $4
 cd tex/
-texfile=`ls $1-$2-$3-master.tex` 
+cp ../../frontmatter/*.tex .
+#texfile=`ls $1-$2-$3-master` 
+texfile="$1-$2-$3-master" 
 # TeX it!     
-xelatex $texfile # > /dev/null
-xelatex $texfile # > /dev/null
-xelatex $texfile # > /dev/null
-xelatex $texfile # > /dev/null
+xelatex ${texfile}.tex > ${texfile}.stdout.log
+bibtex ${texfile}.aux  >> ${texfile}.stdout.log
+perl -i -pe 's/1989\{/1989/'  ${texfile}.bbl
+xelatex ${texfile}.tex >> ${texfile}.stdout.log
+xelatex ${texfile}.tex >> ${texfile}.stdout.log
+xelatex ${texfile}.tex >> ${texfile}.stdout.log

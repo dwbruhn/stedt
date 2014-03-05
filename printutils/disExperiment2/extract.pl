@@ -5,6 +5,7 @@
 # 2011.02.03
 #
 # ...thoroughly hacked in details to support two-column output, and other features.
+# jbl 2013
 #
 # see USAGE, below.
 #
@@ -236,7 +237,7 @@ EndOfSQL
 				&& eq_reflexes($oldform, $form)) {
 				$recs->[$_][2] = ''; # mark as empty for skipping later
 				$lastrec->[6] = merge_glosses($oldgloss,$gloss);
-				$lastrec->[8] .= ";$srcabbr";
+				$lastrec->[8] .= ";\\citealt{$srcabbr}";
 				$lastrec->[9] .= ";$srcid";
 				
 				if ($notern) {
@@ -253,7 +254,7 @@ EndOfSQL
 		# 2. print the forms
 		print STDERR "  " . ((scalar(@$recs)-$deletedforms) . " distinct forms.") if $deletedforms;
 		my $text;
-		$text .= "{\\footnotesize\n";
+		$text .= "{\\small\n";
 		$text .= "\\fascicletablebegin\n";
 		
 		my $lastgrpno = '';
@@ -309,7 +310,7 @@ EndOfSQL
 			$gfn =~ s/\.$//;	# remove any trailing period from gfn to avoid double periods
 			my $gloss_string = ($gfn) ? "$gloss ($gfn.)" : $gloss; # concatenate with gfn if it's not empty
 			$text .= join(' &', $lg, escape_tex(      $form      ,1),
-				escape_tex($gloss_string), src_concat($srcabbr, $srcid), '');	# extra slot for footnotes...
+				escape_tex($gloss_string), src_concat("\\citealt{$srcabbr}", $srcid), '');	# extra slot for footnotes...
 			
 			# footnotes, if any
 			if ($notern) {
@@ -320,8 +321,9 @@ EndOfSQL
 				for my $rec (@results) {
 					my ($notetype, $note) = @$rec;
 					next if $notetype eq 'I' && !$INTERNAL_NOTES; # skip internal notes if we're publishing
-					$text .= "\\raisebox{-0.5ex}{\\footnotemark}";	# lower footnotes so they're less ambiguous about being on its line
-					$text .= '\\footnotetext{';
+					#$text .= "\\raisebox{-0.5ex}{\\footnotemark}";	# lower footnotes so they're less ambiguous about being on its line
+					#$text .= '\\footnotetext{';
+					$text .= '\\footnote{';
 					$text .= '\\textit{' if $notetype eq 'I'; # [Internal] 
 					$text .= '[Orig/Source] ' if $notetype eq 'O';
 					$text .= xml2tex(decode_utf8($note));
@@ -339,8 +341,9 @@ EndOfSQL
 			
 			$text .= "\\\\\n";
 		}
-		$text .= "\\end{supertabular}\n" unless $lastgrpno eq ''; # if there were no forms, skip this
+		$text .= "\\end{mpsupertabular}\n" unless $lastgrpno eq ''; # if there were no forms, skip this
 		$text .= "}\n\n";
+		#$text .= "\n\n";
 		$e{records} = $text;
 		print STDERR "\n";
 	} else {
@@ -474,8 +477,9 @@ sub get_meso_notes {
 		my ($notetype, $note) = ($notes->[0]{type}, $notes->[0]{text});
 		shift @$notes;
 		next if $notetype eq 'I' && !$INTERNAL_NOTES;
-		$notes_string .= "\\raisebox{-0.5ex}{\\footnotemark}";
-		$notes_string .= '\\footnotetext{';
+		#$notes_string .= "\\raisebox{-0.5ex}{\\footnotemark}";
+		#$notes_string .= '\\footnotetext{';
+		$notes_string .= '\\footnote{';
 		$notes_string .= '\\textit{' if $notetype eq 'I';
 		$notes_string .= $note;
 		$notes_string .= '}' if $notetype eq 'I';
