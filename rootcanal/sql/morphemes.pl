@@ -12,8 +12,6 @@ binmode(STDOUT, 'utf8');
 
 my $syls = SyllabificationStation->new();
 
-binmode(STDOUT, 'utf8');
-
 # get the juncture patterns (e.g. "ngkr" -> "ng-kr")
 open(DAT, "juncpats.xls") || die("Could not open file!");
 my %pats;
@@ -60,18 +58,24 @@ sub breakJuncture {
   return $str;
 }
 
+my $glossfile = open GLOSSES,'>glosses.txt';
+binmode(GLOSSES, 'utf8');
+
 while (<>) {
   chomp;
   $_= decode('utf8', $_);
-  my ($rn,$reflex,$gloss,$gfn,$glosshandle,$lg,$grp,$grpno,$srcabbr,$srcid,$semkey,$lgid) = split("\t");
+  my ($rn,$reflex,$gloss,$gfn,$glosshandle,$lg,$grp,$grpno,$srcabbr,$srcid,$semkey,$lgid,$analysis) = split("\t");
+  print GLOSSES "$gloss ($gfn)\n";
   #$gloss = from_utf8_to_xml_entities($gloss);
   my $reflex = breakJuncture($reflex);
   #print '>>> ',$reflex,' ',$reflex2,"\n" if ($reflex ne $reflex2);
   $syls->split_form($reflex);
+  $analysis =~ s/NULL//g;
+  my @tags = split ",",$analysis;
   #print Dumper($syls);
   my $s = 0;
   foreach (@{$syls->{syls}}) {
-    print join("\t",($rn,$s,$_,$reflex,$gloss,$gfn,$glosshandle,$lg,$grp,$grpno,$srcabbr,$srcid,$semkey,$lgid)) . "\n";
+    print join("\t",($rn,$s,$_,$reflex,$gloss,$gfn,$glosshandle,$lg,$grp,$grpno,$srcabbr,$srcid,$semkey,$lgid,$tags[$s])) . "\n";
     $s++;
   }
   #my $xml = $syls->get_xml_mark_cog($etymon);
