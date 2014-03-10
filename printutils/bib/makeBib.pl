@@ -60,6 +60,9 @@ else {
   #small-capped non-Western author; still overgeneralizes (e.g., to "anonymous," "unknown")
   $author =~ s/^(.*?) (.*)$/{\\textsc{\1} \2}/;
 }
+
+#$author =~ s/(\p{Han}+)/u {
+
 print "author = {$author},\n";
 
 #print "author   = {{$author}},\n";

@@ -2,6 +2,9 @@ rm *.aux *.bbl *.blg *.log *.out *.pdf stedtreferences.bib
 
 mysql -D stedt -u root -e "select * from srcbib" > srcbib.csv
 
+
+
+
 # a few ad hoc changes...fix database, then remove the following hack
 perl -i -pe 's/DQ-Yi \(Axi\)/DQ-Yi-Axi/' srcbib.csv
 perl -i -pe 's/Evans, Jonathan P., John B. Lowe, Jackson T. S. Sun/Evans, Jonathan P. and Lowe, John B. and Sun, Jackson T. S./' srcbib.csv
@@ -24,6 +27,10 @@ perl -i -pe 's/Dai Qingxia, Xu Xigen, Shao Jiacheng, Qiu Xiangkun/Dai Qingxia an
 perl -i -pe 's/Xu Lin, Mu Yuzhang, Gai Xingzhi, eds./Xu Lin and Mu Yuzhang and Gai Xingzhi, eds./g;' srcbib.csv
 
 perl -i -pe 's/\&/\\&/g;' srcbib.csv
+#more ad hoc changes for problematic sources
+perl -i -pe 's/Lǐ Fànwén 李范文/Lǐ Fànwén \\TC{李}\\TC{范}\\TC{文}/' srcbib.csv
+#perl -i -pe 's/《夏漢字典》 Xià-Hàn Zìdiǎn \[Tangut / Chinese Dictionary\]/\\TC{\《}\\TC{夏}\\TC{漢}\\TC{字}\\TC{典}\\TC{\》} Xià-Hàn Zìdiǎn \[Tangut / Chinese Dictionary\]/' srcbib.csv
+perl -i -pe 's/《夏漢字典》 Xià-Hàn Zìdiǎn \[Tangut \/ Chinese Dictionary\]/\\TC{《}\\TC{夏}\\TC{漢}\\TC{字}\\TC{典}\\TC{》} Xià-Hàn Zìdiǎn \[Tangut \/ Chinese Dictionary\]/' srcbib.csv
 
 cut -f1  srcbib.csv > cites.csv
 #mysql -D stedt -u root -e "select srcabbr from srcbib" > cites.csv
