@@ -52,16 +52,25 @@ if ($imprint =~ /:\d/) {
 print '@' . $type . '{' . $srcabbr . ",\n";
 #print "citation = {$citation},\n";}
 
-if ($author =~ /,/) {
-  # do nothing
-}
-else {
+if ($author !~ /,/||$author =~/[^,]*, ed./) {
   # author's name assumed to be chinese
   #small-capped non-Western author; still overgeneralizes (e.g., to "anonymous," "unknown")
   $author =~ s/^(.*?) (.*)$/{\\textsc{\1} \2}/;
 }
 
-#$author =~ s/(\p{Han}+)/u {
+elsif ($author !~ /,.*,/||$author =~ /(ed.*\.|et al\.| and )/) {
+  # do nothing
+
+}
+
+else {
+  @z = split /, /,$author;
+  my $q;
+  grep {s/^(.*?) /\\textsc{\1} /;
+  $q .= $_ . ", "; } @z;
+  $author = '{'.$q.'}';
+  print 'AUTHOR!!!'.$q."/n";
+}
 
 print "author = {$author},\n";
 
