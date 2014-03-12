@@ -52,25 +52,18 @@ if ($imprint =~ /:\d/) {
 print '@' . $type . '{' . $srcabbr . ",\n";
 #print "citation = {$citation},\n";}
 
-if ($author !~ /,/||$author =~/[^,]*, ed./) {
-  # author's name assumed to be chinese
-  #small-capped non-Western author; still overgeneralizes (e.g., to "anonymous," "unknown")
-  $author =~ s/^(.*?) (.*)$/{\\textsc{\1} \2}/;
-}
-
-elsif ($author !~ /,.*,/||$author =~ /(ed.*\.|et al\.| and )/) {
-  # do nothing
-
-}
-
-else {
-  @z = split /, /,$author;
-  my $q;
-  grep {s/^(.*?) /\\textsc{\1} /;
-  $q .= $_ . ", "; } @z;
-  $author = '{'.$q.'}';
-  print 'AUTHOR!!!'.$q."/n";
-}
+# divide authors, go through each author name and small cap the Chinese names (i.e. those without commas)
+@authors = split / +and +/,$author;
+my $accumulator;
+grep {
+  if (/^[^,]+$/ || /^[^,]+, *(ed|et al)\./) {
+    # small cap only if name has no commas (excluding the , that conjoins ed. and et al.)
+    s/^(.*?) /\\textsc{\1} /;
+  }
+  $accumulator .= $_ . " and "; 
+} @authors;
+$accumulator =~ s/ and $//;
+$author = '{'.$accumulator.'}';
 
 print "author = {$author},\n";
 
