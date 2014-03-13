@@ -1,7 +1,8 @@
 
 \vspace{1em}
-{\LARGE \parindent=-1em \textbf{[% semkey %]  [% title %]}}
-\addcontentsline{toc}{chapter}{[% semkey %]  [% title %]}
+% {\LARGE \parindent=-1em \textbf{[% semkey %]  [% title %]}}
+% \addcontentsline{toc}{chapter}{[% semkey %]  [% title %]}
+\chapter{[% semkey %]  [% title %]}
 [% # semantic flowchart %]
 [% FOREACH id IN flowchartids -%]
 \resizebox{\columnwidth}{!}{\includegraphics{../../pdf/[% id %].pdf}}
@@ -11,18 +12,18 @@
 [% FOREACH note IN chapter_notes -%]
 [% note %]
 [% END -%]
-
+\nopagebreak
 [% # insert actual content %]
 [% FOREACH etyma -%]
 % [% IF internal_notes %]\newpage[% END %]
-\etymon*{}	% just create section and let the following code add the bookmark, TOC entry, and heading
-\addcontentsline{toc}{section}{([% seq %]) [% plg %] [% protoform_text %] [% protogloss %]}
-\vspace{0.25em}
+% \etymon*{}	% just create section and let the following code add the bookmark, TOC entry, and heading
+% \addcontentsline{toc}{section}{([% seq %]) [% plg %] [% protoform_text %] [% protogloss %]}
+\section{([% seq %]) [% plg %] [% protoform_text %] [% protogloss %]}
+% \vspace{0.25em}
 % {\large \parindent=-1em ([% seq %]) \hspace{\stretch{1}} [% plg %] [% protoform %]\hspace{\stretch{1}}\textbf{[% protogloss %]}
-{\large \parindent=-1em ([% seq %]) [% plg %] [% protoform %] \textbf{[% protogloss %]}
-\hspace{\stretch{1}}\textit{\tiny[\#[% tag %]]}}
+% {\large \parindent=-1em ([% seq %]) [% plg %] [% protoform %] \textbf{[% protogloss %]}
+% \hspace{\stretch{1}}\textit{\tiny[\#[% tag %]]}}
 \nopagebreak
-
 [% FOREACH notes -%]
 [% IF type == 'I' %][Internal Note:]\textit{[% END -%]
 [% IF type == 'O' && internal_notes %][Orig/Source][% END -%]

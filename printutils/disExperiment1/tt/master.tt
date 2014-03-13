@@ -4,28 +4,9 @@
 \documentclass[11pt,twoside,twocolumn]{book}
 
 \usepackage{etoolbox}
+\usepackage{titlesec}
 
 \makeatletter
-\renewcommand{\@makechapterhead}[1]{
-  %\vspace*{50\p@}
-  % {\parindent \z@ \raggedright \normalfont
-  {\parindent \z@ \normalfont
-    \ifnum \c@secnumdepth >\m@ne
-      \if@mainmatter
-        \huge\bfseries \thechapter. \space
-      \fi
-    \fi
-    \Huge \bfseries #1\par\nobreak
-    \vskip 40\p@
-  }}
-
-\newcommand\etymon{\@startsection % special section cmd for etyma
-  {section}{1}{-1em} % name, level, indent
-  {-1ex}	% beforeskip
-  {1pt}		% afterskip
-  {\large}	% format
-}
-
 \newcommand\comparandum{\@startsection{subsection}{2}{0pt}{-1pt}{1pt}{\large\bfseries}}
 \makeatother
 
@@ -54,7 +35,7 @@
 \usepackage[document,raggedrightboxes]{ragged2e}
 \setlength{\RaggedRightRightskip}{0pt plus 3em} % must be defined after fonts are loaded
 
-\usepackage{layout}
+% \usepackage{layout}
 
 \usepackage{fancyhdr}
 
@@ -70,11 +51,13 @@
 } 
 
 \makeatletter
-\patchcmd{\chapter}{\if@openright\cleardoublepage\else\clearpage\fi}{}{}{}
+\patchcmd{\chapter}{\if@openright\cleardoublepage\else\cleardoublepage\fi}{}{}{}
 \makeatother
 
 \usepackage{acronym}
 \usepackage{natbib}
+\usepackage{fix-cm}
+\usepackage{lettrine}
 \usepackage[margin=0.8in]{geometry}
 \geometry{bindingoffset=0.6in}
 
@@ -96,17 +79,27 @@
 \setlength{\headheight}{32pt}
 \setlength{\topmargin}{0pt}
 \setlength{\marginparwidth}{0pt}
+\renewcommand{\thefootnote}{\arabic{footnote}}
 
 \setlength{\headsep}{10pt}
 
-\pagestyle{fancy}
+\titleformat{\chapter}[hang]{\Large\bfseries}{\thechapter}{0pt}{\Large\bfseries}
 
+\pagestyle{fancy}
+ 
 \fancyhead{}
+
+\renewcommand*{\sectionmark}[1]{ \markright{#1} }
+\renewcommand*{\chaptermark}[1]{ \markboth{#1}{} }
+
 \fancyhead[RO]{\Large{Sino-Tibetan Etymological} \vspace{0.5em}}
 \fancyhead[LE]{\Large{Dictionary and Thesaurus} \vspace{0.5em}}
 
-\renewcommand{\thefootnote}{\roman{footnote}}
+\fancyhead[RE]{\Large{\leftmark} \vspace{0.5em}}
+\fancyhead[LO]{\Large{\rightmark} \vspace{0.5em}}
+
 \renewcommand{\headrulewidth}{0.4pt}
+
 
 %\makeatletter
 %    \def\headrule{{\if@fancyplain\let\headrulewidth\plainheadrulewidth\fi
@@ -125,7 +118,7 @@
 
 \pdfbookmark[1]{ [% semkey %]. [% xtitle %]}{titlepage}
 
-\layout
+% \layout
 
 %\the\textwidth
 %
@@ -135,6 +128,7 @@
 
 \maketitle
 \thispagestyle{empty}
+\cleardoublepage
 
 \include{acknowledgements}
 
@@ -146,14 +140,14 @@
 
 \pdfbookmark[1]{Table of Contents}{TOC}
 \tableofcontents
-\clearpage
+\cleardoublepage
 
 % we use \input here to prevent page breaks between sections
 [% FOREACH texfile IN texfilenames -%]
 \input{[% texfile %]}
 [% END -%]
 
-\clearpage
+\cleardoublepage
 
 \phantomsection
 \addcontentsline{toc}{chapter}{References}

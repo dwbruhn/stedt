@@ -4,7 +4,12 @@
 # by Dominic Yu
 # 2011.02.03
 #
-# ...thoroughly hacked in details to support two-column output, and other features.
+# ...thoroughly hacked in aspects great and small to:
+# * support two-column output, and other features.
+# * ease the "fascicle generation process"
+# * be less restrictive in what is shown
+# * provide myriad small typographic improvements.
+#
 # jbl 2013
 #
 # see USAGE, below.
@@ -87,9 +92,11 @@ my $s3   = $s3 == 0 ? 'x' : $s3;
 
 my $semkey = "$vol.$fasc.$chap.$s1.$s2.$s3";
 $semkey    =~ s/\.x//g;
+$semkey .= '.0' unless $semkey =~ /\./; 
 my $texfilename = "$vol-$fasc-$chap-$s1-$s2-$s3";
 $texfilename =~ tr/A-Z/a-z/;
 $texfilename =~ s/\-x//g;
+$texfilename .= '-0' unless $texfilename =~ /\-/; 
 
 if ($sectioncount == 1) {
   $mastertitle = escape_tex($chaptertitle);
@@ -141,8 +148,11 @@ $title = escape_tex($title);
 my $flowchartids = $dbh->selectcol_arrayref("SELECT noteid FROM notes WHERE spec='C' AND id='$semkey' AND notetype='G'");
 print STDERR "generating VFC $semkey :: '$title'...\n";
 my $chapter_notes = [map {xml2tex(decode_utf8($_))} @{$dbh->selectcol_arrayref(
-	"SELECT xmlnote FROM notes WHERE spec='C' AND id='$semkey' AND notetype = 'T' ORDER BY ord")}
+	"SELECT xmlnote FROM notes WHERE spec='C' AND id='$semkey' AND (notetype = 'T' OR notetype = 'N') ORDER BY ord")}
 	];
+
+# change first word of chapter note to dropcaps + smallcaps
+my $chapter_notes = [map { s/^(\w)(\w+) /\\lettrine{\1}{\2} /; $_ } @$chapter_notes];
 
 my @etyma; # array of infos to be passed on to the template
 my $extra_where = ($INTERNAL_NOTES ? "" : "AND e.sequence >= 1");  # extra condition to exclude unsequenced etyma when this is a non-draft version
@@ -153,7 +163,8 @@ my $etyma_in_chapter = $dbh->selectall_arrayref(
 		ORDER BY e.sequence#);
 
 print STDERR (scalar @$etyma_in_chapter) . " etyma in this chapter\n";
-next if 0 == scalar @$etyma_in_chapter; # skip entire chapter if it has no etyma.
+# skip entire chapter if it has no etyma and there is nothing else to print, unless it is a volume beginning.
+next if (0 == scalar @$etyma_in_chapter) && (0 == scalar @$chapter_notes) && (0 == @$flowchartids) && ($semkey !=~ /\.0/);
 foreach (@$etyma_in_chapter) {
 	my %e; # hash of infos to be added to @etyma
 
@@ -173,7 +184,7 @@ foreach (@$etyma_in_chapter) {
 	$e{seq} =~ s/\.(\d)/chr(96+$1)/e;
 
 	# $e{plg} = '' unless $e{plg} eq 'IA';
-	$e{plg} = $e{plg} eq 'PTB' ? '' : "$e{plg}";
+	# $e{plg} = $e{plg} eq 'PTB' ? '' : "$e{plg}";
 
 	$e{protoform} = format_protoform($e{protoform});
 	$e{protoform_text} = $e{protoform};
