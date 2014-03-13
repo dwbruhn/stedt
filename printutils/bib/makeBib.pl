@@ -56,7 +56,7 @@ print '@' . $type . '{' . $srcabbr . ",\n";
 @authors = split / +and +/,$author;
 my $accumulator;
 grep {
-  if (/^[^,]+$/ || /^[^,]+, *(ed|et al)\./) {
+  if (/^[^,]+$/ || /^[^,]+, *(eds?|et al)\./) {
     # small cap only if name has no commas (excluding the , that conjoins ed. and et al.)
     s/^(.*?) /\\textsc{\1} /;
   }
