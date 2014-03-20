@@ -16,7 +16,7 @@ sub source : StartRunmode {
 	}
 
 	my $lg_list = $self->dbh->selectall_arrayref(
-		"SELECT silcode, language, lgcode, grpid, grpno, grp, COUNT(lexicon.rn), lgid AS num_recs, pi_page, lgabbr FROM languagenames NATURAL LEFT JOIN languagegroups LEFT JOIN lexicon USING (lgid) WHERE srcabbr=? AND lgcode != 0 GROUP BY lgid HAVING num_recs > 0 ORDER BY lgcode, language", undef, $srcabbr);
+		"SELECT silcode, language, lgcode, grpid, grpno, grp, COUNT(lexicon.rn), lgid AS num_recs, pi_page, lgabbr FROM languagenames NATURAL LEFT JOIN languagegroups LEFT JOIN lexicon USING (lgid) WHERE srcabbr=? AND lgcode!=0 AND lexicon.status!='HIDE' AND lexicon.status!='DELETED' GROUP BY lgid HAVING num_recs > 0 ORDER BY lgcode, language", undef, $srcabbr);
 
 	require STEDT::RootCanal::Notes;
 	my $INTERNAL_NOTES = $self->has_privs(2);
@@ -46,6 +46,7 @@ sub all_sources {
 	my $a = $self->dbh->selectall_arrayref("SELECT srcabbr, COUNT(DISTINCT languagenames.lgid) AS num_lgs,
 		COUNT(lexicon.rn) AS num_recs, citation, author, year, title, imprint
 		FROM srcbib LEFT JOIN languagenames USING (srcabbr) LEFT JOIN lexicon USING (lgid)
+		WHERE lexicon.status!='HIDE' AND lexicon.status!='DELETED'
 		GROUP BY srcabbr
 		HAVING num_recs > 0
 		ORDER BY citation", {Slice=>{}});
@@ -57,6 +58,7 @@ sub srcabbr : Runmode {
 	my $a = $self->dbh->selectall_arrayref("SELECT srcabbr, COUNT(DISTINCT languagenames.lgid) AS num_lgs,
 		COUNT(lexicon.rn) AS num_recs, citation, author, year, title, imprint
 		FROM srcbib LEFT JOIN languagenames USING (srcabbr) LEFT JOIN lexicon USING (lgid)
+		WHERE lexicon.status!='HIDE' AND lexicon.status!='DELETED'
 		GROUP BY srcabbr
 		HAVING num_recs > 0
 		ORDER BY srcabbr", {Slice=>{}});
