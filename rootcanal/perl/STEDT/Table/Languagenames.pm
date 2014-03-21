@@ -11,7 +11,7 @@ $t->order_by('languagenames.lgsort');
 
 $t->fields(
 	'languagenames.lgid',
-	'COUNT(lexicon.rn) AS num_recs',
+	'SUM(IF(ISNULL(lexicon.status) || lexicon.status="HIDE" || lexicon.status="DELETED",0,1)) AS num_recs',	# for each joined row from lexicon table, count record if it's not null or not hidden/deleted; replaces	COUNT(lexicon.rn)
 	'languagenames.srcabbr',
 	'languagenames.lgabbr',
 	'languagenames.lgcode',

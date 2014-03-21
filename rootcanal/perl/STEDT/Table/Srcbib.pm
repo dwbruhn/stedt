@@ -11,7 +11,7 @@ $t->order_by('srcbib.srcabbr, srcbib.year'); # default is the key
 $t->fields(
 	'srcbib.srcabbr',
 	'COUNT(DISTINCT languagenames.lgid) AS num_lgs',
-	'COUNT(lexicon.rn) AS num_recs',
+	'SUM(IF(ISNULL(lexicon.status) || lexicon.status="HIDE" || lexicon.status="DELETED",0,1)) AS num_recs',	# for each joined row from lexicon table, count record if it's not null or not hidden/deleted; replaces COUNT(lexicon.rn)
 	'srcbib.citation',	# seems kinda useless; format looks like last name + two digits of year + some kind of abbrev.
 	'srcbib.author',
 	'srcbib.year',
