@@ -7,7 +7,6 @@ my ($self, $dbh, $privs) = @_;
 my $t = $self->SUPER::new($dbh, 'languagenames', 'languagenames.lgid', $privs);
 
 $t->query_from(q|languagenames NATURAL LEFT JOIN languagegroups LEFT JOIN lexicon USING (lgid)|);
-$t->default_where('lexicon.status != "HIDE" AND lexicon.status != "DELETED"');
 $t->order_by('languagenames.lgsort');
 
 $t->fields(

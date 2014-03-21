@@ -6,7 +6,6 @@ sub new {
 my $t = shift->SUPER::new(my $dbh = shift, 'srcbib', 'srcbib.srcabbr', shift);
 
 $t->query_from('srcbib LEFT JOIN languagenames USING (srcabbr) LEFT JOIN lexicon USING (lgid)');
-$t->default_where('lexicon.status != "HIDE" AND lexicon.status != "DELETED"');
 $t->order_by('srcbib.srcabbr, srcbib.year'); # default is the key
 
 $t->fields(
