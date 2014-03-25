@@ -60,10 +60,13 @@ grep {
     # small cap only if name has no commas (excluding the , that conjoins ed. and et al.)
     s/^(.*?) /\\textsc{\1} /;
   }
+  else {
+    s/^(.*?), /{\1}, /;
+  }
   $accumulator .= $_ . " and "; 
 } @authors;
 $accumulator =~ s/ and $//;
-$author = '{'.$accumulator.'}';
+#$author = '{'.$accumulator.'}';
 
 print "author = {$author},\n";
 
