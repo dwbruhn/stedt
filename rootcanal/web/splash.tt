@@ -59,7 +59,7 @@
 <hr>
 <small>
 <a href="http://stedt.berkeley.edu/">STEDT Home Page</a> | 
-<a href="[% self_base %]contact.html" target="_blank">Contact Us</a>
+<a href="http://stedt.berkeley.edu/contact" target="_blank">Contact Us</a>
 [% UNLESS user -%]
  | <a href="[% https_base _ self_url %]/account/login">Log in</a> | 
 <a href="[% https_base _ self_url %]/account/gsarpa">Register</a>
