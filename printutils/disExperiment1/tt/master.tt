@@ -158,6 +158,8 @@
 \renewcommand{\bibname}{References}
 \bibliography{stedtreferences}
 
+\clearpage
+\addcontentsline{toc}{section}{Index}
 \printindex
 
 \end{document}
