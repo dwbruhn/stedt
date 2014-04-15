@@ -183,6 +183,16 @@ foreach (@$etyma_in_chapter) {
 	$e{seq} =~ s/\.0$//;
 	$e{seq} =~ s/\.(\d)/chr(96+$1)/e;
 
+	#index gloss parts
+	#if $e{protogloss} =~ /\W/
+	my @tempgloss = split('/', $e{protogloss});
+	foreach my $glosspart (@tempgloss) {
+	  $glosspart =~ s/^\s+|\s+$//g;
+	  $glosspart .= " \\index\{$glosspart\}";
+	  }
+
+	$e{protogloss} = join(' / ', @tempgloss);
+
 	# $e{plg} = '' unless $e{plg} eq 'IA';
 	# $e{plg} = $e{plg} eq 'PTB' ? '' : "$e{plg}";
 

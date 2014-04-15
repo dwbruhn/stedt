@@ -31,3 +31,6 @@ perl -i -pe 's/1989\{/1989/'  ${texfile}.bbl
 xelatex ${texfile}.tex >> ${texfile}.stdout.log
 xelatex ${texfile}.tex >> ${texfile}.stdout.log
 xelatex ${texfile}.tex >> ${texfile}.stdout.log
+makeindex ${texfile} >> ${texfile}.stdout.log
+xelatex ${texfile}.tex >> ${texfile}.stdout.log
+xelatex ${texfile}.tex >> ${texfile}.stdout.log
