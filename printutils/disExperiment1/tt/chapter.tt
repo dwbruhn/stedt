@@ -25,12 +25,12 @@
 % \hspace{\stretch{1}}\textit{\tiny[\#[% tag %]]}}
 \nopagebreak
 [% FOREACH notes -%]
-[% IF type == 'I' %][Internal Note:]\textit{[% END -%]
+[% IF type == 'I' %]{{[Internal Note:]}} \textit{[% END -%]
 [% IF type == 'O' && internal_notes %][Orig/Source][% END -%]
 [% text -%]
-[% IF type == 'I' %]}[% END -%]
+[% IF type == 'I' %]}[% END %]
 
-[% END -%]
+[% END %]
 
 [% IF records %][% records %][% END -%]
 [% IF comparanda.size -%]
