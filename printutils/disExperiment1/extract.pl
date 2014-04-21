@@ -165,7 +165,14 @@ my $etyma_in_chapter = $dbh->selectall_arrayref(
 print STDERR (scalar @$etyma_in_chapter) . " etyma in this chapter\n";
 # skip entire chapter if it has no etyma and there is nothing else to print, unless it is a volume beginning.
 next if (0 == scalar @$etyma_in_chapter) && (0 == scalar @$chapter_notes) && (0 == @$flowchartids) && ($semkey !=~ /\.0/);
+my $etyma_index = 0; # index for accessing next etymon in array (to check sequence number and identify PAFs)
 foreach (@$etyma_in_chapter) {
+	
+	# check if current etymon is a PAF (then it should be included even if it has no records)
+	my $seq_cur = $etyma_in_chapter->[$etyma_index][1]; # get sequence number of current etymon
+	my $seq_next = (scalar @$etyma_in_chapter == $etyma_index+1) ? 0 : $etyma_in_chapter->[$etyma_index+1][1]; # get sequence number of following etymon, but don't overrun array
+	my $isPAF = (int($seq_cur) == $seq_cur && int($seq_cur) == int($seq_next)); # etymon is a PAF is decimal portion of seq is zero and integer portion matches following seq
+	
 	my %e; # hash of infos to be added to @etyma
 
 	# heading stuff
@@ -392,8 +399,9 @@ EndOfSQL
 		$note =~ s/(\[JAM\])/\\hfill $1/g;
 		push @{$e{comparanda}}, xml2tex($note,1); # don't convert curly braces
 	}
-# saving the best for last ... include this etymon if it has some reflexes, or if it's a draft (but has no reflexes)
-push @etyma, \%e if ((scalar(@$recs) > 0) || $INTERNAL_NOTES);
+# saving the best for last ... include this etymon if it has some reflexes, or if it's a PAF, or if this is a draft (even if etymon has no reflexes)
+push @etyma, \%e if ((scalar(@$recs) > 0) || $isPAF || $INTERNAL_NOTES);
+$etyma_index++; # increment index to access next sequence number
 }
 
 # print rootlets
