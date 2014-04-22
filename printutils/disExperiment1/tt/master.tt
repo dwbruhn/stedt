@@ -158,8 +158,11 @@
 \renewcommand{\bibname}{References}
 \bibliography{stedtreferences}
 
-\clearpage
-\addcontentsline{toc}{section}{Index}
+\addcontentsline{toc}{chapter}{Protogloss Index}
+\renewcommand{\indexname}{Protogloss Index}
+% would be nice to figure out how to add a few words of description for this index, e.g.
+% "Being an index to the individual glosses used for etyma in this work."
+% just adding it here does not make it show up in the index...
 \printindex
 
 \end{document}

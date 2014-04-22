@@ -30,4 +30,9 @@ do
 done
 sed -e '/% insert includes here/r./inputs.tex' masterMaster.tex > masterTemp.tex 
 xelatex masterTemp.tex > master.log
-#cp masterTemp.pdf /home/stedt/public_html/dissemination
+bibtex masterTemp  >> ${texfile}.stdout.log &
+makeindex masterTemp >> ${texfile}.stdout.log &
+wait
+xelatex masterTemp.tex > master.log
+xelatex masterTemp.tex > master.log
+xelatex masterTemp.tex > master.log

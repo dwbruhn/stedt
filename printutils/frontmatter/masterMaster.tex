@@ -10,6 +10,9 @@
 \newcommand\comparandum{\@startsection{subsection}{2}{0pt}{-1pt}{1pt}{\large\bfseries}}
 \makeatother
 
+\usepackage{makeidx}
+\makeindex
+
 \usepackage{fontspec}
 \usepackage{xunicode} % for real tildes with \textasciitilde
 \usepackage{xltxtra} % for xelatex logo
@@ -149,5 +152,12 @@
 \bibliographystyle{apalike}
 \renewcommand{\bibname}{References}
 \bibliography{stedtreferences}
+
+\addcontentsline{toc}{chapter}{Protogloss Index}
+\renewcommand{\indexname}{Protogloss Index}
+% would be nice to figure out how to add a few words of description for this index, e.g.
+% "Being an index to the individual glosses used for etyma in this work."
+% just adding it here does not make it show up in the index...
+\printindex
 
 \end{document}
