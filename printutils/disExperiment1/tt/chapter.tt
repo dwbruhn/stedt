@@ -1,8 +1,7 @@
 
 \vspace{1em}
-% {\LARGE \parindent=-1em \textbf{[% semkey %]  [% title %]}}
-% \addcontentsline{toc}{chapter}{[% semkey %]  [% title %]}
-\chapter{[% semkey %]  [% title %]}
+{\LARGE \parindent=-1em \textbf{[% semkey %]  [% title %]}}
+\addcontentsline{toc}{chapter}{[% semkey %]  [% title %]}
 [% # semantic flowchart %]
 [% FOREACH id IN flowchartids -%]
 \resizebox{\columnwidth}{!}{\includegraphics{../../pdf/[% id %].pdf}}

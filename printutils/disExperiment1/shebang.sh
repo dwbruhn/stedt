@@ -3,6 +3,7 @@
 # this script makes the entire STEDT.
 # it takes a while to run (15-20 mins, depending)
 #
+# first, make all the volumes..
 ./makeFascOnly.sh 1 x x & 
 ./makeFascOnly.sh 2 x x & 
 ./makeFascOnly.sh 3 x x & 
@@ -13,8 +14,12 @@
 ./makeFascOnly.sh 8 x x & 
 ./makeFascOnly.sh 9 x x & 
 ./makeFascOnly.sh 10 x x & 
-wait
+wait # for them all to complete...
 cd tex
+# this cp is not strictly necessary since makeFascOnly.sh does it...but, just in case
+# something changes.
+cp ../../frontmatter/*.tex .
+# insert the various little tex files into the master template
 > inputs.tex
 for i in {1..10}
 do
