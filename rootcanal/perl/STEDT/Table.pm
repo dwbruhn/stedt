@@ -82,6 +82,7 @@ sub index_of_key {
 	my $i = 0;
 	foreach ($self->fields()) {
 		return $i if $_ eq $self->{key};
+		$i++;
 	}
 }
 
