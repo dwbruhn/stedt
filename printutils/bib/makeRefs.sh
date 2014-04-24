@@ -35,6 +35,7 @@ perl -i -pe 's/上古漢語的N- 和 m- 前綴/\\TC{上}\\TC{古}\\TC{漢}\\TC{�
 cut -f1  srcbib.csv > cites.csv
 #mysql -D stedt -u root -e "select srcabbr from srcbib" > cites.csv
 
+python bibseminate.py
 perl makeBib.pl srcbib.csv > stedtreferences.bib
 xelatex bibtest.tex 
 bibtex bibtest.aux
