@@ -30,9 +30,9 @@ do
 done
 sed -e '/% insert includes here/r./inputs.tex' masterMaster.tex > masterTemp.tex 
 xelatex masterTemp.tex > master.log
-bibtex masterTemp  >> ${texfile}.stdout.log &
-makeindex masterTemp >> ${texfile}.stdout.log &
+bibtex masterTemp  > master.bibtex.log &
+makeindex masterTemp > master.makeindex.log &
 wait
-xelatex masterTemp.tex > master.log
-xelatex masterTemp.tex > master.log
-xelatex masterTemp.tex > master.log
+xelatex masterTemp.tex >> master.log
+xelatex masterTemp.tex >> master.log
+xelatex masterTemp.tex >> master.log

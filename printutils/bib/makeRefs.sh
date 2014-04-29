@@ -1,7 +1,7 @@
 rm *.aux *.bbl *.blg *.log *.out *.pdf stedtreferences.bib 
 
-mysql -D stedt -u root -e "select * from srcbib" > srcbib.csv
-
+#mysql -D stedt -u root -e "select * from srcbib" > srcbib.csv
+mysql -D stedt -u root -pPASSWORD --default-character-set=utf8 -e "select * from srcbib" > srcbib.csv
 
 
 
