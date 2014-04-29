@@ -371,8 +371,8 @@ EndOfSQL
 			$text .= "\\\\\n";
 		}
 		$text .= "\\end{mpsupertabular}\n" unless $lastgrpno eq ''; # if there were no forms, skip this
-		$text .= "}\n\n";
-		#$text .= "\n\n";
+		$text .= "}\n";
+		#$text .= "\n";
 		$e{records} = $text;
 		print STDERR "\n";
 	} else {
