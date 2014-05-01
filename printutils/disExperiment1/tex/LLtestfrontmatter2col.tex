@@ -1,0 +1,145 @@
+%!TEX TS-program = xelatex
+%!TEX encoding = UTF-8 Unicode
+% \documentclass[12pt]{report}
+\documentclass[11pt,twoside,twocolumn]{book}
+
+\makeatletter
+\renewcommand{\@makechapterhead}[1]{%
+  %\vspace*{50\p@}%
+  {\parindent \z@ \raggedright \normalfont
+    \ifnum \c@secnumdepth >\m@ne
+      \if@mainmatter
+        \huge\bfseries \thechapter. \space
+      \fi
+    \fi
+    \Huge \bfseries #1\par\nobreak
+    \vskip 40\p@
+  }}
+\newcommand\etymon{\@startsection % special section cmd for etyma
+  {section}{1}{-1em} % name, level, indent
+  {-1ex}	% beforeskip
+  {1pt}		% afterskip
+  {\large}	% format
+}
+\newcommand\comparandum{\@startsection{subsection}{2}{0pt}{-1pt}{1pt}{\large\bfseries}}
+\makeatother
+
+\usepackage{fontspec}
+\usepackage{xunicode} % for real tildes with \textasciitilde
+\usepackage{xltxtra} % for xelatex logo
+\setmainfont{Charis SIL}
+% \setmainfont{Arial Unicode MS}
+\newfontfamily\stedtfont{STEDTU}
+\newfontfamily\tradchinesefont{SimSun}
+\newfontfamily\simpchinesefont{SimSun}
+\newcommand{\TC}[1]{{\tradchinesefont #1}}
+\newcommand{\SC}[1]{{\simpchinesefont #1}}
+\newcommand{\STEDTU}[1]{{\stedtfont #1}}
+\newcommand{\fascicletablebegin}{\begin{mpsupertabular}[l]{@{\hspace*{1.1em}}>{\hangindent=0.1in}p{1.3in}>{\hangindent=0.1in}p{1.2in}>{\hangindent=0.1in}p{1.4in}>{\hangindent=0.1in}p{2.5in}l}}
+\renewcommand\thechapter{} % use cap roman numerals for chapter numbers
+
+\usepackage{fullpage}
+\usepackage{parskip}
+\usepackage[toc]{multitoc}
+\usepackage{supertabular,ltxtable,booktabs}
+\setcounter{LTchunksize}{300} % use more memory for fewer compiles
+\usepackage{graphicx}
+% \usepackage{microtype} % only works in pdftex, which we are not using...
+% \usepackage{tablefootnote}
+% \usepackage{array} % use array and ragged2e for raggedright inside tables
+% \usepackage[document,raggedrightboxes]{ragged2e}
+% \setlength{\RaggedRightRightskip}{0pt plus 3em} % must be defined after fonts are loaded
+
+\usepackage{layout}
+
+\usepackage{fancyhdr}
+
+\title{STEDT Front Matter}
+\author{STEDT}
+\date{date}
+\usepackage[bookmarks]{hyperref}
+\hypersetup{%
+	pdfborder={0 0 1},
+	pdfborderstyle={/S/U/W 1}, % make links underlined (instead of surrounded by red boxes)
+	pdftitle = {STEDT Front Matter}, 
+	pdfauthor = {\textcopyright\ STEDT}, 
+} 
+
+\usepackage{etoolbox}
+\makeatletter
+% \patchcmd{\chapter}{\if@openright\cleardoublepage\else\clearpage\fi}{}{}{}
+
+\usepackage{acronym}
+\usepackage{natbib}
+\usepackage[margin=0.8in]{geometry}
+
+% \pdfpageheight=22in
+% \pdfpagewidth=16in
+
+\setlength\paperwidth{16in}
+\setlength\paperheight{22in}
+
+\setlength{\columnsep}{5em}
+\setlength{\columnseprule}{0.05pt}
+
+\setlength\textwidth{14in}
+\setlength\textheight{20in}
+
+\setlength\columnwidth{7in}
+% \setlength\columnheight{18in}
+
+\setlength{\headheight}{20pt}
+\setlength{\topmargin}{0pt}
+\setlength{\marginparwidth}{0pt}
+
+\pagestyle{fancy}
+
+\fancyhead{}
+\fancyhead[LE]{Dictionary and Thesaurus \vspace{0.5em}}
+\fancyhead[RO]{Sino-Tibetan Etymological \vspace{0.5em}}
+
+\makeatletter
+    \def\headrule{{\if@fancyplain\let\headrulewidth\plainheadrulewidth\fi
+        \hrule\@height\headrulewidth\@width 4in \vskip-\headrulewidth}}
+\makeatother
+
+% \lhead{Dictionary and Thesaurus}
+% \rhead{Sino-Tibetan Etymological}
+% \chead{}
+\lfoot{}
+\cfoot{\thepage}
+\rfoot{}
+\renewcommand{\headrulewidth}{0.4pt}
+
+\begin{document}
+\setcounter{secnumdepth}{0} % don't number sections, just chapters
+\layout
+
+%\the\textwidth
+%
+%\the\columnwidth
+%
+%\the\columnsep
+
+\maketitle
+\thispagestyle{empty}
+
+\include{acknowledgements}
+
+\include{preface}
+
+\include{introduction}
+
+\include{terminology}
+
+\pdfbookmark[1]{Table of Contents}{TOC}
+\tableofcontents
+\cleardoublepage
+
+\phantomsection
+\addcontentsline{toc}{chapter}{References}
+\bibliographystyle{apalike}
+\renewcommand{\bibname}{References}
+\bibliography{stedtreferences}
+
+\end{document}
