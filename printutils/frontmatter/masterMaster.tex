@@ -37,6 +37,7 @@
 \usepackage{array} % use array and ragged2e for raggedright inside tables
 \usepackage[document,raggedrightboxes]{ragged2e}
 \setlength{\RaggedRightRightskip}{0pt plus 3em} % must be defined after fonts are loaded
+\usepackage[yyyymmdd,hhmmss]{datetime}
 
 % \usepackage{layout}
 
@@ -44,7 +45,7 @@
 
 \title{The\\Sino-Tibetan Etymological\\Dictionary\\and\\Thesaurus}
 \author{DRAFT}
-\date{2014.06.30}
+\date{Compiled on \today\ at \currenttime}
 \usepackage[bookmarks]{hyperref}
 \hypersetup{%
         pdfborder={0 0 1},
@@ -92,14 +93,14 @@
  
 \fancyhead{}
 
-\renewcommand*{\sectionmark}[1]{ \markright{#1} }
+\renewcommand*{\sectionmark}[1]{ \markright{#1}{} }
 \renewcommand*{\chaptermark}[1]{ \markboth{#1}{} }
 
-\fancyhead[RO]{\Large{Sino-Tibetan Etymological} \vspace{0.5em}}
-\fancyhead[LE]{\Large{Dictionary and Thesaurus} \vspace{0.5em}}
+\fancyhead[RE]{\Large{Sino-Tibetan Etymological} \vspace{0.5em}}
+\fancyhead[LO]{\Large{Dictionary and Thesaurus} \vspace{0.5em}}
 
-\fancyhead[RE]{\Large{\leftmark} \vspace{0.5em}}
-\fancyhead[LO]{\Large{\rightmark} \vspace{0.5em}}
+\fancyhead[LE]{\Large{\leftmark} \vspace{0.5em}}
+\fancyhead[RO]{\Large{\rightmark} \vspace{0.5em}}
 
 \renewcommand{\headrulewidth}{0.4pt}
 
