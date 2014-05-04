@@ -7,6 +7,7 @@
 [% # semantic flowchart %]
 [% FOREACH id IN flowchartids -%]
 % \resizebox{\columnwidth}{!}{\includegraphics{../../pdf/[% id %].pdf}}
+\vspace{0.5em}
 \includegraphics{../../pdf/[% id %].pdf}
 [% END -%]\vspace{0.25em}
 [% # general discussion == chapter notes %]

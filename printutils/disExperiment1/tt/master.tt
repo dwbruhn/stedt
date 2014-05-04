@@ -132,6 +132,8 @@
 \begin{document}
 \setcounter{secnumdepth}{0} % don't number sections, just chapters
 
+\pdfbookmark[1]{ [% semkey %]. [% xtitle %]}{titlepage}
+
 % \layout
 
 %\the\textwidth

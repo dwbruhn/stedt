@@ -23,7 +23,7 @@ cp ../../frontmatter/*.tex .
 > inputs.tex
 for i in {1..10}
 do
-   title=`grep "pdfbookmark" ${i}-x-x-master.tex | grep -v TOC | perl -pe 's/.pdfbookmark\[1\].*?{(.*?)\}.*/\1/'`
+   title=`grep "pdfbookmark" ${i}-x-x-master.tex | grep -v TOC | perl -pe 's/.pdfbookmark\[1\].*?{([\d\. ]+)(.*?)\}.*/\2/'`
    echo "\begin{part}{$title}" >> inputs.tex
    perl -ne "print if/input\{\d+\-/" ${i}-x-x-master.tex | perl -pe s'/.*://' >> inputs.tex
    echo "\end{part}" >> inputs.tex
