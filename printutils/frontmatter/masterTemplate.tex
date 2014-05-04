@@ -94,6 +94,8 @@
 \setlength{\topmargin}{0pt}
 \setlength{\marginparwidth}{0pt}
 \renewcommand{\thefootnote}{\arabic{footnote}}
+\renewcommand{\thepart}{\arabic{part}}
+\renewcommand{\partname}{Volume}
 
 \setlength{\headsep}{10pt}
 
@@ -132,6 +134,8 @@
 
 \begin{document}
 \setcounter{secnumdepth}{0} % don't number sections, just chapters
+
+\pdfbookmark[1]{ [% semkey %]. [% xtitle %]}{titlepage}
 
 % \layout
 
