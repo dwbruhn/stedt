@@ -17,6 +17,7 @@
 \usepackage{xunicode} % for real tildes with \textasciitilde
 \usepackage{xltxtra} % for xelatex logo
 \setmainfont{Charis SIL}
+% \setmainfont{Arial Unicode MS}
 \newfontfamily\stedtfont{STEDTU Roman}
 \newfontfamily\tradchinesefont{LiSong Pro}
 \newfontfamily\simpchinesefont{STSong}
@@ -35,8 +36,9 @@
 % \usepackage{microtype} % only works in pdftex, which we are not using...
 \usepackage{tablefootnote}
 \usepackage{array} % use array and ragged2e for raggedright inside tables
-\usepackage[document,raggedrightboxes]{ragged2e}
-\setlength{\RaggedRightRightskip}{0pt plus 3em} % must be defined after fonts are loaded
+% \usepackage[document,raggedrightboxes]{ragged2e}
+% \setlength{\RaggedRightRightskip}{0pt plus 3em} % must be defined after fonts are loaded
+\usepackage[yyyymmdd,hhmmss]{datetime}
 
 % \usepackage{layout}
 
@@ -54,7 +56,8 @@
 } 
 
 \makeatletter
-\patchcmd{\chapter}{\if@openright\cleardoublepage\else\cleardoublepage\fi}{}{}{}
+\patchcmd{\chapter}{\if@openright\cleardoublepage\else\clearpage\fi}{}{}{}
+%\patchcmd{\chapter}{}{}{}{}
 \makeatother
 
 \usepackage{acronym}
@@ -64,6 +67,13 @@
 \usepackage[margin=0.8in]{geometry}
 \geometry{bindingoffset=0.6in}
 
+\let\origdoublepage\cleardoublepage
+\newcommand{\clearemptydoublepage}{%
+  \clearpage
+  {\pagestyle{empty}\origdoublepage}%
+}
+\let\cleardoublepage\clearemptydoublepage
+
 % \pdfpageheight=26in
 % \pdfpagewidth=16in
 
@@ -71,7 +81,7 @@
 \setlength\paperheight{26in}
 
 \setlength{\columnsep}{5em}
-\setlength{\columnseprule}{0.05pt}
+% \setlength{\columnseprule}{0.05pt}
 
 \setlength\textwidth{15in}
 \setlength\textheight{23.5in}
@@ -95,11 +105,14 @@
 \renewcommand*{\sectionmark}[1]{ \markright{#1} }
 \renewcommand*{\chaptermark}[1]{ \markboth{#1}{} }
 
-\fancyhead[RO]{\Large{Sino-Tibetan Etymological} \vspace{0.5em}}
-\fancyhead[LE]{\Large{Dictionary and Thesaurus} \vspace{0.5em}}
+% \renewcommand*{\sectionmark}[1]{ \markright{#1}{} }
+% \renewcommand*{\chaptermark}[1]{ \markboth{#1}{} }
 
-\fancyhead[RE]{\Large{\leftmark} \vspace{0.5em}}
-\fancyhead[LO]{\Large{\rightmark} \vspace{0.5em}}
+\fancyhead[RE]{\Large{Sino-Tibetan Etymological} \vspace{0.5em}}
+\fancyhead[LO]{\Large{Dictionary and Thesaurus} \vspace{0.5em}}
+
+\fancyhead[RO]{\Large{\leftmark} \vspace{0.5em}}
+\fancyhead[LE]{\Large{\rightmark} \vspace{0.5em}}
 
 \renewcommand{\headrulewidth}{0.4pt}
 
@@ -118,8 +131,6 @@
 
 \begin{document}
 \setcounter{secnumdepth}{0} % don't number sections, just chapters
-
-\pdfbookmark[1]{ [% semkey %]. [% xtitle %]}{titlepage}
 
 % \layout
 
@@ -144,6 +155,8 @@
 \pdfbookmark[1]{Table of Contents}{TOC}
 \tableofcontents
 \cleardoublepage
+
+% \renewcommand{\clearpage}{}
 
 % we use \input here to prevent page breaks between sections
 [% FOREACH texfile IN texfilenames -%]

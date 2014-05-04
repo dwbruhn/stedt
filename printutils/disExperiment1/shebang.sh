@@ -28,7 +28,7 @@ do
    perl -ne "print if/input\{\d+\-/" ${i}-x-x-master.tex | perl -pe s'/.*://' >> inputs.tex
    echo "\end{part}" >> inputs.tex
 done
-sed -e '/% insert includes here/r./inputs.tex' masterMaster.tex > masterTemp.tex 
+sed -e '/% insert includes here/r./inputs.tex' masterTemplate.tex > masterTemp.tex 
 xelatex masterTemp.tex > master.log
 bibtex masterTemp  > master.bibtex.log &
 makeindex masterTemp > master.makeindex.log &
