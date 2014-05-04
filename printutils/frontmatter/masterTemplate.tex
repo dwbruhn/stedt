@@ -2,6 +2,7 @@
 %!TEX encoding = UTF-8 Unicode
 % \documentclass[12pt]{report}
 \documentclass[11pt,twoside,twocolumn]{book}
+% \documentclass[11pt]{book}
 
 \usepackage{etoolbox}
 \usepackage{titlesec}
@@ -17,6 +18,7 @@
 \usepackage{xunicode} % for real tildes with \textasciitilde
 \usepackage{xltxtra} % for xelatex logo
 \setmainfont{Charis SIL}
+% \setmainfont{Arial Unicode MS}
 \newfontfamily\stedtfont{STEDTU Roman}
 \newfontfamily\tradchinesefont{LiSong Pro}
 \newfontfamily\simpchinesefont{STSong}
@@ -35,8 +37,8 @@
 % \usepackage{microtype} % only works in pdftex, which we are not using...
 \usepackage{tablefootnote}
 \usepackage{array} % use array and ragged2e for raggedright inside tables
-\usepackage[document,raggedrightboxes]{ragged2e}
-\setlength{\RaggedRightRightskip}{0pt plus 3em} % must be defined after fonts are loaded
+% \usepackage[document,raggedrightboxes]{ragged2e}
+% \setlength{\RaggedRightRightskip}{0pt plus 3em} % must be defined after fonts are loaded
 \usepackage[yyyymmdd,hhmmss]{datetime}
 
 % \usepackage{layout}
@@ -52,10 +54,11 @@
         pdfborderstyle={/S/U/W 1}, % make links underlined (instead of surrounded by red boxes)
         pdftitle = {Sino-Tibetan Etymological Dictionary and Thesaurus}, 
         pdfauthor = {\textcopyright\ STEDT}, 
-} 
+}
 
 \makeatletter
-\patchcmd{\chapter}{\if@openright\cleardoublepage\else\cleardoublepage\fi}{}{}{}
+\patchcmd{\chapter}{\if@openright\cleardoublepage\else\clearpage\fi}{}{}{}
+%\patchcmd{\chapter}{}{}{}{}
 \makeatother
 
 \usepackage{acronym}
@@ -65,6 +68,13 @@
 \usepackage[margin=0.8in]{geometry}
 \geometry{bindingoffset=0.6in}
 
+\let\origdoublepage\cleardoublepage
+\newcommand{\clearemptydoublepage}{%
+  \clearpage
+  {\pagestyle{empty}\origdoublepage}%
+}
+\let\cleardoublepage\clearemptydoublepage
+
 % \pdfpageheight=26in
 % \pdfpagewidth=16in
 
@@ -72,7 +82,7 @@
 \setlength\paperheight{26in}
 
 \setlength{\columnsep}{5em}
-\setlength{\columnseprule}{0.05pt}
+% \setlength{\columnseprule}{0.05pt}
 
 \setlength\textwidth{15in}
 \setlength\textheight{23.5in}
@@ -93,8 +103,11 @@
  
 \fancyhead{}
 
-\renewcommand*{\sectionmark}[1]{ \markright{#1}{} }
+\renewcommand*{\sectionmark}[1]{ \markright{#1} }
 \renewcommand*{\chaptermark}[1]{ \markboth{#1}{} }
+
+% \renewcommand*{\sectionmark}[1]{ \markright{#1}{} }
+% \renewcommand*{\chaptermark}[1]{ \markboth{#1}{} }
 
 \fancyhead[RE]{\Large{Sino-Tibetan Etymological} \vspace{0.5em}}
 \fancyhead[LO]{\Large{Dictionary and Thesaurus} \vspace{0.5em}}
