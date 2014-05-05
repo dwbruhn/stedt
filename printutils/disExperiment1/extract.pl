@@ -328,6 +328,13 @@ EndOfSQL
 			$form =~ s/(\S)=(\S)/$1꞊$2/g; # short equals - must be done AFTER syllabification station			
 			$form =~ s/{/\\textbf{/g;
 			$form = '*' . $form if ($lg =~ /^\*/); # put * for proto-lgs
+			if ($lg eq 'Chinese (Hanzi)') {		# deal with Chinese chars (need \TC or \SC)
+				if ($srcabbr eq 'WHBLS-2011') {
+					$form = '\\TC{' . $form . '}';	# Baxter-Sagart uses traditional chars
+				} else {
+					$form = '\\SC{' . $form . '}';	# other sources (so far only Nagano) use simplified
+				}
+			}
 			if ($lg eq $lastlg) {
 				$lg = '';			# don't repeat the lg name if same
 			} else {
