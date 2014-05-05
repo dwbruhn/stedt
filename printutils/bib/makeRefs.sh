@@ -39,6 +39,7 @@ cut -f1  srcbib.csv > cites.csv
 
 python bibseminate.py
 perl makeBib.pl srcbib.csv > stedtreferences.bib
+python fiximprint.py
 xelatex bibtest.tex 
 bibtex bibtest.aux
 perl -i -pe 's/1989\{/1989/' bibtest.bbl
