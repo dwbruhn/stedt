@@ -3,17 +3,23 @@
 \fancyhead[RO]{\Large{[% semkey %]  [% title %]} \vspace{0.5em}}
 {\LARGE \parindent=-1em \textbf{[% semkey %]  [% title %]}}
 \addcontentsline{toc}{chapter}{[% semkey %]  [% title %]}
+\nopagebreak
 % \chapter{[% semkey %]  [% title %]}
 [% # semantic flowchart %]
 [% FOREACH id IN flowchartids -%]
-% \resizebox{\columnwidth}{!}{\includegraphics{../../pdf/[% id %].pdf}}
+\makebox[\columnwidth]{
 \vspace{0.5em}
-\includegraphics{../../pdf/[% id %].pdf}
+\XeTeXpdffile "../../pdf/[% id %].pdf"
+}
+
+% \centerline\includegraphics{../../pdf/[% id %].pdf}
+% \resizebox{\columnwidth}{!}{\includegraphics{../../pdf/[% id %].pdf}}
 [% END -%]\vspace{0.25em}
 [% # general discussion == chapter notes %]
 [% FOREACH note IN chapter_notes -%]
 [% note %]
 [% END -%]
+
 % \nopagebreak
 [% # insert actual content %]
 [% FOREACH etyma -%]
