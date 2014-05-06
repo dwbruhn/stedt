@@ -35,7 +35,7 @@ def imprint( bib ):
   book = re.compile(r'\w*\:\ \w*') #regex to find book imprint
   for line in bib:
     for subline in line:
-      if subline[0] == 'imprint ':
+      if subline[0].startswith('imprint'):
         if re.match(journ,subline[1]):
           parts = re.split(r'[\d]*',subline[1][1:-3])
           if '. ' in subline[1][1:-3]:
@@ -55,6 +55,20 @@ def imprint( bib ):
           publisher = ['publisher',str('{'+parts[1]+'},')]
           line.insert(-4,address)
           line.insert(-4,publisher)
+# following block is incomplete. a big problem for edited volumes is that there seems to be no systematic bibliographic style employed!!
+#        if 'ed.' in subline[1] or 'eds.' in subline[1]:
+#          parts = re.split(r'(\d+\-\d+)|:|\e\d\.\ \b\y|\,\ \p\p\.\ ', subline[1])
+#          page = re.compile(r'\d+\-\d+')
+#          for word in parts:
+#            if page.match(str(word)):
+#              pgs = ['pages',str('{'word+'},')]
+#          publisher = ['publisher',str('{'+parts[-1])]
+#          if parts[-3].startswith('.  '):
+#            address = ['address',str('{'+parts[-3].strip('.  ')+'},')]
+#          if parts[-3].startswith('. '):
+#            address = ['address',str('{'+parts[-3].strip('. ')+'},')]
+          
+
   return bib
 #        else:
 #          newbib.append(subline)
