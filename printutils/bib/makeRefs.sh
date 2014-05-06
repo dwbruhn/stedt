@@ -27,6 +27,8 @@ perl -i -pe 's/Bandhu, Chuda Mani, B. N. Dahal, A. Holzhausen and A. Hale/Bandhu
 perl -i -pe 's/Chen Shilin, Li Min, et al., eds./Chen Shilin and Li Min, et al., eds./g;' srcbib.csv
 perl -i -pe 's/Dai Qingxia, Xu Xigen, Shao Jiacheng, Qiu Xiangkun/Dai Qingxia and Xu Xigen and Shao Jiacheng and Qiu Xiangkun/g;' srcbib.csv
 perl -i -pe 's/Xu Lin, Mu Yuzhang, Gai Xingzhi, eds./Xu Lin and Mu Yuzhang and Gai Xingzhi, eds./g;' srcbib.csv
+perl -i -pe 's/\\\\textup/\\textup/' srcbib.csv
+perl -i -pe 's/\\\\textit\{/\{\\it /' srcbib.csv
 
 perl -i -pe 's/\&/\\&/g;' srcbib.csv
 #more ad hoc changes for problematic sources --- would be ideal to have makeRefs.pl wrap all characters of the type /(\p{Han}+)/u
