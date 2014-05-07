@@ -58,7 +58,7 @@ def imprint( bib ):
               line.insert(-4,editor)
               booktitle = ['booktitle\t',str('{'+newparts[1]+'},')]
               line.insert(-4,booktitle)
-              pages = ['pages\t',str('{'+newparts[2]+'},')]
+              pages = ['pages\t',str('{'+newparts[2])]
               line.insert(-4,pages)
             if len(newparts) == 4:
               editor = ['editor\t',str('{'+newparts[0]+'},')]
@@ -67,7 +67,7 @@ def imprint( bib ):
               line.insert(-4,booktitle)
               pages = ['pages\t',str('{'+newparts[2]+'},')]
               line.insert(-4,pages)
-              address = ['address\t',str('{'+newparts[3]+'},')]
+              address = ['address\t',str('{'+newparts[3])]
               line.insert(-4,address)
             if len(newparts) == 5:
               editor = ['editor\t',str('{'+newparts[0]+'},')]
@@ -78,7 +78,7 @@ def imprint( bib ):
               line.insert(-4,pages)
               address = ['address\t',str('{'+newparts[3]+'},')]
               line.insert(-4,address)
-              publisher = ['publisher\t',str('{'+newparts[4]+'},')]
+              publisher = ['publisher\t',str('{'+newparts[4])]
               line.insert(-4,publisher)
             if len(newparts) == 6:
               editor = ['editor\t',str('{'+newparts[0]+'},')]
@@ -98,11 +98,9 @@ def imprint( bib ):
                 line.insert(-4,volume)
               address = ['address\t',str('{'+newparts[4]+'},')]
               line.insert(-4,address)
-              publisher = ['publisher\t',str('{'+newparts[5]+'},')]
+              publisher = ['publisher\t',str('{'+newparts[5])]
               line.insert(-4,publisher)
           else: #book, but not edited volume
-     #       print subline[1]
-    #        if subline[1].startswith('{('): #part of a series?
             parts = re.split(r'{(\([^\(]*\))|\:\ ', subline[1]) #split by series parenthetical, colon
             newparts = []
             for part in parts:
@@ -128,11 +126,24 @@ def imprint( bib ):
               line.insert(-4,address)
               publisher = ['publisher\t',str('{'+newparts[1])]
               line.insert(-4,publisher)
-
+        if subline[1].startswith('{Ph.D. Dissertation'):
+          school = ['school\t',str('{'+subline[1].split('{Ph.D. Dissertation, ')[-1])]
+          line.insert(-4,school)
+          line[0][0] = line[0][0].replace('@book','@phdthesis')
+          
+              
   for line in bib:
     for subline in line:
       if subline[0].startswith('editor'):
         line[0][0] = line[0][0].replace('@book','@incollection')
+
+#  for line in bib:
+#    for subline in line:
+#      if subline[0].startswith('imprint'):
+#        line.pop(line.index(subline))
+#      if len(subline) > 1:
+#        if subline[1].endswith('{},'):
+#          line.pop(line.index(subline))
 
 #  for line in bib:
 #    for subline in line:
