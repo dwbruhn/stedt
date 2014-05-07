@@ -1,9 +1,9 @@
 rm *.aux *.bbl *.blg *.log *.out *.pdf stedtreferences.bib 
 
 # my local system is already configured for utf-8...
-mysql -D stedt -u root -e "select * from srcbib" > srcbib.csv
+#mysql -D stedt -u root -e "select * from srcbib" > srcbib.csv
 # if using the production stedt database, you'll need to set the user and password locally.
-# mysql -D stedt -u root -pPASSWORD --default-character-set=utf8 -e "select * from srcbib" > srcbib.csv
+mysql -D stedt -u root -pPASSWORD --default-character-set=utf8 -e "select * from srcbib" > srcbib.csv
 
 
 
@@ -41,9 +41,10 @@ cut -f1  srcbib.csv > cites.csv
 
 python bibseminate.py
 perl makeBib.pl srcbib.csv > stedtreferences.bib
-xelatex -interaction=nonstopmode bibtest.tex 
-python fiximprint.py
+python tweakimprint.py
+xelatex bibtest.tex 
+bibtex bibtest.aux
 perl -i -pe 's/1989\{/1989/' bibtest.bbl
-xelatex -interaction=nonstopmode bibtest.tex 
-xelatex -interaction=nonstopmode bibtest.tex
+xelatex bibtest.tex 
+xelatex bibtest.tex
 cp stedtreferences.bib ..
