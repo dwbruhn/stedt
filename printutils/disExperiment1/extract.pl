@@ -364,7 +364,7 @@ EndOfSQL
 					$text .= '[Orig/Source] ' if $notetype eq 'O';
 					$text .= xml2tex(decode_utf8($note));
 					$text .= '}' if $notetype eq 'I';
-					$text .= "}\n";
+					$text .= "}\\\\\n";
 				}
 			} elsif ($ETYMA_TAGS) {
 				$text .= "\\hspace*{1ex}";
