@@ -45,6 +45,7 @@ python tweakimprint.py
 xelatex bibtest.tex 
 bibtex bibtest.aux
 perl -i -pe 's/1989\{/1989/' bibtest.bbl
-xelatex bibtest.tex 
+perl -i -pe 's/--/\xe2\x80\x93/' bibtest.bbl
+xelatex bibtest.tex
 xelatex bibtest.tex
 cp stedtreferences.bib ..

@@ -30,6 +30,8 @@ bibtex ${texfile}.aux  >> ${texfile}.stdout.log &
 makeindex ${texfile} >> ${texfile}.stdout.log &
 wait
 perl -i -pe 's/1989\{/1989/'  ${texfile}.bbl
+perl -i -pe 's/--/\xe2\x80\x93/' ${texfile}.bbl
+
 xelatex ${texfile}.tex >> ${texfile}.stdout.log
 xelatex ${texfile}.tex >> ${texfile}.stdout.log
 xelatex ${texfile}.tex >> ${texfile}.stdout.log

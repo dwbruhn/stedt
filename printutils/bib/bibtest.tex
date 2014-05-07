@@ -63,7 +63,8 @@
 \patchcmd{\chapter}{\if@openright\cleardoublepage\else\clearpage\fi}{}{}{}
 
 \usepackage{acronym}
-\usepackage[authoryear]{natbib}
+\usepackage[square,sort,comma,numbers]{natbib}
+%\usepackage[round]{natbib}
 
 \begin{document}
 
@@ -76,7 +77,7 @@ Hello world.
 
 
 \addcontentsline{toc}{chapter}{References}
-\bibliographystyle{chicagoa}
+\bibliographystyle{apalike}
 \renewcommand{\bibname}{References}
 \bibliography{stedtreferences}
 
