@@ -22,7 +22,9 @@
 [% IF type == 'O' && internal_notes %][Orig/Source][% END -%]
 [% text -%]
 [% IF type == 'I' %]}[% END %]
-[% END %][% IF records %][% records %][% END -%]
+[% END %]
+
+[% IF records %][% records %][% END -%]
 [% IF comparanda.size -%]
 [% label = 'Chinese comparand' _ (comparanda.size == 1 ? 'um' : 'a') -%]
 \comparandum[\textit{[% label %]}]{[% label %]}
