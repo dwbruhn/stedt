@@ -27,7 +27,9 @@ sub elink : Runmode {
 		$e{pform} =~ s/~ +/~ */g;
 		$e{pform} =~ s/ = +/ = */g;
 		$e{pform} = '*' . $e{pform};
-		$e{mesoroots} = $self->dbh->selectall_arrayref("SELECT form,gloss,plg,grpno FROM mesoroots LEFT JOIN languagegroups USING (grpid) WHERE tag=$t", {Slice=>{}});
+		$e{mesoroots} = $self->dbh->selectall_arrayref("SELECT form,gloss,plg,grpno FROM mesoroots
+			LEFT JOIN languagegroups USING (grpid) WHERE tag=$t
+			ORDER BY grp0,grp1,grp2,grp3,grp4,variant", {Slice=>{}});
 		$e{allofams} = $self->dbh->selectall_arrayref(
 			"SELECT tag, sequence, languagegroups.plg, protoform, protogloss FROM etyma LEFT JOIN languagegroups USING (grpid)
 			 WHERE chapter=? AND sequence != 0 AND FLOOR(sequence)=FLOOR(?) AND status != 'DELETE' ORDER BY sequence", {Slice=>{}},
