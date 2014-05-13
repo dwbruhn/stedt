@@ -1,9 +1,9 @@
 rm *.aux *.bbl *.blg *.log *.out *.pdf stedtreferences.bib 
 
 # my local system is already configured for utf-8...
-#mysql -D stedt -u root -e "select * from srcbib" > srcbib.csv
+mysql -D stedt -u root -e "select * from srcbib" > srcbib.csv
 # if using the production stedt database, you'll need to set the user and password locally.
-mysql -D stedt -u root -pPASSWORD --default-character-set=utf8 -e "select * from srcbib" > srcbib.csv
+#mysql -D stedt -u root -pPASSWORD --default-character-set=utf8 -e "select * from srcbib" > srcbib.csv
 
 
 

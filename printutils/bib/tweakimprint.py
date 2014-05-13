@@ -88,10 +88,13 @@ def imprint( bib ):
               pages = ['pages\t',str('{'+newparts[2]+'},')]
               line.insert(-4,pages)
               servol = newparts[3][1:-1].split(', ')
+              for word in servol:
+                if word == 'No.' or word == 'no.' or word == 'Vol.':
+                  servol.pop(servol.index(word))
               series = ['series\t',str('{'+' '.join(servol[0:-1])+'},')]
               line.insert(-4,series)
               if servol[-1].startswith('No.') or servol[-1].startswith('no.'):
-                number = ['number\t',str('{'+re.split(r'\.\s*', servol[-1])[-1]+'},')]
+                number = ['number\t',str('{'+re.split(r'(\d+)', servol[-1])[-1]+'},')]
                 line.insert(-4,number)
               else:
                 volume = ['volume\t',str('{'+servol[-1]+'},')]
@@ -109,10 +112,13 @@ def imprint( bib ):
                 newparts.append(part.strip(draff))
             if len(newparts) == 3:
               servol = newparts[0][1:-1].split()
-              series = ['series\t',str('{'+' '.join(servol[0:-1])+'},')]
+              for word in servol:
+                if word == 'No.' or word == 'no.' or word == 'Vol.':
+                  servol.pop(servol.index(word))
+              series = ['series\t',str('{'+' '.join(servol[0:-1]).strip(',')+'},')]
               line.insert(-4,series)
               if servol[-1].startswith('No.') or servol[-1].startswith('no.'):
-                number = ['number\t',str('{'+re.split(r'\.\s*', servol[-1])[-1]+'},')]
+                number = ['number\t',str('{'+re.split(r'(\d+)', servol[-1])[-1]+'},')]
                 line.insert(-4,number)
               else:
                 volume = ['volume\t',str('{'+servol[-1]+'},')]
@@ -126,7 +132,7 @@ def imprint( bib ):
               line.insert(-4,address)
               publisher = ['publisher\t',str('{'+newparts[1])]
               line.insert(-4,publisher)
-        if subline[1].startswith('{Ph.D. Dissertation'):
+        if subline[1].startswith('{Ph.D. Dissertation') or subline[1].startswith('Ph.D Dissertation') or subline[1].startswith('PhD Dissertation'):
           school = ['school\t',str('{'+subline[1].split('{Ph.D. Dissertation, ')[-1])]
           line.insert(-4,school)
           line[0][0] = line[0][0].replace('@book','@phdthesis')
@@ -137,13 +143,13 @@ def imprint( bib ):
       if subline[0].startswith('editor'):
         line[0][0] = line[0][0].replace('@book','@incollection')
 
-#  for line in bib:
-#    for subline in line:
-#      if subline[0].startswith('imprint'):
-#        line.pop(line.index(subline))
-#      if len(subline) > 1:
-#        if subline[1].endswith('{},'):
-#          line.pop(line.index(subline))
+  for line in bib:
+    for subline in line:
+      if subline[0].startswith('imprint'):
+        line.pop(line.index(subline))
+      if len(subline) > 1:
+        if subline[1].endswith('{},'):
+          line.pop(line.index(subline))
 
 #  for line in bib:
 #    for subline in line:
