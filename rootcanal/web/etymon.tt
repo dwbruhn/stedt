@@ -37,7 +37,7 @@ Reflexes <span class="u[% etyma.0.tag %]">tagged by <select name="DDMenu" onchan
 <table><tr><td style="padding: 10px; ">
 <h1>[% IF c.has_privs(2) %]<a href="[% self_url %]/edit/etyma?etyma.tag=[% e.tag %]" target="edit_etyma">[% END %]
 #[% e.tag %][% IF c.has_privs(2) %]</a>[% END %] [% e.plg %] [% e.protoform %] [% e.protogloss %]
-[%- IF e.uid != 8 && c.has_privs(2) %] <span class="u[% etyma.0.tag %]">(proposed by [% e.username %])</span>[% END -%]
+[%- IF e.uid != 8 && c.has_privs(2) %] <span class="u[% etyma.0.tag %]">(added by [% e.username %])</span>[% END -%]
 [%- IF !e.public %] <span id="prov_heading" style="color:red; cursor:help; font-size:medium">(provisional)</span> [% END -%]
 </h1></td>
 [% IF c.has_privs(8) # make_meso button for approvers only %]
