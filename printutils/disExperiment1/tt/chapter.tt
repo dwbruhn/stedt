@@ -2,12 +2,15 @@
 \fancyhead[RO]{\Large{[% semkey %]  [% title %]} \vspace{0.5em}}
 {\LARGE \parindent=-1em \textbf{[% semkey %]  [% title %]}}
 \addcontentsline{toc}{chapter}{[% semkey %]  [% title %]}
-\nopagebreak
+% \nopagebreak
 [% # semantic flowchart %][% FOREACH id IN flowchartids -%]
-\makebox[\columnwidth]{
-\vspace{0.5em}
-\XeTeXpdffile "../../pdf/[% id %].pdf"
-}
+\begin{figure}[!]
+\includegraphics[max width=\columnwidth]{../../pdf/[% id %].pdf}
+  \label{fig:[% semkey %]  [% title %]}
+  \caption{[% semkey %]  \textit{[% title %]}}
+\end{figure}
+\vspace{0.25em}
+
 [% END -%]\vspace{0.25em}
 [% # general discussion == chapter notes %]
 [% FOREACH note IN chapter_notes -%]
@@ -23,7 +26,8 @@
 [% text -%]
 [% IF type == 'I' %]}[% END %]
 [% END %]
-
+\vspace{0.5em}
+\nopagebreak
 [% IF records %][% records %][% END -%]
 [% IF comparanda.size -%]
 [% label = 'Chinese comparand' _ (comparanda.size == 1 ? 'um' : 'a') -%]
