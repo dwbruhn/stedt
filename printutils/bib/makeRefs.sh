@@ -49,4 +49,4 @@ perl -i -pe 's/--/\xe2\x80\x93/' bibtest.bbl
 xelatex bibtest.tex
 xelatex bibtest.tex
 cp stedtreferences.bib ..
-cp stedtreferences.bib ../DisExperiment1/tex
+cp stedtreferences.bib ../disExperiment1/tex
