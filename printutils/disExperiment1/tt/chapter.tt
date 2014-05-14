@@ -4,10 +4,12 @@
 \addcontentsline{toc}{chapter}{[% semkey %]  [% title %]}
 % \nopagebreak
 [% # semantic flowchart %][% FOREACH id IN flowchartids -%]
-\begin{figure}[!]
+\begin{figure}[H]
+\begin{center}
 \includegraphics[max width=\columnwidth]{../../pdf/[% id %].pdf}
-  \label{fig:[% semkey %]  [% title %]}
-  \caption{[% semkey %]  \textit{[% title %]}}
+\label{fig:[% id %] [% semkey %] [% title %]}
+\caption{[% semkey %] \textit{[% title %]}}
+\end{center}
 \end{figure}
 \vspace{0.25em}
 
