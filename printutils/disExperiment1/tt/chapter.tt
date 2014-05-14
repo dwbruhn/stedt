@@ -11,7 +11,6 @@
 \caption{[% semkey %] \textit{[% title %]}}
 \end{center}
 \end{figure}
-\vspace{0.25em}
 
 [% END -%]\vspace{0.25em}
 [% # general discussion == chapter notes %]
@@ -29,7 +28,7 @@
 [% IF type == 'I' %]}[% END %]
 [% END %]
 \vspace{0.5em}
-\nopagebreak
+
 [% IF records %][% records %][% END -%]
 [% IF comparanda.size -%]
 [% label = 'Chinese comparand' _ (comparanda.size == 1 ? 'um' : 'a') -%]

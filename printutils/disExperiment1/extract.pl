@@ -288,7 +288,8 @@ EndOfSQL
 		
 		my $lastgrpno = '';
 		my $lastlg = '';
-		my $group_space = '[0.5ex]';
+		#my $group_space = '[0.5ex]';
+		my $group_space = '';
 		for my $rec (@$recs) {
 			my ($grpno,$grp,$lg,$rn,$an,$form,$gloss,$gfn,$srcabbr,$srcid,$notern)
 				= @$rec;
@@ -375,7 +376,8 @@ EndOfSQL
 				$text .= "{\\tiny $an}";
 			}
 			
-			$text .= "\\\\\n";
+			#$text .= "\\\\\n";
+			$text .= "\n";
 		}
 		$text .= "\\end{mpsupertabular}\n" unless $lastgrpno eq ''; # if there were no forms, skip this
 		$text .= "}\n";
