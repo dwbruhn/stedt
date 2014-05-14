@@ -288,8 +288,8 @@ EndOfSQL
 		
 		my $lastgrpno = '';
 		my $lastlg = '';
-		#my $group_space = '[0.5ex]';
-		my $group_space = '';
+		my $group_space = '[0.5ex]';
+		#my $group_space = '';
 		for my $rec (@$recs) {
 			my ($grpno,$grp,$lg,$rn,$an,$form,$gloss,$gfn,$srcabbr,$srcid,$notern)
 				= @$rec;
@@ -312,6 +312,7 @@ EndOfSQL
 					$text .= $meso;
 					$text .= '}&';
 					$text .= $note;
+					#$text .= "\\\\\n";
 					$text .= "\\\\*$group_space\n";
 				}
 				my ($meso, $note) = get_meso_notes($e{mesoroots}, $e{subgroupnotes}, $grpno);
@@ -319,6 +320,7 @@ EndOfSQL
 				$text .= $meso;
 				$text .= '}&';
 				$text .= $note;
+				#$text .= "\\\\\n";
 				$text .= "\\\\*$group_space\n"; # if the star doesn't work, use \\nopagebreak before the \n
 				$lastgrpno = $grpno;
 			}
@@ -365,7 +367,8 @@ EndOfSQL
 					$text .= '[Orig/Source] ' if $notetype eq 'O';
 					$text .= xml2tex(decode_utf8($note));
 					$text .= '}' if $notetype eq 'I';
-					$text .= "}\\\\\n";
+					#$text .= "}\\\\\n";
+					$text .= "}";
 				}
 			} elsif ($ETYMA_TAGS) {
 				$text .= "\\hspace*{1ex}";
@@ -376,8 +379,7 @@ EndOfSQL
 				$text .= "{\\tiny $an}";
 			}
 			
-			#$text .= "\\\\\n";
-			$text .= "\n";
+			$text .= "\\\\\n";
 		}
 		$text .= "\\end{mpsupertabular}\n" unless $lastgrpno eq ''; # if there were no forms, skip this
 		$text .= "}\n";
