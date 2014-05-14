@@ -136,7 +136,7 @@ Displaying items [% a %]-[% b %] of [% result.data.size %].
 [%- IF t.add_form_items(fld) %]
 [%- sub(c.query) %]
 [%- ELSE %]
-<input name="[% fld %]" type="text" class="add_reset">
+<input name="[% fld %]" type="text" class="add_reset" [% IF t.table=='srcbib' %]style="width:250%;"[% END %]>
 [%- END %]
 </td></tr>
 [%- END %]
