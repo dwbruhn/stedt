@@ -35,7 +35,7 @@ def imprint( bib ):
   for line in bib:
     for subline in line:
       if subline[0].startswith('imprint'):
-        if re.match(journ,subline[1]): #journal regex found?
+        if re.match(journ,subline[1]) and not re.match(book,subline[1]): #journal regex found?
           parts = re.split(r'(\d.*\d)', subline[1]) #split by '124:1324-1234' to separate journal title from volume/pgs
           subparts = re.split(r'\:', parts[1]) #split 2nd element of above list by ':' to separate volume from pgs
           journal = ['journal\t',str(parts[0].strip()+'},')] #remake journal field
@@ -111,22 +111,28 @@ def imprint( bib ):
               if part != None and part != '' and part != ' ':
                 newparts.append(part.strip(draff))
             if len(newparts) == 3:
-              servol = newparts[0][1:-1].split()
-              for word in servol:
-                if word == 'No.' or word == 'no.' or word == 'Vol.':
-                  servol.pop(servol.index(word))
-              series = ['series\t',str('{'+' '.join(servol[0:-1]).strip(',')+'},')]
-              line.insert(-4,series)
-              if servol[-1].startswith('No.') or servol[-1].startswith('no.'):
-                number = ['number\t',str('{'+re.split(r'(\d+)', servol[-1])[-1]+'},')]
-                line.insert(-4,number)
+              if not newparts[0].startswith('{'): #makes sure actually a series
+                servol = newparts[0][1:-1].split()
+                for word in servol:
+                  if word == 'No.' or word == 'no.' or word == 'Vol.':
+                    servol.pop(servol.index(word))
+                series = ['series\t',str('{'+' '.join(servol[0:-1]).strip(',')+'},')]
+                line.insert(-4,series)
+                if servol[-1].startswith('No.') or servol[-1].startswith('no.'):
+                  number = ['number\t',str('{'+re.split(r'(\d+)', servol[-1])[-1]+'},')]
+                  line.insert(-4,number)
+                else:
+                  volume = ['volume\t',str('{'+servol[-1]+'},')]
+                  line.insert(-4,volume)
+                address = ['address\t',str('{'+newparts[1]+'},')]
+                line.insert(-4,address)
+                publisher = ['publisher\t',str('{'+newparts[2])]
+                line.insert(-4,publisher)
               else:
-                volume = ['volume\t',str('{'+servol[-1]+'},')]
-                line.insert(-4,volume)
-              address = ['address\t',str('{'+newparts[1]+'},')]
-              line.insert(-4,address)
-              publisher = ['publisher\t',str('{'+newparts[2])]
-              line.insert(-4,publisher)
+                address = ['address\t',str(newparts[0]+'},')]
+                line.insert(-4,address)
+                publisher = ['publisher\t',str('{'+' '.join(newparts[1:])+'},')]
+                line.insert(-4,publisher)
             if len(newparts) == 2:
               address = ['address\t',str(newparts[0]+'},')]
               line.insert(-4,address)
