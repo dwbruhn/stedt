@@ -163,7 +163,7 @@
 
 \phantomsection
 \addcontentsline{toc}{chapter}{References}
-\bibliographystyle{apalike}
+\bibliographystyle{authordate1}
 \renewcommand{\bibname}{References}
 \bibliography{stedtreferences}
 
