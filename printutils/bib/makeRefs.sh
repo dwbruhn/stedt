@@ -36,7 +36,7 @@ perl -i -pe 's/Lǐ Fànwén 李范文/Lǐ Fànwén \\TC{李}\\TC{范}\\TC{
 perl -i -pe 's/《夏漢字典》 Xià-Hàn Zìdiǎn \[Tangut \/ Chinese Dictionary\]/\\TC{《}\\TC{夏}\\TC{漢}\\TC{字}\\TC{典}\\TC{》} Xià-Hàn Zìdiǎn \[Tangut \/ Chinese Dictionary\]/' srcbib.csv
 perl -i -pe 's/上古漢語的N- 和 m- 前綴/\\TC{上}\\TC{古}\\TC{漢}\\TC{語}\\TC{的}N- \\TC{和} m- \\TC{前}\\TC{綴}/' srcbib.csv
 perl -i -pe 's/汉语历史音韵学/\\TC{汉}\\TC{语}\\TC{历}\\TC{史}\\TC{音}\\TC{韵}\\TC{学}/' srcbib.csv
-perl -i -oe 's/中国社会科学出版社/\\TC{中}\\TC{国}\\TC{社}\\TC{会}\\TC{科}\\TC{学}\\TC{出}\\TC{版}\\TC{社}/' srcbib.csv
+perl -i -pe 's/中国社会科学出版社/\\TC{中}\\TC{国}\\TC{社}\\TC{会}\\TC{科}\\TC{学}\\TC{出}\\TC{版}\\TC{社}/' srcbib.csv
 
 cut -f1  srcbib.csv > cites.csv
 #mysql -D stedt -u root -e "select srcabbr from srcbib" > cites.csv
