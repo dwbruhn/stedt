@@ -26,7 +26,6 @@
 [% text -%]
 [% IF type == 'I' %]}[% END %]
 [% END %]
-\vspace{0.5em}
 
 [% IF records %][% records %][% END -%]
 [% IF comparanda.size -%]
