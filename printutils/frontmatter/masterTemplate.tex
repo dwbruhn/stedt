@@ -141,44 +141,46 @@
 \defcitealias{JAM-VSTB}{VSTB}
 
 \begin{document}
-\setcounter{secnumdepth}{0} % don't number sections, just chapters
-
 % \layout
-
 %\the\textwidth
 %
 %\the\columnwidth
 %
 %\the\columnsep
 
+\setcounter{secnumdepth}{0} % don't number sections, just chapters
+\frontmatter
+
 \maketitle
+\onecolumn
 \include{copyright}
-
-% \thispagestyle{empty}
-% \cleardoublepage
-
-\include{acknowledgements}
-
-\include{preface}
-
-\include{introduction}
-
-\include{terminology}
+\twocolumn
 
 \pdfbookmark[0]{Table of Contents}{TOC}
 \tableofcontents
 \cleardoublepage
 
+\include{introduction}
+\include{acknowledgements}
+\include{terminology}
+
+\cleardoublepage
+
+\mainmatter
+\pdfbookmark[0]{The Dictionary-Thesaurus}{TOC}
+
 % insert includes here
 
 \cleardoublepage
 
-\phantomsection
+\backmatter
+\fancyhead[LE]{\Large{References} \vspace{0.5em}}
 \addcontentsline{toc}{chapter}{References}
 \bibliographystyle{apalike}
 \renewcommand{\bibname}{References}
 \bibliography{stedtreferences}
 
+\fancyhead[LE]{\Large{Protogloss Index} \vspace{0.5em}}
 \addcontentsline{toc}{chapter}{Protogloss Index}
 \renewcommand{\indexname}{Protogloss Index}
 % would be nice to figure out how to add a few words of description for this index, e.g.
