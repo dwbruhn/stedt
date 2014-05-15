@@ -20,7 +20,6 @@
 [% # insert actual content %]
 [% FOREACH etyma -%]
 \section{([% seq %]) [% plg %] [% protoform_text %] [% protogloss %]}
-\nopagebreak
 [% FOREACH notes -%]
 [% IF type == 'I' %]{{[Internal Note:]}} \textit{[% END -%]
 [% IF type == 'O' && internal_notes %][Orig/Source][% END -%]
