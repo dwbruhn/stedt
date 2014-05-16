@@ -1,10 +1,7 @@
 rm *.aux *.bbl *.blg *.log *.out *.pdf stedtreferences.bib 
 
-# my local system is already configured for utf-8...
-#mysql -D stedt -u root -e "select * from srcbib" > srcbib.csv
-# if using the production stedt database, you'll need to set the user and password locally.
-mysql -D stedt -u root -pPASSWORD --default-character-set=utf8 -e "select * from srcbib" > srcbib.csv
-
+# use local db_creds file for db login info
+mysql --defaults-extra-file=db_creds --default-character-set=utf8 -D stedt -e "select * from srcbib" > srcbib.csv
 
 
 # a few ad hoc changes...fix database, then remove the following hack
@@ -29,8 +26,8 @@ perl -i -pe 's/Dai Qingxia, Xu Xigen, Shao Jiacheng, Qiu Xiangkun/Dai Qingxia an
 perl -i -pe 's/Xu Lin, Mu Yuzhang, Gai Xingzhi, eds./Xu Lin and Mu Yuzhang and Gai Xingzhi, eds./g;' srcbib.csv
 perl -i -pe 's/\\\\textup/\\textup/' srcbib.csv
 perl -i -pe 's/\\\\textit\{/\{\\it /' srcbib.csv
-
 perl -i -pe 's/\&/\\&/g;' srcbib.csv
+
 #more ad hoc changes for problematic sources --- would be ideal to have makeRefs.pl wrap all characters of the type /(\p{Han}+)/u
 perl -i -pe 's/Lǐ Fànwén 李范文/Lǐ Fànwén \\TC{李}\\TC{范}\\TC{文}/' srcbib.csv
 perl -i -pe 's/《夏漢字典》 Xià-Hàn Zìdiǎn \[Tangut \/ Chinese Dictionary\]/\\TC{《}\\TC{夏}\\TC{漢}\\TC{字}\\TC{典}\\TC{》} Xià-Hàn Zìdiǎn \[Tangut \/ Chinese Dictionary\]/' srcbib.csv
