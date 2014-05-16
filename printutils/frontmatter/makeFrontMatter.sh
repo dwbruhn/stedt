@@ -2,6 +2,7 @@ cp masterTemplate.tex frontmatter$1.tex
 if [ "$1" = '1col' ] ; then
 perl -i -pe 's/\\documentclass\[11pt,/\% \\documentclass[11pt,/'  frontmatter$1.tex
 perl -i -pe 's/\% \\documentclass\[11pt\]/\\documentclass[11pt]/'  frontmatter$1.tex
+perl -i -pe 's/\\twocolumn//'  frontmatter$1.tex
 #
 perl -i -pe 's/^(.geometry)/% \1/' frontmatter$1.tex
 perl -i -pe 's/paperwidth.17in./paperwidth{8.5in}/' frontmatter$1.tex
