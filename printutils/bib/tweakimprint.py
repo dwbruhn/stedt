@@ -138,7 +138,7 @@ def imprint( bib ):
               line.insert(-4,address)
               publisher = ['publisher\t',str('{'+newparts[1])]
               line.insert(-4,publisher)
-        if subline[1].startswith('{Ph.D. Dissertation') or subline[1].startswith('Ph.D Dissertation') or subline[1].startswith('PhD Dissertation'):
+        if subline[1].startswith('{Ph.D. Dissertation') or subline[1].startswith('Ph.D Dissertation') or subline[1].startswith('PhD Dissertation') or re.match(r'.*Ph\.*D\.*\sDiss', subline[1]):
           school = ['school\t',str('{'+subline[1].split('{Ph.D. Dissertation, ')[-1])]
           line.insert(-4,school)
           line[0][0] = line[0][0].replace('@book','@phdthesis')

@@ -29,6 +29,7 @@ my ( $srcabbr    ,
  $infascicle ) = split "\t";
 
 $year =~ s/\.//;
+$year =~ s/\-/\-\-/;
 $imprint =~ s/^ +//g;
 #my ($address, $publisher) = split ':',$imprint;
 my @names = split(/[\s\.]/, $author);
@@ -75,7 +76,9 @@ print "author = {$author},\n";
 print "title    = {{$title}},\n";
 
 #print "author   = {{$author}},\n";
-print "year     = {$year},\n";
+if (length $year > 4 && $year !~ /\?/) {print "year     = {{$year}},\n"; }
+else {print "year     = {$year},\n"; };
+#print "year     = {{$year}},\n";
 if ($imprint ne "") { print "imprint  = {$imprint},\n"; }
 #if ($address ne "") { print "address  = {$address},\n"; }
 if ($publisher ne "") { print "publisher  = {$publisher},\n"; }
