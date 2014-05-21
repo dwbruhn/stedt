@@ -29,11 +29,16 @@ perl -i -pe 's/\\\\textit\{/\{\\it /' srcbib.csv
 perl -i -pe 's/\&/\\&/g;' srcbib.csv
 
 #more ad hoc changes for problematic sources --- would be ideal to have makeRefs.pl wrap all characters of the type /(\p{Han}+)/u
-perl -i -pe 's/Lǐ Fànwén 李范文/Lǐ Fànwén \\TC{李}\\TC{范}\\TC{文}/' srcbib.csv
-perl -i -pe 's/《夏漢字典》 Xià-Hàn Zìdiǎn \[Tangut \/ Chinese Dictionary\]/\\TC{《}\\TC{夏}\\TC{漢}\\TC{字}\\TC{典}\\TC{》} Xià-Hàn Zìdiǎn \[Tangut \/ Chinese Dictionary\]/' srcbib.csv
-perl -i -pe 's/上古漢語的N- 和 m- 前綴/\\TC{上}\\TC{古}\\TC{漢}\\TC{語}\\TC{的}N- \\TC{和} m- \\TC{前}\\TC{綴}/' srcbib.csv
-perl -i -pe 's/汉语历史音韵学/\\TC{汉}\\TC{语}\\TC{历}\\TC{史}\\TC{音}\\TC{韵}\\TC{学}/' srcbib.csv
-perl -i -pe 's/中国社会科学出版社/\\TC{中}\\TC{国}\\TC{社}\\TC{会}\\TC{科}\\TC{学}\\TC{出}\\TC{版}\\TC{社}/' srcbib.csv
+perl -i -pe 's/Lǐ Fànwén 李范文/Lǐ Fànwén \\SC{李范文}/' srcbib.csv
+perl -i -pe 's/《夏漢字典》/\\TC{《夏漢字典》}/' srcbib.csv
+perl -i -pe 's/上古漢語的N- 和 m- 前綴/\\TC{上古漢語的}N- \\TC{和} m- \\TC{前綴}/' srcbib.csv
+perl -i -pe 's/汉语历史音韵学/\\SC{汉语历史音韵学}/' srcbib.csv
+perl -i -pe 's/中国社会科学出版社/\\SC{中国社会科学出版社}/' srcbib.csv
+
+perl -i -pe 's/卒/\\SC{卒}/' srcbib.csv
+perl -i -pe 's/Tibetan sdud/Tibetan \\textit{sdud}/' srcbib.csv
+perl -i -pe 's/\*st- hypothesis/\\textbf{\*st-} hypothesis/' srcbib.csv
+perl -i -pe 's/KL-/\\textbf{KL-}/' srcbib.csv
 
 cut -f1  srcbib.csv > cites.csv
 #mysql -D stedt -u root -e "select srcabbr from srcbib" > cites.csv
