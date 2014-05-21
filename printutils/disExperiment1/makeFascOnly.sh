@@ -17,6 +17,13 @@ fi
 # verbose...
 set -x
 rm tex/$1-$2-$3-*
+cp ../frontmatter/masterTemplate.tex tt/master.tt
+perl -i -pe 's/^.include.introduction.*$//' tt/master.tt
+perl -i -pe 's/^.include.acknowledgements.*$//' tt/master.tt
+perl -i -pe 's/^.include.terminology.*$//' tt/master.tt
+perl -i -pe 's/^.title.*$//' tt/master.tt
+perl -i -pe 's/^.author.*$//' tt/master.tt
+perl -i -pe 's/^\%\%\%\%.//' tt/master.tt
 # exit on errors..
 set -e
 perl extract.pl $1 $2 $3 $4
@@ -29,9 +36,10 @@ xelatex ${texfile}.tex > ${texfile}.stdout.log
 bibtex ${texfile}.aux  >> ${texfile}.stdout.log &
 makeindex ${texfile} >> ${texfile}.stdout.log &
 wait
+# this is a workaround for bibtex: it goofs when more than 26 cites appear for an author/year.
 perl -i -pe 's/1989\{/1989/'  ${texfile}.bbl
+# this is a workaround for bibtex and latex: we make double dashes into em dashes in bib.
 perl -i -pe 's/--/\xe2\x80\x93/' ${texfile}.bbl
-
 xelatex ${texfile}.tex >> ${texfile}.stdout.log
 xelatex ${texfile}.tex >> ${texfile}.stdout.log
 xelatex ${texfile}.tex >> ${texfile}.stdout.log

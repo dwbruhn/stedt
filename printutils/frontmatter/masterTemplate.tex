@@ -48,7 +48,11 @@
 \usepackage{fancyhdr}
 
 \title{The\\Sino-Tibetan Etymological\\Dictionary\\and\\Thesaurus}
+%%%%%% the following line is  for use in master.tt
+%%%% \title{STEDT Root Canal Extraction:\\[% semkey %]. [% xtitle %]}
 \author{DRAFT}
+%%%%%% the following line is  for use in master.tt
+%%%% \author{[% author %]}
 \date{Compiled on \today\ at \currenttime}
 \usepackage[bookmarks]{hyperref}
 \hypersetup{%
@@ -110,9 +114,6 @@
 \renewcommand*{\sectionmark}[1]{ \markright{#1} }
 \renewcommand*{\chaptermark}[1]{ \markboth{#1}{} }
 
-% \renewcommand*{\sectionmark}[1]{ \markright{#1}{} }
-% \renewcommand*{\chaptermark}[1]{ \markboth{#1}{} }
-
 \fancyhead[RE]{\Large{Sino-Tibetan Etymological} \vspace{0.5em}}
 \fancyhead[LO]{\Large{Dictionary and Thesaurus} \vspace{0.5em}}
 
@@ -121,15 +122,6 @@
 
 \renewcommand{\headrulewidth}{0.4pt}
 
-
-%\makeatletter
-%    \def\headrule{{\if@fancyplain\let\headrulewidth\plainheadrulewidth\fi
-%        \hrule\@height\headrulewidth\@width 4in \vskip-\headrulewidth}}
-%\makeatother
-
-% \rhead{\LARGE{Sino-Tibetan Etymological}}
-% \lhead{\LARGE{Dictionary and Thesaurus}}
-% \chead{}
 \lfoot{}
 \cfoot{\thepage}
 \rfoot{}
@@ -145,6 +137,27 @@
 \usepackage{tikz-qtree}
 
 \begin{document}
+
+% from http://mintaka.sdsu.edu/GF/bibliog/latex/floats.html
+%
+% Alter some LaTeX defaults for better treatment of figures:
+% See p.105 of "TeX Unbound" for suggested values.
+% See pp. 199-200 of Lamport's "LaTeX" book for details.
+%   General parameters, for ALL pages:
+\renewcommand{\topfraction}{0.9}	% max fraction of floats at top
+\renewcommand{\bottomfraction}{0.8}	% max fraction of floats at bottom
+%   Parameters for TEXT pages (not float pages):
+\setcounter{topnumber}{10}
+\setcounter{bottomnumber}{10}
+\setcounter{totalnumber}{80} 
+\setcounter{dbltopnumber}{40}    % for 2-column pages
+\renewcommand{\dbltopfraction}{0.9}	% fit big float above 2-col. text
+\renewcommand{\textfraction}{0.1}	% allow minimal text w. figs
+%   Parameters for FLOAT pages (not text pages):
+\renewcommand{\floatpagefraction}{0.85}	% require fuller float pages
+% N.B.: floatpagefraction MUST be less than topfraction !!
+\renewcommand{\dblfloatpagefraction}{0.85}	% require fuller float pages
+
 % \layout
 %\the\textwidth
 %
@@ -153,6 +166,10 @@
 %\the\columnsep
 
 \setcounter{secnumdepth}{0} % don't number sections, just chapters
+
+%%%%%% the following line is for use in master.tt
+%%%% \pdfbookmark[1]{ [% semkey %]. [% xtitle %]}{titlepage}
+
 \frontmatter
 
 \maketitle
@@ -174,6 +191,12 @@
 \pdfbookmark[0]{The Dictionary-Thesaurus}{TOC}
 
 % insert includes here
+
+%%%%%% the following lines are for use in master.tt
+%%%%%% we use \input here to prevent page breaks between sections
+%%%% [% FOREACH texfile IN texfilenames -%]
+%%%%  \input{[% texfile %]}
+%%%% [% END -%]
 
 \cleardoublepage
 
