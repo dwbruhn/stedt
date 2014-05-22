@@ -238,16 +238,30 @@ A further change in the previous STEDT schema is my recent abandonment of the co
 
 We may now present the latest version of our subgrouping scheme, as shown in Figure~\ref{fig:ST_tree}.
 
-\begin{figure}[ht]
+\begin{figure*}[ht]
 \centering
+
 \begin{tikzpicture}
-\tikzset{level 1/.style={level distance=48pt}}
-\tikzset{level 2/.style={level distance=48pt}}
-\Tree [.Sino-Tibetan [ {NE India Areal Group} Sal Himalayish Tangut-Qiang Nungish Lolo-Burmese-Naxi Karenic Tujia Baic ].Tibeto-Burman Chinese ]
+\tikzset{grow'=right,level distance=200pt}
+\tikzset{level 3+/.style={level distance=120pt}}
+\tikzset{execute at begin node=\strut}
+\tikzset{every tree node/.style={align=center,anchor=base west}}
+\Tree [.\node[draw]{Sino-Tibetan}; \node[draw]{Chinese}; 
+[.\node[draw]{Tibeto-Burman};
+\textbf{Baic}
+[.{\textbf{NE India}\\\textbf{Areal Group}} [.{“N. Assam”\\Areal Group} Tani Deng ] Kuki-Chin Meithei {Karbi (Mikir)} Mru
+[.{“Naga” Areal Group} {Ao Group} {Angami-Pochuri\\Group} {Zeme Group} Tangkhulic ] ]
+\textbf{Nungish}
+[.\textbf{Sal} Bodo-Koch {Konyak (N.\ Naga)} [.Jg-Asakian Jingpho Asak ] ] \textbf{Tujia}
+[.\textbf{Himalayish} Tibeto-Kanauri Newar Kiranti Kham-Magar-Chepang ]
+[.{\textbf{Lolo-Burmese-}\\\textbf{Naxi}} [.Lolo-Burmese Burmish Loloish ] Naxi ]
+\textbf{Karenic}
+[.\textbf{Tangut-Qiang} Tangut Qiangic rGyalrongic ] ] ]
 \end{tikzpicture}
-\caption{Updated subgrouping model of ST/TB relationships XYZ UNFINISHED}
+
+\caption{Updated subgrouping model of ST/TB relationships}
 \label{fig:ST_tree}
-\end{figure}
+\end{figure*}
 
 Finally, we are left with the major question of where Chinese fits into the picture. The standard view has always been that the primary split in the ST family is between Chinese (= Sinitic) on the one hand, and TB on the other. This is now being questioned by certain scholars who claim that there are no clear innovations shared by TB as a whole with respect to Chinese, or that there is an especially close relationship between Chinese and a particular branch of TB.\footnote{Cf.\ van Driem’s “Sino-Bodic” grouping (\citealt{SVD-SB}), and my critique of it (\citealt{JAM-OSB}).} If we adopt such a point of view, that would make Sinitic just another branch of a superfamily we might call “Sino-Tibeto-Burman” (STB). It seems prudent, however, to treat this as an open question for the time being.
 
@@ -713,7 +727,8 @@ the reproductive system. See especially Ch.~IX, ‘Body fluids’.
 
 More complex flowcharts have been constructed for the associations of SKIN, based on the analysis of XYZ etyma with that meaning. These are presented in Figures~\ref{fig:skin_chart1} and \ref{fig:skin_chart2}, in both “landscape” and “portrait” formats:\footnote{As a desideratum for the future, one might envision three-dimensional semantic diagrams like those used to model molecules in organic chemistry! XYZ duplicate of previous footnote}
 
-\begin{figure}[h]
+\begin{figure*}[h]
+\centering
 \makebox[\columnwidth]{
 %\vspace{0.5em}
 \XeTeXpdffile "../../pdf/7732.pdf"
@@ -721,16 +736,17 @@ More complex flowcharts have been constructed for the associations of SKIN, base
 % \resizebox{\columnwidth}{!}{\includegraphics{../../pdf/7732.pdf}}
 \caption{SKIN Flowchart \#1}
 \label{fig:skin_chart1}
-\end{figure}
+\end{figure*}
 
-\begin{figure}[h]
+\begin{figure*}[h]
+\centering
 \makebox[\columnwidth]{
 % \vspace{0.5em}
 \XeTeXpdffile "../../pdf/7733.pdf"
 }
 \caption{SKIN Flowchart \#2}
 \label{fig:skin_chart2}
-\end{figure}
+\end{figure*}
 
 
 In all language families, semantic associations/variation is much less structured than phonological variation. Sometimes the same unexpected semantic association is found in widely different language families, e.g.\ BRAIN and MARROW, exemplified both in IE and TB.\footnote{See \textit{\citetalias{JAM-VSTB}}, pp.~182–3, 203.} Other associations seem to be confined to a particular family, e.g.\ YEAST and SALT, so far discovered only in TB.\footnote{See \citealt{JAM-HPTB} (\textit{\citetalias{JAM-HPTB}}:34) and \citeyear{JAM-OER}. Yeast is traditionally used for brewing liquor rather than for baking bread in East and SE Asia. Both salt and yeast are efficacious substances that have dramatic effects on the taste of food or drink; their lack renders the food or drink insipid. Cf.\ Proto-Kuki-Naga \textbf{*m-tsyi} ‘salt’ and Jingpho \textbf{mətsi}, Lahu \textbf{dî} ‘yeast’ (Lahu voiced initials come from *prenasalized ones).}
