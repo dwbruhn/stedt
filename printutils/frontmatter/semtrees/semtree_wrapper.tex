@@ -1,0 +1,13 @@
+% wrapper for semtree chart
+% NOTE: use pdflatex for now, since xelatex makes some nodes disappear (under Eye)
+
+% standalone package generates pdf with separate pages scaled to fit each tikzpicture
+\documentclass[tikz]{standalone}
+
+% packages for drawing trees
+\usepackage{tikz}
+\usepackage{tikz-qtree}
+
+\begin{document}
+\include{semtree}
+\end{document}

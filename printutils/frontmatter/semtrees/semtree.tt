@@ -1,0 +1,22 @@
+[% FOREACH i IN trees -%]
+%\begin{figure}
+%\centering
+\begin{tikzpicture}
+% draw squared lines
+\tikzset{edge from parent/.style=
+{draw,
+edge from parent path={(\tikzchildnode.west)
+-- +(-20pt,0)
+|- (\tikzparentnode.east)}}}
+
+\tikzset{grow'=right,level distance=200pt}
+\tikzset{execute at begin node=\strut}
+\tikzset{every tree node/.style={align=left,anchor=base west}}
+[% i %]
+\end{tikzpicture}
+%code for wrapping in figure someday with auto-caption and label:
+%\caption{Volume [% loop.count %]}
+%\label{fig:semtree_vol[% loop.count %]}
+%\end{figure}
+
+[%- END -%]
