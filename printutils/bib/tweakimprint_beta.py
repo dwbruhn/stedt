@@ -157,7 +157,7 @@ def imprint( bib ):
     if counter == 0:
       for subline in line:
         if subline[0].startswith('imprint'):
-          subline[0] = subline[0].replace('imprint', 'address')
+          subline[0] = subline[0].replace('imprint', 'note')
         
   for line in bib:
     for subline in line:
