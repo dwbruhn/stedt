@@ -150,6 +150,12 @@ def imprint( bib ):
 #	      subline[0] = subline[0].replace('imprint', 'address')
 
   for line in bib:
+    if line[0][0].startswith('@article') or line[0][0].startswith('@phd'):
+      for subline in line:
+        if subline[0].startswith('address') or subline[0].startswith('imprint'):
+          line.pop(line.index(subline))
+
+  for line in bib:
     counter = 0
     for subline in line:
       if subline[0].startswith('address'):
