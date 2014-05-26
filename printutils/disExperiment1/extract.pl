@@ -283,7 +283,7 @@ EndOfSQL
 		# 2. print the forms
 		print STDERR "  " . ((scalar(@$recs)-$deletedforms) . " distinct forms.") if $deletedforms;
 		my $text;
-		$text .= "{\\nobreak\\small\n";
+		$text .= "{\\small\n";
 		$text .= "\\fascicletablebegin\n";
 		
 		my $lastgrpno = '';
