@@ -204,18 +204,19 @@
 \backmatter
 \fancyhead[LE]{\Large{References} \vspace{0.5em}}
 \fancyhead[RO]{\Large{References} \vspace{0.5em}}
-\addcontentsline{toc}{part}{References}
 \bibliographystyle{authordate1}
 \renewcommand{\bibname}{References}
 \bibliography{stedtreferences}
-
+\addcontentsline{toc}{part}{References}
 \fancyhead[LE]{\Large{Protogloss Index} \vspace{0.5em}}
 \fancyhead[RO]{\Large{Protogloss Index} \vspace{0.5em}}
-\addcontentsline{toc}{part}{Protogloss Index}
 \renewcommand{\indexname}{Protogloss Index}
 % would be nice to figure out how to add a few words of description for this index, e.g.
 % "Being an index to the individual glosses used for etyma in this work."
 % just adding it here does not make it show up in the index...
+\clearpage
+\phantomsection
+\addcontentsline{toc}{part}{Protogloss Index}
 \printindex
 
 \end{document}
