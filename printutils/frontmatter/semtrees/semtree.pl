@@ -18,7 +18,7 @@ use Template;
 my $dbh = STEDTUtil::connectdb();
 binmode(STDERR, ":utf8");
 
-my $query = "SELECT semkey, chaptertitle, v, f, c, s1, s2, s3
+my $query = "SELECT semkey, chaptertitle, v, f, c, s1, s2, s3, (SELECT COUNT(*) FROM etyma WHERE etyma.chapter=chapters.semkey AND etyma.status != 'DELETE') as num_etyma
 	FROM chapters
 	WHERE semkey NOT IN ('999', 'x.x', '950.1')
 	ORDER BY v,f,c,s1,s2,s3";
@@ -31,10 +31,10 @@ my $cur_level;
 # keep track of volumes
 my $prev_vol = 1;
 
-my ($semkey,$chaptertitle,$v,$f,$c,$s1,$s2,$s3);
+my ($semkey,$chaptertitle,$v,$f,$c,$s1,$s2,$s3,$num_etyma);
 
 for (@{$dbh->selectall_arrayref($query)}) {
-	($semkey,$chaptertitle,$v,$f,$c,$s1,$s2,$s3) = map {decode_utf8($_)} @$_;
+	($semkey,$chaptertitle,$v,$f,$c,$s1,$s2,$s3,$num_etyma) = map {decode_utf8($_)} @$_;
 
 	# skip lower levels for now
 #	next if ($s3);
@@ -69,7 +69,7 @@ for (@{$dbh->selectall_arrayref($query)}) {
 	}
 	
 	$trees[$v-1] .= "\t" x $cur_level; # insert appropriate # of tabs for current node
-	my $node_text = "$semkey " . escape_tex($chaptertitle); # concatenate semkey and chapter title (escape tex-specific chars)
+	my $node_text = "$semkey " . escape_tex($chaptertitle) . " ($num_etyma)"; # concatenate semkey, chapter title (escape tex-specific chars), and number of etyma
 	$node_text =~ s/(.{20}[^\s]*)(\s+|\/)/$1$2\\\\/g; # add line break sequence about every 20 chars or so
 #	print "$node_text\n";
 	$trees[$v-1] .= "[.{$node_text}\n"; # tree code for the current node
