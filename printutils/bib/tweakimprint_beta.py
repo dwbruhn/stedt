@@ -176,6 +176,14 @@ def imprint( bib ):
         if subline[0].startswith('address'):
           line.pop(line.index(subline))
 
+  for line in bib:
+    if line[0][0].startswith('@book'):
+      for subline in line:
+        if subline[0].startswith('author'):
+          if ', ed.' in subline[1] or ', eds.' in subline[1] or ', (eds.)' in subline[1] or ', (ed.)' in subline[1]:
+            line[0][0] = line[0][0].replace('@book','@collection')
+            subline[1] = re.sub(', \(*eds*\.\)*', '', subline[1])          
+
 
 
 def main():
