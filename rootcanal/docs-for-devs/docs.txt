@@ -5,8 +5,8 @@ notes table
 
 Rn (integer)        # rn from lex, 0 if etyma or chapter
 tag (smallint)		# tag from etyma, 0 otherwise
-Id (text)           # chapter (with dots) ***(*) but see below.
-Spec (enum)    L for lexicon, E for etymon, C for chapter. Mostly redundant with rn !=0, tag !=0, and id LIKE '_%', but see note on "id" below.
+Id (text)           # chapter (with dots) ***(*(*)) but see below.
+Spec (enum)    L for lexicon, E for etymon, C for chapter, S for source. Mostly redundant with rn !=0, tag !=0, and id LIKE '_%', but see note on "id" below.
 
 Notetype (enum) # T:text I:internal N:new O:orig/source G:graphics F:final H:hptb-ref
 T and N are essentially the same. Originally T was for text and N was for footnotes,
@@ -23,6 +23,7 @@ SELECT `spec`, `notetype`, count(*) FROM `notes` group by spec, notetype order b
 	E: I T N F H
 	C: I T N F G
 	L: I N O
+	S: I N
 
 Order (integer)       # order of note if more than one for a certain etymon/chapter.
 DateTime (datetime)	when note was modified
@@ -33,4 +34,6 @@ xmlnote              # actual note in xml, utf8. You can see the list of xml mar
 *** "id" actually does double duty for certain lexicon notes; in these cases, rn specifies lexicon.rn as usual, but id stores a *tag number* that the note is associated with. When showing footnotes in the etymon view or in the printed PDF's, these notes will only show up when the lexicon record is displayed under that tag. This was a hack to hide certain notes in TBRS, and perhaps should be deprecated, or even reworked so it specifies a tag number where it does *not* show up.
 
 **** "id" actually does triple duty for certain etyma notes. In these cases, the grpid is stored in the id column to indicate that these should show up as subgroup notes underneath an etymon.
+
+**** "id" actually does quadruple duty for source notes: when spec='S' (srcbib), the srcabbr is stored in the id column [dwbruhn]
 
