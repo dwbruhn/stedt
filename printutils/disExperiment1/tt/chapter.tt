@@ -19,7 +19,7 @@
 [% END -%]% \nopagebreak
 [% # insert actual content %]
 [% FOREACH etyma -%]
-\needspace{5\baselineskip}\section{([% seq %]) [% plg %] [% protoform_text %] [% protogloss %]}
+\needspace{5\baselineskip}\section[([% seq %]) [% plg %] [% protoform_text %] [% protogloss %]]{([% seq %]) [% plg %] [% protoform %] [% protogloss %]}
 [% FOREACH notes -%]
 [% IF type == 'I' %]{{[Internal Note:]}} \textit{[% END -%]
 [% IF type == 'O' && internal_notes %][Orig/Source][% END -%]
