@@ -35,4 +35,4 @@
 [% FOREACH note IN comparanda -%]
 [% note %]
 [% END -%]
-[% END -%]
+[% END %]
