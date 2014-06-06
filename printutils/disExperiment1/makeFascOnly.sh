@@ -39,7 +39,7 @@ wait
 # this is a workaround for bibtex: it goofs when more than 26 cites appear for an author/year.
 perl -i -pe 's/1989\{/1989/'  ${texfile}.bbl
 # this is a workaround for bibtex and latex: we make double dashes into em dashes in bib.
-perl -i -pe 's/--/\xe2\x80\x93/' ${texfile}.bbl
+perl -i -pe 's/--/\xe2\x80\x93/g' ${texfile}.bbl
 xelatex ${texfile}.tex >> ${texfile}.stdout.log
 xelatex ${texfile}.tex >> ${texfile}.stdout.log
 xelatex ${texfile}.tex >> ${texfile}.stdout.log
