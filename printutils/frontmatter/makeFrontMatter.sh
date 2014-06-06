@@ -17,6 +17,8 @@ cd ../disExperiment1/tex
 rm *.toc *.aux *.bbl *.blg *.log *.out
 xelatex frontmatter$1.tex
 bibtex frontmatter$1.aux
+# replace -- with en-dashes in year and page ranges
+perl -i -pe 's/--/\xe2\x80\x93/g' frontmatter$1.bbl
 xelatex frontmatter$1.tex
 xelatex frontmatter$1.tex
 xelatex frontmatter$1.tex
