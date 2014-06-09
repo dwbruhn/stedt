@@ -31,10 +31,10 @@ done
 sed -e '/% insert includes here/r./inputs.tex' masterTemplate.tex > masterTemp.tex 
 xelatex masterTemp.tex > master.log
 bibtex masterTemp  > master.bibtex.log &
-# this is a workaround for bibtex and latex: we make double dashes into en dashes in bib.
-perl -i -pe 's/--/\xe2\x80\x93/g' masterTemp.bbl
 makeindex masterTemp > master.makeindex.log &
 wait
+# this is a workaround for bibtex and latex: we make double dashes into en dashes in bib.
+perl -i -pe 's/--/\xe2\x80\x93/g' masterTemp.bbl
 xelatex masterTemp.tex >> master.log
 xelatex masterTemp.tex >> master.log
 xelatex masterTemp.tex >> master.log
