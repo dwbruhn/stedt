@@ -300,10 +300,10 @@ EndOfSQL
 				my ($tmp_grpno, $grpname);
 				while (@{$e{mesoroots}} && $e{mesoroots}[0]{grpno} lt $grpno
 						|| @{$e{subgroupnotes}} && $e{subgroupnotes}[0]{grpno} lt $grpno) {
-					if (@{$e{mesoroots}} && @{$e{subgroupnotes}} or @{$e{mesoroots}}) {
+					if (@{$e{mesoroots}} && $e{mesoroots}[0]{grpno} lt $grpno) {  # if there are mesoroots or mesoroots + subgroup note(s)
 						$tmp_grpno = $e{mesoroots}[0]{grpno};
 						$grpname   = $e{mesoroots}[0]{grp};
-					} else {
+					} else {	# otherwise just subgroup note(s)
 						$tmp_grpno = $e{subgroupnotes}[0]{grpno};
 						$grpname   = $e{subgroupnotes}[0]{grp};
 					}
