@@ -510,7 +510,7 @@ sub get_meso_notes {
 	}
 	my $meso_string = '';
 	if (@m) {
-		$meso_string = ": $m[0]{plg} ";
+		$meso_string = ": ";	# omit redundant plg abbreviation; original line: $meso_string = ": $m[0]{plg} ";
 	}
 	$meso_string .= join ', ', map {format_protoform(escape_tex(decode_utf8($_->{form}))) . ' ' . escape_tex(decode_utf8($_->{gloss}))} @m;
 	my $notes_string = '';
