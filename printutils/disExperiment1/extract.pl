@@ -164,8 +164,9 @@ my $etyma_in_chapter = $dbh->selectall_arrayref(
 
 print STDERR (scalar @$etyma_in_chapter) . " etyma in this chapter.\n";
 print STDERR (scalar @$chapter_notes) . " chapter note(s) found.\n";
-# skip entire chapter if it has no etyma and there is nothing else to print, unless it is a volume beginning.
-next if (0 == scalar @$etyma_in_chapter) && (0 == scalar @$chapter_notes) && (0 == @$flowchartids) && ($semkey !=~ /\.0/);
+# skip entire chapter if it has no etyma and there is nothing else to print, unless it is a volume or fascicle beginning.
+# if it is a V or F, semkey will have the form DIGIT(S).DIGIT(S)
+next if (0 == scalar @$etyma_in_chapter) && (0 == scalar @$chapter_notes) && (0 == @$flowchartids) && !($semkey =~ /^\d+\.\d+$/);
 my $etyma_index = 0; # index for accessing next etymon in array (to check sequence number and identify PAFs)
 foreach (@$etyma_in_chapter) {
 	
