@@ -333,10 +333,10 @@ EndOfSQL
 			$form =~ s/{/\\textbf{/g;
 			$form = '*' . $form if ($lg =~ /^\*/); # put * for proto-lgs
 			if ($lg eq 'Chinese (Hanzi)') {		# deal with Chinese chars (need \TC or \SC)
-				if ($srcabbr eq 'WHBLS-2011') {
-					$form = '\\TC{' . $form . '}';	# Baxter-Sagart uses traditional chars
+				if ($srcabbr eq 'YN-RGLD') {
+					$form = '\\SC{' . $form . '}';	# Nagano db uses simplified
 				} else {
-					$form = '\\SC{' . $form . '}';	# other sources (so far only Nagano) use simplified
+					$form = '\\TC{' . $form . '}';	# other sources (Baxter-Sagart, HPTB) use traditional
 				}
 			}
 			if ($lg eq $lastlg) {
