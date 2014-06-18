@@ -12,7 +12,7 @@ binmode(STDERR, ":utf8");
 opendir(DIR, ".") or die "Can't opendir current directory: $!";
 my @file_list = grep(/^\d.*?\.tex$/, readdir(DIR));
 closedir(DIR);
-@file_list = sort @file_list;
+@file_list = sort @file_list; # ASCII sort, works well enough to make things not too jumbled
 
 foreach my $filename (@file_list) {
 	
@@ -30,7 +30,7 @@ foreach my $filename (@file_list) {
 	}
 	close(TEXFILE);
 	
-	print "\n\n\\textbf{$filename}\n\n";
+	print "\\section*{$filename}";
 	
 	$cur_file =~ s/\n/ /g; # replace all newlines with spaces
 	my @chars = split("", $cur_file);	# split the file into an array
