@@ -1,0 +1,138 @@
+%!TEX TS-program = xelatex
+%!TEX encoding = UTF-8 Unicode
+% wrapper for footnote extractor
+\documentclass[11pt,twoside,twocolumn]{book}
+
+\usepackage{etoolbox}
+\usepackage{titlesec}
+
+\makeatletter
+\newcommand\comparandum{\@startsection{subsection}{2}{0pt}{-1pt}{1pt}{\large\bfseries}}
+\makeatother
+
+\usepackage{makeidx}
+\makeindex
+
+\usepackage{needspace}
+\usepackage{fontspec}
+\usepackage{xunicode} % for real tildes with \textasciitilde
+\usepackage{xltxtra} % for xelatex logo
+\setmainfont[Renderer=ICU]{Charis SIL}
+\newfontfamily\stedtfont{STEDTU Roman}
+\newfontfamily\tradchinesefont{LiSong Pro}
+\newfontfamily\simpchinesefont{STSong}
+\newcommand{\TC}[1]{{\tradchinesefont #1}}
+\newcommand{\SC}[1]{{\simpchinesefont #1}}
+\newcommand{\STEDTU}[1]{{\stedtfont #1}}
+\newcommand{\fascicletablebegin}{\needspace{5\baselineskip}\begin{mpsupertabular}[l]{@{\hspace*{1.1em}}>{\hangindent=0.1in}p{1.3in}>{\hangindent=0.1in}p{1.2in}>{\hangindent=0.1in}p{1.4in}>{\hangindent=0.1in}p{2.1in}l}}
+\renewcommand\thechapter{} % use cap roman numerals for chapter numbers
+
+\usepackage{fullpage}
+\usepackage{parskip}
+\usepackage[toc]{multitoc}
+\usepackage{supertabular,ltxtable,booktabs}
+\setcounter{LTchunksize}{600} % use more memory for fewer compiles
+% \usepackage{graphicx}
+\usepackage[export]{adjustbox} % loads also graphicx
+\usepackage{float}
+% \usepackage{microtype} % only works in pdftex, which we are not using...
+\usepackage{tablefootnote}
+\usepackage{array} % use array and ragged2e for raggedright inside tables
+% \usepackage[document,raggedrightboxes]{ragged2e}
+% \setlength{\RaggedRightRightskip}{0pt plus 3em} % must be defined after fonts are loaded
+\usepackage[yyyymmdd,hhmmss]{datetime}
+
+\raggedbottom
+
+% \usepackage{layout}
+
+\usepackage{fancyhdr}
+
+
+%\usepackage[bookmarks]{hyperref}
+%\hypersetup{%
+%        pdfborder={0 0 1},
+%        pdfborderstyle={/S/U/W 1}, % make links underlined (instead of surrounded by red boxes)
+%        pdftitle = {STEDT footnotes}, 
+%}
+
+\makeatletter
+\patchcmd{\chapter}{\if@openright\cleardoublepage\else\clearpage\fi}{}{}{}
+%\patchcmd{\chapter}{}{}{}{}
+\makeatother
+
+\usepackage{acronym}
+\usepackage{natbib}
+\usepackage{fix-cm}
+\usepackage{lettrine}
+\usepackage[margin=0.6in]{geometry}
+\geometry{bindingoffset=0.6in}
+
+\let\origdoublepage\cleardoublepage
+\newcommand{\clearemptydoublepage}{%
+  \clearpage
+  {\pagestyle{empty}\origdoublepage}%
+}
+\let\cleardoublepage\clearemptydoublepage
+
+% \pdfpageheight=26in
+% \pdfpagewidth=16in
+
+\setlength\paperwidth{17in}
+\setlength\paperheight{26in}
+
+\setlength{\columnsep}{5em}
+% \setlength{\columnseprule}{0.05pt}
+
+\setlength\textwidth{15in}
+\setlength\textheight{23.5in}
+
+\setlength\columnwidth{7.0in}
+% \setlength\columnheight{18in}
+
+\setlength{\headheight}{32pt}
+\setlength{\topmargin}{0pt}
+\setlength{\marginparwidth}{0pt}
+\renewcommand{\thefootnote}{\arabic{footnote}}
+\renewcommand{\thepart}{\arabic{part}}
+\renewcommand{\partname}{Volume}
+
+\setlength{\headsep}{10pt}
+
+\titleformat{\chapter}[hang]{\Large\bfseries}{\thechapter}{0pt}{\Large\bfseries}
+
+\pagestyle{fancy}
+ 
+\fancyhead{}
+
+\renewcommand*{\sectionmark}[1]{ \markright{#1} }
+\renewcommand*{\chaptermark}[1]{ \markboth{#1}{} }
+
+% \fancyhead[RE]{\Large{Sino-Tibetan Etymological} \vspace{0.5em}}
+% \fancyhead[LO]{\Large{Dictionary and Thesaurus} \vspace{0.5em}}
+
+% \fancyhead[RO]{\Large{\leftmark} \vspace{0.5em}}
+% \fancyhead[LE]{\Large{\rightmark} \vspace{0.5em}}
+
+\renewcommand{\headrulewidth}{0.4pt}
+
+\lfoot{}
+\cfoot{\thepage}
+\rfoot{}
+
+% citation aliases
+\defcitealias{STC}{STC}
+\defcitealias{JAM-HPTB}{HPTB}
+\defcitealias{JAM-TBRS}{TBRS}
+\defcitealias{JAM-VSTB}{VSTB}
+
+% packages for drawing trees
+\usepackage{tikz}
+\usepackage{tikz-qtree}
+
+% package for enhancing lists
+\usepackage[shortlabels]{enumitem}
+
+\begin{document}
+\include{footnotes}
+\end{document}
