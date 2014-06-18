@@ -12,6 +12,7 @@ binmode(STDERR, ":utf8");
 opendir(DIR, ".") or die "Can't opendir current directory: $!";
 my @file_list = grep(/^\d.*?\.tex$/, readdir(DIR));
 closedir(DIR);
+@file_list = sort @file_list;
 
 foreach my $filename (@file_list) {
 	
