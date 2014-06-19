@@ -1,8 +1,6 @@
 # script to run footnote extractor
 # requires footnotes.pl and fn_wrapper.tex
-echo Copying tex files...
-cp ../tex/*.tex .
 echo Extracting footnotes...
-perl footnotes.pl > footnotes.tex
+perl footnotes.pl ../tex/ > footnotes.tex
 echo TeXing...
 xelatex fn_wrapper.tex

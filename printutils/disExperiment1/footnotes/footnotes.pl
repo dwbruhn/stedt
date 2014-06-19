@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# extract all footnotes from all tex files in current directory
+# extract all footnotes from all tex files in directory provided as argument (WITH TRAILING SLASH)
 
 use strict;
 use utf8;
@@ -8,8 +8,8 @@ binmode(STDOUT, ":utf8");
 binmode(STDIN, ":utf8");
 binmode(STDERR, ":utf8");
 
-# get list of tex files in current directory that start with digit
-opendir(DIR, ".") or die "Can't opendir current directory: $!";
+# get list of tex files in directory that start with digit
+opendir(DIR, $ARGV[0]) or die "Can't opendir directory provided: $!";
 my @file_list = grep(/^\d.*?\.tex$/, readdir(DIR));
 closedir(DIR);
 @file_list = sort @file_list; # ASCII sort, works well enough to make things not too jumbled
@@ -21,7 +21,7 @@ foreach my $filename (@file_list) {
 	my $cur_index = 0; # keeps track of current character being scanned
 	my $fn_count = 0; # fn counter
 	
-	open(TEXFILE, $filename) or die "Could not open $filename. $!";
+	open(TEXFILE, $ARGV[0].$filename) or die "Could not open $filename. $!";
 	binmode(TEXFILE, ":utf8");
 	
 	# load file contents into string
