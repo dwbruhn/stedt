@@ -65,7 +65,7 @@ sub bold_protoform { # pass in something already escape_tex'd
 
 sub prettify_protoform {
 	my $s = shift;
-	$s =~ s#\(?(.)/(.)(?:/(.))?\)?#_tabularify($1,$2,$3)#ge;
+	$s =~ s#\(?(.)/(.)(?:/(.))?(?:/(.))?\)?#_tabularify($1,$2,$3,$4)#ge;
 	return $s;
 }
 
