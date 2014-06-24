@@ -34,8 +34,6 @@ xelatex bibtest.tex
 bibtex bibtest.aux
 #perl -i -pe 's/1989\}\{/1989\}/' bibtest.bbl
 perl -i -pe 's/1989\{/1989/' bibtest.bbl
-# replace -- with en-dashes in year and page ranges
-perl -i -pe 's/--/\xe2\x80\x93/g' bibtest.bbl
 xelatex bibtest.tex
 xelatex bibtest.tex
 cp stedtreferences.bib ..
