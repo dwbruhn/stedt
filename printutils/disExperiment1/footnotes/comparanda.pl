@@ -18,7 +18,7 @@ foreach my $filename (@file_list) {
 	
 	my $cur_file;	# string to hold file contents
 	
-	open(TEXFILE, $ARGV[0].$filename) or die "Could not open $filename. $!";
+	open(TEXFILE, "$ARGV[0]/$filename") or die "Could not open $filename. $!";
 	binmode(TEXFILE, ":utf8");
 	
 	# load file contents into string
@@ -27,9 +27,10 @@ foreach my $filename (@file_list) {
 	}
 	close(TEXFILE);
 	
-	print "\n\\section*{$filename}\n";
+	# include etyma heading with comparanda
+	my @matches = $cur_file =~ /(\\section.*?)\n.*?(\\comparandum.*?)(\\needspace{5\\baselineskip}|$)/gs;
 	
-	print $cur_file =~ /(?<!newcommand)(\\comparandum.*?)(\\needspace{5\\baselineskip}|$)/gs;
-	
-
+	if (scalar @matches) {
+		print "\n\\section*{$filename}\n@matches";
+	}
 }

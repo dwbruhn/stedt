@@ -1,6 +1,6 @@
 # script to run comparanda extractor
 # requires comparanda.pl and comp_wrapper.tex
 echo Extracting comparanda...
-perl comparanda.pl ../tex/ > comparanda.tex
+perl comparanda.pl ../tex > comparanda.tex
 echo TeXing...
 xelatex comp_wrapper.tex
