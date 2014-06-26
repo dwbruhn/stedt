@@ -365,7 +365,7 @@ EndOfSQL
 					#$text .= '\\footnotetext{';
 					$text .= '\\footnote{';
 					$text .= '\\textit{' if $notetype eq 'I'; # [Internal] 
-					$text .= '[Orig/Source] ' if $notetype eq 'O';
+					$text .= '[Source Note] ' if $notetype eq 'O';
 					$text .= xml2tex(decode_utf8($note));
 					$text .= '}' if $notetype eq 'I';
 					#$text .= "}\\\\\n";
