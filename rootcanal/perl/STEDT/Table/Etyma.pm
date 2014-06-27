@@ -6,7 +6,7 @@ sub new {
 my ($self, $dbh, $privs, $uid) = @_;
 my $t = $self->SUPER::new($dbh, 'etyma', 'etyma.tag', $privs); # dbh, table, key, privs
 
-$t->query_from(q|etyma LEFT JOIN `users` ON etyma.uid = users.uid LEFT JOIN languagegroups ON etyma.grpid=languagegroups.grpid|);
+$t->query_from(q|etyma LEFT JOIN `users` ON etyma.uid = users.uid LEFT JOIN languagegroups ON etyma.grpid=languagegroups.grpid LEFT JOIN chapters ON etyma.chapter=chapters.semkey|);
 $t->default_where('etyma.status != "DELETE"');
 $t->order_by('etyma.chapter, etyma.sequence');
 $t->fields('etyma.tag',
@@ -14,7 +14,7 @@ $t->fields('etyma.tag',
 	'(SELECT COUNT(DISTINCT rn) FROM lx_et_hash WHERE tag=etyma.tag AND uid=8) AS num_recs',
 	($uid ? "(SELECT COUNT(DISTINCT rn) FROM lx_et_hash WHERE tag=etyma.tag AND uid=$uid) AS u_recs" : ()),
 	($uid ? "(SELECT COUNT(DISTINCT rn) FROM lx_et_hash WHERE tag=etyma.tag AND uid !=8 AND uid != $uid) AS o_recs" : ()),
-	'(SELECT chaptertitle FROM chapters WHERE chapters.semkey=etyma.chapter) AS chaptertitle',	
+	'chapters.chaptertitle',	
 	'etyma.chapter',
 	'etyma.sequence',
 	'etyma.protoform', 'etyma.protogloss',

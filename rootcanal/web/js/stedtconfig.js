@@ -400,7 +400,7 @@ var setup = { // in the form setup.[tablename].[fieldname]
 			noedit: true,
 			size: 30
 		},
-		'chaptertitle' : {
+		'chapters.chaptertitle' : {
 			hide: true,
 			noedit: true
 		},
