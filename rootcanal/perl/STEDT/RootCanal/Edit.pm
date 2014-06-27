@@ -10,14 +10,15 @@ sub table : StartRunmode {
 	my $self = shift;
 	my $t0 = time();
 	my $tbl = $self->param('tbl');
-	# restrict particular tables from users without approver privs
-	if    ($tbl eq  'projects')	{ $self->require_privs(8) }
+	# restrict particular tables from users without appropriate privs
+	if    ($tbl eq  'projects')	{ $self->require_privs(8) }	# approver privs
+	elsif ($tbl eq  'notes')	{ $self->require_privs(1) }	# tagger privs (due to username exposure)
 #	elsif ($tbl eq  'mesoroots')	{ $self->require_privs(8) }
 #	elsif ($tbl eq  'hptb')		{ $self->require_privs(8) }
 #	elsif ($tbl eq  'glosswords')	{ $self->require_privs(8) }
 #	elsif ($tbl eq  'morphemes')	{ $self->require_privs(8) }
 #	elsif ($tbl eq  'chapters')	{ $self->require_privs(8) }
-	else			        { $self->require_privs(2) }
+	else			        { $self->require_privs(2) }	# logged-in user (available to public via guest account)
 	
 	my $q = $self->query;
 

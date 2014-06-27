@@ -18,10 +18,10 @@ Edit/Browse tables:
 	<li><a href="[% self_url %]/subgroups/view">language groups</a></li>
 </ul></td>
 <td><ul>
+	[% IF c.has_privs(1) -%]<li><a href="[% self_url %]/edit/notes">notes</a></li>[% END -%]
 	<li><a href="[% self_url %]/edit/mesoroots">mesoroots</a> ("Dependent Mesoroots" only)</li>
 	<li><a href="[% self_url %]/edit/etymologies">etymologies</a> (including all user-tagged etymologies)</li>
 	[% IF c.has_privs(8) -%]<li><a href="[% self_url %]/edit/projects">projects</a></li>[% END -%]
-	[% IF c.has_privs(16) -%]<li><a href="[% self_url %]/contribution">contributions</a></li>[% END %]
 	[% IF c.has_privs(16) -%]<li><a href="[% self_url %]/admin/deletedata">delete source and/or language data</a></li>[% END %]
 </ul></td>
 </tr></table>
@@ -31,7 +31,7 @@ Semantic categorization stuff:
 <ul>
 <li><a href="[% self_url %]/chapters">chapter browser</a></li>
 <li><a href="[% self_url %]/chapters/tweak">semkeys and their glosswords</a></li>
-<li><a href="[% self_url %]/chapters/grid" style="font-family: Times, 'Times New Roman', 'Segoe UI Symbol', 'Cambria Math'">grid view: volumes ⨉ fascicles</a></li>
+<li><a href="[% self_url %]/chapters/grid">grid view: volumes <span style="font-family: Times, 'Times New Roman', 'Segoe UI Symbol', 'Cambria Math'">⨉</span> fascicles</a></li>
 </ul>
 
 [% IF c.has_privs(1) -%]
@@ -41,6 +41,7 @@ Activity:
 <li><a href="[% self_url %]/admin/queries">recent queries (public interface)</a></li>
 <li><a href="[% self_url %]/admin/progress">progress report, tagging awaiting approval, etc.</a></li>
 [% IF c.has_privs(8) -%]<li><a href="[% self_url %]/admin/bulkapproval">bulk approval of tagging</a></li>[% END -%]
+[% IF c.has_privs(16) -%]<li><a href="[% self_url %]/contribution">contributions</a></li>[% END %]
 </ul>
 [% END %]
 

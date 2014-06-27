@@ -33,10 +33,18 @@ sub add : RunMode {
 	}
 	my $sth = $dbh->prepare($sql);
 	$sth->execute($spec, $id, $ord, $type, $xml, $uid, $id2 ? $id2 : ());
+	
+	# get noteid for use below
+	my $noteid = $dbh->selectrow_array("SELECT LAST_INSERT_ID()");
+	
+	# update changelog (note that oldval and newval are TEXT type fields, which cannot have default values
+	# so we have to explcitly set them to the empty string)
+	$self->dbh->do("INSERT changelog (uid, change_type, `table`, id, oldval, newval, time)
+					VALUES (?,?,?,?,?,?,NOW())", undef,
+					$self->param('uid'), 'new_rec', 'notes', $noteid, '', '');
 
 	my $kind = $spec eq 'L' ? 'lex' : $spec eq 'C' ? 'chapter' : # special handling for comparanda
 		$spec eq 'S' ? 'source' : $type eq 'F' ? 'comparanda' : $id2 ? 'et_subgroup' : 'etyma';
-	my $noteid = $dbh->selectrow_array("SELECT LAST_INSERT_ID()");
 	my $lastmod = $dbh->selectrow_array("SELECT datetime FROM notes WHERE noteid=?", undef, $noteid);
 	$self->header_add('-x-json'=>qq|{"id":"$noteid"}|);
 	my @a; my $i = $q->param('fn_counter')+1;
@@ -115,6 +123,16 @@ sub save : RunMode {
  		return "Someone else has modified this note! Your changes were not saved.";
  	}
 	$self->dbh->do("UNLOCK TABLES");
+	
+	# if we get here, the change was successful
+	# update changelog (note that oldval and newval are TEXT type fields, which cannot have default values
+	# so we have to explcitly set them to the empty string)
+	# note that multiple fields could have been changed, so just record fact of change for now
+	# until we can loop through specific changes and record them individually
+	$self->dbh->do("INSERT changelog (uid, change_type, `table`, id, oldval, newval, time)
+					VALUES (?,?,?,?,?,?,NOW())", undef,
+					$self->param('uid'), '-', 'notes', $noteid, '', '');
+					
 	$self->header_add('-x-json'=>qq|{"lastmod":"$lastmod"}|);
 	my @a; my $i = 1;
 	return join("\r", xml2html($xml, $self, \@a, \$i), map {$_->{text}} @a);

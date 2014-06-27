@@ -36,6 +36,8 @@
 	[% tbl_key = 'lgid' %]
 [% CASE 'srcbib' %]
 	[% tbl_key = 'srcabbr' %]
+[% CASE 'notes' %]
+	[% tbl_key = 'noteid' %]
 [% CASE # in most cases it's just 'id' %]
 	[% tbl_key = 'id' %]
 [% END %]
@@ -45,8 +47,8 @@
 <td>[% row.2 | html %]</td>
 <td>[% row.3 | html %]</td>
 <td>
-[% # if user is not approver or above, don't make a link for advanced tables %]
-[% IF !c.has_privs(8) && (row.3 == 'morphemes' || row.3 == 'hptb' || row.3 == 'chapters' || row.3 == 'projects' || row.3 == 'mesoroots') %]
+[% # if user is not approver or above, don't make a link for projects table %]
+[% IF !c.has_privs(8) && (row.3 == 'projects') %]
 [% row.4 | html %]
 [% ELSE # otherwise, fine to make a link %]
 <a href="[% self_url %]/edit/[% row.3 %]?[% row.3 %].[% tbl_key %]=[% row.4 %]" target="change_viewer">[% row.4 | html %]</a>
