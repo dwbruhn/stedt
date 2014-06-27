@@ -86,7 +86,8 @@ my ($self, $dbh, $privs, $uid2, $uid1) = @_;
 
 my $t = $self->SUPER::new($dbh, 'lexicon', 'lexicon.rn', $privs); # dbh, table, key, privs
 
-$t->query_from(q|lexicon LEFT JOIN languagenames USING (lgid) LEFT JOIN languagegroups USING (grpid) LEFT JOIN chapters USING (semkey)|);
+$t->query_from(q|lexicon LEFT JOIN languagenames USING (lgid) LEFT JOIN languagegroups USING (grpid) LEFT JOIN chapters USING (semkey) 
+		LEFT JOIN srcbib USING (srcabbr)|);
 $t->default_where('lexicon.status != "HIDE" AND lexicon.status != "DELETED"');
 $t->order_by('languagegroups.grp0, languagegroups.grp1, languagegroups.grp2, languagegroups.grp3, languagegroups.grp4, languagenames.lgsort, lexicon.reflex, languagenames.srcabbr, lexicon.srcid');
 $t->fields(
@@ -102,7 +103,7 @@ $t->fields(
 	'languagegroups.grpid',
 	'languagegroups.grpno',
 	'languagegroups.grp',
-	'(SELECT citation from srcbib WHERE srcabbr=languagenames.srcabbr) AS citation',
+	'srcbib.citation AS citation',
 	'languagenames.srcabbr', 'lexicon.srcid',
 #	'lexicon.status',
 #	'lexicon.semcat',
