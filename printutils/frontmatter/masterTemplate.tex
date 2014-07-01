@@ -4,6 +4,7 @@
 \documentclass[11pt,twoside,twocolumn]{book}
 % \documentclass[11pt]{book}
 
+\usepackage{epigraph}
 \usepackage{etoolbox}
 \usepackage{titlesec}
 
@@ -185,7 +186,10 @@
 
 \pdfbookmark[0]{Table of Contents}{TOC}
 \tableofcontents
-\cleardoublepage
+\clearpage
+
+\include{epigraph}
+\clearpage
 
 \include{introduction}
 \include{acknowledgements}
