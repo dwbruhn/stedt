@@ -59,9 +59,10 @@ logged in as <b>[% user %]</b>
 <option value="[% self_url %]/edit/glosswords">Glosses</option> 
 <option value="[% self_url %]/edit/etymologies">Etymologies</option> 
 [% END # has_privs(2) -%]
-[% IF c.has_privs(1) # for read-only users, these options are accessible but shouldn't clutter up the dropdown box %]
+[% IF c.has_privs(1) # for read-only users, these options are accessible (except for edit/notes) but shouldn't clutter up the dropdown box %]
 <option value="[% self_url %]/edit/mesoroots">Mesoroots</option>
 <option value="[% self_url %]/edit/morphemes">Morphemes</option>
+<option value="[% self_url %]/edit/notes">Notes</option>
 <option value="[% self_url %]/edit/soundlaws">Sound Laws</option> 
 [% END # has_privs(1) %]
 [% IF c.has_privs(8) -%]

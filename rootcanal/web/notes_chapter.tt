@@ -9,7 +9,6 @@ notetype:<select name="notetype">
 <option [% IF n.type=='I' %]selected="selected" [% END %]value="I">Internal</option>
 <option [% IF n.type=='N' %]selected="selected" [% END %]value="N">New</option>
 <option [% IF n.type=='G' %]selected="selected" [% END %]value="G">Graphic</option>
-<option [% IF n.type=='F' %]selected="selected" [% END %]value="F">Final</option>
 <option [% IF n.type=='O' %]selected="selected" [% END %]value="O">O??</option>
 </select>
 last modified: <span id="lastmod[% n.noteid %]">[% n.lastmod %]</span>

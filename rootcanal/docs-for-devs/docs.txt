@@ -16,7 +16,7 @@ I means notes for internal STEDT use only.
 G is a reference to graphics file (4 digits, with implied .pdf and .gif versions)
 O means notes from the source, which we should never modify. Copy into a new note instead.
 H means the note contains an HPTB ref and suppresses generation of an automatic HPTB note.
-F means 'final', which for etyma means it's a Chinese comparandum, and for chapters means text that should appear at the end of the chapter.
+F means 'final', which for etyma means it's a Chinese comparandum [NOW DEPRECATED: and for chapters means text that should appear at the end of the chapter.]
 
 To see which types are associated with each spec, you can run the following sql command.
 SELECT `spec`, `notetype`, count(*) FROM `notes` group by spec, notetype order by 1, 3 desc
