@@ -48,7 +48,7 @@ View tagging by [% IF c.has_privs(1) %](A) [% END %]<select id="uid1" name="uid1
 
 [% IF result.data.size -%]
 <form target="tableedit_print" method="post">
-[% result.data.size %] found. (WHERE [% result.debug %]; [% time_elapsed %]s[% IF c.has_privs(16) %]; js:<span id="time_elapsed_js"></span>s[% END %].)
+[% result.data.size %] found. (WHERE [% result.debug | html %]; [% time_elapsed %]s[% IF c.has_privs(16) %]; js:<span id="time_elapsed_js"></span>s[% END %].)
 [%- FOREACH col IN t.searchable -%]
 [%- IF c.query.param(col) %]<input name="[% col %]" type="hidden" value="[% c.query.param(col) %]">[% END -%]
 [%- END -%]
@@ -71,7 +71,7 @@ Displaying items [% a %]-[% b %] of [% result.data.size %].
 </form>
 [%- END -%]
 [%- ELSE -%]
-No records found. (WHERE [% result.debug %])
+No records found. (WHERE [% result.debug | html %])
 [% END # result.data.size -%]
 
 <form>

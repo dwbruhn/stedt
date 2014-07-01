@@ -58,7 +58,36 @@ $t->search_form_items(
 							-labels=>\%usernames,
 							-default=>'');
 	},
-	# need to add dropdown boxes for spec and notetype
+	# add dropdown boxes for spec and notetype
+	'notes.spec' => sub {
+		my $cgi = shift;
+		my @specs = qw/L E C S/;
+		my %spec_labels = (
+			'L' => 'Lexicon',
+			'E' => 'Etyma',
+			'C' => 'Chapter',
+			'S' => 'Source',
+		);
+		return $cgi->popup_menu(-name => 'notes.spec', -values=>['', @specs],
+							-labels=>\%spec_labels,
+							-default=>'');
+	},
+	'notes.notetype' => sub {
+		my $cgi = shift;
+		my @notetypes = qw/I T N F H G O/;
+		my %type_labels = (
+			'I' => 'Internal',
+			'T' => 'Text',
+			'N' => 'New',
+			'F' => 'Final',
+			'H' => 'HPTB',
+			'G' => 'Graphics',
+			'O' => 'Orig/Src',
+		);
+		return $cgi->popup_menu(-name => 'notes.notetype', -values=>['', @notetypes],
+							-labels=>\%type_labels,
+							-default=>'');
+	},
 );
 
 $t->wheres(
