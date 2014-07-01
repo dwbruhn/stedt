@@ -1,5 +1,9 @@
-// tooltip help for id field
-$('notes.id_search').addTip('For <b>Chapter</b> notes, id = chapter (e.g. 1.6.5)<br>For <b>Lexicon</b> notes, id = tag # associated with note.<br>For <b>Etyma</b> notes, id = grpid (subgroup note).<br>For <b>Source</b> notes, id = source abbreviation.', 'ID Field', {className:'standard'});
+// tooltip help for various fields
+$('notes.id_search').addTip('For <b>Chapter</b> notes, id = chapter (e.g. 1.6.5)<br>For <b>Lexicon</b> notes, id = tag # associated with note<br>For <b>Etyma</b> notes, id = grpid (subgroup note)<br>For <b>Source</b> notes, id = source abbreviation', 'ID', {className:'standard', delay:'0'});
+$('notes.notetype_search').addTip('<b>Internal</b> = visible only to logged-in users<br><b>Text = New</b> = standard note visible to public<br><b>Final</b> = (for etyma) Chinese comparanda note; (for chapters) note at end of chapter<br><b>HPTB</b> = etyma note containing an HPTB reference (deprecated)<br><b>Graphics</b> = reference to graphics file<br><b>Orig/Src</b> = author\'s note from the original source', 'TYPE', {className:'standard', delay:'0'});
+$('notes.rn_search').addTip('Record number (for lexicon notes)', 'RN', {className:'standard', delay:'0'});
+$('notes.tag_search').addTip('Tag number (for etyma notes)', 'TAG', {className:'standard', delay:'0'});
+$('notes.ord_search').addTip('Order of note if there is more than one note for a particular element', 'ORDER', {className:'standard', delay:'0'});
 
 // convert xmlnote to html for display
 function xml2html(xmlnote) {
@@ -189,7 +193,7 @@ setup.notes = {
 	'notes.ord': {
 		label: 'order',
 		noedit: true,
-		size: 5
+		size: 13
 	},
       	'notes.xmlnote' : {
 		noedit: true,
