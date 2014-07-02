@@ -7,7 +7,7 @@
 <input type="hidden" name="user" value="guest">
 <input type="hidden" name="pwd" value="guest">
 <input type="hidden" name="url" value="[% c.query.param('url') %]">
-<input type="submit" value="Click here for FREE, UNLIMITED access to the database as a guest*">&nbsp;&nbsp;
+<input type="submit" value="Click here for free, unlimited access to the database as a guest*">&nbsp;&nbsp;
 </form>
 
 <p><b>OR</b></p>
@@ -21,22 +21,14 @@ password: <input type="password" size="10" name="pwd">
 <p><b>OR</b></p>
 <p><a href="[% self_url %]/account/gsarpa">create a new account</a></p>
 </form>
-<form method="post" action="[% self_url %]/account/login">
-<input type="hidden" name="user" value="guest">
-<input type="hidden" name="pwd" value="guest">
-<input type="hidden" name="url" value="[% c.query.url('-path',1,'-query',1) %]">
-</form>
 </center>
 
 [%- IF !blank -%]
 <center>
-<p>Sorry, your username and/or password were/was incorrect.
-<br/>
-You can try again (above), or type in (below) your username 
-<br/>
-OR
-<br/>
-the email address associated with your account to have a new
+<p><span style="color:red; font-weight:bold; font-size:large;">Sorry, your username and/or password were/was incorrect.</span>
+<br/>You can try again (above),</p>
+<p><b>OR</b></p>
+type in (below) your username or the email address associated with your account to have a new
 password emailed to you.</p>
 
 [%- IF err.all_empty -%]

@@ -8,22 +8,22 @@ setTimeout(function(){location.href = "[% new_url | url %]"}, 3000);
 </script>
 [%- ELSIF !c.param('user') -%]
 <center>
-<form method="post" action="[% self_url %]/account/login">
 <h2>Welcome!</h2>
-<input type="submit" value="Click here for FREE, UNLIMITED access to the database as a guest*">&nbsp;&nbsp;
+<form method="post" action="[% self_url %]/account/login">
+<input type="hidden" name="user" value="guest">
+<input type="hidden" name="pwd" value="guest">
+<input type="hidden" name="url" value="[% c.query.url('-path',1,'-query',1) %]">
+<input type="submit" value="Click here for free, unlimited access to the database as a guest*">&nbsp;&nbsp;
+</form>
 <p><b>OR</b></p>
 <p>...if you already have an account please login:</p>
+<form method="post" action="[% self_url %]/account/login">
 username: <input type="text" size="10" name="user">
 password: <input type="password" size="10" name="pwd">
 <input type="hidden" name="url" value="[% c.query.url('-path',1,'-query',1) %]">
 <input type="submit" value="log in">
 <p><b>OR</b></p>
 <p><a href="[% self_url %]/account/gsarpa">create a new account</a></p>
-</form>
-<form method="post" action="[% self_url %]/account/login">
-<input type="hidden" name="user" value="guest">
-<input type="hidden" name="pwd" value="guest">
-<input type="hidden" name="url" value="[% c.query.url('-path',1,'-query',1) %]">
 </form>
 </center>
 [% END %]
