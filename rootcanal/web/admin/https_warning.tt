@@ -7,23 +7,25 @@
 setTimeout(function(){location.href = "[% new_url | url %]"}, 3000);
 </script>
 [%- ELSIF !c.param('user') -%]
-<h1>STEDT Database Login</h1>
-<p>The page you are trying to access requires you to log in first.</p>
+<center>
 <form method="post" action="[% self_url %]/account/login">
+<h2>Welcome!</h2>
+<input type="submit" value="Click here for FREE, UNLIMITED access to the database as a guest*">&nbsp;&nbsp;
+<p><b>OR</b></p>
+<p>...if you already have an account please login:</p>
 username: <input type="text" size="10" name="user">
 password: <input type="password" size="10" name="pwd">
 <input type="hidden" name="url" value="[% c.query.url('-path',1,'-query',1) %]">
 <input type="submit" value="log in">
-<p><a href="[% self_url %]/account/gsarpa">create account</a></p>
-</form>
 <p><b>OR</b></p>
+<p><a href="[% self_url %]/account/gsarpa">create a new account</a></p>
+</form>
 <form method="post" action="[% self_url %]/account/login">
 <input type="hidden" name="user" value="guest">
 <input type="hidden" name="pwd" value="guest">
 <input type="hidden" name="url" value="[% c.query.url('-path',1,'-query',1) %]">
-<input type="submit" value="Click here to proceed as a guest">&nbsp;&nbsp;
-<span style="color:red; font-weight:bold; font-size:large;">(NEW)</span>
 </form>
+</center>
 [% END %]
 </body>
 </html>
