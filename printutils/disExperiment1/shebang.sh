@@ -4,7 +4,6 @@
 # it takes a while to run (15-20 mins, depending)
 #
 # first, make all the volumes..
-./makeFascOnly.sh 1 x x & 
 ./makeFascOnly.sh 2 x x & 
 ./makeFascOnly.sh 3 x x & 
 ./makeFascOnly.sh 4 x x & 
@@ -14,6 +13,7 @@
 ./makeFascOnly.sh 8 x x & 
 ./makeFascOnly.sh 9 x x & 
 ./makeFascOnly.sh 10 x x & 
+./makeFascOnly.sh 1 x x & 
 wait # for them all to complete...
 cd tex
 # this cp is not strictly necessary since makeFascOnly.sh does it...but, just in case
@@ -30,9 +30,9 @@ do
 done
 sed -e '/% insert includes here/r./inputs.tex' masterTemplate.tex > masterTemp.tex 
 xelatex masterTemp.tex > master.log
-bibtex masterTemp  > master.bibtex.log &
-makeindex masterTemp > master.makeindex.log &
-wait
+bibtex masterTemp  > master.bibtex.log
 xelatex masterTemp.tex >> master.log
+xelatex masterTemp.tex >> master.log
+makeindex masterTemp > master.makeindex.log
 xelatex masterTemp.tex >> master.log
 xelatex masterTemp.tex >> master.log
