@@ -33,11 +33,11 @@ cp ../../frontmatter/*.tex .
 texfile="$1-$2-$3-master" 
 # TeX it!     
 xelatex ${texfile}.tex > ${texfile}.stdout.log
-bibtex ${texfile}.aux  >> ${texfile}.stdout.log &
-makeindex ${texfile} >> ${texfile}.stdout.log &
-wait
+bibtex ${texfile}.aux  >> ${texfile}.stdout.log
 # this is a workaround for bibtex: it goofs when more than 26 cites appear for an author/year.
 perl -i -pe 's/1989\{/1989/'  ${texfile}.bbl
 xelatex ${texfile}.tex >> ${texfile}.stdout.log
+xelatex ${texfile}.tex >> ${texfile}.stdout.log
+makeindex ${texfile} >> ${texfile}.stdout.log
 xelatex ${texfile}.tex >> ${texfile}.stdout.log
 xelatex ${texfile}.tex >> ${texfile}.stdout.log
