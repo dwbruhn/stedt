@@ -1,0 +1,6 @@
+# script to run prettified protoforms extractor
+# requires pforms.pl and pforms_wrapper.tex
+echo Extracting protoforms...
+perl pforms.pl ../tex > pforms.tex
+echo TeXing...
+xelatex pforms_wrapper.tex
