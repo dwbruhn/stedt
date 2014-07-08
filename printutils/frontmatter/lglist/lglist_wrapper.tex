@@ -1,0 +1,123 @@
+% wrapper for lglist table
+%!TEX TS-program = xelatex
+%!TEX encoding = UTF-8 Unicode
+% \documentclass[12pt]{report}
+\documentclass[11pt,twoside,twocolumn]{book}
+% \documentclass[11pt]{book}
+
+\usepackage{etoolbox}
+\usepackage{titlesec}
+
+\makeatletter
+\newcommand\comparandum{\@startsection{subsection}{2}{0pt}{-1pt}{1pt}{\large\bfseries}}
+\makeatother
+
+
+\usepackage{needspace}
+\usepackage{fontspec}
+\usepackage{xunicode} % for real tildes with \textasciitilde
+\usepackage{xltxtra} % for xelatex logo
+\setmainfont[Renderer=ICU,Mapping=tex-text]{Charis SIL}
+% \setmainfont{Arial Unicode MS}
+\newfontfamily\stedtfont{STEDTU}
+\newfontfamily\tradchinesefont{SimSun}
+\newfontfamily\simpchinesefont{SimSun}
+\newcommand{\TC}[1]{{\tradchinesefont #1}}
+\newcommand{\SC}[1]{{\simpchinesefont #1}}
+\newcommand{\STEDTU}[1]{{\stedtfont #1}}
+\newcommand{\fascicletablebegin}{\needspace{5\baselineskip}\begin{mpsupertabular}[l]{@{\hspace*{1.1em}}>{\hangindent=0.1in}p{1.3in}>{\hangindent=0.1in}p{1.2in}>{\hangindent=0.1in}p{1.4in}>{\hangindent=0.1in}p{2.1in}l}}
+\renewcommand\thechapter{} % use cap roman numerals for chapter numbers
+
+\usepackage{fullpage}
+\usepackage{parskip}
+\usepackage[toc]{multitoc}
+\usepackage{supertabular,ltxtable,booktabs}
+\setcounter{LTchunksize}{600} % use more memory for fewer compiles
+% \usepackage{graphicx}
+\usepackage[export]{adjustbox} % loads also graphicx
+\usepackage{float}
+% \usepackage{microtype} % only works in pdftex, which we are not using...
+\usepackage{tablefootnote}
+\usepackage{array} % use array and ragged2e for raggedright inside tables
+% \usepackage[document,raggedrightboxes]{ragged2e}
+% \setlength{\RaggedRightRightskip}{0pt plus 3em} % must be defined after fonts are loaded
+\usepackage[yyyymmdd,hhmmss]{datetime}
+
+\raggedbottom
+
+% \usepackage{layout}
+
+\usepackage{fancyhdr}
+
+\title{The\\Sino-Tibetan Etymological\\Dictionary\\and\\Thesaurus\\--DRAFT--}
+%%%%%% the following line is  for use in master.tt
+%%%% \title{STEDT Root Canal Extraction:\\[% semkey %]. [% xtitle %]}
+\author{James A. Matisoff}
+%%%%%% the following line is  for use in master.tt
+%%%% \author{[% author %]}
+\date{2014}
+\usepackage[bookmarks]{hyperref}
+\hypersetup{%
+        pdfborder={0 0 1},
+        pdfborderstyle={/S/U/W 1}, % make links underlined (instead of surrounded by red boxes)
+        pdftitle = {Sino-Tibetan Etymological Dictionary and Thesaurus}, 
+        pdfauthor = {\textcopyright\ STEDT}, 
+}
+
+\makeatletter
+\patchcmd{\chapter}{\if@openright\cleardoublepage\else\clearpage\fi}{}{}{}
+%\patchcmd{\chapter}{}{}{}{}
+\makeatother
+
+\usepackage{acronym}
+\usepackage{natbib}
+\usepackage{fix-cm}
+\usepackage{lettrine}
+\usepackage[margin=0.6in]{geometry}
+\geometry{bindingoffset=0.6in}
+
+\let\origdoublepage\cleardoublepage
+\newcommand{\clearemptydoublepage}{%
+  \clearpage
+  {\pagestyle{empty}\origdoublepage}%
+}
+\let\cleardoublepage\clearemptydoublepage
+
+% \pdfpageheight=26in
+% \pdfpagewidth=16in
+
+\setlength\paperwidth{17in}
+\setlength\paperheight{26in}
+
+\setlength{\columnsep}{5em}
+% \setlength{\columnseprule}{0.05pt}
+
+\setlength\textwidth{15in}
+\setlength\textheight{23.5in}
+
+\setlength\columnwidth{7.0in}
+% \setlength\columnheight{18in}
+
+\setlength{\headheight}{32pt}
+\setlength{\topmargin}{0pt}
+\setlength{\marginparwidth}{0pt}
+
+
+
+\begin{document}
+
+
+
+%\onecolumn
+\include{lglist}
+\twocolumn
+
+\cleardoublepage
+
+\backmatter
+
+\bibliographystyle{authordate1}
+\bibliography{stedtreferences}
+
+
+\end{document}
