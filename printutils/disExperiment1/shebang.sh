@@ -15,6 +15,8 @@
 ./makeFascOnly.sh 10 x x & 
 ./makeFascOnly.sh 1 x x & 
 wait # for them all to complete...
+# update language list
+perl ../frontmatter/lglist.pl > ../frontmatter/lglist.tex
 cd tex
 # this cp is not strictly necessary since makeFascOnly.sh does it...but, just in case
 # something changes.
