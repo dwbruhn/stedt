@@ -12,7 +12,7 @@ perl -i -pe 's/textheight.23.5in./textheight{8.6in}/' frontmatter$1.tex
 perl -i -pe 's/columnwidth.7.2in./columnwidth{7.0in}/' frontmatter$1.tex
 #
 fi
-perl lglist.pl > lglist.tex
+# perl lglist.pl > lglist.tex	# requires db access, so commented out for now
 cp *.tex ../disExperiment1/tex
 cd ../disExperiment1/tex
 rm *.toc *.aux *.bbl *.blg *.log *.out
