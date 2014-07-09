@@ -19,11 +19,12 @@ my $dbh = STEDTUtil::connectdb();
 binmode(STDERR, ":utf8");
 binmode(STDOUT, ":utf8");
 
-my $query = "SELECT grp, grpno, languagenames.language, GROUP_CONCAT(DISTINCT srcabbr)
+my $query = "SELECT grp, grpno, languagenames.language, GROUP_CONCAT(DISTINCT srcabbr ORDER BY author, year)
 		FROM lexicon
 		JOIN lx_et_hash ON (lexicon.rn=lx_et_hash.rn AND lx_et_hash.uid=8 AND lx_et_hash.tag!=0)
 		JOIN languagenames USING (lgid)
 		LEFT JOIN languagegroups USING (grpid)
+		LEFT JOIN srcbib USING (srcabbr)
 		GROUP BY languagenames.language
 		ORDER BY grp0,grp1,grp2,grp3,grp4,languagenames.language";
 
