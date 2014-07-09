@@ -94,6 +94,8 @@ sub save : RunMode {
 	my $lastmod = $q->param('mod');
 	my ($mod_time, $note_uid) = $dbh->selectrow_array("SELECT datetime,uid FROM notes WHERE noteid=?", undef, $noteid);
 	my $xml;
+	my %orig_vals;	# hash to hold original values of notes table fields
+	my %new_vals;	# hash to hold new values
 
 	# allow taggers to modify only their own notes
 	if ($self->param('uid') != $note_uid && !$self->has_privs(8)) {
@@ -104,6 +106,11 @@ sub save : RunMode {
 	# check mod time to ensure no one changed it before us
 	$dbh->do("LOCK TABLE notes WRITE");
 	if ($lastmod eq $mod_time) {
+
+		# save original values in %orig_vals hash for changelog
+		%orig_vals = %{$dbh->selectrow_hashref("SELECT * FROM notes WHERE noteid=?", undef, $noteid)};
+
+		# get ready to write changes		
 		my $sql = "UPDATE notes SET notetype=?, xmlnote=? WHERE noteid=?";
 		my @args = ($q->param('notetype'), markup2xml($q->param('xmlnote')));
 		if ($q->param('id')) { # actually an optional tag number, for lexicon notes
@@ -114,24 +121,33 @@ sub save : RunMode {
 			$sql =~ s/ WHERE/, uid=? WHERE/;
 			push @args, $q->param('uid');
 		}
+
+		# write changes
 		my $sth = $dbh->prepare($sql);
 		$sth->execute(@args, $noteid);
+
+		# save new values in %new_vals hash
+		%new_vals = %{$dbh->selectrow_hashref("SELECT * FROM notes WHERE noteid=?", undef, $noteid)};
+
 		($xml, $lastmod) = $dbh->selectrow_array("SELECT xmlnote, datetime FROM notes WHERE noteid=?", undef, $noteid);
 	} else {
-		$self->dbh->do("UNLOCK TABLES");
+		$dbh->do("UNLOCK TABLES");
 		$self->header_add(-status => 409);
  		return "Someone else has modified this note! Your changes were not saved.";
  	}
-	$self->dbh->do("UNLOCK TABLES");
+	$dbh->do("UNLOCK TABLES");
 	
-	# if we get here, the change was successful
-	# update changelog (note that oldval and newval are TEXT type fields, which cannot have default values
-	# so we have to explcitly set them to the empty string)
-	# note that multiple fields could have been changed, so just record fact of change for now
-	# until we can loop through specific changes and record them individually
-	$self->dbh->do("INSERT changelog (uid, change_type, `table`, id, oldval, newval, time)
-					VALUES (?,?,?,?,?,?,NOW())", undef,
-					$self->param('uid'), '-', 'notes', $noteid, '', '');
+	# if we get here, the change was successful (or nothing changed)
+	# loop through changes and record each in changelog
+	# just use string comparison (converts number to string where necessary)
+	foreach (keys %orig_vals) {
+		next if $_ eq 'datetime';	# skip recording changes in modification time
+		if ($orig_vals{$_} ne $new_vals{$_}) {
+			$dbh->do("INSERT changelog (uid, change_type, `table`, id, col, oldval, newval, time)
+				VALUES (?,?,?,?,?,?,?,NOW())", undef,
+				$self->param('uid'), '-', 'notes', $noteid, $_, $orig_vals{$_}, $new_vals{$_});
+		}		
+	}
 					
 	$self->header_add('-x-json'=>qq|{"lastmod":"$lastmod"}|);
 	my @a; my $i = 1;
@@ -145,7 +161,21 @@ sub reorder : RunMode {
 	# change the order, but don't update the modification time for something so minor.
 	my $sth = $self->dbh->prepare("UPDATE notes SET ord=?, datetime=datetime WHERE noteid=?");
 	my $i = 0;
-	$sth->execute(++$i, $_) foreach @ids;
+	my $old_ord;
+	foreach (@ids) {
+		# save old ord value
+		$old_ord = $self->dbh->selectrow_array("SELECT ord FROM notes WHERE noteid=?", undef, $_);
+		
+		# set new ord value (after incrementing it)
+		$sth->execute(++$i, $_);
+		
+		# record ord change in changelog (these are MySQL TINYINTs, so okay to use numeric comparison)
+		if ($old_ord != $i) {
+			$self->dbh->do("INSERT changelog (uid, change_type, `table`, id, col, oldval, newval, time)
+				VALUES (?,?,?,?,?,?,?,NOW())", undef,
+				$self->param('uid'), '-', 'notes', $_, 'ord', $old_ord, $i);	
+		}
+	}
 	return '';
 }
 
