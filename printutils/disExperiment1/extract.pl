@@ -26,6 +26,7 @@ use FascicleXetexUtil;
 use STEDTUtil;
 use Template;
 
+my %STATS;
 my $INTERNAL_NOTES = 0;
 my $ETYMA_TAGS = 0;
 my $author = '';
@@ -133,7 +134,7 @@ for (@{$dbh->selectall_arrayref("SELECT tag,chapter,sequence,protoform,protoglos
 	#print ">>> $tag $chapter\n";
 	if ($chapter =~ /^1.9.\d$/) {
 		push @info, 'TBRS'; # "volume" info to print for cross refs in the notes
-	} elsif ($chapter = $chapterkey) {
+	} elsif ($chapter eq $chapterkey) {
 	        #print ">>> $tag $chapter\n";
 		$info[0] = ''; # make sequence empty if not in the current extraction
 	}
@@ -169,7 +170,11 @@ print STDERR (scalar @$chapter_notes) . " chapter note(s) found.\n";
 next if (0 == scalar @$etyma_in_chapter) && (0 == scalar @$chapter_notes) && (0 == @$flowchartids) && !($semkey =~ /^\d+\.\d+$/);
 my $etyma_index = 0; # index for accessing next etymon in array (to check sequence number and identify PAFs)
 foreach (@$etyma_in_chapter) {
-	
+
+	$STATS{1}{'total'}{etyma}++;
+	$STATS{2}{$vol}{etyma}++;
+	$STATS{3}{$semkey}{etyma}++;
+
 	# check if current etymon is a PAF (then it should be included even if it has no records)
 	my $seq_cur = $etyma_in_chapter->[$etyma_index][1]; # get sequence number of current etymon
 	my $seq_next = (scalar @$etyma_in_chapter == $etyma_index+1) ? 0 : $etyma_in_chapter->[$etyma_index+1][1]; # get sequence number of following etymon, but don't overrun array
@@ -295,6 +300,11 @@ EndOfSQL
 			my ($grpno,$grp,$lg,$rn,$an,$form,$gloss,$gfn,$srcabbr,$srcid,$notern)
 				= @$rec;
 			next unless $lg; # skip duplicate forms (see above)
+
+			$STATS{1}{'total'}{reflexes}++;
+			$STATS{2}{$vol}{reflexes}++;
+			$STATS{3}{$semkey}{reflexes}++;
+			$STATS{4}{$semkey . ' ' . $e{tag}}{reflexes}++;
 			
 			if ($grpno ne $lastgrpno) {
 				$text .= '[1ex]' unless $lastgrpno eq ''; # add space above this row
@@ -411,6 +421,10 @@ EndOfSQL
 		$note =~ s/(\[ZJH\])/\\hfill $1/g;
 		$note =~ s/(\[JAM\])/\\hfill $1/g;
 		push @{$e{comparanda}}, xml2tex($note,1); # don't convert curly braces
+		$STATS{1}{'total'}{comparanda}++;
+		$STATS{2}{$vol}{comparanda}++;
+		$STATS{3}{$semkey}{comparanda}++;
+		$STATS{4}{$semkey . ' ' . $e{tag}}{comparanda}++;
 	}
 # saving the best for last ... include this etymon if it has some reflexes, or if it's a PAF, or if this is a draft (even if etymon has no reflexes)
 push @etyma, \%e if ((scalar(@$recs) > 0) || $isPAF || $INTERNAL_NOTES);
@@ -455,6 +469,20 @@ $tt->process("tt/master.tt", {
 
 }, "tex/${mastertexfilename}", binmode => ':utf8' ) || die $tt->error(), "\n";
 
+open STATS,">tex/${mastertexfilename}.stats.csv";
+print STATS "start\t" . scalar localtime . "\n";
+foreach my $stat (sort keys %STATS) {
+  next if $stat > 3;
+  my %onestat = %{ $STATS{$stat} };
+  foreach my $indv (sort keys %onestat) {
+    print STATS $stat . "\t";
+    print STATS $indv;
+    for my $stype (qw(etyma reflexes comparanda)) {
+      print STATS "\t" . ($onestat{$indv}{$stype}+0) ;
+    }
+    print STATS "\n";
+  }
+}
 
 $dbh->disconnect;
 print STDERR "done!\n";
