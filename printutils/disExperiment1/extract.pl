@@ -134,7 +134,7 @@ for (@{$dbh->selectall_arrayref("SELECT tag,chapter,sequence,protoform,protoglos
 	#print ">>> $tag $chapter\n";
 	if ($chapter =~ /^1.9.\d$/) {
 		push @info, 'TBRS'; # "volume" info to print for cross refs in the notes
-	} elsif ($chapter eq $chapterkey) {
+	} elsif ($chapter =~ /$chapterkey/) {
 	        #print ">>> $tag $chapter\n";
 		$info[0] = ''; # make sequence empty if not in the current extraction
 	}
