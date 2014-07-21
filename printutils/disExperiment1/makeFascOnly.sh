@@ -17,6 +17,7 @@ fi
 # verbose...
 set -x
 rm tex/$1-$2-$3-*
+lockfile -20 -l 600 -r20 master.lock
 cp ../frontmatter/masterTemplate.tex tt/master.tt
 perl -i -pe 's/^.include.introduction.*$//' tt/master.tt
 perl -i -pe 's/^.include.acknowledgements.*$//' tt/master.tt
@@ -27,11 +28,15 @@ perl -i -pe 's/^\%\%\%\%.//' tt/master.tt
 # exit on errors..
 set -e
 perl extract.pl $1 $2 $3 $4
+rm -f master.lock
 cd tex/
 cp ../../frontmatter/*.tex .
 #texfile=`ls $1-$2-$3-master` 
 texfile="$1-$2-$3-master" 
 # TeX it!     
+if [ "$4" = '--x' ] ; then
+  exit
+fi
 xelatex ${texfile}.tex > ${texfile}.stdout.log
 bibtex ${texfile}.aux  >> ${texfile}.stdout.log
 # this is a workaround for bibtex: it goofs when more than 26 cites appear for an author/year.
