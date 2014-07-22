@@ -1,7 +1,7 @@
 [%# logic:
-	show just mesoroots (with no heading): if mesoroots exist AND (not tagger OR no co-allofams)
-	show just allofams (with heading): if tagger AND no mesoroots AND co-allofams exist
-	show mesoroots/allofam switcher: if tagger AND mesoroots exist AND co-allofams exist
+	show just mesoroots (with no heading): if mesoroots exist AND no co-allofams
+	show just allofams (with heading): if no mesoroots AND co-allofams exist
+	show mesoroots/allofam switcher: if mesoroots exist AND co-allofams exist
 %]
 
 
@@ -15,8 +15,8 @@
 <p><a href="[% c.query.url('-absolute',1) %]/etymon/[% tag %]" target="stedt_etymon">#[% tag %]:</a> [% plg %] <b>[% pform %]</b> [% pgloss %]</p>
 [% IF mesoroots.size -%]
 
-[%# if co-allofams exist (and user is a tagger or above), show tabs to switch between mesoroots and allofams %]
-[% IF allofams.size > 1 && c.has_privs(1) -%]
+[%# if co-allofams exist, show tabs to switch between mesoroots and allofams %]
+[% IF allofams.size > 1 -%]
 
 [%# (messy!) code to toggle the divs and headings: %]
 <a href="#" onclick="$('allo_div_[% tag %]').hide();
@@ -46,7 +46,7 @@ return false;">
 </div>
 [% END # mesoroots size check -%]
 
-[% IF allofams.size > 1 && c.has_privs(1) # if co-allofams exist and the user is a tagger -%]
+[% IF allofams.size > 1 # if co-allofams exist -%]
 
 [% IF !mesoroots.size # if there are no mesoroots, just show allofams with a static heading -%]
 <b>Allofams:</b>
@@ -63,7 +63,7 @@ return false;">
 
 [% END # allofam loops -%]
 </ul>
-[% END # allofam size and privs check -%]
+[% END # allofam size check -%]
 </div>
 
 [% END # etyma loop -%]
