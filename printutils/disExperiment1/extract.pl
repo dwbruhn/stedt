@@ -9,6 +9,28 @@
 #
 # see USAGE, below.
 #
+# Briefly:
+#
+# This script now treats vols. 1 and 2 specially: the semantic sectioning and sequence, arrived
+# at by hard labor, are retained as is.
+#
+# for vols 3-10, nodes in the semantic tree are "lumped" at the chapter level, i.e.
+# *  all nodes below V.F.C are combined and
+# *  the etyma are resequenced in order by protogloss.
+#
+# To accomplish this, the program first makes a hash of all the VFCs that will be handled (and
+# this then is the number of tex files that will be generated.
+#
+# (of course for vols. 1 and 2, a "V.F.C" may in fact be a "V.F or a "V.F.C.S.S.S", got it?)
+#
+# Then it goes through each VFC and makes a combined list of etyma, which it then sorts
+# by protogloss before passing through the template.
+#
+# other than that, the script does pretty much the same thing it did before; note that
+# most of the "Internal Only" stuff -- hidden etyma, internal notes, has either been torn out
+# or reconfigured. 
+#
+#
 
 use lib '..';
 
@@ -93,16 +115,27 @@ print STDERR "q: $query\n";
 for (@{$dbh->selectall_arrayref($query)}) {
   ($semkeyx,$chaptertitle,$v,$f,$c,$s1,$s2,$s3,@info) = map {decode_utf8($_)} @$_;
 
-  $texfilename = "$v-$f-$c";
+  my $texfilename;
+  my $vfckey;
+  my $visualvfckey;
+
+  if ($v == 1 || $v == 2) {
+    $texfilename = $semkeyx;
+    $texfilename =~ s/\./\-/g;
+    $visualvfckey = $semkeyx;
+    $vfckey = ($v + 100) . "." . ($f + 100) . "." . ($c + 100)  . "." . ($s1 + 100) . "." . ($s2 + 100)  . "." . ($s3 + 100) ;
+  }
+  else {
+    $texfilename = "$v-$f-$c";
+    $visualvfckey = "$v.$f.$c";
+    $vfckey = ($v + 100) . "." . ($f + 100) . "." . ($c + 100);
+  }
+
   $texfilename =~ tr/A-Z/a-z/;
   $texfilename =~ s/\-x//g;
   $texfilename .= '-0' unless $texfilename =~ /\-/; 
 
-  my $vfckey = ($v + 100) . "." . ($f + 100) . "." . ($c + 100);
-
-  my $visualvfckey = "$v.$f.$c";
-
-  print STDERR ">>>>> file: $texfilename, $semkeyx, $vfckey\n";
+  print STDERR ">> file: $texfilename, semkey: $semkeyx, sortkey for semkey: '$vfckey'\n";
 
   $vfcs{$vfckey}{$counter++} = [ $texfilename,$visualvfckey,$semkeyx,$chaptertitle,$v,$f,$c,$s1,$s2,$s3,@info ];
 }
@@ -119,8 +152,10 @@ foreach my $vfc (sort keys %vfcs) {
   my $sectioncount = 0;
 
   my %sectionvalues = %{ $vfcs{$vfc} } ;
+  my @first = sort keys %sectionvalues;
+  ($texfilename,$visualvfckey,$semkeyx,$chaptertitle,$v,$f,$c,$s1,$s2,$s3,@info) = @{ $sectionvalues{@first[0]} };
   $texfilename = $vfcs{$vfc}{texfilename};
-  print STDERR "\n>>>>> VFC: $vfc\n";
+  print STDERR "\n>>> VFC: $visualvfckey (sortkey = $vfc)\n";
 
   @etyma =() ;      # array of infos to be passed on to the template
 
@@ -155,11 +190,7 @@ foreach my $vfc (sort keys %vfcs) {
     }
 
     # build etyma hash
-    print STDERR "building etyma data...\n";
-    #my $xvol  = "\\d+" if ($ivol  eq "x");
-    #my $xfasc = "\\d+" if ($ifasc eq "x");
-    #my $xchap = "\\d+" if ($ichap eq "x");
-    print STDERR ">>> $semkey\n";
+    print STDERR "  >> Building etyma data for $semkey\n";
     my $nextseq = 1;
 
     my $chapter_notes = [
@@ -179,14 +210,14 @@ foreach my $vfc (sort keys %vfcs) {
 		WHERE e.uid=8 AND status != 'DELETE' AND $special $extra_where
 		ORDER BY e.sequence#);
 
-    print STDERR (scalar @$etyma_in_chapter) . " etyma in this chapter, ";
+    print STDERR '  >> Found ' . (scalar @$etyma_in_chapter) . " etyma in this chapter, ";
     print STDERR (scalar @$chapter_notes) . " chapter note(s) found, ";
     print STDERR (scalar @$flowchartids) . " flowcharts(s) found.\n";
     # skip entire chapter if it has no etyma and there is nothing else to print, unless it is a volume or fascicle beginning.
     # if it is a V or F, semkey will have the form DIGIT(S).DIGIT(S)
     #next if (0 == scalar @$etyma_in_chapter) && (0 == scalar @$chapter_notes) && (0 == @$flowchartids) && !($semkey =~ /^\d+\.\d+$/);
     if ((0 == scalar @$etyma_in_chapter) && (0 == scalar @$chapter_notes) && (0 == @$flowchartids)) {
-      print STDERR "skipping $semkey: no data.\n";
+      print STDERR "  >> skipping $semkey: no data.\n";
       next;
     }
     my $etyma_index = 0; # index for accessing next etymon in array (to check sequence number and identify PAFs)
@@ -207,6 +238,7 @@ foreach my $vfc (sort keys %vfcs) {
       @e{qw/tag seq protoform protogloss plg/}
 	= map {escape_tex(decode_utf8($_))} @$_;
 
+      print STDERR "    #$e{tag}: '$e{protogloss}' ($e{seq}) ";
       # mess with sequence number if its an "autosequence" number...
       #print STDERR "before nextseq $nextseq :: " . int($e{seq}) . "\n";
       $nextseq = int($e{seq}) if (int($e{seq}) < 1000);
@@ -271,7 +303,6 @@ AND languagenames.grpid=languagegroups.grpid)
 ORDER BY languagegroups.grp0, languagegroups.grp1, languagegroups.grp2, languagegroups.grp3, languagegroups.grp4, languagenames.lgsort, reflex, languagenames.srcabbr, lexicon.srcid
 EndOfSQL
       my $recs = $dbh->selectall_arrayref($sql);
-      print STDERR "#$e{tag}: ($e{seq}) ";
       if (@$recs) {		# skip if no records
 	for my $rec (@$recs) {
 	  $_ = decode_utf8($_) foreach @$rec; # do it here so we don't have to later
@@ -452,7 +483,14 @@ EndOfSQL
   }
   my $tt = Template->new() || die "$Template::ERROR\n";
   next if 0 == scalar @etyma;
-  print STDERR "writing file $texfilename, semkey=$semkey, ($vol,$fasc,$chap) " . scalar @etyma . " etyma included.\n";
+  # sort all etyma by protogloss, if not vol 1 or 2.
+  if ($v != 1 || $v != 2) {
+    @etyma = sort { $a->{protogloss} cmp $b->{protogloss} } @etyma ;
+    my $sequence = 0;
+    grep { $_->{seq} = $sequence++; } @etyma ; # print "seq $sequence :: " . $_->{protogloss} . "\n";
+  }
+  
+  print STDERR "  Writing file $texfilename, semkey=$semkey, ($vol,$fasc,$chap) " . scalar @etyma . " etyma included.\n";
   $tt->process("tt/chapter.tt", {
 				 semkey   => $visualvfckey,
 				 volume   => $ivol,
