@@ -569,8 +569,9 @@ sub format_protoform {
   for ($s) {
     s/⪤} +/⪤} */g;
     s/ OR +/ or */g;
-    s/\\textasciitilde\\ +/\\textasciitilde */g;
+    s/\\textasciitilde\\ +/\\textasciitilde\\ */g;
     s/ = +/ = */g;
+    s/, +/, */g;	# add star to protoforms separated by commas (e.g. PKC verb-stem alternations)
     s/^/*/;
     s/(\*\S+)/\\textbf{$1}/g; # bold only the protoform, not allofam or "or"
   }
