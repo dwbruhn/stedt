@@ -572,7 +572,8 @@ sub format_protoform {
     s/\\textasciitilde\\ +/\\textasciitilde\\ */g;
     s/ = +/ = */g;
     s/, +/, */g;	# add star to protoforms separated by commas (e.g. PKC verb-stem alternations)
-    s/^/*/;
+    s/; +/; */g;	# add star to protoforms separated by semicolons (e.g. PKC)
+    s/^/*/;		# star at beginning of field
     s/(\*\S+)/\\textbf{$1}/g; # bold only the protoform, not allofam or "or"
   }
   return $s;
