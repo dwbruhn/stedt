@@ -87,7 +87,7 @@ sub escape_tex {
 	$s =~ s/#/\\#/g;
 	$s =~ s/&/\\&/g;
 	$s =~ s/\$/\\\$/g unless $ignore_dollar_signs; # for dollar signs in Na data
-	$s =~ s/~/\\textasciitilde\\ /g;
+	$s =~ s/~/\\textasciitilde{}/g;
 #	$s =~ s/</\\textless\\ /g;
 #	$s =~ s/>/\\textgreater\\ /g;
 	$s =~ s/([ⓁⓋⓒⒸⓈ˯˰⪤↮↭])/\\STEDTU{$1}/g;
