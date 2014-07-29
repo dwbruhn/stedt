@@ -484,9 +484,9 @@ EndOfSQL
   my $tt = Template->new() || die "$Template::ERROR\n";
   next if 0 == scalar @etyma;
   # sort all etyma by protogloss, if not vol 1 or 2.
-  if ($v != 1 || $v != 2) {
+  if ($v != 1 && $v != 2) {
     @etyma = sort { $a->{protogloss} cmp $b->{protogloss} } @etyma ;
-    my $sequence = 0;
+    my $sequence = 1;
     grep { $_->{seq} = $sequence++; } @etyma ; # print "seq $sequence :: " . $_->{protogloss} . "\n";
   }
   
