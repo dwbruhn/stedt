@@ -178,8 +178,10 @@ foreach my $vfc (sort keys %vfcs) {
     $semkey = "$ivol.$ifasc.$ichap.$is1.$is2.$is3";
     $semkey    =~ s/\.x//g;
     $semkey .= '.0' unless $semkey =~ /\./; 
-    $title = $dbh->selectrow_array(qq#SELECT chaptertitle FROM `chapters` WHERE `semkey` = '$semkey'#);
-    $title = escape_tex($title);
+    if ($sectioncount == 1) {
+      $title = $dbh->selectrow_array(qq#SELECT chaptertitle FROM `chapters` WHERE `semkey` = '$semkey'#);
+      $title = escape_tex($title);
+    }
     $flowchartids = $dbh->selectcol_arrayref("SELECT noteid FROM notes WHERE spec='C' AND id='$semkey' AND notetype='G'");
     #print STDERR "generating VFC $texfilename :: '$title'...\n";
 
