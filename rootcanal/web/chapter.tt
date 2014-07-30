@@ -14,9 +14,7 @@
 [% ELSE # public user -%]
 [% FOREACH n IN notes -%]
 [% IF n.type == 'G' -%]
-<div>
-<embed width="700px" height="700px" name="plugin" src="[% self_base %]pdf/[% n.noteid %].pdf" type="application/pdf">
-</div>
+<div><img src="http://docs.google.com/viewer?url=[% c.query.url.replace('[^/]+$', '') %]pdf/[% n.noteid %].pdf&a=bi&pagenumber=1"></div>
 [% ELSE -%]
 <p>[% n.text %]</p>
 [% END # notetype -%]
