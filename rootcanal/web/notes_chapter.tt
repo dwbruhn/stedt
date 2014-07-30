@@ -14,7 +14,7 @@ notetype:<select name="notetype">
 last modified: <span id="lastmod[% n.noteid %]">[% n.lastmod %]</span>
 <br>
 [% IF n.type == 'G' -%]
-<p>[Link to graphics file [% n.noteid %].gif.<br>
+<p>[<a href="[% self_base %]pdf/[% n.noteid %].pdf">Link to graphics file [% n.noteid %].pdf.</a><br>
 Delete the file if you delete this note.]</p>
 [% ELSE -%]
 <textarea name="xmlnote" rows="[% n.num_lines %]" cols="54">
@@ -35,7 +35,9 @@ user: <select name="uid">
 </form>
 <div id="preview[% n.noteid %]" class="notepreview">
 [% IF n.type == 'G' -%]
-<div><img src="[% self_base %]gif/[% n.noteid %].gif"></div>
+<div>
+<embed width="700px" height="700px" name="plugin" src="[% self_base %]pdf/[% n.noteid %].pdf" type="application/pdf">
+</div>
 [% ELSE -%]
 [% IF n.type == 'I' %][Internal Note:] <i>[% END -%]
 [% n.text -%]

@@ -14,7 +14,9 @@
 [% ELSE # public user -%]
 [% FOREACH n IN notes -%]
 [% IF n.type == 'G' -%]
-<div><img src="[% self_base %]gif/[% n.noteid %].gif"></div>
+<div>
+<embed width="700px" height="700px" name="plugin" src="[% self_base %]pdf/[% n.noteid %].pdf" type="application/pdf">
+</div>
 [% ELSE -%]
 <p>[% n.text %]</p>
 [% END # notetype -%]
