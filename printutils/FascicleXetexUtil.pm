@@ -54,7 +54,7 @@ sub bold_protoform { # pass in something already escape_tex'd
 	my $s = shift;
 	for ($s) {
 		s/⪤} +/⪤} */g;
-		s/\\textasciitilde\\ +/\\textasciitilde\\ */g;
+		s/\\textasciitilde{} +/\\textasciitilde{} */g;
 		s/ = +/ = */g;
 		s/ or +/ or */g;
 		$_ = '*' . $_;
