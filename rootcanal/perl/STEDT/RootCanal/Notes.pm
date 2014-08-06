@@ -270,16 +270,17 @@ sub _markup2xml {
 
 sub _tag2info {
 	my ($t, $s, $c) = @_;
-	my ($form, $gloss) = $c->dbh->selectrow_array("SELECT etyma.protoform,etyma.protogloss FROM etyma WHERE tag=? AND status != 'DELETE'", undef, $t);
+	my ($form, $gloss, $plg) = $c->dbh->selectrow_array("SELECT etyma.protoform,etyma.protogloss,languagegroups.plg
+		FROM etyma LEFT JOIN languagegroups USING (grpid) WHERE etyma.tag=? AND etyma.status != 'DELETE'", undef, $t);
 	return "[ERROR! Dead etyma ref #$t!]" unless $form;
 	$form =~ s/-/‑/g; # non-breaking hyphens
 	$form =~ s/^/*/;
 	$form =~ s/⪤ /⪤ */g;		# add a star for proto-allofams
 	$form =~ s|(\*\S+)|<b>$1</b>|g; # bold the protoform but not the allofam sign or gloss
 	if ($s) {			# alternative gloss, add it in
-		$s = "$form</a> $s";
+		$s = "$plg $form</a> $s";
 	} else {
-		$s = "$form</a> $gloss"; # put protogloss if no alt given
+		$s = "$plg $form</a> $gloss"; # put protogloss if no alt given
 	}
 	my $u = $c->query->url(-absolute=>1);
 	return qq|<a href="$u/etymon/$t">#$t $s|;
