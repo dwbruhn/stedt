@@ -80,7 +80,8 @@ my ($date, $shortdate);
 
 my %tag2info; # this is (and should only be) used inside xml2tex, for looking up etyma refs
 
-for (@{$dbh->selectall_arrayref("SELECT tag,chapter,protoform,protogloss FROM etyma")}) {
+for (@{$dbh->selectall_arrayref("SELECT etyma.tag, etyma.chapter, etyma.protoform, etyma.protogloss, languagegroups.plg
+	FROM etyma LEFT JOIN languagegroups USING (grpid)")}) {
   my ($tag,@info) = map {decode_utf8($_)} @$_;
   $info[1] = '*' . $info[1];
   $info[1] =~ s/⪤} +/⪤} */g;
@@ -540,7 +541,7 @@ sub _tag2info {
   my ($t, $s) = @_;
   my $a_ref = $tag2info{$t};
   return "\\textit{[ERROR! Dead etyma ref #$t!]}" unless $a_ref;
-  my ($chapter, $pform, $pgloss) = @{$a_ref};
+  my ($chapter, $pform, $pgloss, $plg) = @{$a_ref};
   $t = $ETYMA_TAGS ? "\\textit{\\tiny[#$t]}" : ''; # don't escape the # symbol here, it will be taken care of by escape_tex
   if ($s =~ /^\s+$/) { # empty space means only put the number, no protogloss
     $s = '';
@@ -549,9 +550,9 @@ sub _tag2info {
     $pform =~ s/⪤ /⪤ */g;	# add a star for proto-allofams
     $pform =~ s/(\*\S+)/\\textbf{$1}/g; # bold the protoform but not the allofam sign or gloss
     if ($s) {				# alternative gloss, add it in
-      $s = "$pform $s";
+      $s = "$plg $pform $s";
     } else {
-      $s = "$pform $pgloss";	# put protogloss if no alt given
+      $s = "$plg $pform $pgloss";	# put protogloss if no alt given
     }
     $s = " $s" if $t;	   # add a space between if there's a printseq
   }
