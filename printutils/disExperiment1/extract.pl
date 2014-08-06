@@ -80,14 +80,17 @@ my ($date, $shortdate);
 
 my %tag2info; # this is (and should only be) used inside xml2tex, for looking up etyma refs
 
-for (@{$dbh->selectall_arrayref("SELECT tag,chapter,sequence,protoform,protogloss FROM etyma")}) {
-  my ($tag,$chapter,@info) = map {decode_utf8($_)} @$_;
+for (@{$dbh->selectall_arrayref("SELECT tag,chapter,protoform,protogloss FROM etyma")}) {
+  my ($tag,@info) = map {decode_utf8($_)} @$_;
   #print ">>> $tag $chapter\n";
-  if ($chapter =~ /^1.9.\d$/) {
-    push @info, 'TBRS'; # "volume" info to print for cross refs in the notes
-  }
+#  if ($chapter =~ /^1.9.\d$/) {
+#    push @info, 'TBRS'; # "volume" info to print for cross refs in the notes
+#  }
   $info[1] = '*' . $info[1];
   $info[1] =~ s/⪤} +/⪤} */g;
+  if (!($info[0] =~ /^[12]/)) {  # truncate semkey at three levels (VFC) if not volume 1 or 2
+    $info[0] =~ s/^([^.]+\.[^.]+\.[^.]+)(?:\..+)$/$1/;
+  }
   $tag2info{$tag} = \@info;
 }
 $FascicleXetexUtil::tag2info = \&_tag2info;
@@ -541,15 +544,15 @@ sub _tag2info {
   my ($t, $s) = @_;
   my $a_ref = $tag2info{$t};
   return "\\textit{[ERROR! Dead etyma ref #$t!]}" unless $a_ref;
-  my ($seq, $pform, $pgloss, $volume) = @{$a_ref};
-  if ($seq) { # if the root is in current extraction, put the print ref
-    $seq =~ s/\.0$//;
-    $seq =~ s/\.(\d)/chr(96+$1)/e;
-    $t = "($seq)";
-    $t = "$volume $t" if $volume;
-  } else {
+  my ($chapter, $pform, $pgloss) = @{$a_ref};
+#  if (0) { # if the root is in current extraction, put the print ref
+#    $seq =~ s/\.0$//;
+#    $seq =~ s/\.(\d)/chr(96+$1)/e;
+#    $t = "($seq)";
+#    $t = "$volume $t" if $volume;
+#  } else {
     $t = $ETYMA_TAGS ? "\\textit{\\tiny[#$t]}" : ''; # don't escape the # symbol here, it will be taken care of by escape_tex
-  }
+#  }
   if ($s =~ /^\s+$/) { # empty space means only put the number, no protogloss
     $s = '';
   } else {
@@ -563,7 +566,7 @@ sub _tag2info {
     }
     $s = " $s" if $t;	   # add a space between if there's a printseq
   }
-  return "\\textbf{$t}$s";
+  return "\\textbf{$t}$s (§$chapter)";
 }
 
 sub format_protoform {
