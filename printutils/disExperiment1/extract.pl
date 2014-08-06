@@ -543,19 +543,16 @@ sub _tag2info {
   return "\\textit{[ERROR! Dead etyma ref #$t!]}" unless $a_ref;
   my ($chapter, $pform, $pgloss, $plg) = @{$a_ref};
   $t = $ETYMA_TAGS ? "\\textit{\\tiny[#$t]}" : ''; # don't escape the # symbol here, it will be taken care of by escape_tex
-  if ($s =~ /^\s+$/) { # empty space means only put the number, no protogloss
-    $s = '';
+  $pform =~ s/-/‑/g;		# non-breaking hyphens
+  $pform =~ s/⪤ /⪤ */g;	# add a star for proto-allofams
+  $pform =~ s/(\*\S+)/\\textbf{$1}/g; # bold the protoform but not the allofam sign or gloss
+  if ($s) {				# alternative gloss, add it in
+    $s = "$plg $pform $s";
   } else {
-    $pform =~ s/-/‑/g;		# non-breaking hyphens
-    $pform =~ s/⪤ /⪤ */g;	# add a star for proto-allofams
-    $pform =~ s/(\*\S+)/\\textbf{$1}/g; # bold the protoform but not the allofam sign or gloss
-    if ($s) {				# alternative gloss, add it in
-      $s = "$plg $pform $s";
-    } else {
-      $s = "$plg $pform $pgloss";	# put protogloss if no alt given
-    }
-    $s = " $s" if $t;	   # add a space between if there's a printseq
+    $s = "$plg $pform $pgloss";	# put protogloss if no alt given
   }
+  $s = " $s" if $t;	   # add a space between if there's a printseq
+
   return "\\textbf{$t}$s (§$chapter)"; # provide VFC of etymon after cross-reference
 }
 
