@@ -24,6 +24,12 @@ setup['lexicon']['notes.rn'] = {
 		return a.join(' ');
 	}
 };
+// override language transform from stedtconfig.js because lgid is in a different spot (for some reason)
+setup['lexicon']['languagenames.language'].transform = function (v, key, rec, n) {
+				return '<a href="' + baseRef + 'group/' + rec[n+1] + '/' + rec[n-4] + '"'
+				+ ' title="' + rec[n+2] + ' - ' + rec[n+3].replace(/"/g,'&quot;') + '"'
+				+ ' target="stedt_grps">' + v + '</a>';
+};
 if (stedt_other_username) {
 	setup['lexicon']['user_an']['label'] = stedt_other_username + '\'s analysis';
 	setup['lexicon']['user_an']['transform'] = function (v) {
