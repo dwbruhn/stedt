@@ -38,7 +38,7 @@ function xml2html(xmlnote) {
 	htmlnote = htmlnote.replace(/＂/g, '&quot;');
 	
 	// italicize certain abbrevations
-	var abbrevs = ['GSR','GSTC','STC','HPTB','TBRS','TSR','AHD','VSTB','TBT','HCT','LTBA','BSOAS','CSDPN','TIL','OED'];
+	var abbrevs = ['GSR','GSTC','STC','HPTB','TBRS','LTSR','TSR','AHD','VSTB','TBT','HCT','LTBA','BSOAS','CSDPN','TIL','OED'];
 	var abbrevs_length = abbrevs.length;
 	for (var i = 0; i < abbrevs_length; i++) {
 		var abbrev_reg = new RegExp('\\b(' + abbrevs[i] + ')\\b', 'g');	// remember to double-escape word boundary chars when making RegExp object
