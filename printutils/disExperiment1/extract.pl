@@ -140,15 +140,16 @@ for (@{$dbh->selectall_arrayref($query)}) {
   $vfcs{$vfckey}{$counter++} = [ $texfilename,$visualvfckey,$semkeyx,$chaptertitle,$v,$f,$c,$s1,$s2,$s3,@info ];
 }
 
-my $title;
-my $flowchartids;
-my $chapter_notes;
-my @etyma;
-my $semkey;
-
 
 foreach my $vfc (sort keys %vfcs) {
 
+  my $title;
+  my $flowchartids;
+  my @allflowchartids;
+  my @all_chapter_notes;
+  my @etyma;
+  my $semkey;
+  
   my $sectioncount = 0;
 
   my %sectionvalues = %{ $vfcs{$vfc} } ;
@@ -158,6 +159,8 @@ foreach my $vfc (sort keys %vfcs) {
   print STDERR "\n>>> VFC: $visualvfckey (sortkey = $vfc)\n";
 
   @etyma =() ;      # array of infos to be passed on to the template
+  @all_chapter_notes = ();
+  @allflowchartids = ();
 
   # lumping everything beyond the vfc level (jblowe 7/15/2014)
   foreach my $counter (sort keys %sectionvalues) {
@@ -188,7 +191,7 @@ foreach my $vfc (sort keys %vfcs) {
     if ($ifasc == $fasc && $ichap == $chap) {
       $mastertitle = escape_tex($chaptertitle);
       $masterVFC = $semkey;
-      print STDERR "  == $masterVFC $mastertitle\n";
+      print STDERR "  ++ $masterVFC $mastertitle\n";
     }
 
     # build etyma hash
@@ -201,7 +204,9 @@ foreach my $vfc (sort keys %vfcs) {
 			];
 
     # change first word of chapter note to dropcaps + smallcaps
-    my $chapter_notes = [map { s/^(\w)(\w+) /\\lettrine{\1}{\2} /; $_ } @$chapter_notes];
+    $chapter_notes = [map { s/^(\w)(\w+) /\\lettrine{\1}{\2} /; $_ } @$chapter_notes];
+
+    #print STDERR "  chapter notes: ", @$chapter_notes;
 
     my $extra_where = ($INTERNAL_NOTES ? "" : "AND e.sequence >= 1"); # extra condition to exclude unsequenced etyma when this is a non-draft version
     my $special = " e.chapter = '$semkey'";
@@ -215,12 +220,20 @@ foreach my $vfc (sort keys %vfcs) {
     print STDERR '  >> Found ' . (scalar @$etyma_in_chapter) . " etyma in this chapter, ";
     print STDERR (scalar @$chapter_notes) . " chapter note(s) found, ";
     print STDERR (scalar @$flowchartids) . " flowcharts(s) found.\n";
+
+    @all_chapter_notes = (@all_chapter_notes, @$chapter_notes);
+    # @all_chapter_notes = map {my $outer = $_; map {($outer, $_)} @all_chapter_notes} @chapter_notes;
+    @allflowchartids = (@allflowchartids, @$flowchartids);
+    print STDERR "  Accumulated so far: " . scalar @all_chapter_notes . ' flowcharts: ' . scalar @allflowchartids, "\n";
+
     # skip entire chapter if it has no etyma and there is nothing else to print, unless it is a volume or fascicle beginning.
     # if it is a V or F, semkey will have the form DIGIT(S).DIGIT(S)
-    #next if (0 == scalar @$etyma_in_chapter) && (0 == scalar @$chapter_notes) && (0 == @$flowchartids) && !($semkey =~ /^\d+\.\d+$/);
     if ((0 == scalar @$etyma_in_chapter) && (0 == scalar @$chapter_notes) && (0 == @$flowchartids)) {
       print STDERR "  >> skipping $semkey: no data.\n";
       next;
+    }
+    else {
+      print STDERR "  >> continuing with $semkey.\n";
     }
     my $etyma_index = 0; # index for accessing next etymon in array (to check sequence number and identify PAFs)
     foreach (@$etyma_in_chapter) {
@@ -484,7 +497,7 @@ EndOfSQL
     }
   }
   my $tt = Template->new() || die "$Template::ERROR\n";
-  next if 0 == scalar @etyma;
+  #next if 0 == scalar @etyma;
   # sort all etyma by protogloss, if not vol 1 or 2.
   if ($v != 1 && $v != 2) {
     @etyma = sort { $a->{protogloss} cmp $b->{protogloss} } @etyma ;
@@ -492,7 +505,9 @@ EndOfSQL
     grep { $_->{seq} = $sequence++; } @etyma ; # print "seq $sequence :: " . $_->{protogloss} . "\n";
   }
   
-  print STDERR "  Writing file $texfilename, semkey=$semkey, ($vol,$fasc,$chap) " . scalar @etyma . " etyma included.\n";
+  print STDERR "  Writing file $texfilename, semkey=$semkey, ($vol,$fasc,$chap) " . scalar @etyma . " etyma; " . 
+    scalar @allflowchartids . " flowchart(s); " . scalar @all_chapter_notes . " ch note(s).\n";
+
   $tt->process("tt/chapter.tt", {
 				 semkey   => $visualvfckey,
 				 volume   => $ivol,
@@ -501,12 +516,16 @@ EndOfSQL
 				 date     => $date,
 				 title    => $title,
 				 author   => $author,
-				 flowchartids => $flowchartids,
-				 chapter_notes => $chapter_notes,
+				 flowchartids => \@allflowchartids,
+				 chapter_notes => \@all_chapter_notes,
 				 etyma    => \@etyma,
 				 internal_notes => $INTERNAL_NOTES,
 				}, "tex/${texfilename}.tex", binmode => ':utf8' ) || die $tt->error(), "\n";
   push @texfilenames,$texfilename;
+
+  undef @allflowchartids;
+  undef @allflowchartids;
+  undef @etyma;
 }
 
 my $tt = Template->new() || die "$Template::ERROR\n";
