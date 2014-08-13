@@ -261,10 +261,6 @@ foreach my $vfc (sort keys %vfcs) {
       $nextseq++;
       #print STDERR "after nextseq $nextseq :: " . int($e{seq}) . "\n";
 
-      # prettify sequence number
-      $e{seq} =~ s/\.0$//;
-      $e{seq} =~ s/\.(\d)/chr(96+$1)/e;
-
       #index gloss parts
       #if $e{protogloss} =~ /\W/
       my @tempgloss = split('/', $e{protogloss});
@@ -498,31 +494,58 @@ EndOfSQL
   }
   my $tt = Template->new() || die "$Template::ERROR\n";
   #next if 0 == scalar @etyma;
-  # sort all etyma by protogloss, if not vol 1 or 2.
-  if ($v != 1 && $v != 2) {
-    @etyma = sort { $a->{protogloss} cmp $b->{protogloss} } @etyma ;
-    my $sequence = 1;
-    grep { $_->{seq} = $sequence++; } @etyma ; # print "seq $sequence :: " . $_->{protogloss} . "\n";
+
+  if ((0 == scalar @etyma) && (0 == scalar@all_chapter_notes) && (0 == @allflowchartids)) {
+    print STDERR "  >> not writing anything for $semkey: no data.\n";
+  }
+  else {
+    
+    # sort all etyma by protogloss, if not vol 1 or 2.
+    if ($v != 1 && $v != 2) {
+      my @sorted = sort { $a->{protogloss} cmp $b->{protogloss} } @etyma ;
+      my $sequence = 0;
+      my %pghash;
+      for my $eee (@etyma) {
+	my $seq_cur = $eee->{seq};
+	if (int($seq_cur) == $seq_cur) {
+	  $pghash{$eee->{protogloss}} .= $eee->{protogloss};
+	  $sequence++;
+	}
+	else {
+	  
+	}
+      }
+      #grep { $_->{seq} = $sequence++; } @etyma ; # print "seq $sequence :: " . $_->{protogloss} . "\n";
+    }
+    
+    # prettify sequence number
+    grep { 
+      $_->{seq} =~ s/\.0$//;
+      # nb only works on single digits
+      $_->{subseq} = $_->{seq} =~ /\.(\d)/ ? chr(96+$1) : $1;
+      $_->{seq} =~ s/\.(\d)//; 
+    } @etyma ;
+    
+    
+    print STDERR "  Writing file $texfilename, semkey=$semkey, ($vol,$fasc,$chap) " . scalar @etyma . " etyma; " . 
+      scalar @allflowchartids . " flowchart(s); " . scalar @all_chapter_notes . " ch note(s).\n";
+    
+    $tt->process("tt/chapter.tt", {
+				   semkey   => $visualvfckey,
+				   volume   => $ivol,
+				   fascicle => $ifasc,
+				   chapter  => $ichap,
+				   date     => $date,
+				   title    => $title,
+				   author   => $author,
+				   flowchartids => \@allflowchartids,
+				   chapter_notes => \@all_chapter_notes,
+				   etyma    => \@etyma,
+				   internal_notes => $INTERNAL_NOTES,
+				  }, "tex/${texfilename}.tex", binmode => ':utf8' ) || die $tt->error(), "\n";
+    push @texfilenames,$texfilename;  
   }
   
-  print STDERR "  Writing file $texfilename, semkey=$semkey, ($vol,$fasc,$chap) " . scalar @etyma . " etyma; " . 
-    scalar @allflowchartids . " flowchart(s); " . scalar @all_chapter_notes . " ch note(s).\n";
-
-  $tt->process("tt/chapter.tt", {
-				 semkey   => $visualvfckey,
-				 volume   => $ivol,
-				 fascicle => $ifasc,
-				 chapter  => $ichap,
-				 date     => $date,
-				 title    => $title,
-				 author   => $author,
-				 flowchartids => \@allflowchartids,
-				 chapter_notes => \@all_chapter_notes,
-				 etyma    => \@etyma,
-				 internal_notes => $INTERNAL_NOTES,
-				}, "tex/${texfilename}.tex", binmode => ':utf8' ) || die $tt->error(), "\n";
-  push @texfilenames,$texfilename;
-
   undef @allflowchartids;
   undef @allflowchartids;
   undef @etyma;

@@ -19,7 +19,11 @@
 [% END -%]% \nopagebreak
 [% # insert actual content %]
 [% FOREACH etyma -%]
+[% IF subseq != '' %]
+\needspace{5\baselineskip}\subsection[([% seq %][% subseq %]) [% plg %] [% protoform_text %] [% protogloss %]]{([% seq %][% subseq %]) [% plg %] [% protoform %] [% protogloss %]}
+[% ELSE %]
 \needspace{5\baselineskip}\section[([% seq %]) [% plg %] [% protoform_text %] [% protogloss %]]{([% seq %]) [% plg %] [% protoform %] [% protogloss %]}
+[% END %]
 [% FOREACH notes -%]
 [% IF type == 'I' %]{{[Internal Note:]}} \textit{[% END -%]
 [% IF type == 'O' && internal_notes %][Orig/Source][% END -%]
