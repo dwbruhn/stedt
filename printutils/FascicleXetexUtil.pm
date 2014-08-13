@@ -46,7 +46,7 @@ work in progress
 =cut
 
 my @italicize_abbrevs =
-qw|GSR GSTC STC HPTB TSR AHD VSTB TBT HCT LTBA BSOAS CSDPN TIL OED|;
+qw|GSR GSTC STC HPTB LTSR TSR AHD VSTB TBT HCT LTBA BSOAS CSDPN TIL OED|;
 
 our $tag2info;  # sub ref only used inside xml2tex, set from the outside
 
