@@ -293,7 +293,7 @@ sub _nonbreak_hyphens {
 }
 
 my @italicize_abbrevs =
-qw|GSR GSTC STC HPTB TBRS TSR AHD VSTB TBT HCT LTBA BSOAS CSDPN TIL OED|;
+qw|GSR GSTC STC HPTB TBRS LTSR TSR AHD VSTB TBT HCT LTBA BSOAS CSDPN TIL OED|;
 
 # this sub is used so that apostrophes in forms are not educated into "smart quotes"
 # We need to substitute an obscure unicode char, then switch it back to "&apos;" later.
