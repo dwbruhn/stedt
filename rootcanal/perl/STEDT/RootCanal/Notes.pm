@@ -346,8 +346,10 @@ sub xml2html {
 	}
 	### specify STEDTU here?
 
-	s/&lt;-+&gt;/⟷/g; # convert arrows
-	s/< /< /g; # no-break space after "comes from" sign
+	s/&lt;-+&gt;/⟷/g; # convert double-headed arrows
+	s/-+&gt;/→/g; # convert right arrows
+	s/&lt;-+/←/g; # convert left arrows
+	s/&lt; /< /g; # no-break space after "comes from" sign
 	
 	s|<footnote>(.*?)</footnote>|push @$footnotes,{text=>$1,super=>$super_id}; qq(<a href="#foot$$i" id="toof$$i" class="footlink"><sup>) . $$i++ . "</sup></a>"|ge;
 	s/^<p>//; # get rid of the first pair of (not the surrounding) <p> tags.

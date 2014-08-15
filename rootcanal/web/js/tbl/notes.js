@@ -45,8 +45,10 @@ function xml2html(xmlnote) {
 		htmlnote = htmlnote.replace(abbrev_reg, '<i>$1</i>');		
 	}
 	
-	htmlnote = htmlnote.replace(/&lt;-+&gt;/g, '⟷');	// convert <-> (and <-->, etc.) to arrows
-	htmlnote = htmlnote.replace(/< /g, '< ');		// no-break space after "comes from" sign
+	htmlnote = htmlnote.replace(/&lt;-+&gt;/g, '⟷');	// convert <-> (and <-->, etc.) to double-headed arrow
+	htmlnote = htmlnote.replace(/-+&gt;/g, '→');    // convert -> (and -->, etc.) to right arrow
+	htmlnote = htmlnote.replace(/&lt;-+/g, '←');    // convert <- (and <--, etc.) to left arrow
+	htmlnote = htmlnote.replace(/&lt; /g, '< ');		// no-break space after "comes from" sign
 	
 	// just do something to set footnotes apart
 	htmlnote = htmlnote.replace(/<footnote>/g, '{<i>FOOTNOTE:</i> ');
