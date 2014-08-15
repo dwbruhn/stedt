@@ -166,7 +166,9 @@ sub xml2tex { # for the notes
 	}
 	$_ = escape_tex($_, 1, 1); # pass 1, 1 to mean don't escape curly braces or dollar signs, since we did that already
 	
-	s/<-+>/\$\\longleftrightarrow\$/g; # convert arrows
+	s/<-+>/\$\\longleftrightarrow\$/g; # convert double-headed arrows
+	s/-+>/\$\\rightarrow\$/g; # convert right arrows
+	s/<-+/\$\\leftarrow\$/g; # convert left arrows
 	s/< /<~/g; # no break after "comes from" sign
 	return $_;
 }
