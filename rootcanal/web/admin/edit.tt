@@ -101,7 +101,7 @@ No records found. (WHERE [% result.debug | html %])
 <td>[% s | html %]</td>
 [%- END -%]
 [% IF c.has_privs(1) && t.table != 'etymologies' -%]
-<td><a href="[% self_url %]/admin/changes?t=[% t.table %]&id=[% row.$key_index %]"><img src="[% self_base %]img/clock.png" width="16" height="16"></a></td>
+<td><a href="[% self_url %]/admin/changes?t=[% t.table %]&id=[% row.$key_index %]" target="stedt_changelog"><img src="[% self_base %]img/clock.png" width="16" height="16"></a></td>
 [% END -%]
 [% IF c.has_privs(16) -%]
 <td><a href="[% self_url %]/edit/[% t.table %]/[% row.$key_index %]"><img src="[% self_base %]img/b_edit.png" width="16" height="16"></a></td>

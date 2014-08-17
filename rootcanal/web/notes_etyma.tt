@@ -13,7 +13,7 @@ notetype:<select name="notetype">
 <option [% IF n.type=='H' %]selected="selected" [% END %]value="H">HPTB</option>
 <option value="F">Comparandum</option>[% END %]
 </select>
-last modified: <span id="lastmod[% n.noteid %]">[% n.lastmod %]</span>
+last modified: <span id="lastmod[% n.noteid %]"><a href="[% self_url %]/admin/changes?t=notes&id=[% n.noteid %]" target="stedt_changelog">[% n.lastmod %]</a></span>
 <br>
 <textarea name="xmlnote" rows="[% n.num_lines %]" cols="54">
 [%- n.markup -%]

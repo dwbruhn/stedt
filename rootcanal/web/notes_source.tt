@@ -8,7 +8,7 @@ notetype:<select name="notetype">
 <option [% IF n.type=='I' %]selected="selected" [% END %]value="I">Internal</option>
 <option [% IF n.type=='N' %]selected="selected" [% END %]value="N">New</option>
 </select>
-last modified: <span id="lastmod[% n.noteid %]">[% n.lastmod %]</span>
+last modified: <span id="lastmod[% n.noteid %]"><a href="[% self_url %]/admin/changes?t=notes&id=[% n.noteid %]" target="stedt_changelog">[% n.lastmod %]</a></span>
 <br>
 <textarea name="xmlnote" rows="[% n.num_lines %]" cols="54">
 [%- n.markup -%]

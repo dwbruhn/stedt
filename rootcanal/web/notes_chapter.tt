@@ -11,7 +11,7 @@ notetype:<select name="notetype">
 <option [% IF n.type=='G' %]selected="selected" [% END %]value="G">Graphic</option>
 <option [% IF n.type=='O' %]selected="selected" [% END %]value="O">O??</option>
 </select>
-last modified: <span id="lastmod[% n.noteid %]">[% n.lastmod %]</span>
+last modified: <span id="lastmod[% n.noteid %]"><a href="[% self_url %]/admin/changes?t=notes&id=[% n.noteid %]" target="stedt_changelog">[% n.lastmod %]</a></span>
 <br>
 [% IF n.type == 'G' -%]
 <p>[<a href="[% self_base %]pdf/[% n.noteid %].pdf">Link to graphics file [% n.noteid %].pdf.</a><br>

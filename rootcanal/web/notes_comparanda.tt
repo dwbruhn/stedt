@@ -6,7 +6,7 @@
 <input type="hidden" name="notetype" value="F">
 [% IF n.uid == c.param('uid') || c.has_privs(8) # check if user owns note or has approver privs %]
 [% # need to keep the hidden form inputs accessible even when the user doesn't own a note, so that adding a new note works %]
-last modified: <span id="lastmod[% n.noteid %]">[% n.lastmod %]</span>
+last modified: <span id="lastmod[% n.noteid %]"><a href="[% self_url %]/admin/changes?t=notes&id=[% n.noteid %]" target="stedt_changelog">[% n.lastmod %]</a></span>
 <br>
 <textarea name="xmlnote" rows="[% n.num_lines %]" cols="54">
 [%- n.markup -%]
