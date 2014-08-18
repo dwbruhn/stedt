@@ -6,7 +6,7 @@
 [% IF c.has_privs(8) # only approvers can edit source notes %]
 notetype:<select name="notetype">
 <option [% IF n.type=='I' %]selected="selected" [% END %]value="I">Internal</option>
-<option [% IF n.type=='N' %]selected="selected" [% END %]value="N">New</option>
+<option [% IF n.type=='T' %]selected="selected" [% END %]value="T">Text</option>
 </select>
 last modified: <span id="lastmod[% n.noteid %]"><a href="[% self_url %]/admin/changes?t=notes&id=[% n.noteid %]" target="stedt_changelog">[% n.lastmod %]</a></span>
 <br>

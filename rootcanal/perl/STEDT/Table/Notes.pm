@@ -74,11 +74,10 @@ $t->search_form_items(
 	},
 	'notes.notetype' => sub {
 		my $cgi = shift;
-		my @notetypes = qw/I T N F H G O/;
+		my @notetypes = qw/I T F H G O/;
 		my %type_labels = (
 			'I' => 'Internal',
 			'T' => 'Text',
-			'N' => 'New',
 			'F' => 'Final',
 			'H' => 'HPTB',
 			'G' => 'Graphics',

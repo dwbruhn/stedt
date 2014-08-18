@@ -9,8 +9,7 @@
 notetype:<select name="notetype">
 [% IF c.has_privs(8) %]<option [% IF n.type=='T' %]selected="selected" [% END %]value="T">Text</option>[% END %]
 <option [% IF n.type=='I' %]selected="selected" [% END %]value="I">Internal</option>
-[% IF c.has_privs(8) %]<option [% IF n.type=='N' %]selected="selected" [% END %]value="N">New</option>
-<option [% IF n.type=='H' %]selected="selected" [% END %]value="H">HPTB</option>
+[% IF c.has_privs(8) %]<option [% IF n.type=='H' %]selected="selected" [% END %]value="H">HPTB</option>
 <option value="F">Comparandum</option>[% END %]
 </select>
 last modified: <span id="lastmod[% n.noteid %]"><a href="[% self_url %]/admin/changes?t=notes&id=[% n.noteid %]" target="stedt_changelog">[% n.lastmod %]</a></span>

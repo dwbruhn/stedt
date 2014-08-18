@@ -90,9 +90,9 @@ function showaddform (spec, id, e) {
 	// constrain notetypes
 	// if approver or above, can enter the full range of notetypes, otherwise limit to internal notes
 	if (stedtuserprivs & 8) {
-		var types = spec === 'L' ? ['N','I','O'] : spec === 'F' ? ['F'] :
-			spec === 'E' ? ['T','I','H','N'] : spec === 'C' ? ['T','I','N','G'] :
-			spec === 'M' ? ['T','I'] : ['I','N'];
+		var types = spec === 'L' ? ['T','I','O'] : spec === 'F' ? ['F'] :
+			spec === 'E' ? ['T','I','H'] : spec === 'C' ? ['T','I','G'] :
+			spec === 'M' ? ['T','I'] : ['I','T'];
 	} else {
 		types = ['I'];
 	}
