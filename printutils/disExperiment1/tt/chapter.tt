@@ -15,6 +15,7 @@
 [% END -%]\vspace{0.25em}
 [% # general discussion == chapter notes %]
 [% FOREACH note IN chapter_notes -%]
+\par
 [% note %]
 [% END -%]% \nopagebreak
 [% # insert actual content %]
@@ -27,6 +28,7 @@
 [% FOREACH notes -%]
 [% IF type == 'I' %]{{[Internal Note:]}} \textit{[% END -%]
 [% IF type == 'O' && internal_notes %][Orig/Source][% END -%]
+\par
 [% text -%]
 [% IF type == 'I' %]}[% END %]
 [% END %]
