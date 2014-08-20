@@ -15,6 +15,7 @@ function xml2html(xmlnote) {
 	htmlnote = htmlnote.replace(/<gloss>(.*?)<\/gloss>/g, '$1');	// no formatting for deprecated 'gloss' tag
 	htmlnote = htmlnote.replace(/<hanform>(.*?)<\/hanform>/g, '$1');
 	htmlnote = htmlnote.replace(/<reconstruction>\*(.*?)<\/reconstruction>/g, format_rxn);
+	htmlnote = htmlnote.replace(/<unicode>(.*?)<\/unicode>/g, '&#x$1;');
 	
 	// for xref, just make it an elink and let the et_info_popup code in stedtconfig.js take care of the rest
 	htmlnote = htmlnote.replace(/<xref ref="(\d+)">#\1(.*?)<\/xref>/g,

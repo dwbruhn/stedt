@@ -197,6 +197,7 @@ sub xml2markup {
 	s|<hanform>(.*?)</hanform>|[[$1]]|g;
 	s|<latinform>(.*?)</latinform>|[[+$1]]|g;
 	s|<plainlatinform>(.*?)</plainlatinform>|[[$1]]|g;
+	s|<unicode>(.*?)</unicode>|[[=$1]]|g;
 	s/&amp;/&/g;
 	s/&lt;/</g;
 	s/&gt;/>/g;
@@ -259,6 +260,9 @@ sub _markup2xml {
 			$ltext = $url;
 		}
 		return qq|<a href="$url">$ltext</a>|;
+	}
+	if ($code eq '=') {	# hex unicode code point
+		return "<unicode>$s2</unicode>";
 	}
 	my $u = ord decode_utf8($s); ### oops, it hasn't been decoded from utf8 yet
 	if (($u >= 0x3400 && $u <= 0x4dbf) || ($u >= 0x4e00 && $u <= 0x9fff)
@@ -331,6 +335,7 @@ sub xml2html {
 	s|<hanform>(.*?)</hanform>|$1|g;
 	s|<latinform>(.*?)</latinform>|"<b>" . _nonbreak_hyphens(_qtd($1)) . "</b>"|ge;
 	s|<plainlatinform>(.*?)</plainlatinform>|_qtd($1)|ge;
+	s|<unicode>(.*?)</unicode>|&#x$1;|g;	# convert hex unicode codepoint to html numeric character reference
 
 	s/(\S)&apos;/$1’/g; # smart quotes
 	s/&apos;/‘/g;
