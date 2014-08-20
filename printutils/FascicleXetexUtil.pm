@@ -131,6 +131,7 @@ sub xml2tex { # for the notes
 	s|<a href="(.*?)">(.*?)</a>|\\href{$1}{$2}|g;	#convert hyperlinks
 	s|<footnote>(.*?)</footnote>|\\footnote{$1}|g;
 	s|<hanform>(.*?)</hanform>|\\TC{$1}|g;
+	s|<unicode>(.*?)</unicode>|\\TC{\\char"\U$1}|g;	# assume hex unicode codepoint is a CJK character (note that \char" needs uppercase)
 	s|<latinform>(.*?)</latinform>|"\\textbf{" . _nonbreak_hyphens(_qtd($1)) . "}"|ge; # exception to smart quote
 	s|<plainlatinform>(.*?)</plainlatinform>|_qtd($1)|ge; # not used...
 	s/&amp;/&/g;
@@ -177,6 +178,7 @@ sub _tag2info {
 	&$tag2info;
 }
 
+# dead code? is this subroutine ever accessed?
 sub xml2html {
 	my @footnotes;
 	my $i = 1;
