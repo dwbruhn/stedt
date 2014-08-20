@@ -471,7 +471,7 @@ EndOfSQL
 
       # Chinese comparanda
       $e{comparanda} = [];
-      my @comparanda = @{$dbh->selectcol_arrayref("SELECT xmlnote FROM notes WHERE tag=$e{tag} AND notetype = 'F'")};
+      my @comparanda = @{$dbh->selectcol_arrayref("SELECT xmlnote FROM notes WHERE tag=$e{tag} AND notetype = 'F' ORDER BY ord")};
       for my $note (@comparanda) {
 	$note = decode_utf8($note);
 	# $note =~ s/’ /’\n\n/; # not /g, only the first instance WHY

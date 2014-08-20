@@ -39,6 +39,7 @@
 \comparandum[\textit{[% label %]}]{[% label %]}
 [% END %]
 [% FOREACH note IN comparanda -%]
+\par
 [% note %]
 [% END -%]
 [% END %]
