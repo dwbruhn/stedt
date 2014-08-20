@@ -12,7 +12,7 @@ function xml2html(xmlnote) {
 	// flag Chinese characters not inside <hanform></hanform> (change font color to red)
 	// match any Han character not followed by "</hanform" or another Han character, then format as red using inline css
 	// javascript doesn't support \p{Han}, so have to list unicode ranges for Han characters explicitly
-	htmlnote = htmlnote.replace(/([\u2E80-\u2E99\u2E9B-\u2EF3\u2F00-\u2FD5\u3005\u3007\u3021-\u3029\u3038-\u303B‌​\u3400-\u4DB5\u4E00-\u9FCC\uF900-\uFA6D\uFA70-\uFAD9])(?![\u2E80-\u2E99\u2E9B-\u2EF3\u2F00-\u2FD5\u3005\u3007\u3021-\u3029\u3038-\u303B‌​\u3400-\u4DB5\u4E00-\u9FCC\uF900-\uFA6D\uFA70-\uFAD9])(?!<\/hanform)/g, '<span style="color:red;">$1</span>');
+	htmlnote = htmlnote.replace(/([\u2E80-\u2E99\u2E9B-\u2EF3\u2F00-\u2FD5\u3005\u3007\u3021-\u3029\u3038-\u303B‌​\u3400-\u4DB5\u4E00-\u9FCC\uF900-\uFA6D\uFA70-\uFAD9\u3000-\u303F])(?![\u2E80-\u2E99\u2E9B-\u2EF3\u2F00-\u2FD5\u3005\u3007\u3021-\u3029\u3038-\u303B‌​\u3400-\u4DB5\u4E00-\u9FCC\uF900-\uFA6D\uFA70-\uFAD9\u3000-\u303F])(?!<\/hanform)/g, '<span style="color:red;">$1</span>');
 	
 	htmlnote = htmlnote.replace(/<par>/g, '<p>');
 	htmlnote = htmlnote.replace(/<\/par>/g, '</p>');
