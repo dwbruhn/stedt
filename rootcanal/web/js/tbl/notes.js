@@ -8,6 +8,17 @@ $('notes.ord_search').addTip('Order of note if there is more than one note for a
 // convert xmlnote to html for display
 function xml2html(xmlnote) {
 	var htmlnote = xmlnote;
+	
+	// flag Chinese characters not inside <hanform> (change font color to red)
+	// regular expression needs to match any Han character not preceded by "hanform>" or another Han character
+	// since javascript doesn't support lookbehind, have to reverse whole string and use negative lookahead
+	htmlnote = htmlnote.split('').reverse().join('');
+	// match any Han character not followed by "<mrofnah" or another Han character and format as red using css (and the replacement string has to be backwards, too)
+	// javascript also doesn't support \p{Han}, so have to list unicode ranges for Han characters explicitly
+	htmlnote = htmlnote.replace(/([\u2E80-\u2E99\u2E9B-\u2EF3\u2F00-\u2FD5\u3005\u3007\u3021-\u3029\u3038-\u303B‌​\u3400-\u4DB5\u4E00-\u9FCC\uF900-\uFA6D\uFA70-\uFAD9])(?!>mrofnah)(?![\u2E80-\u2E99\u2E9B-\u2EF3\u2F00-\u2FD5\u3005\u3007\u3021-\u3029\u3038-\u303B‌​\u3400-\u4DB5\u4E00-\u9FCC\uF900-\uFA6D\uFA70-\uFAD9])/g, '>naps/<$1>";der:roloc"=elyts naps<');
+	// un-reverse note	
+	htmlnote = htmlnote.split('').reverse().join('');
+	
 	htmlnote = htmlnote.replace(/<par>/g, '<p>');
 	htmlnote = htmlnote.replace(/<\/par>/g, '</p>');
 	htmlnote = htmlnote.replace(/<emph>/g, '<i>');
