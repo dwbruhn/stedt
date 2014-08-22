@@ -45,7 +45,7 @@ EOF
 
 my @stats = (
 [ 'Total language entries (unique to source):', 'SELECT count(*) FROM `languagenames` WHERE EXISTS (SELECT * FROM `lexicon` WHERE languagenames.lgid=lexicon.lgid)', 'e.g. <i>Bantawa</i> from Rai (1985), <i>Bantawa</i> from Weidert (1987), and <i>Lahu</i> from Weidert (1987) are 3 separate entries' ],
-[ 'Unique ISO 639-3 codes:', 'SELECT -1 + count(distinct(silcode)) FROM `languagenames` WHERE EXISTS (SELECT * FROM `lexicon` WHERE languagenames.lgid=lexicon.lgid)', '<b>underestimates</b> the true number of languges in the database, because not all language entries have codes assigned' ],
+[ 'Unique ISO 639-3 codes:', 'SELECT -1 + count(distinct(silcode)) FROM `languagenames` WHERE EXISTS (SELECT * FROM `lexicon` WHERE languagenames.lgid=lexicon.lgid)', '<b>underestimates</b> the true number of languages in the database, because not all language entries have codes assigned' ],
 [ 'Unique language names:', 'SELECT count(distinct(language)) FROM `languagenames` WHERE EXISTS (SELECT * FROM `lexicon` WHERE languagenames.lgid=lexicon.lgid)', '<b>overestimates</b> the true number of languages in the database, due to variant names for the same language (e.g. <i>Darang Deng</i> and <i>Digaro</i>)' ],
 [ 'Language entries with ISO 639-3 codes:', 'SELECT count(*) FROM `languagenames` WHERE EXISTS (SELECT * FROM `lexicon` WHERE languagenames.lgid=lexicon.lgid) AND silcode<>""', '' ],
 [ 'Language entries without ISO 639-3 codes:', 'SELECT count(*) FROM `languagenames` WHERE EXISTS (SELECT * FROM `lexicon` WHERE languagenames.lgid=lexicon.lgid) AND silcode=""', '' ],
