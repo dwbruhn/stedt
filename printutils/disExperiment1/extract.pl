@@ -138,6 +138,14 @@ for (@{$dbh->selectall_arrayref($query)}) {
   print STDERR ">> file: $texfilename, semkey: $semkeyx, sortkey for semkey: '$vfckey'\n";
 
   $vfcs{$vfckey}{$counter++} = [ $texfilename,$visualvfckey,$semkeyx,$chaptertitle,$v,$f,$c,$s1,$s2,$s3,@info ];
+
+  # pick up first in the set as the master title and vfc
+  if ($counter == 1) {
+    $mastertitle = escape_tex($chaptertitle);
+    $masterVFC = $semkeyx;
+    print STDERR "++ $masterVFC $mastertitle\n";
+  }
+
 }
 
 
@@ -187,12 +195,6 @@ foreach my $vfc (sort keys %vfcs) {
     }
     $flowchartids = $dbh->selectcol_arrayref("SELECT noteid FROM notes WHERE spec='C' AND id='$semkey' AND notetype='G'");
     #print STDERR "generating VFC $texfilename :: '$title'...\n";
-
-    if ($ifasc == $fasc && $ichap == $chap) {
-      $mastertitle = escape_tex($chaptertitle);
-      $masterVFC = $semkey;
-      print STDERR "  ++ $masterVFC $mastertitle\n";
-    }
 
     # build etyma hash
     print STDERR "  >> Building etyma data for $semkey\n";
@@ -248,6 +250,8 @@ foreach my $vfc (sort keys %vfcs) {
       my $isPAF = (int($seq_cur) == $seq_cur && int($seq_cur) == int($seq_next)); # etymon is a PAF is decimal portion of seq is zero and integer portion matches following seq
 	
       my %e;			# hash of infos to be added to @etyma
+
+      $e{ispaf} = $isPAF;
 
       # heading stuff
       @e{qw/tag seq protoform protogloss plg/}
@@ -500,32 +504,44 @@ EndOfSQL
   }
   else {
     
-    # sort all etyma by protogloss, if not vol 1 or 2.
-    if ($v != 1 && $v != 2) {
-      my @sorted = sort { $a->{protogloss} cmp $b->{protogloss} } @etyma ;
-      my $sequence = 0;
-      my %pghash;
-      for my $eee (@etyma) {
-	my $seq_cur = $eee->{seq};
-	if (int($seq_cur) == $seq_cur) {
-	  $pghash{$eee->{protogloss}} .= $eee->{protogloss};
-	  $sequence++;
-	}
-	else {
-	  
-	}
-      }
-      #grep { $_->{seq} = $sequence++; } @etyma ; # print "seq $sequence :: " . $_->{protogloss} . "\n";
-    }
-    
-    # prettify sequence number
+    # prettify sequence number, and resequence if necessary
+    # the insight here is that if a range of etyma are already sequenced, then
+    # we don't need to sort it by protogloss: the desired sequence has already been
+    # set. 
+    # this heuristic is not without some complications, however -- the autolumping
+    # requires that a sequence for the entire range of VFC be reset, and this
+    # may look a bit funny. Etc. Etc...
+
+    # first, we resequence the entire set, which is in the order it was retrieved from the database
+    # (i.e. by VFC, then by sequence number, possibly auto-generated sequence numbers)
+    print STDERR "Re-sequencing...\n";
+    my $sequence = 0;
+    my $hasSubSeq = 0;
     grep { 
-      $_->{seq} =~ s/\.0$//;
-      # nb only works on single digits
-      $_->{subseq} = $_->{seq} =~ /\.(\d)/ ? chr(96+$1) : $1;
-      $_->{seq} =~ s/\.(\d)//; 
+      my $n = $_->{seq};
+      $n =~ s/\.0$//;
+      $_->{subseq} = $n =~ /\.(\d)/ ? chr(96+$1) : '';
+      $sequence++ unless $n =~ /\.(\d)/;
+      $_->{seq} = $sequence;
+      print STDERR $_->{seq} . " " . $_->{subseq} . " " . $_->{protoform} . " " . $_->{protogloss} . "\n";
+      $hasSubSeq = 1 if $_->{subseq} ne '';
     } @etyma ;
-    
+
+    # if we are not in vols 1 or 2, and we did not find any "manual sequencing" (indicated by the presence of
+    # subsequences), then we go ahead and sort by protogloss and resequence.
+    if ($v != 1 && $v != 2 && $hasSubSeq == 0) {
+      print STDERR "Sorting by protogloss and Re-sequencing...\n";
+      my $sequence = 1;
+      @etyma = sort { $a->{protogloss} cmp $b->{protogloss} } @etyma ;
+      grep { 
+	print STDERR $_->{seq} . " " . $_->{subseq} . " -> ";
+	if ($v != 1 && $v != 2) {
+	  $_->{seq} = $sequence;
+	  $sequence++ if ($_->{subseq} == '');
+	}
+	print STDERR $_->{seq} . " " . $_->{subseq} . " " . $_->{protoform} . " " . $_->{protogloss} . "\n";
+      } @etyma ;
+    }
     
     print STDERR "  Writing file $texfilename, semkey=$semkey, ($vol,$fasc,$chap) " . scalar @etyma . " etyma; " . 
       scalar @allflowchartids . " flowchart(s); " . scalar @all_chapter_notes . " ch note(s).\n";

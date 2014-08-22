@@ -22,6 +22,8 @@ cp ../frontmatter/masterTemplate.tex tt/master.tt
 perl -i -pe 's/^.include.introduction.*$//' tt/master.tt
 perl -i -pe 's/^.include.acknowledgements.*$//' tt/master.tt
 perl -i -pe 's/^.include.terminology.*$//' tt/master.tt
+perl -i -pe 's/^.include.preface.*$//' tt/master.tt
+perl -i -pe 's/^.include.epigraph.*$//' tt/master.tt
 perl -i -pe 's/^.title.*$//' tt/master.tt
 perl -i -pe 's/^.author.*$//' tt/master.tt
 perl -i -pe 's/^\%\%\%\%.//' tt/master.tt
