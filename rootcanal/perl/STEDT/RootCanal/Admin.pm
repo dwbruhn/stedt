@@ -308,4 +308,112 @@ sub expire_sessions : Runmode {
 	return "<pre>$tmp</pre>";
 }
 
+sub lg_stats : Runmode {
+	# ported from lg_table.cgi
+	my $self = shift;
+	
+	# open the language lookup table and make our hash
+	open F, "<:utf8", "sil2lg.txt" or die $!;
+	binmode(STDOUT, ":utf8");
+	my %sil2lg;
+	while (<F>) {
+		my ($silcode, $lgname) = split /\t/;
+		$sil2lg{$silcode} = $lgname;
+	}
+	close F or die $!;
+	
+	my $time = scalar localtime;
+	my $text = "<h2 align=\"center\">STEDT Database Language Statistics</h2>
+	<p align=\"center\">(as of $time)</p>";
+	
+	my @stats = (
+	[ 'Total language entries (unique to source):', 'SELECT count(*) FROM `languagenames` WHERE EXISTS (SELECT * FROM `lexicon` WHERE languagenames.lgid=lexicon.lgid)', 'e.g. <i>Bantawa</i> from Rai (1985), <i>Bantawa</i> from Weidert (1987), and <i>Lahu</i> from Weidert (1987) are 3 separate entries' ],
+	[ 'Unique ISO 639-3 codes:', 'SELECT -1 + count(distinct(silcode)) FROM `languagenames` WHERE EXISTS (SELECT * FROM `lexicon` WHERE languagenames.lgid=lexicon.lgid)', '<b>underestimates</b> the true number of languages in the database, because not all language entries have codes assigned' ],
+	[ 'Unique language names:', 'SELECT count(distinct(language)) FROM `languagenames` WHERE EXISTS (SELECT * FROM `lexicon` WHERE languagenames.lgid=lexicon.lgid)', '<b>overestimates</b> the true number of languages in the database, due to variant names for the same language (e.g. <i>Darang Deng</i> and <i>Digaro</i>)' ],
+	[ 'Language entries with ISO 639-3 codes:', 'SELECT count(*) FROM `languagenames` WHERE EXISTS (SELECT * FROM `lexicon` WHERE languagenames.lgid=lexicon.lgid) AND silcode<>""', '' ],
+	[ 'Language entries without ISO 639-3 codes:', 'SELECT count(*) FROM `languagenames` WHERE EXISTS (SELECT * FROM `lexicon` WHERE languagenames.lgid=lexicon.lgid) AND silcode=""', '' ],
+	[ 'Unique combinations of language name + ISO 639-3 code:', 'SELECT language, silcode, count(*) FROM `languagenames` WHERE EXISTS (SELECT * FROM `lexicon` WHERE languagenames.lgid=lexicon.lgid) AND silcode<>"" GROUP BY language, silcode', 'e.g. <i>Bai</i> [bca] and <i>Bai</i> [bfs] are 2 separate entries; <i>Ao (Chungli)</i> [njo] and <i>Ao (Mongsen)</i> [njo] are also 2 separate entries' ],
+	[ 'Unique language names without ISO 639-3 codes:', 'SELECT count(distinct(language)) FROM `languagenames` WHERE EXISTS (SELECT * FROM `lexicon` WHERE languagenames.lgid=lexicon.lgid) AND silcode=""', '(see the <b>NO CODE</b> section of the table below)' ],
+	[ 'Language names that correspond to more than one unique ISO 639-3 code:', 'SELECT language, count(language) FROM (SELECT language, silcode FROM `languagenames` WHERE EXISTS (SELECT * FROM `lexicon` WHERE languagenames.lgid=lexicon.lgid) AND silcode<>"" GROUP BY language, silcode) AS table1 GROUP BY language HAVING count(*)>1', 'e.g. <i>Bai</i> [bfs, bca], <i>Chinese</i> [och, cmn], <i>Tujia</i> [tjs, tji]' ],
+	[ 'ISO 639-3 codes that correspond to exactly one unique language name:', 'SELECT silcode, count(silcode) FROM (SELECT silcode, language FROM `languagenames` WHERE EXISTS (SELECT * FROM `lexicon` WHERE languagenames.lgid=lexicon.lgid) AND silcode<>"" GROUP BY silcode, language) AS table1 GROUP BY silcode HAVING count(*)=1', 'e.g. [aim] => <i>Aimol</i>, [adl] => <i>Gallong</i>' ],
+	[ 'ISO 639-3 codes that correspond to multiple unique language names:', 'SELECT silcode, count(silcode) FROM (SELECT silcode, language FROM `languagenames` WHERE EXISTS (SELECT * FROM `lexicon` WHERE languagenames.lgid=lexicon.lgid) AND silcode<>"" GROUP BY silcode, language) AS table1 GROUP BY silcode HAVING count(*)>1', 'e.g. [kdv] (<i>Andro</i>, <i>Ganan</i>, <i>Kadu</i>, <i>Sak</i>, <i>Sengmai</i>, etc.), [bap] (<i>Bantawa</i>, <i>Rungchangbung</i>)' ],
+	);
+	
+	$text .= '<table border="1" align="center" cellpadding="5" cellspacing="1">';
+	$text .= '<tr bgcolor="#99CCFF"><th align="left">Statistic</th><th align="left">Number</th><th align="left">Notes</th></tr>';
+	
+	foreach (@stats) {
+		my ($desc, $query, $notes) = @$_;
+		$text .= qq|<tr><td>$desc</td><td align="right">|;
+		my $a = $self->dbh->selectall_arrayref($query);
+		if (1 == @$a) { # if contains one row, print the value
+			$text .= $a->[0][0];
+		} else {
+			$text .= scalar @$a;
+		}
+		$text .= "</td><td>$notes</td></tr>\n";
+	}
+	$text .= "</table>";
+	
+	$text .= "<br/><br/>
+	<table border=\"1\" cellpadding=\"1\" cellspacing=\"0\" align=\"center\">
+	 <tr align=\"left\" bgcolor=\"#99CCFF\">
+	  <th>ISO 639-3 Code&nbsp;&nbsp;</th>
+	  <th>Ethnologue Name</th>
+	  <th>STEDT Name(s)</th>
+	  <th>Sources</th>
+	  <th>records</th>
+	 </tr>";
+	 
+	# look up stuff from the database
+	my $a = $self->dbh->selectall_arrayref("SELECT silcode,language,COUNT(*), SUM((SELECT COUNT(*) FROM lexicon WHERE lgid=languagenames.lgid)) FROM `languagenames` WHERE EXISTS (SELECT * FROM `lexicon` WHERE languagenames.lgid=lexicon.lgid) GROUP BY silcode,language ORDER BY silcode");
+	
+	# first pass: move empty silcodes to end
+	while ($a->[0][0] eq '')
+		# test if the silcode is empty
+		# (they're sorted so the empty ones are at the top)
+	{
+		push @$a, shift @$a; # take the first item and tack it to the end
+	}
+	
+	# second pass: count number of lines for each sil code
+	my %sil_count;
+	foreach (@$a) {
+		my $silcode = $_->[0];
+		$sil_count{$silcode}++;
+	}
+	
+	# third pass: count number of lines for each sil code
+	my $lastsilcode = '';
+	foreach (@$a) {
+		my ($silcode, $lgname, $num, $num_recs) = @$_;
+		$text .= "<tr>";
+		if ($silcode ne $lastsilcode) {
+			my $n = $sil_count{$silcode};
+			if ($silcode) {
+				$text .= "<td rowspan=$n valign='middle'><a href=\"http://www.sil.org/iso639-3/documentation.asp?id=$silcode\">$silcode</a></td>";
+				$text .= "<td rowspan=$n valign='middle'><a href=\"http://www.ethnologue.com/show_language.asp?code=$silcode\">$sil2lg{$silcode}</a></td>";
+			} else {
+				$text .= "<td rowspan=$n colspan=2 valign='top'><b>NO CODE</b></td>";
+			}
+			$lastsilcode = $silcode;
+		}
+		$num_recs =~ s/(\d)(\d{3})$/$1,$2/; # insert commas to make numbers more readable
+		$text .= "<td>$lgname</td><td>$num</td><td align='right'>$num_recs</td>";
+		$text .= "</tr>\n";
+	}
+	
+	$text .= "</table>";
+	
+	$text .= "<p align=\"center\">
+	    <a href=\"http://validator.w3.org/check?uri=referer\"><img
+	    src=\"http://www.w3.org/Icons/valid-xhtml10-blue\"
+	    alt=\"Valid XHTML 1.0 Transitional\" /></a>
+	</p>";
+	
+	$text .= "</html>";	
+	 
+ 	return $self->tt_process("tt/lg_stats.tt", {text=>$text});
+}
+
 1;
