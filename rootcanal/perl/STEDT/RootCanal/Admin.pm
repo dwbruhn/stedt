@@ -405,12 +405,6 @@ sub lg_stats : Runmode {
 	
 	$text .= "</table>";
 	
-	$text .= "<p align=\"center\">
-	    <a href=\"http://validator.w3.org/check?uri=referer\"><img
-	    src=\"http://www.w3.org/Icons/valid-xhtml10-blue\"
-	    alt=\"Valid XHTML 1.0 Transitional\" /></a>
-	</p>";
-	
 	$text .= "</html>";	
 	 
  	return $self->tt_process("tt/lg_stats.tt", {text=>$text});
