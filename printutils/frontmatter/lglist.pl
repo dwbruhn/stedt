@@ -13,7 +13,6 @@ use utf8;
 use Encode;
 use FascicleXetexUtil;
 use STEDTUtil;
-use Template;
 
 my $dbh = STEDTUtil::connectdb();
 binmode(STDERR, ":utf8");
