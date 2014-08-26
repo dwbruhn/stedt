@@ -517,12 +517,17 @@ EndOfSQL
     print STDERR "Re-sequencing...\n";
     my $sequence = 0;
     my $hasSubSeq = 0;
+    my $oldn;
     grep { 
+      print STDERR $_->{seq} . ':: ';
       my $n = $_->{seq};
       $n =~ s/\.0$//;
+      print STDERR $n . ' :: ' . $oldn . ' /// ';
       $_->{subseq} = $n =~ /\.(\d)/ ? chr(96+$1) : '';
-      $sequence++ unless $n =~ /\.(\d)/;
+      $n =~ s/\.(\d)$//;
+      $sequence++ unless $n eq $oldn;
       $_->{seq} = $sequence;
+      $oldn = $n;
       print STDERR $_->{seq} . " " . $_->{subseq} . " " . $_->{protoform} . " " . $_->{protogloss} . "\n";
       $hasSubSeq = 1 if $_->{subseq} ne '';
     } @etyma ;
