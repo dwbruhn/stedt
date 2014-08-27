@@ -44,6 +44,7 @@ $t->searchable(	'srcbib.srcabbr',
 	'srcbib.year',
 	'srcbib.title',
 	'srcbib.imprint',
+	'srcbib.notes',
 	'srcbib.todo',
 );
 
