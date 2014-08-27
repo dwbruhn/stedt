@@ -135,7 +135,7 @@ for (@{$dbh->selectall_arrayref($query)}) {
   $texfilename =~ s/\-x//g;
   $texfilename .= '-0' unless $texfilename =~ /\-/; 
 
-  print STDERR ">> file: $texfilename, semkey: $semkeyx, sortkey for semkey: '$vfckey'\n";
+  print STDERR ">> file: $texfilename, semkey: $semkeyx, counter $counter, chaptertitle $chaptertitle\n";
 
   $vfcs{$vfckey}{$counter++} = [ $texfilename,$visualvfckey,$semkeyx,$chaptertitle,$v,$f,$c,$s1,$s2,$s3,@info ];
 
@@ -161,7 +161,7 @@ foreach my $vfc (sort keys %vfcs) {
   my $sectioncount = 0;
 
   my %sectionvalues = %{ $vfcs{$vfc} } ;
-  my @first = sort keys %sectionvalues;
+  my @first = sort { int($a) <=> int($b) } keys %sectionvalues;
   ($texfilename,$visualvfckey,$semkeyx,$chaptertitle,$v,$f,$c,$s1,$s2,$s3,@info) = @{ $sectionvalues{@first[0]} };
   $texfilename = $vfcs{$vfc}{texfilename};
   print STDERR "\n>>> VFC: $visualvfckey (sortkey = $vfc)\n";
@@ -171,7 +171,7 @@ foreach my $vfc (sort keys %vfcs) {
   @allflowchartids = ();
 
   # lumping everything beyond the vfc level (jblowe 7/15/2014)
-  foreach my $counter (sort keys %sectionvalues) {
+  foreach my $counter (sort { int($a) <=> int($b) } keys %sectionvalues) {
 
     ($texfilename,$visualvfckey,$semkeyx,$chaptertitle,$v,$f,$c,$s1,$s2,$s3,@info) = @{ $sectionvalues{$counter} };
 
