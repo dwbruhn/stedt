@@ -283,6 +283,7 @@ sub _tag2info {
 	$form =~ s|(\*\S+)|<b>$1</b>|g; # bold the protoform but not the allofam sign or gloss
 	if ($s) {			# alternative gloss, add it in
 		$s = "$plg $form</a> $s";
+		$s =~ s/\s+$//;	# remove any trailing whitespace (from blank alt gloss designed to suppress default gloss)
 	} else {
 		$s = "$plg $form</a> $gloss"; # put protogloss if no alt given
 	}
