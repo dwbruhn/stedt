@@ -609,14 +609,15 @@ sub _tag2info {
   $pform =~ s/-/‑/g;		# non-breaking hyphens
   $pform =~ s/⪤ /⪤ */g;	# add a star for proto-allofams
   $pform =~ s/(\*\S+)/\\textbf{$1}/g; # bold the protoform but not the allofam sign or gloss
-  if ($s) {				# alternative gloss, add it in
+  if ($s) {				# alternative gloss, add it in (and omit VFC cross-reference)
     $s = "$plg $pform $s";
+    $s =~ s/\s+$//;	# remove any trailing whitespace (from blank alt gloss designed to suppress default gloss)
   } else {
-    $s = "$plg $pform $pgloss";	# put protogloss if no alt given
+    $s = "$plg $pform $pgloss (§$chapter)";	# put protogloss and VFC cross-ref if no alt gloss given
   }
   $s = " $s" if $t;	   # add a space between if there's a printseq
 
-  return "\\textbf{$t}$s (§$chapter)"; # provide VFC of etymon after cross-reference
+  return "\\textbf{$t}$s";
 }
 
 sub format_protoform {
