@@ -217,7 +217,7 @@ sub get_brace_mark_cog {
 	$delim = shift(@delims) || '';
 	$tag   = shift(@tags)   || '';
 	if ($tag eq $stedtno) {
-	    $xml .= "{$syl}$delim";
+	    $xml .= "❴$syl❵$delim";
 	} else {
 	    $xml .= "$syl$delim";
 	}

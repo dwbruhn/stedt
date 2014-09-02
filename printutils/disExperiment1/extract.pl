@@ -405,9 +405,11 @@ EndOfSQL
 			
 			
 	  $syls->fit_word_to_analysis($an, $form);
-	  $form = $syls->get_brace_mark_cog($e{tag}) || $form;
-	  $form =~ s/(\S)=(\S)/$1꞊$2/g; # short equals - must be done AFTER syllabification station			
-	  $form =~ s/{/\\textbf{/g;
+	  $form = $syls->get_brace_mark_cog($e{tag}) || $form;  # surround cognate morpheme with ❴❵ (U+2774, 2775) to flag it
+	  $form =~ s/(\S)=(\S)/$1꞊$2/g; # short equals - must be done AFTER syllabification station
+	  $form = escape_tex($form);    # escape tex here to preserve curly braces in forms (e.g. B&S OC reconstructions)
+	  $form =~ s/❴/\\textbf{/g; # boldface the cognate morpheme
+	  $form =~ s/❵/}/g;
 	  $form = '*' . $form if ($lg =~ /^\*/); # put * for proto-lgs
 	  if ($lg eq 'Chinese (Hanzi)') { # deal with Chinese chars (need \TC or \SC)
 	    if ($srcabbr eq 'YN-RGLD') {
@@ -426,7 +428,7 @@ EndOfSQL
 	  $lg = '\\textit{' . $lg . '}';
 	  $gfn =~ s/\.$//; # remove any trailing period from gfn to avoid double periods
 	  my $gloss_string = ($gfn) ? "$gloss ($gfn.)" : $gloss; # concatenate with gfn if it's not empty
-	  $text .= join(' &', $lg, escape_tex(      $form      ,1),
+	  $text .= join(' &', $lg, $form,
 			escape_tex($gloss_string), src_concat("\\citealt{$srcabbr}", $srcid), ''); # extra slot for footnotes...
 			
 	  # footnotes, if any
