@@ -16,7 +16,7 @@ perl -i -pe 's/《夏漢字典》/\\TC{《夏漢字典》}/' srcbib.csv
 perl -i -pe 's/上古漢語的N- 和 m- 前綴/\\TC{上古漢語的}N- \\TC{和} m- \\TC{前綴}/' srcbib.csv
 perl -i -pe 's/汉语历史音韵学/\\SC{汉语历史音韵学}/' srcbib.csv
 perl -i -pe 's/中国社会科学出版社/\\SC{中国社会科学出版社}/' srcbib.csv
-
+perl -i -pe 's/North East Frontier Agency \(India\)/NEFA \(India\)/' srcbib.csv
 perl -i -pe 's/卒/\\SC{卒}/' srcbib.csv
 perl -i -pe 's/Tibetan sdud/Tibetan \\textit{sdud}/' srcbib.csv
 perl -i -pe 's/\*st- hypothesis/\\textbf{\*st-} hypothesis/' srcbib.csv
