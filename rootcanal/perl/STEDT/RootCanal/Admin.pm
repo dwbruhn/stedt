@@ -23,7 +23,10 @@ sub updatesequence : Runmode {
 			 'UPDATE etyma SET refcount = 0;',
 			 'UPDATE etyma SET refcount = (SELECT COUNT(tag) FROM lx_et_hash WHERE lx_et_hash.tag = etyma.tag  AND uid = 8 GROUP by tag);',
 			 'UPDATE etyma SET refcount = 0 where refcount is NULL;',
-			 'update etyma set sequence = (select @rownum:=@rownum+1 rownum FROM (SELECT @rownum:=1000) r) where seqlocked = 0 order by refcount desc;' );
+			 # sorts on protogloss
+			 'update etyma set sequence = (select @rownum:=@rownum+1 rownum FROM (SELECT @rownum:=1000) r) where seqlocked = 0 order by protogloss;' );
+	                 # below is the 'old' autosequencer -- based on attestation.
+			 # 'update etyma set sequence = (select @rownum:=@rownum+1 rownum FROM (SELECT @rownum:=1000) r) where seqlocked = 0 order by refcount desc;' );
 	foreach my $cmd (@commands) {
 	  $self->dbh->do($cmd);
 	}
