@@ -1,4 +1,0 @@
-[% PROCESS header.tt title="STEDT Database Language Statistics" %]
-[% text %]
-</body>
-</html>

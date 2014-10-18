@@ -72,6 +72,7 @@ Tools:
 Stuff for the public:
 <ul>
 <li><a href="[% self_url %]/admin/lg_stats">STEDT Database Language Statistics</a></li>
+<li><a href="[% self_url %]/admin/db_stats">STEDT Database Statistics</a></li>
 <li><a href="[% self_url %]">public interface (main page)</a></li>
 </ul>
 </body></html>

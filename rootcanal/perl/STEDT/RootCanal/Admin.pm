@@ -410,7 +410,106 @@ sub lg_stats : Runmode {
 	
 	$text .= "</html>";	
 	 
- 	return $self->tt_process("tt/lg_stats.tt", {text=>$text});
+ 	return $self->tt_process("tt/stats.tt", {text=>$text, title=>"STEDT Database Language Statistics"});
+}
+
+
+
+sub get_stats {
+	my $self = shift;
+
+	my $sql = "show table status";
+	#my $sth = $self->dbh->selectall_arrayref($sql);
+
+	my $sth = $self->dbh->prepare($sql);
+
+	$sth->execute();
+
+	my ($Name,$Engine,$Version,$Row_format,$Rows,$Avg_row_length,$Data_length,
+	    $Max_data_length,$Index_length,$Data_free,$Auto_increment,$Create_time,
+	    $Update_time,$Check_time,$Collation,$Checksum,$Create_options,$Comment);
+
+	$sth->bind_columns(\$Name,\$Engine,\$Version,\$Row_format,\$Rows,\$Avg_row_length,\$Data_length,
+			   \$Max_data_length,\$Index_length,\$Data_free,\$Auto_increment,\$Create_time,
+			   \$Update_time,\$Check_time,\$Collation,\$Checksum,\$Create_options,\$Comment);
+
+	my %tables = (
+		      'chapters' =>  'Chapters',
+		      'etyma' => 'Etyma (reconstructions)',
+		      'hptb' => 'Reconstructions from HPTB',
+		      'languagegroups' => 'Language Groups',
+		      'languagenames' => 'Language Names',
+		      'lexicon' => 'Reflexes (= "lexical items"="citations")',
+		      'lx_et_hash' => 'Tagged Morphemes',
+		      'notes' => 'Notes',
+		      'srcbib' => 'Sources (of lexical data)'
+		     ) ;
+
+	while ( (my $key, my $value) = each %tables) {
+	  #print "$key = $value\n";
+	}
+
+	my $result;
+	#my $result = "<table border=\"1\"><tr><th>Table Name<th>Rows";
+	#my $result = "<table border=\"1\"><tr><th>Table Name<th>Rows<th>Avg. Row Length";
+	while ($sth->fetch()) {
+	  if ($tables{$Name}) {
+	    my $table =  $tables{$Name} . " </td><td><a href=\"../edit/$Name\" target=\"_new\">" . $Name . "</a>" ;
+	    #$result .= "<tr><td>" . join("<td>",($table,$Rows,$Avg_row_length));
+	    $result .= "<tr><td>" . join("<td>",($table,$Rows));
+	  }
+	}
+	#$result .= "</table>";
+
+	return $result ;
+}
+
+
+sub db_stats : Runmode {
+	# hacked from lg_stats, and some code from the so-called "chiangmai version"
+	my $self = shift;
+	
+	my $time = scalar localtime;
+	my $text = "<h2 align=\"center\">STEDT Publication Statistics (i.e. what's in the D-T)</h2>
+	<p align=\"center\">(as of $time)</p>";
+
+	my @stats = (
+	[ 'Cognate sets in D-T:', 'select count(*) from (SELECT tag,count(*) FROM lx_et_hash WHERE uid=8 AND tag != 0 group by tag) as x', '(i.e. etyma with supporting forms)' ],
+	[ 'Sequenced etyma with support:', "SELECT count(*) FROM etyma WHERE status != 'DELETE'", '(should be the same as above)' ],
+	[ 'Number of supporting forms:', 'SELECT count(*) FROM lx_et_hash WHERE uid=8 AND tag != 0', '(morphemes which have been tagged, and so appear in the D-T)' ],
+	[ 'Languages and dialects:', 'SELECT count(distinct(lgsort)) FROM `languagenames` WHERE EXISTS (SELECT * FROM `lexicon` WHERE languagenames.lgid=lexicon.lgid)', 'Count of "normalized" language names of supporting forms, i.e. in lgsort column' ],
+	[ 'Number of "usable" Etyma:', "SELECT count(*) FROM etyma WHERE status != 'DELETE'", 'i.e. not deleted, with or without supporting forms' ],
+	[ 'Weakly attested sets:', 'SELECT count(*) from (SELECT tag,count(*) as N FROM lx_et_hash WHERE uid=8 AND tag != 0 group by tag) as x WHERE n <= 5', '(5 or fewer supporting forms)' ],
+	[ 'Strongly attested sets:', 'SELECT count(*) from (SELECT tag,count(*) as N FROM lx_et_hash WHERE uid=8 AND tag != 0 group by tag) as x WHERE n > 5', '(greater that 5 supporting forms)' ],
+	[ 'Forms which have not been tagged', 'SELECT count(*)  FROM lexicon LEFT JOIN lx_et_hash USING (rn) WHERE tag is Null;', 'no tags at all' ],
+	);
+	
+	$text .= '<table border="1" align="center" cellpadding="5" cellspacing="1">';
+	$text .= '<tr bgcolor="#99CCFF"><th align="left">Statistic</th><th align="left">Number</th><th align="left">Notes</th></tr>';
+	
+	foreach (@stats) {
+		my ($desc, $query, $notes) = @$_;
+		$text .= qq|<tr><td>$desc</td><td align="right">|;
+		my $a = $self->dbh->selectall_arrayref($query);
+		if (1 == @$a) { # if contains one row, print the value
+			$text .= $a->[0][0];
+		} else {
+			$text .= scalar @$a;
+		}
+		$text .= "</td><td>$notes</td></tr>\n";
+	}
+	$text .= "</table>";
+
+	$text .= "<br><br><h2 align=\"center\">STEDT \"Raw\" Database Statistics (i.e. rows in tables)</h2>";
+
+	$text .= "<table border=\"1\" cellpadding=\"1\" cellspacing=\"0\" align=\"center\">";
+	$text .= '<tr bgcolor="#99CCFF"><th align="left">Table Label</th><th align="left">Table Name</th><th align="left">Rows</th></tr>';
+	$text .= get_stats($self);	
+	$text .= "</html>";
+	$text .= "</table>";
+
+	 
+ 	return $self->tt_process("tt/stats.tt", {text=>$text, title=>"STEDT Datatabase Statistics"});
 }
 
 1;
