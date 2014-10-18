@@ -474,7 +474,7 @@ sub db_stats : Runmode {
 	<p align=\"center\">(as of $time)</p>";
 
 	my @stats = (
-	[ 'Cognate sets in D-T:', 'select count(*) from (SELECT tag,count(*) FROM lx_et_hash WHERE uid=8 AND tag != 0 group by tag) as x', '(i.e. etyma with supporting forms)' ],
+	[ 'Cognate sets in D-T:', 'select count(*) from (SELECT tag,count(*) FROM lx_et_hash WHERE uid=8 AND tag != 0 group by tag) as x', '(i.e. distinct tags in use)' ],
 	[ 'Sequenced etyma with support:', "SELECT count(*) FROM etyma WHERE status != 'DELETE'", '(should be the same as above)' ],
 	[ 'Number of supporting forms:', 'SELECT count(*) FROM lx_et_hash WHERE uid=8 AND tag != 0', '(morphemes which have been tagged, and so appear in the D-T)' ],
 	[ 'Languages and dialects:', 'SELECT count(distinct(lgsort)) FROM `languagenames` WHERE EXISTS (SELECT * FROM `lexicon` WHERE languagenames.lgid=lexicon.lgid)', 'Count of "normalized" language names of supporting forms, i.e. in lgsort column' ],
@@ -510,6 +510,40 @@ sub db_stats : Runmode {
 
 	 
  	return $self->tt_process("tt/stats.tt", {text=>$text, title=>"STEDT Datatabase Statistics"});
+}
+
+sub raw_stats : Runmode {
+	# hacked from db_stats... makes a csv version of stats suitable for further processing.
+	my $self = shift;
+	
+	my $time = scalar localtime;
+	my $text = "STEDT Database Statistics \t$time\n";
+
+	my @stats = (
+	[ 'Cognate sets in D-T:', 'select count(*) from (SELECT tag,count(*) FROM lx_et_hash WHERE uid=8 AND tag != 0 group by tag) as x', '(i.e. distinct tags in use)' ],
+	[ 'Sequenced etyma with support:', "SELECT count(*) FROM etyma WHERE status != 'DELETE'", '(should be the same as above)' ],
+	[ 'Number of supporting forms:', 'SELECT count(*) FROM lx_et_hash WHERE uid=8 AND tag != 0', '(morphemes which have been tagged, and so appear in the D-T)' ],
+	[ 'Languages and dialects:', 'SELECT count(distinct(lgsort)) FROM `languagenames` WHERE EXISTS (SELECT * FROM `lexicon` WHERE languagenames.lgid=lexicon.lgid)', 'Count of "normalized" language names of supporting forms, i.e. in lgsort column' ],
+	[ 'Number of "usable" Etyma:', "SELECT count(*) FROM etyma WHERE status != 'DELETE'", 'i.e. not soft-deleted, with or without supporting forms' ],
+	[ 'Weakly attested sets:', 'SELECT count(*) from (SELECT tag,count(*) as N FROM lx_et_hash WHERE uid=8 AND tag != 0 group by tag) as x WHERE n <= 5', '(5 or fewer supporting forms)' ],
+	[ 'Strongly attested sets:', 'SELECT count(*) from (SELECT tag,count(*) as N FROM lx_et_hash WHERE uid=8 AND tag != 0 group by tag) as x WHERE n > 5', '(greater that 5 supporting forms)' ],
+	[ 'Forms with no tags:', 'SELECT count(*)  FROM lexicon LEFT JOIN lx_et_hash USING (rn) WHERE tag is Null;', '... at all' ],
+	);
+	
+	$text .= "\n\nStatistic\tNumber\tNotes\t\n";
+	
+	foreach (@stats) {
+		my ($desc, $query, $notes) = @$_;
+		$text .= "$desc\t";
+		my $a = $self->dbh->selectall_arrayref($query);
+		if (1 == @$a) { # if contains one row, print the value
+			$text .= $a->[0][0];
+		} else {
+			$text .= scalar @$a;
+		}
+		$text .= "\t$notes\n";
+	}
+ 	return $self->tt_process("tt/rawstats.tt", {text=>$text, title=>"STEDT Database Language Statistics"});
 }
 
 1;
