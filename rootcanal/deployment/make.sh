@@ -1,14 +1,14 @@
 #! /bin/bash
 # use -rtvni to do a dry run with itemized changes
 
-svn up ~/svn-rootcanal
-rsync -rti --exclude '.svn' --exclude 'js' --exclude 'scriptaculous/' --exclude 'admin.tt' ~/svn-rootcanal/web/ ~/public_html
-rsync -rti --exclude '.svn' ~/svn-rootcanal/perl/STEDT/ ~/pm/STEDT
+git pull -v
+rsync -rti --exclude '.git*' --exclude 'js' --exclude 'scriptaculous/' --exclude 'admin.tt' ../web/ $1
+rsync -rti --exclude '.git*' ../perl/STEDT/ $1/STEDT
 # add new files to js directory if necessary, but let minify do the replacing
-rsync -rti --exclude '.svn' --ignore-existing --delete ~/svn-rootcanal/web/js/ ~/public_html/js
-rsync -rti --exclude '.svn' --ignore-existing --delete ~/svn-rootcanal/web/scriptaculous/ ~/public_html/scriptaculous/
-find ~/svn-rootcanal/web/js/ -name "*.js" -exec perl ~/svn-rootcanal/deployment/minify.pl {} \;
-find ~/svn-rootcanal/web/scriptaculous/*/ -name "*.js" -exec perl ~/svn-rootcanal/deployment/minify.pl {} \;
+rsync -rti --exclude '.git*' --ignore-existing --delete ../web/js/ $1/js
+rsync -rti --exclude '.git*' --ignore-existing --delete ../web/scriptaculous/ $1/scriptaculous/
+find ../web/js/ -name "*.js" -exec perl minify.pl {} \;
+find ../web/scriptaculous/*/ -name "*.js" -exec perl minify.pl {} \;
 
-svn info ~/svn-rootcanal | grep 'Revision' > ~/deployed.txt
-perl -pe  's{<\!-- svnversion -->}{"<p>svn revision: " . `svnversion ~/svn-rootcanal/` . "</p>"}e' ~/svn-rootcanal/web/admin.tt > ~/public_html/admin.tt
+git log | grep commit | head -1 | cut -f2 -d" " > deployed.txt
+perl -pe  's{<\!-- svnversion -->}{"<p>" . `git log | grep commit | head -1` . "</p>"}e' ../web/admin.tt > $1/admin.tt
